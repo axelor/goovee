@@ -25,22 +25,27 @@
  * getReplacedPriceAndDiscounts), `SaleOrderLineDiscountServiceImpl
  * .getDiscountedPrice`. The end-to-end `getDiscountedPrice` mirrors the SALE
  * path (honours the folded-in price). The product-price endpoint's quirky
- * variant lives in `apply-price-list.ts`.
- *
- * Precision: float64, not BigDecimal. The fixed-amount discount branch of
- * `computeDiscount` would round to AOS's DISCOUNT_SCALE (20) — past float64's
- * precision, so a no-op and omitted; the percentage branch rounds to the
- * unit-price scale exactly as AOS does. */
+ * variant lives in `apply-price-list.ts`. */
 
-import type {DecimalLike, ResolvedDiscount} from './types';
+import type {BigDecimal} from '@goovee/orm';
+
+import type {ResolvedDiscount} from './types';
 import type {PriceListLineRow, PriceListRow} from '../orm';
 import {
   AMOUNT_TYPE,
   COMPUTE_METHOD_DISCOUNT,
   DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
+  DISCOUNT_SCALE,
   PRICE_LIST_LINE_TYPE,
 } from './types';
-import {round} from './util';
+import {
+  applyPercentDiscount,
+  ONE,
+  percentFraction,
+  scaled,
+  toDecimalOrNull,
+  ZERO,
+} from './util';
 
 /* ──────────────────────────────────────────────────────────────────────
  * Discount primitives (PriceListService)
@@ -64,18 +69,18 @@ export function getDiscountTypeSelect(line: PriceListLineRow): number {
  *  line's `amountTypeSelect` (percentage vs fixed). */
 export function getDiscountAmount(
   line: PriceListLineRow,
-  unitPrice: number,
-): number {
-  const amount = Number(line.amount ?? 0);
+  unitPrice: BigDecimal,
+): BigDecimal {
+  const amount = toDecimalOrNull(line.amount) ?? ZERO;
   switch (line.typeSelect) {
     case PRICE_LIST_LINE_TYPE.INCREASE:
-      return -amount;
+      return amount.negate();
     case PRICE_LIST_LINE_TYPE.DISCOUNT:
       return amount;
     case PRICE_LIST_LINE_TYPE.REPLACE:
-      return unitPrice - amount;
+      return unitPrice.subtract(amount);
     default:
-      return 0;
+      return ZERO;
   }
 }
 
@@ -86,27 +91,31 @@ export function getDiscountAmount(
  *  - increase: fixed → `+ amount`, percent → `× (1 + amount/100)`;
  *  - discount: fixed → `− amount`, percent → `× (1 − amount/100)`;
  *  - replace: the amount, outright;
- *  - otherwise: the price unchanged. */
+ *  - otherwise: the price unchanged.
+ *
+ *  The percentage arms look like `applyPercentDiscount` and must not be folded
+ *  into it: that helper rounds, and AOS does not round while comparing candidate
+ *  lines. Rounding here would change which line wins, not just the amount. */
 export function getUnitPriceDiscounted(
   line: PriceListLineRow,
-  unitPrice: number,
-): number {
-  const amount = Number(line.amount ?? 0);
+  unitPrice: BigDecimal,
+): BigDecimal {
+  const amount = toDecimalOrNull(line.amount) ?? ZERO;
   switch (line.typeSelect) {
     case PRICE_LIST_LINE_TYPE.INCREASE:
       if (line.amountTypeSelect === AMOUNT_TYPE.FIXED) {
-        return unitPrice + amount;
+        return unitPrice.add(amount);
       }
       if (line.amountTypeSelect === AMOUNT_TYPE.PERCENT) {
-        return unitPrice * (1 + amount / 100);
+        return unitPrice.multiply(ONE.add(percentFraction(amount)));
       }
       return unitPrice;
     case PRICE_LIST_LINE_TYPE.DISCOUNT:
       if (line.amountTypeSelect === AMOUNT_TYPE.FIXED) {
-        return unitPrice - amount;
+        return unitPrice.subtract(amount);
       }
       if (line.amountTypeSelect === AMOUNT_TYPE.PERCENT) {
-        return unitPrice * (1 - amount / 100);
+        return unitPrice.multiply(ONE.subtract(percentFraction(amount)));
       }
       return unitPrice;
     case PRICE_LIST_LINE_TYPE.REPLACE:
@@ -121,33 +130,35 @@ export function getUnitPriceDiscounted(
  *  overload: `unitPrice × (1 − generalDiscount/100)`. */
 export function getUnitPriceDiscountedByGeneralDiscount(
   priceList: PriceListRow,
-  unitPrice: number,
-): number {
-  const generalDiscount = Number(priceList.generalDiscount ?? 0);
-  return unitPrice * (1 - generalDiscount / 100);
+  unitPrice: BigDecimal,
+): BigDecimal {
+  const generalDiscount = toDecimalOrNull(priceList.generalDiscount) ?? ZERO;
+  return unitPrice.multiply(ONE.subtract(percentFraction(generalDiscount)));
 }
 
 /** Applies a resolved discount to a unit price
  *  (`PriceListService.computeDiscount`):
- *  - fixed   → `unitPrice − discountAmount`;
- *  - percent → `unitPrice × (100 − discountAmount) / 100`, rounded to the
- *    unit-price scale (half-up);
+ *  - fixed   → `unitPrice − discountAmount`, rounded to DISCOUNT_SCALE;
+ *  - percent → `unitPrice × (100 − discountAmount) / 100`, one half-up rounding
+ *    at the unit-price scale;
  *  - none / unknown → unchanged.
  *
- *  AOS rounds the fixed branch to DISCOUNT_SCALE (20) — beyond float64's
- *  precision, hence a no-op and omitted here. */
+ *  The percent form differs from `getUnitPriceDiscounted`'s `× (1 − amount/100)`
+ *  above: AOS writes the two differently, and this is the one whose rounding
+ *  reaches the invoice. */
 export function computeDiscount(
-  unitPrice: number,
+  unitPrice: BigDecimal,
   discountTypeSelect: number,
-  discountAmount: number,
+  discountAmount: BigDecimal,
   nbDecimalForUnitPrice: number = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
-): number {
+): BigDecimal {
   if (discountTypeSelect === AMOUNT_TYPE.FIXED) {
-    return unitPrice - discountAmount;
+    return scaled(unitPrice.subtract(discountAmount), DISCOUNT_SCALE);
   }
   if (discountTypeSelect === AMOUNT_TYPE.PERCENT) {
-    return round(
-      (unitPrice * (100 - discountAmount)) / 100,
+    return applyPercentDiscount(
+      unitPrice,
+      discountAmount,
       nbDecimalForUnitPrice,
     );
   }
@@ -165,26 +176,28 @@ export function computeDiscount(
 export function getDiscounts(
   priceList: PriceListRow,
   line: PriceListLineRow | null,
-  price: number,
+  price: BigDecimal,
   nbDecimalForUnitPrice: number = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
-): {discountTypeSelect: number; discountAmount: number} {
+): {discountTypeSelect: number; discountAmount: BigDecimal} {
   if (line != null) {
     return {
-      discountAmount: round(
+      discountAmount: scaled(
         getDiscountAmount(line, price),
         nbDecimalForUnitPrice,
       ),
       discountTypeSelect: getDiscountTypeSelect(line),
     };
   }
-  const discountAmount = round(
-    Number(priceList.generalDiscount ?? 0),
+  const discountAmount = scaled(
+    toDecimalOrNull(priceList.generalDiscount) ?? ZERO,
     nbDecimalForUnitPrice,
   );
   return {
     discountAmount,
     discountTypeSelect:
-      discountAmount === 0 ? AMOUNT_TYPE.NONE : AMOUNT_TYPE.PERCENT,
+      discountAmount.compareTo(ZERO) === 0
+        ? AMOUNT_TYPE.NONE
+        : AMOUNT_TYPE.PERCENT,
   };
 }
 
@@ -200,7 +213,7 @@ export function getDiscounts(
 export function getReplacedPriceAndDiscounts(
   priceList: PriceListRow,
   line: PriceListLineRow | null,
-  price: number,
+  price: BigDecimal,
   computeMethodDiscountSelect: number,
   nbDecimalForUnitPrice: number = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
 ): ResolvedDiscount {
@@ -227,7 +240,7 @@ export function getReplacedPriceAndDiscounts(
     return {
       price: discountedPrice,
       discountTypeSelect: AMOUNT_TYPE.NONE,
-      discountAmount: 0,
+      discountAmount: ZERO,
     };
   }
 
@@ -247,13 +260,29 @@ export function getReplacedPriceAndDiscounts(
 export function getPriceListLineList<L extends PriceListLineRow>(
   productLines: readonly L[],
   categoryLines: readonly L[] | null | undefined,
-  qty: DecimalLike,
+  qty: BigDecimal,
 ): L[] {
-  const qtyNum = Number(qty);
+  /* An absent `minQty` reads as zero — no minimum, so the line is reachable at any
+   * quantity. That diverges from AOS, which filters in SQL (`minQty <= :qty`)
+   * where a NULL makes the predicate UNKNOWN and the row is never returned.
+   *
+   * An unreadable `minQty` is dropped rather than read as zero, because zero is a
+   * reachable minimum and coercing it there would let a line the caller cannot
+   * interpret win the selection. Only an untyped source reaches that branch: an
+   * ORM row types the column as a decimal, and one always reads back. */
+  const resolved = (lines: readonly L[]) =>
+    lines.map(line => ({
+      line,
+      minQty: line.minQty == null ? ZERO : toDecimalOrNull(line.minQty),
+    }));
   const reachableSortedDesc = (lines: readonly L[]) =>
-    lines
-      .filter(line => Number(line.minQty ?? 0) <= qtyNum)
-      .sort((a, b) => Number(b.minQty ?? 0) - Number(a.minQty ?? 0));
+    resolved(lines)
+      .filter(
+        (entry): entry is {line: L; minQty: BigDecimal} =>
+          entry.minQty != null && entry.minQty.compareTo(qty) <= 0,
+      )
+      .sort((a, b) => b.minQty.compareTo(a.minQty))
+      .map(entry => entry.line);
 
   const fromProduct = reachableSortedDesc(productLines);
   if (fromProduct.length > 0) return fromProduct;
@@ -272,18 +301,18 @@ export function getPriceListLineList<L extends PriceListLineRow>(
 export function getPriceListLine<L extends PriceListLineRow>(
   productLines: readonly L[],
   categoryLines: readonly L[] | null | undefined,
-  qty: DecimalLike,
-  unitPrice: number,
+  qty: BigDecimal,
+  unitPrice: BigDecimal,
 ): L | null {
   const candidates = getPriceListLineList(productLines, categoryLines, qty);
   if (candidates.length === 0) return null;
   if (candidates.length === 1) return candidates[0];
 
   let bestLine: L | null = null;
-  let bestDiscounted: number | null = null;
+  let bestDiscounted: BigDecimal | null = null;
   for (const line of candidates) {
     const discounted = getUnitPriceDiscounted(line, unitPrice);
-    if (bestDiscounted === null || bestDiscounted > discounted) {
+    if (bestDiscounted === null || bestDiscounted.compareTo(discounted) > 0) {
       bestDiscounted = discounted;
       bestLine = line;
     }
@@ -342,11 +371,11 @@ export function getDiscountedPrice<L extends PriceListLineRow>({
   priceList: PriceListRow;
   productLines: readonly L[];
   categoryLines?: readonly L[] | null;
-  qty: DecimalLike;
-  price: number;
+  qty: BigDecimal;
+  price: BigDecimal;
   computeMethodDiscountSelect: number;
   nbDecimalForUnitPrice?: number;
-}): number {
+}): BigDecimal {
   const line = getPriceListLine(productLines, categoryLines, qty, price);
   const discounts = getReplacedPriceAndDiscounts(
     priceList,

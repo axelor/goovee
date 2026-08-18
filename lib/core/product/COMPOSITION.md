@@ -50,6 +50,7 @@ import {
   fetchUnitConversions,
 } from '@/product/orm';
 import {getDefaultPriceList, quoteProductPrice} from '@/product/pricing';
+import {BigDecimal} from '@goovee/orm';
 
 // 1. the product — fetched by YOUR query, spreading the core fragment
 const product = await client.aOSProduct.findOne({
@@ -87,8 +88,8 @@ const quote = quoteProductPrice({
   priceListLines, // all the list's lines; quote partitions per product/category
   computeMethodDiscountSelect, // from AppBase
   inAti, // the order's tax-basis orientation
-  qty: 1,
-  nbDecimalForUnitPrice, // from AppBase (default 2)
+  qty: BigDecimal.valueOf('1'), // amounts and quantities are decimals
+  nbDecimalForUnitPrice, // from AppBase (default 2) — scales stay numbers
   // requestedUnit + unitConversions — only if quoting in another unit (Recipe 4)
 });
 ```
@@ -109,7 +110,9 @@ quote.unitId; // the unit the price is in — id only; map it to a name yourself
 ## Recipe 2 — price an owned / override price (e.g. a marketplace listing)
 
 The price/`inAti`/currency are yours; the product supplies only the **tax
-setup**. This is what `marketplace`'s `computePrice` does.
+setup**. `marketplace`'s `computePrice` follows this shape, though it calls
+`computeWtAti` + `getExchangeRate` itself rather than `getConvertedPrice`, because
+it cascades through several display currencies.
 
 ```ts
 import {
@@ -117,20 +120,26 @@ import {
   getTotalTaxRateInPercentage,
   getConvertedPrice,
   PriceComputationError,
+  toDecimalOrNull,
+  ZERO,
+  type ResolvedTaxLine,
 } from '@/product/pricing';
 
 // tax from the product (lenient: a broken tax config degrades to 0%)
-let taxLineSet;
+let taxLineSet: ResolvedTaxLine[];
 try {
   taxLineSet = getSaleTaxLineSet({product, companyId, fiscalPosition, today});
 } catch (e) {
   if (!(e instanceof PriceComputationError)) throw e;
   taxLineSet = []; // 0% — storefront policy, not the core's
 }
+// This catch does NOT cover a total rate of exactly -100%: that raises an uncoded
+// Error from the ATI->WT divide below. Guard `taxFactor(rate)` against zero as
+// well if the page must render on corrupt data.
 
-// price the values you own
+// price the values you own — an ORM decimal column becomes a BigDecimal here
 const {wt, ati, taxRate} = getConvertedPrice({
-  price: listing.salePrice, // YOUR price
+  price: toDecimalOrNull(listing.salePrice) ?? ZERO, // YOUR price
   sourceInAti: listing.inAti, // YOUR basis
   taxLineSet,
   fromCurrency: listing.saleCurrency, // YOUR currency
@@ -158,6 +167,9 @@ import {
   getLineTotal,
 } from '@/product/pricing';
 import {findPartnerSalePriceLists, fetchPriceListLines} from '@/product/orm';
+import {BigDecimal} from '@goovee/orm';
+
+const qty = BigDecimal.valueOf('1'); // quantities are decimals too
 
 // --- get the applicable list ---
 // buyer route (per-partner, native):
@@ -177,7 +189,7 @@ if (priceList) {
     ? lines.filter(l => l.productCategory?.id === product.productCategory?.id)
     : [];
   const primary = inAti ? ati : wt;
-  const line = getPriceListLine(productLines, categoryLines, 1, primary);
+  const line = getPriceListLine(productLines, categoryLines, qty, primary);
 
   const d = getReplacedPriceAndDiscounts(
     priceList,
@@ -196,7 +208,7 @@ const {exTaxTotal, inTaxTotal, priceDiscounted} = getLineTotal({
   ati,
   discountTypeSelect: d.discountTypeSelect,
   discountAmount: d.discountAmount,
-  qty: 1,
+  qty, // a BigDecimal, as above
   taxRate,
   inAti,
   currencyDecimals: toCurrency.numberOfDecimals ?? nbDecimalForUnitPrice,
@@ -272,12 +284,18 @@ The compute method is the admin's choice of what the buyer sees. `quote` (and
 - **Price lists aren't inherently buyer-tied** — only `findPartnerSalePriceLists`
   is. A general/non-buyer list = fetch it any other way and feed
   `getDefaultPriceList`/`fetchPriceListLines` unchanged.
-- **Arithmetic is float64.** A value on an exact half-cent can round a cent off
-  AOS's `BigDecimal` (rare). A consumer that captures payment should accept the
-  quote within **half the currency's smallest unit**.
-- **Strict core.** Every failure is a `PriceComputationError` with a `.code`
-  (`ACCOUNT_MANAGEMENT_3`, `CURRENCY_1`, `UNIT_CONVERSION_*`, …). Degrade in the
-  app, not the core.
+- **Amounts, rates and quantities are `BigDecimal`, in and out** (scales and
+  `*Select` enums stay plain numbers, as in AOS). The core does not coerce, so a
+  caller converts at the boundary — `toDecimalOrNull(x) ?? ZERO` for an ORM
+  decimal column, `BigDecimal.valueOf('1')` for a literal. Plain numbers come back
+  only from `quoteProductPrice` and the marketplace adapter, where each value has
+  few enough significant decimals to convert without loss.
+- **Strict core.** Almost every failure is a `PriceComputationError` with a
+  `.code` (`ACCOUNT_MANAGEMENT_3`, `CURRENCY_1`, `UNIT_CONVERSION_*`, …). Degrade
+  in the app, not the core. The one exception is a total tax rate of exactly
+  −100%, which raises an uncoded `Error` — see `PRICING.md` § Strictness, and
+  guard `taxFactor(rate)` before any ATI→WT conversion if you must render rather
+  than fail.
 
 ---
 

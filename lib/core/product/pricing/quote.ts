@@ -16,6 +16,8 @@
  * storefront wraps this with its own lenient policy and product fetch; the
  * parity test wraps it to compare against AOS. */
 
+import type {BigDecimal} from '@goovee/orm';
+
 import {AMOUNT_TYPE, DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE} from './types';
 import type {
   ConversionLine,
@@ -27,7 +29,7 @@ import type {
   UnitConversionRow,
 } from '../orm';
 import {convertUnitPrice, roundSaleUnitPrice} from './tax';
-import {round} from './util';
+import {ONE, scaled, ZERO} from './util';
 import {getSaleUnitPrice} from './catalogue';
 import {getPriceListLine, getReplacedPriceAndDiscounts} from './discount';
 import {getLineTotal} from './line-total';
@@ -86,7 +88,7 @@ export function quoteProductPrice({
   priceListLines,
   computeMethodDiscountSelect,
   inAti,
-  qty = 1,
+  qty = ONE,
   requestedUnit,
   unitConversions,
   nbDecimalForUnitPrice = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
@@ -105,7 +107,7 @@ export function quoteProductPrice({
   computeMethodDiscountSelect: number;
   /** The order's tax-basis orientation (`saleOrder.inAti`). */
   inAti: boolean;
-  qty?: number;
+  qty?: BigDecimal;
   requestedUnit?: {id: string} | null;
   unitConversions?: readonly UnitConversionRow[];
   nbDecimalForUnitPrice?: number;
@@ -130,7 +132,7 @@ export function quoteProductPrice({
    * folds it into the unit price (price set); SEPARATE leaves the catalogue
    * price and reports the residual discount, which the line total applies. */
   let discountTypeSelect: number = AMOUNT_TYPE.NONE;
-  let discountAmount = 0;
+  let discountAmount = ZERO;
   let discount: QuoteDiscount | null = null;
   if (priceList) {
     /* Partition the list's lines into this product's vs its category's — the
@@ -154,7 +156,7 @@ export function quoteProductPrice({
     );
     discountTypeSelect = discounts.discountTypeSelect;
     discountAmount = discounts.discountAmount;
-    const newPrimary = round(discounts.price ?? primary, nb);
+    const newPrimary = scaled(discounts.price ?? primary, nb);
     if (inAti) {
       ati = newPrimary;
       wt = convertUnitPrice(true, result.taxRate, newPrimary, nb);
@@ -167,7 +169,7 @@ export function quoteProductPrice({
     if (discountTypeSelect !== AMOUNT_TYPE.NONE) {
       discount = {
         type: discountTypeSelect === AMOUNT_TYPE.PERCENT ? 'percent' : 'fixed',
-        amount: discountAmount,
+        amount: discountAmount.toNumber(),
       };
     }
   }
@@ -184,15 +186,23 @@ export function quoteProductPrice({
     nbDecimalForUnitPrice: nb,
   });
 
+  /* The quote is the core's outer edge, so the values convert to `number` here.
+   * Each has few enough significant decimals to survive that: the money fields
+   * were rounded above, `priceDiscounted` stays at the unit-price scale in every
+   * branch — rounded there, or a difference of two values already there — and
+   * `taxRate`/`qty` are returned as supplied. A wide decimal would NOT survive:
+   * `.toNumber()` keeps about 15 significant digits. Callers doing further
+   * arithmetic on money should come back through the core rather than build on
+   * these. */
   return {
     currency: toCurrency,
     unitId: result.unitId,
-    qty,
-    taxRate: result.taxRate,
-    unitPrice: {wt, ati},
+    qty: qty.toNumber(),
+    taxRate: result.taxRate.toNumber(),
+    unitPrice: {wt: wt.toNumber(), ati: ati.toNumber()},
     discount,
-    priceDiscounted,
-    exTaxTotal,
-    inTaxTotal,
+    priceDiscounted: priceDiscounted.toNumber(),
+    exTaxTotal: exTaxTotal.toNumber(),
+    inTaxTotal: inTaxTotal.toNumber(),
   };
 }

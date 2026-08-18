@@ -33,12 +33,16 @@ import {
   getSaleTaxLineSet,
   getTotalTaxRateInPercentage,
   PriceComputationError,
-  round,
+  scaled,
+  taxFactor,
   todayInTimezone,
+  toDecimalOrNull,
+  ZERO,
 } from '@/product/pricing';
+import type {BigDecimal} from '@goovee/orm';
 import type {PriceContext} from '../orm';
 
-const DEFAULT_TAX_RATE = 0;
+const DEFAULT_TAX_RATE = ZERO;
 
 export type ComputedPrice = {
   /** The price without tax. */
@@ -98,13 +102,13 @@ export function computePrice({
   const today = todayInTimezone(companyTimezone);
 
   const {salePrice: _salePrice, inAti, saleCurrency} = priceOverride;
-  const salePrice = Number(_salePrice);
+  const salePrice = toDecimalOrNull(_salePrice) ?? ZERO;
 
   /* Resolve the tax percentage through the strict core. If the tax
    * configuration is broken (any PriceComputationError), show the price
    * untaxed rather than failing the page — a storefront page must
    * render. */
-  let taxRate: number;
+  let taxRate: BigDecimal;
   try {
     const lineSet = getSaleTaxLineSet({
       product,
@@ -115,6 +119,16 @@ export function computePrice({
     taxRate = getTotalTaxRateInPercentage(lineSet);
   } catch (e) {
     if (!(e instanceof PriceComputationError)) throw e;
+    taxRate = DEFAULT_TAX_RATE;
+  }
+  /* Deriving WT from an ATI-stored price divides by 1 + rate, so a rate of
+   * exactly -100% has no answer and the core throws. AOS's own tax lines are
+   * constrained to 0..100 and cannot hold it, so this only comes from corrupt
+   * data: treat it as one more broken tax configuration and fall back to
+   * untaxed rather than failing the page. The WT-stored direction never divides,
+   * so it is left as it is — it yields ATI 0, which the storefront reads as a
+   * free listing. */
+  if (Boolean(inAti) && taxFactor(taxRate).compareTo(ZERO) === 0) {
     taxRate = DEFAULT_TAX_RATE;
   }
 
@@ -156,10 +170,11 @@ export function computePrice({
     }
   }
 
+  // Both amounts are rounded to the display currency's scale, once, here.
   return {
-    wt: round(convertedWt, resolvedScale),
-    ati: round(convertedAti, resolvedScale),
-    taxRate,
+    wt: scaled(convertedWt, resolvedScale).toNumber(),
+    ati: scaled(convertedAti, resolvedScale).toNumber(),
+    taxRate: taxRate.toNumber(),
     currency: {
       code: resolvedCurrency?.code ?? '',
       codeISO: resolvedCurrency?.codeISO ?? '',
@@ -174,15 +189,15 @@ export function computePrice({
  *  the caller can try the next target. (This is the lenient wrapper
  *  around the strict `getExchangeRate`.) */
 function tryConvert(
-  amount: number,
+  amount: BigDecimal,
   fromCode: string,
   toCurrency: Currency,
   today: string,
   lines: ConversionLine[],
-): {value: number; currency: Currency} | null {
+): {value: BigDecimal; currency: Currency} | null {
   try {
     const rate = getExchangeRate(fromCode, toCurrency.codeISO, today, lines);
-    return {value: amount * rate, currency: toCurrency};
+    return {value: amount.multiply(rate), currency: toCurrency};
   } catch (e) {
     if (!(e instanceof PriceComputationError)) throw e;
     return null;
@@ -196,4 +211,12 @@ function tryConvert(
 export function isPaid(value: number | string | null | undefined): boolean {
   const amount = Number(value ?? 0);
   return Number.isFinite(amount) && amount > 0;
+}
+
+/** Half-up rounding of a plain number to `scale` places. Used to total amounts
+ *  that are already rounded to a currency's scale — a cart total, a month of
+ *  revenue. */
+export function round(value: number, scale: number): number {
+  const factor = 10 ** scale;
+  return Math.round(value * factor) / factor;
 }

@@ -1,9 +1,10 @@
 /* The billable line totals — what you'd actually charge — a port of AOS
  * `SaleOrderLineComputeServiceImpl.computeValues`. */
 
-import type {DecimalLike} from './types';
+import type {BigDecimal} from '@goovee/orm';
+
 import {DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE} from './types';
-import {round} from './util';
+import {divide, scaled, taxFactor} from './util';
 import {computeDiscount} from './discount';
 
 /** The billable line totals.
@@ -36,23 +37,26 @@ export function getLineTotal({
 }: {
   /** The line's unit prices (WT / ATI), as stored — already folded under
    *  INCLUDE, catalogue under SEPARATE. */
-  wt: number;
-  ati: number;
+  wt: BigDecimal;
+  ati: BigDecimal;
   /** The residual price-list discount (`AMOUNT_TYPE`); NONE under INCLUDE. */
   discountTypeSelect: number;
-  discountAmount: number;
-  qty: DecimalLike;
+  discountAmount: BigDecimal;
+  qty: BigDecimal;
   /** Total tax rate as a PERCENTAGE (e.g. 20), per
    *  `getTotalTaxRateInPercentage`. */
-  taxRate: number;
+  taxRate: BigDecimal;
   /** The order's tax-basis orientation (`saleOrder.inAti`): which basis is the
    *  primary the total is computed from, the other being derived. */
   inAti: boolean;
   /** The order currency's `numberOfDecimals` — the scale the totals round to. */
   currencyDecimals: number;
   nbDecimalForUnitPrice?: number;
-}): {exTaxTotal: number; inTaxTotal: number; priceDiscounted: number} {
-  const quantity = Number(qty);
+}): {
+  exTaxTotal: BigDecimal;
+  inTaxTotal: BigDecimal;
+  priceDiscounted: BigDecimal;
+} {
   const primary = inAti ? ati : wt;
   const priceDiscounted = computeDiscount(
     primary,
@@ -60,15 +64,15 @@ export function getLineTotal({
     discountAmount,
     nbDecimalForUnitPrice,
   );
-  const rate = taxRate / 100;
-  let exTaxTotal: number;
-  let inTaxTotal: number;
+  const factor = taxFactor(taxRate);
+  let exTaxTotal: BigDecimal;
+  let inTaxTotal: BigDecimal;
   if (!inAti) {
-    exTaxTotal = round(quantity * priceDiscounted, currencyDecimals);
-    inTaxTotal = round(exTaxTotal * (1 + rate), currencyDecimals);
+    exTaxTotal = scaled(qty.multiply(priceDiscounted), currencyDecimals);
+    inTaxTotal = scaled(exTaxTotal.multiply(factor), currencyDecimals);
   } else {
-    inTaxTotal = round(quantity * priceDiscounted, currencyDecimals);
-    exTaxTotal = round(inTaxTotal / (1 + rate), currencyDecimals);
+    inTaxTotal = scaled(qty.multiply(priceDiscounted), currencyDecimals);
+    exTaxTotal = scaled(divide(inTaxTotal, factor), currencyDecimals);
   }
   return {exTaxTotal, inTaxTotal, priceDiscounted};
 }

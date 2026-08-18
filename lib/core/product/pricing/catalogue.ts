@@ -34,9 +34,13 @@
  * `CurrencyServiceImpl.getAmountCurrencyConvertedAtDate` →
  * `ProductCompanyServiceImpl.get`.
  *
- * Final amounts are NOT rounded here (both levels return raw values; the caller
- * rounds at its scale). Exchange rates ARE rounded as AOS rounds them (they
- * feed the computed value). Arithmetic is float64 — see PRICING.md. */
+ * Neither level applies the final unit-price rounding — the caller does that at
+ * its own scale. Two things ARE rounded here, both because AOS rounds them: the
+ * exchange rate (6 dp, or 8-then-6 inverted), and — only when a real conversion
+ * happened — the converted amount, at the target currency's decimals. So a
+ * cross-currency quote comes back at the currency's scale, not raw. */
+
+import type {BigDecimal} from '@goovee/orm';
 
 import type {ResolvedTaxLine} from './types';
 import type {
@@ -47,7 +51,14 @@ import type {
   UnitConversionRow,
 } from '../orm';
 import {PriceComputationError} from './errors';
-import {resolveProductField, round, todayInTimezone} from './util';
+import {
+  ONE,
+  resolveProductField,
+  scaled,
+  todayInTimezone,
+  toDecimalOrNull,
+  ZERO,
+} from './util';
 import {
   computeWtAti,
   getSaleTaxLineSet,
@@ -72,9 +83,10 @@ import {getExchangeRate, getUnitCoefficient} from './conversion';
  *  totals are computed as unit price × `qty`. Omit `unit` (and `qty` defaults to
  *  1) to price one item in the price's own unit.
  *
- *  Returns unrounded values; `wt`/`ati` are the per-(requested-)unit price and
- *  `wtTotal`/`atiTotal` are those times `qty`. The caller rounds at whatever
- *  scale its context requires. */
+ *  `wt`/`ati` are the per-(requested-)unit price and `wtTotal`/`atiTotal` are
+ *  those times `qty`. The unit-price rounding is the caller's, at whatever scale
+ *  its context requires — but a real currency conversion has already rounded
+ *  these to the target currency's decimals (see the conversion step below). */
 export function getConvertedPrice({
   price,
   sourceInAti,
@@ -85,9 +97,9 @@ export function getConvertedPrice({
   today,
   unit,
   unitConversions,
-  qty = 1,
+  qty = ONE,
 }: {
-  price: number;
+  price: BigDecimal;
   sourceInAti: boolean;
   taxLineSet: readonly ResolvedTaxLine[];
   fromCurrency: Currency | null | undefined;
@@ -99,14 +111,14 @@ export function getConvertedPrice({
   unit?: {requestedUnitId: string; saleUnitId: string} | null;
   unitConversions?: readonly UnitConversionRow[];
   /** Quantity in the requested (or sale) unit; defaults to 1. */
-  qty?: number;
+  qty?: BigDecimal;
 }): {
-  wt: number;
-  ati: number;
-  taxRate: number;
-  qty: number;
-  wtTotal: number;
-  atiTotal: number;
+  wt: BigDecimal;
+  ati: BigDecimal;
+  taxRate: BigDecimal;
+  qty: BigDecimal;
+  wtTotal: BigDecimal;
+  atiTotal: BigDecimal;
 } {
   const taxRate = getTotalTaxRateInPercentage(taxLineSet);
   let {wt, ati} = computeWtAti(price, sourceInAti, taxRate);
@@ -120,8 +132,8 @@ export function getConvertedPrice({
     );
   }
   const rate = getExchangeRate(fromCode, toCode, today, conversionLines);
-  wt *= rate;
-  ati *= rate;
+  wt = wt.multiply(rate);
+  ati = ati.multiply(rate);
 
   /* Round the converted amount to the TARGET currency's own decimals, the way
    * AOS does inside the conversion itself
@@ -131,9 +143,9 @@ export function getConvertedPrice({
    * guard). Skipping this diverges for any currency whose decimals differ from
    * the unit-price scale — e.g. JPY (0 decimals): 8960.25 vs 8960. The caller
    * still applies the final unit-price rounding on top. */
-  if (rate !== 1 && toCurrency?.numberOfDecimals != null) {
-    wt = round(wt, toCurrency.numberOfDecimals);
-    ati = round(ati, toCurrency.numberOfDecimals);
+  if (rate.compareTo(ONE) !== 0 && toCurrency?.numberOfDecimals != null) {
+    wt = scaled(wt, toCurrency.numberOfDecimals);
+    ati = scaled(ati, toCurrency.numberOfDecimals);
   }
 
   /* Unit conversion, after currency, mirroring AOS `ProductRestServiceImpl`:
@@ -145,11 +157,18 @@ export function getConvertedPrice({
       unit.saleUnitId,
       unitConversions ?? [],
     );
-    wt *= coef;
-    ati *= coef;
+    wt = wt.multiply(coef);
+    ati = ati.multiply(coef);
   }
 
-  return {wt, ati, taxRate, qty, wtTotal: wt * qty, atiTotal: ati * qty};
+  return {
+    wt,
+    ati,
+    taxRate,
+    qty,
+    wtTotal: wt.multiply(qty),
+    atiTotal: ati.multiply(qty),
+  };
 }
 
 /** Level 1 — "price THIS PRODUCT for this company, in this currency" —
@@ -180,7 +199,7 @@ export function getSaleUnitPrice({
   companySpecificProductFields,
   requestedUnit,
   unitConversions,
-  qty = 1,
+  qty = ONE,
 }: {
   product: PriceableProduct;
   company: {id: string; timezone?: string | null} | null;
@@ -191,14 +210,14 @@ export function getSaleUnitPrice({
   /** Quote in this unit instead of the product's `salesUnit ?? unit`. */
   requestedUnit?: {id: string} | null;
   unitConversions?: readonly UnitConversionRow[];
-  qty?: number;
+  qty?: BigDecimal;
 }): {
-  wt: number;
-  ati: number;
-  taxRate: number;
-  qty: number;
-  wtTotal: number;
-  atiTotal: number;
+  wt: BigDecimal;
+  ati: BigDecimal;
+  taxRate: BigDecimal;
+  qty: BigDecimal;
+  wtTotal: BigDecimal;
+  atiTotal: BigDecimal;
   unitId: string | null;
 } {
   const companyId = company?.id;
@@ -248,7 +267,7 @@ export function getSaleUnitPrice({
 
   return {
     ...getConvertedPrice({
-      price: Number(salePrice ?? 0),
+      price: toDecimalOrNull(salePrice) ?? ZERO,
       sourceInAti: Boolean(inAti),
       taxLineSet,
       fromCurrency: saleCurrency,

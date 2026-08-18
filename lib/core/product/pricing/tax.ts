@@ -9,6 +9,8 @@
  * product's tax set swaps the whole set) → pick one rate line per tax (the
  * active one, else the dated line whose window contains today), deduplicated. */
 
+import type {BigDecimal} from '@goovee/orm';
+
 import type {ResolvedTaxLine} from './types';
 import type {
   AccountManagementRow,
@@ -17,7 +19,14 @@ import type {
   TaxRow,
 } from '../orm';
 import {PriceComputationError} from './errors';
-import {round} from './util';
+import {
+  divide,
+  scaled,
+  taxFactor,
+  percentFraction,
+  toDecimalOrNull,
+  ZERO,
+} from './util';
 
 /** Finds the account-management row (the "which taxes apply" config) for the
  *  selling company: first on the product itself, then on its product family.
@@ -161,7 +170,7 @@ function resolveTaxLine(
 ): ResolvedTaxLine | null | undefined {
   const active = tax.activeTaxLine;
   if (active != null) {
-    return {id: active.id, value: toNumberOrNull(active.value)};
+    return {id: active.id, value: toDecimalOrNull(active.value)};
   }
   const list = tax.taxLineList;
   if (!list || list.length === 0) return undefined;
@@ -170,7 +179,7 @@ function resolveTaxLine(
      * also chronological comparison. */
     if (today < line.startDate) continue;
     if (line.endDate != null && today > line.endDate) continue;
-    return {id: line.id, value: toNumberOrNull(line.value)};
+    return {id: line.id, value: toDecimalOrNull(line.value)};
   }
   return null;
 }
@@ -180,10 +189,10 @@ function resolveTaxLine(
  *  21.5. */
 export function getTotalTaxRateInPercentage(
   lineSet: readonly ResolvedTaxLine[],
-): number {
-  let total = 0;
+): BigDecimal {
+  let total = ZERO;
   for (const line of lineSet) {
-    if (line.value != null) total += line.value;
+    if (line.value != null) total = total.add(line.value);
   }
   return total;
 }
@@ -195,17 +204,23 @@ export function getTotalTaxRateInPercentage(
  *  Same algebra as `TaxService.convertUnitPrice`, just producing both numbers
  *  at once instead of one per call. */
 export function computeWtAti(
-  price: number,
+  price: BigDecimal,
   inAti: boolean,
-  taxRate: number,
-): {wt: number; ati: number} {
+  taxRate: BigDecimal,
+): {wt: BigDecimal; ati: BigDecimal} {
+  const untaxed = taxRate.compareTo(ZERO) === 0;
   if (inAti) {
+    /* Both bases are returned unrounded, so the quotient keeps the intermediate
+     * scale `divide` carries — AOS's COMPUTATION_SCALING. */
     return {
       ati: price,
-      wt: taxRate === 0 ? price : price / (1 + taxRate / 100),
+      wt: untaxed ? price : divide(price, taxFactor(taxRate)),
     };
   }
-  return {wt: price, ati: price + (price * taxRate) / 100};
+  return {
+    wt: price,
+    ati: untaxed ? price : price.add(price.multiply(percentFraction(taxRate))),
+  };
 }
 
 /** Converts a unit price from one tax basis to the other, mirroring
@@ -217,13 +232,17 @@ export function computeWtAti(
  *  step (`applyPriceList`). */
 export function convertUnitPrice(
   priceIsAti: boolean,
-  taxRate: number,
-  price: number,
+  taxRate: BigDecimal,
+  price: BigDecimal,
   scale: number,
-): number {
-  const rate = taxRate / 100;
-  if (priceIsAti) return round(price / (1 + rate), scale);
-  return round(price + price * rate, scale);
+): BigDecimal {
+  if (taxRate.compareTo(ZERO) === 0) return scaled(price, scale);
+  /* The WT→ATI leg is exact until its single rounding, as in AOS. The ATI→WT leg
+   * divides wide and then scales rather than dividing straight to `scale` — see
+   * the note on `divide`. */
+  if (priceIsAti) return scaled(divide(price, taxFactor(taxRate)), scale);
+  const rate = percentFraction(taxRate);
+  return scaled(price.add(price.multiply(rate)), scale);
 }
 
 /** Rounds a WT/ATI unit-price pair the way an AOS sale-order / invoice line
@@ -232,7 +251,7 @@ export function convertUnitPrice(
  *  line has ONE primary basis (the order's `inAti` orientation): that basis is
  *  rounded to `scale`, and the OTHER basis is then derived FROM the rounded
  *  primary via `convertUnitPrice` — not rounded independently. So a WT line
- *  stores `price = round(wt)` and `inTaxPrice = convertUnitPrice(false, rate,
+ *  stores `price = scaled(wt)` and `inTaxPrice = convertUnitPrice(false, rate,
  *  price)`, and an ATI line does the mirror.
  *
  *  This deriving-from-the-rounded-primary is why the invoice can differ by a
@@ -241,26 +260,20 @@ export function convertUnitPrice(
  *  514.80×rate ATI would give 433.05). Feed the unrounded `wt`/`ati`/`taxRate`
  *  from `getConvertedPrice`/`getSaleUnitPrice`; get back the invoice pair. */
 export function roundSaleUnitPrice(
-  {wt, ati, taxRate}: {wt: number; ati: number; taxRate: number},
+  {wt, ati, taxRate}: {wt: BigDecimal; ati: BigDecimal; taxRate: BigDecimal},
   primaryInAti: boolean,
   scale: number,
-): {wt: number; ati: number} {
+): {wt: BigDecimal; ati: BigDecimal} {
   if (primaryInAti) {
-    const atiRounded = round(ati, scale);
+    const atiRounded = scaled(ati, scale);
     return {
       ati: atiRounded,
       wt: convertUnitPrice(true, taxRate, atiRounded, scale),
     };
   }
-  const wtRounded = round(wt, scale);
+  const wtRounded = scaled(wt, scale);
   return {
     wt: wtRounded,
     ati: convertUnitPrice(false, taxRate, wtRounded, scale),
   };
-}
-
-function toNumberOrNull(value: unknown): number | null {
-  if (value == null) return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
 }

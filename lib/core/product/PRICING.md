@@ -10,7 +10,7 @@ from `pricing/index.ts` (import everything from `@/product/pricing`):
 - `types` / `errors` — the _computed_ shapes (`ResolvedTaxLine`,
   `ResolvedDiscount`), the enums, error codes, and the error class. (The
   _input_ shapes are the `Payload` types of `../orm`'s fragments — see below.)
-- `util` — half-up rounding, timezone "today", per-company field reads.
+- `util` — decimal arithmetic, timezone "today", per-company field reads.
 - `tax` — tax resolution, WT/ATI, basis conversion + invoice pairing.
 - `conversion` — currency exchange rate, unit coefficient.
 - `discount` — the buyer's price-list discount primitives.
@@ -59,6 +59,15 @@ unit conversion — this module throws a `PriceComputationError` carrying the
 matching error code. It never invents a fallback. **Degradation policy belongs
 to the caller** (e.g. the marketplace shows a broken-tax price untaxed and
 cascades through display currencies rather than failing a page).
+
+One failure is **not** a `PriceComputationError`: a total tax rate of exactly
+−100% makes `1 + rate` zero, and dividing by it raises a plain `Error`. AOS
+mirrors this — its tax lines are constrained to `0..100`, so the input takes a
+direct database write, and where AOS does divide it raises an unchecked
+`ArithmeticException` rather than an `AxelorException`. A caller that must render
+rather than fail therefore cannot rely on catching `PriceComputationError` alone;
+it has to check `taxFactor(rate)` against zero before any ATI→WT conversion — an
+ATI-stored price, or an ATI-primary order over a WT-stored one.
 
 ## How a price is computed
 
@@ -111,8 +120,10 @@ cascades through display currencies rather than failing a page).
 
 Both levels return the per-unit `wt` and `ati`, the applied `taxRate` (a
 percentage), the `qty`, and the line totals `wtTotal` / `atiTotal` (`wt`/`ati` ×
-`qty`). Level 1 additionally echoes the resolved `unitId`. Values are **raw** —
-rounding is left to the caller, at whatever scale its context requires.
+`qty`). Level 1 additionally echoes the resolved `unitId`. The **unit-price**
+rounding is left to the caller, at whatever scale its context requires — but a
+real currency conversion has already rounded the amounts to the target currency's
+decimals (step 6), so they are not raw.
 
 ## Two levels
 
@@ -129,9 +140,11 @@ The module mirrors AOS's own two-level API:
 
 ## Errors
 
-Every failure is a `PriceComputationError` with a `.code`, thrown at the same
-point the mirrored AOS Java throws — so a caller can react exactly as an AOS
-admin would read the original error, or degrade (see Strictness).
+Each code below is a `PriceComputationError` thrown at the same point the mirrored
+AOS Java throws — so a caller can react exactly as an AOS admin would read the
+original error, or degrade (see Strictness). The table is the complete set of
+_coded_ failures; a total tax rate of exactly −100% raises an uncoded `Error`
+instead, for the reason given under Strictness.
 
 | Code                                  | Raised when                                                                                                  |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -157,8 +170,8 @@ _after_ a catalogue price exists, and not every consumer wants it:
 applies the price list as the next step (`getDefaultPriceList` →
 `getDiscountedPrice`). See that file's header for the discount rules, the
 compute-method modes (fold the discount into the price vs keep it separate), and
-the line-selection logic. Like the rest of the core it works in float64 and
-leaves final rounding to the caller.
+the line-selection logic. Like the rest of the core it leaves final rounding to
+the caller.
 
 The **billable line total** — what you actually charge — is `getLineTotal` in
 `line-total.ts`, a port of `SaleOrderLineComputeServiceImpl.computeValues`. It
@@ -168,19 +181,61 @@ matters under the SEPARATE compute method, where the discount is **not** in the
 unit price: the discounted amount only surfaces in the line total. `wt`/`ati`
 from this core are the unit price; `getLineTotal` is the line amount.
 
+## Types
+
+Amounts, rates and quantities are the `BigDecimal` the goovee ORM exports
+(`@goovee/orm`); scales and enum selects are plain numbers. That is the split AOS
+uses — `BigDecimal qty`, `BigDecimal unitPrice`, `int scale`,
+`int discountTypeSelect` — and half-up rounding matches Java's, negatives
+included.
+
+The core does not coerce, so a caller holding a number or a decimal string
+converts at its own boundary — `toDecimalOrNull` is exported for exactly that, and
+routes through the string form so a value that arrived as a double stays exact to
+its printed digits. Plain numbers come back out of `quoteProductPrice` and the
+marketplace adapter only, where each value has few enough significant decimals to
+convert without loss. `taxRate` and `qty` are returned as they were supplied.
+
+The arithmetic helpers, all in `util`: `scaled` (half-up to a scale), `divide`,
+`percentFraction` (`percent / 100`), `taxFactor` (`1 + rate/100`),
+`applyPercentDiscount` (`value × (100 − percent) / 100`, so a negative percent
+raises the value — that is how a markup arrives), and the `ZERO` / `ONE` /
+`HUNDRED` constants. Two scales, both AOS's: `INTERMEDIATE_SCALE` in `util` (20,
+`COMPUTATION_SCALING`) for intermediates, and `DISCOUNT_SCALE` in `types` (20,
+`PriceListLineRepository`) for a fixed-amount discount. They coincide at 20 and
+mean unrelated things — do not substitute one for the other.
+
+Two rules for arithmetic here:
+
+- **Prefer one rounding, at the scale the result is wanted at.** Rounding wide and
+  then re-rounding can in principle cross a half-cent boundary a single rounding
+  would not. Where AOS rounds twice — the currency step below, then the caller's
+  unit-price rounding — the port rounds twice too; faithfulness wins over the
+  rule.
+- **Never call `BigDecimal.divide(divisor, scale, mode)` directly.** In
+  `@goovee/orm` 0.0.7 it returns a result too large by `10 ** (2 × deficit)`
+  whenever `scale + divisor.scale() − dividend.scale()` is negative — the divisor's
+  value is irrelevant, only the scales matter (`6666.03333 / 100` at scale 2 gives
+  `66660333.30`; `6666.03333 / 1.2` gives `55550277.75`). Use `divide`, which
+  raises the scale to keep that expression non-negative, and `percentFraction` for
+  a division by 100, which needs no division at all.
+
+Rounding on the money path goes through `scaled`, except inside `divide`, which
+rounds its own quotient. A consumer totalling amounts the core has already
+rounded does that on its own side.
+
+An exact half rounds **away from zero**, as Java's HALF_UP does — so `−119.585`
+gives `−119.59`. That applies wherever a discount amount is negative: an INCREASE
+line, which is resolved into a negative discount, and a REPLACE line whose
+replacement price sits above the price being replaced.
+
 ## Known simplifications vs AOS
 
-- **Arithmetic** is float64 rather than BigDecimal, and **final rounding** is
-  left to the caller (exchange rates, which feed the computed value, are rounded
-  to AOS's scales internally — see step 6). AOS carries 20 decimals through its
-  intermediate tax math and rounds half-up; float64's ~15–17 significant digits
-  agree for realistic prices, but the gap is **not purely theoretical**: a value
-  that lands exactly on a half-cent can round the wrong way (e.g. a 5% discount
-  of 613.30 is exactly 582.635 → AOS 582.64, but float64 holds 582.6349… → 582.63
-  — a one-cent break). It is rare (~1 in several thousand combinations) and a
-  consumer needing exactness applies its own tolerance (marketplace checkout
-  does). The fix, deferred, is to move the hot path onto the `BigDecimal` the
-  goovee ORM already exports (`@goovee/orm`), which mirrors Java's exactly.
+- **The final unit-price rounding** is left to the caller. What the two levels do
+  round internally, they round because AOS does: the exchange rate, and the
+  converted amount at the target currency's decimals (step 6).
+  `quoteProductPrice` is the exception — being the outer edge, it rounds
+  everything it returns.
 
 See the header comment in `catalogue.ts` (and each concern file) for the exact
 AOS services each step mirrors.
