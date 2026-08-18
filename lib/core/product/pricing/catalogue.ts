@@ -5,18 +5,18 @@
  *   `salePrice`/`inAti`/`saleCurrency` off the product (honouring per-company
  *   override rows), work out which taxes apply (`getSaleTaxLineSet`), hand
  *   everything to level 2.
- * Level 2 — `getConvertedPrice` — "price THESE VALUES": sum the tax rates,
- *   derive WT and ATI from the stored number, convert both to the target
- *   currency. Exists so things that OWN their price (a sale-order line, a price
- *   list, a marketplace listing) can be priced without pretending the values
- *   came from the product.
+ * Level 2 — `getConvertedPrice` — "price THESE VALUES": sum the tax rates, express
+ *   the stored number in the basis the caller asked for, and convert it to the
+ *   target currency. Exists so things that OWN their price (a sale-order line, a
+ *   price list, a record that stores its own) can be priced without pretending the
+ *   values came from the product.
  *
  * One deliberate deviation from AOS: `getConvertedPrice` takes `sourceInAti`
  * explicitly rather than re-reading `inAti` off the product
  * (ProductPriceServiceImpl.java:144-147 silently assumes the price uses the
  * product's basis). That holds for every AOS caller, but not for a caller whose
- * record froze the flag (e.g. a marketplace listing) — so the basis is the
- * caller's to state.
+ * record froze the flag when the price was created — so the basis is the caller's
+ * to state.
  *
  * Unit conversion (COEFF only) mirrors the quick-price ENDPOINT, not the
  * invoice: in AOS the ONLY place a price is coefficient-converted by unit is
@@ -24,9 +24,9 @@
  * sale-order / invoice line never does — `SaleOrderLinePriceServiceImpl` prices
  * via the unit-less `getSaleUnitPrice`, and picking a product forces the line's
  * unit back to the product's sale unit. So unit conversion here is an
- * endpoint-style convenience for an app that wants per-requested-unit quoting;
- * only the endpoint validates it (see scripts/test-price). The conversion runs
- * AFTER currency conversion.
+ * endpoint-style convenience for an app that wants per-requested-unit quoting,
+ * with no invoiced number to check it against — only the endpoint's. The
+ * conversion runs AFTER currency conversion.
  *
  * AOS code mirrored: `ProductRestService.fetchProductPrice` →
  * `ProductPriceServiceImpl.getSaleUnitPrice` →
@@ -34,11 +34,11 @@
  * `CurrencyServiceImpl.getAmountCurrencyConvertedAtDate` →
  * `ProductCompanyServiceImpl.get`.
  *
- * Neither level applies the final unit-price rounding — the caller does that at
- * its own scale. Two things ARE rounded here, both because AOS rounds them: the
- * exchange rate (6 dp, or 8-then-6 inverted), and — only when a real conversion
- * happened — the converted amount, at the target currency's decimals. So a
- * cross-currency quote comes back at the currency's scale, not raw. */
+ * Three things are rounded here, each because AOS rounds it: the exchange rate
+ * (6 dp, or 8-then-6 inverted); the converted amount at the target currency's
+ * decimals, only when a real conversion happened; and the returned amount at
+ * `nbDecimalForUnitPrice`. The basis conversion in between is deliberately left
+ * wide. A caller rounding the returned amount again rounds twice. */
 
 import type {BigDecimal} from '@goovee/orm';
 
@@ -71,7 +71,7 @@ import {getExchangeRate, getUnitCoefficient} from './conversion';
 /** Level 2 — "price THESE VALUES" — mirroring
  *  `ProductPriceServiceImpl.getConvertedPrice`. Use this when the price belongs
  *  to something other than the product: in AOS that's a sale-order line or a
- *  price list; in the portal, a marketplace listing.
+ *  price list, and here any record that stores a price of its own.
  *
  *  Returns ONE amount, in the `resultInAti` basis, rounded to
  *  `nbDecimalForUnitPrice` — the same single number AOS returns. When the source
