@@ -6,7 +6,7 @@
  * `PriceListLineRow`, `UnitConversionRow`). A field added to a fragment flows
  * straight into the functions that read it. This file holds only what the core
  * itself defines: the values it *computes* (`ResolvedTaxLine`, `ResolvedDiscount`),
- * the `DecimalLike` quantity type, the AOS enum constants, and the error codes.
+ * the AOS enum constants and scales, and the error codes.
  *
  * Vocabulary:
  * - WT — the price WITHOUT tax (net); ATI — with ALL TAXES INCLUDED (gross).
@@ -20,11 +20,6 @@
  *   separate. */
 
 import type {BigDecimal} from '@goovee/orm';
-
-/** Any value `Number(...)` understands: plain numbers, decimal strings, and the
- *  ORM's `BigDecimal`. Used for the `qty` params the caller supplies directly
- *  (the ORM-sourced decimal fields are typed `BigDecimal` by their `Payload`). */
-export type DecimalLike = string | number | BigDecimal;
 
 /** Why a price could not be computed. Each code corresponds to one spot where
  *  the mirrored AOS Java throws an `AxelorException`, so a caller can react
@@ -54,7 +49,7 @@ export type PriceComputationErrorCode =
 /** A tax line once picked: just its identity and its rate. The id is what lets
  *  us deduplicate — AOS collects the picked lines into a `HashSet`, so one line
  *  shared by two taxes must count once. (Computed from a `TaxRow`.) */
-export type ResolvedTaxLine = {id: string; value: number | null};
+export type ResolvedTaxLine = {id: string; value: BigDecimal | null};
 
 /* ──────────────────────────────────────────────────────────────────────
  * Price-list enum constants (PriceListLineRepository / AppBaseRepository)
@@ -94,13 +89,18 @@ export const COMPUTE_METHOD_DISCOUNT = {
  *  defaults to 2. Callers pass their configured value. */
 export const DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE = 2;
 
+/** AOS `PriceListLineRepository.DISCOUNT_SCALE` (declared in
+ *  `PriceListLine.xml`) — the scale a FIXED-amount discount is rounded to. Equal
+ *  to `util`'s `INTERMEDIATE_SCALE` by coincidence, not by meaning. */
+export const DISCOUNT_SCALE = 20;
+
 /** A resolved discount: the amount, the unit it is expressed in (`AMOUNT_TYPE`),
  *  and — when the compute method folded it in — the already-discounted
  *  `price`. (Computed from a price list + line.) */
 export type ResolvedDiscount = {
   discountTypeSelect: number;
-  discountAmount: number;
+  discountAmount: BigDecimal;
   /** The discounted unit price, set only when the discount was folded into the
    *  price (see `getReplacedPriceAndDiscounts`); otherwise null. */
-  price: number | null;
+  price: BigDecimal | null;
 };

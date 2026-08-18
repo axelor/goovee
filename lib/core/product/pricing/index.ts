@@ -9,9 +9,14 @@
  * `PriceComputationError` wherever the mirrored AOS Java throws; degradation
  * policy belongs to the caller.
  *
+ * Amounts, rates and quantities are `BigDecimal` in and out, as in AOS; scales
+ * and enum selects are plain numbers. The core does not coerce, so callers convert
+ * at their boundary. `quoteProductPrice` is the exception — being the outer edge,
+ * it returns plain numbers.
+ *
  * Split by concern (this folder); see PRICING.md for the narrative:
  * - types / errors   — input shapes, enums, error codes, the error class.
- * - util             — rounding, timezone "today", per-company field reads.
+ * - util             — decimal arithmetic, timezone "today", per-company reads.
  * - tax              — tax resolution, WT/ATI, basis conversion + pairing.
  * - conversion       — currency exchange rate, unit coefficient.
  * - discount         — the buyer's price-list discount primitives.

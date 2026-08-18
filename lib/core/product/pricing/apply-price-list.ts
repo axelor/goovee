@@ -3,9 +3,11 @@
  * path because it reproduces an AOS quirk on purpose. Currently uncalled; kept
  * as the offline reference for the endpoint's exact number. */
 
-import type {DecimalLike} from './types';
+import type {BigDecimal} from '@goovee/orm';
+
 import type {PriceListLineRow, PriceListRow} from '../orm';
 import {AMOUNT_TYPE, DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE} from './types';
+import {ONE, ZERO} from './util';
 import {convertUnitPrice} from './tax';
 import {
   computeDiscount,
@@ -67,17 +69,17 @@ export function applyPriceList<L extends PriceListLineRow>({
   priceList,
   productLines,
   categoryLines,
-  qty = 1,
+  qty = ONE,
   computeMethodDiscountSelect,
   nbDecimalForUnitPrice = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
 }: {
-  price: number;
+  price: BigDecimal;
   /** The product's stored tax basis (`product.inAti`). */
   productInAti: boolean;
   /** The basis `price` is expressed in / wanted back in. */
   targetInAti: boolean;
   /** Total tax percentage, for the basis round-trip. */
-  taxRate: number;
+  taxRate: BigDecimal;
   /** Whether a buyer is identified. AOS returns the price unchanged when there
    *  is none (`partner == null`); otherwise it runs in full. */
   partnerPresent: boolean;
@@ -86,10 +88,10 @@ export function applyPriceList<L extends PriceListLineRow>({
   priceList: PriceListRow | null;
   productLines: readonly L[];
   categoryLines?: readonly L[] | null;
-  qty?: DecimalLike;
+  qty?: BigDecimal;
   computeMethodDiscountSelect: number;
   nbDecimalForUnitPrice?: number;
-}): number {
+}): BigDecimal {
   if (!partnerPresent) return price;
 
   const differingBasis = productInAti !== targetInAti;
@@ -102,7 +104,7 @@ export function applyPriceList<L extends PriceListLineRow>({
    * price list AOS's fillDiscount yields NONE / 0, so computeDiscount is a
    * no-op — but the basis round-trip above/below still happens. */
   let discountTypeSelect: number = AMOUNT_TYPE.NONE;
-  let discountAmount = 0;
+  let discountAmount = ZERO;
   if (priceList != null) {
     const line = getPriceListLine(productLines, categoryLines, qty, working);
     const discounts = getReplacedPriceAndDiscounts(

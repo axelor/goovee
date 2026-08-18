@@ -9,10 +9,17 @@ import type {
   AOSPartner,
 } from '@/goovee/.generated/models';
 import type {Currency} from '@/product/orm';
-import {dateInTimezone, getExchangeRate, round} from '@/product/pricing';
+import {
+  dateInTimezone,
+  getExchangeRate,
+  scaled,
+  toDecimalOrNull,
+  ZERO,
+} from '@/product/pricing';
+import {round} from '../utils/price';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
-import type {Payload, SelectOptions} from '@goovee/orm';
+import type {BigDecimal, Payload, SelectOptions} from '@goovee/orm';
 import {format, startOfMonth, subMonths} from 'date-fns';
 import {RECENT_REVIEW_WINDOW_DAYS} from '../constants/review';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
@@ -604,7 +611,7 @@ export async function getRevenueSummary({
      * the checkout used (todayInTimezone), so the buyer→contributor rate is
      * the inverse of the rate the buyer was charged at. */
     const asOf = dateInTimezone(purchase.purchaseDateTime, companyTimezone);
-    let rate: number;
+    let rate: BigDecimal;
     try {
       rate = getExchangeRate(
         fromCode,
@@ -616,7 +623,11 @@ export async function getRevenueSummary({
       unconvertible += 1;
       continue;
     }
-    const value = round(Number(purchase.priceWt) * rate, decimals);
+    // Convert in decimals, rounding once at the target currency's scale.
+    const value = scaled(
+      (toDecimalOrNull(purchase.priceWt) ?? ZERO).multiply(rate),
+      decimals,
+    ).toNumber();
     const key = monthKey(purchase.purchaseDateTime);
     byMonth.set(key, (byMonth.get(key) ?? 0) + value);
   }

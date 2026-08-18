@@ -3,9 +3,11 @@
  * `UnitConversionServiceImpl.getCoefficient`. Both return a plain multiplier;
  * the caller multiplies the price by it. */
 
+import type {BigDecimal} from '@goovee/orm';
+
 import type {ConversionLine, UnitConversionRow} from '../orm';
 import {PriceComputationError} from './errors';
-import {round} from './util';
+import {divide, ONE, scaled, toDecimalOrNull, ZERO} from './util';
 
 /** Scales AOS rounds exchange rates to (`AppBaseService`): a rate to 6
  *  decimals, an inverted rate at 8 before being re-scaled to 6. */
@@ -34,8 +36,8 @@ export function getExchangeRate(
   toCode: string,
   today: string,
   lines: readonly ConversionLine[],
-): number {
-  if (fromCode === toCode) return 1;
+): BigDecimal {
+  if (fromCode === toCode) return ONE;
 
   const matchLine = (start: string, end: string) =>
     lines.find(l => {
@@ -50,28 +52,28 @@ export function getExchangeRate(
 
   const direct = matchLine(fromCode, toCode);
   if (direct != null) {
-    const rate = Number(direct.exchangeRate);
-    if (!Number.isFinite(rate) || rate === 0) {
+    const rate = toDecimalOrNull(direct.exchangeRate);
+    if (rate == null || rate.compareTo(ZERO) === 0) {
       throw new PriceComputationError(
         'CURRENCY_2',
         `Unusable exchange rate for ${fromCode} → ${toCode}`,
       );
     }
-    return round(rate, EXCHANGE_RATE_SCALE);
+    return scaled(rate, EXCHANGE_RATE_SCALE);
   }
 
   const inverse = matchLine(toCode, fromCode);
   if (inverse != null) {
-    const rate = Number(inverse.exchangeRate);
-    if (!Number.isFinite(rate) || rate === 0) {
+    const rate = toDecimalOrNull(inverse.exchangeRate);
+    if (rate == null || rate.compareTo(ZERO) === 0) {
       throw new PriceComputationError(
         'CURRENCY_2',
         `Unusable exchange rate for ${toCode} → ${fromCode}`,
       );
     }
     /* AOS inverts at 8 decimals, then re-scales the rate to 6. */
-    return round(
-      round(1 / rate, EXCHANGE_RATE_REVERSION_SCALE),
+    return scaled(
+      scaled(divide(ONE, rate), EXCHANGE_RATE_REVERSION_SCALE),
       EXCHANGE_RATE_SCALE,
     );
   }
@@ -108,8 +110,8 @@ export function getUnitCoefficient(
   fromUnitId: string,
   toUnitId: string,
   conversions: readonly UnitConversionRow[],
-): number {
-  if (fromUnitId === toUnitId) return 1;
+): BigDecimal {
+  if (fromUnitId === toUnitId) return ONE;
 
   const direct = conversions.find(
     c => c.startUnit.id === fromUnitId && c.endUnit.id === toUnitId,
@@ -130,19 +132,19 @@ export function getUnitCoefficient(
 /** Reads a usable coefficient off one matched line, inverting it when the line
  *  was matched in reverse. Rejects non-coefficient lines and zero/unreadable
  *  coefficients exactly where AOS does. */
-function coefOf(line: UnitConversionRow, inverted: boolean): number {
+function coefOf(line: UnitConversionRow, inverted: boolean): BigDecimal {
   if (line.typeSelect !== TYPE_COEFF) {
     throw new PriceComputationError(
       'UNIT_CONVERSION_FORMULA_UNSUPPORTED',
       'Only coefficient-based unit conversions are supported',
     );
   }
-  const coef = Number(line.coef);
-  if (!Number.isFinite(coef) || coef === 0) {
+  const coef = toDecimalOrNull(line.coef);
+  if (coef == null || coef.compareTo(ZERO) === 0) {
     throw new PriceComputationError(
       'UNIT_CONVERSION_2',
       'Unit conversion coefficient is zero or unreadable',
     );
   }
-  return inverted ? 1 / coef : coef;
+  return inverted ? divide(ONE, coef) : coef;
 }

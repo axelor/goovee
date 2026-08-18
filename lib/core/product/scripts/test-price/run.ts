@@ -32,6 +32,7 @@ import '@/load-swc-env';
 
 import axios from 'axios';
 import {parseArgs} from 'node:util';
+import {BigDecimal} from '@goovee/orm';
 
 import {DEFAULT_TENANT} from '@/constants';
 import {manager} from '@/tenant';
@@ -41,7 +42,6 @@ import {
   getDefaultPriceList,
   PriceComputationError,
   quoteProductPrice,
-  round,
   todayInTimezone,
 } from '../../pricing';
 import type {PriceListRow} from '@/product/orm';
@@ -159,7 +159,14 @@ type GooveePrice =
  * vs line-total relationship is explicit: at LINE_QTY the line total divided
  * by it is the discounted unit price (relied on by eqTotalToUnit). The sweep
  * doesn't vary quantity. */
-const LINE_QTY = 1;
+const LINE_QTY = BigDecimal.valueOf('1');
+
+/* Comparison tolerance and display only — every price this script compares has
+ * already been rounded by the core. */
+function round(value: number, scale: number): number {
+  const factor = 10 ** scale;
+  return Math.round(value * factor) / factor;
+}
 
 function computeGooveePrice({
   product,
@@ -440,9 +447,10 @@ function eqTotalToUnit(gv: GooveePrice, ep: PriceResult, nb: number): boolean {
     return false;
   }
   const eps = 0.5 * 10 ** -nb;
+  const qty = LINE_QTY.toNumber();
   return (
-    Math.abs(gv.exTaxTotal / LINE_QTY - ep.wt) < eps &&
-    Math.abs(gv.inTaxTotal / LINE_QTY - ep.ati) < eps
+    Math.abs(gv.exTaxTotal / qty - ep.wt) < eps &&
+    Math.abs(gv.inTaxTotal / qty - ep.ati) < eps
   );
 }
 
