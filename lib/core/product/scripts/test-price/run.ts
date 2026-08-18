@@ -1,7 +1,7 @@
 /* Product price-parity test.
  *
- * Sweeps products × companies × buyers × currencies and scores each product
- * across THREE prices:
+ * Sweeps products × companies × buyers × currencies × tax-basis orientation and
+ * scores each product across THREE prices:
  *   gv — goovee: the core's invoice price (getSaleUnitPrice + roundSaleUnitPrice)
  *   so — the TRUE AOS sale-order / invoice line price, computed via the product
  *        onchange action on a transient line (no order is persisted)
@@ -22,9 +22,14 @@
  * against ep instead (indicational, so partial at worst). --unit is therefore
  * left out of the default sweep.
  *
+ * A line rounds its primary tax basis and derives the other from the rounded
+ * figure, so WT-primary and ATI-primary are separate paths that can disagree with
+ * AOS independently. Both are swept by default and tallied separately; either can
+ * be isolated with --wt-primary / --ati-primary.
+ *
  * Pure product test: no marketplace involvement, nothing persisted. Every
- * dimension (product, company, partner, currency, unit) is a CLI flag; with
- * none it sweeps sensible defaults.
+ * dimension (product, company, partner, currency, unit, basis) is a CLI flag;
+ * with none it sweeps sensible defaults.
  *
  * Run:  pnpm test-price -- --help
  */
@@ -97,6 +102,7 @@ const {values} = parseArgs({
     'all-products': {type: 'boolean'},
     'all-partners': {type: 'boolean'},
     'ati-primary': {type: 'boolean'},
+    'wt-primary': {type: 'boolean'},
     verbose: {type: 'boolean'},
     help: {type: 'boolean'},
   },
@@ -116,9 +122,11 @@ gv ≠ so → FAILURE; gv == so but ep differs → PARTIAL (the known endpoint�
 invoice gap); all three agree → SUCCESS. Exits non-zero only on a failure.
 
 Defaults sweep every sellable product, every company, one buyer per distinct
-(fiscal position, currency, sale price list) + a no-buyer row, and a curated
+(fiscal position, currency, sale price list) + a no-buyer row, a curated
 set of target currencies — a few European, a few distinct, and one with no
-exchange rate (to show the error path): ${DEFAULT_CURRENCIES.join(', ')}.
+exchange rate (to show the error path): ${DEFAULT_CURRENCIES.join(', ')} — and
+BOTH tax-basis orientations, since a line rounds its primary basis and derives
+the other, so the two are separate code paths with separate answers.
 
 Usage:
   pnpm test-price [-- <options>]
@@ -134,8 +142,9 @@ Options:
   --limit <n>        Cap the number of products (quick runs).
   --all-products     Include non-sellable / all products, not just sellable.
   --all-partners     Use every partner instead of the sampled set.
-  --ati-primary      Price as an ATI-oriented order (round ATI, derive WT).
-                     Default: WT-primary (match the company's sale-order config).
+  --ati-primary      Sweep ONLY the ATI-oriented basis (round ATI, derive WT).
+  --wt-primary       Sweep ONLY the WT-oriented basis (round WT, derive ATI).
+                     Default with neither: both, reported separately.
   --tenant <id>      Tenant id (default: ${DEFAULT_TENANT}).
   --verbose          Print every row, not only mismatches.
 `);
@@ -616,7 +625,13 @@ async function main() {
 
   const nb = appConfig.nbDecimalForUnitPrice;
   const requestedUnit = values.unit ? {id: values.unit} : null;
-  const atiPrimary = Boolean(values['ati-primary']);
+  /* A line rounds its primary basis and derives the other from the rounded
+   * figure, so the two orientations are separate paths that can disagree with
+   * AOS independently. Sweep both unless one is asked for. */
+  const onlyAti = Boolean(values['ati-primary']);
+  const onlyWt = Boolean(values['wt-primary']);
+  const orientations: boolean[] =
+    onlyAti === onlyWt ? [false, true] : onlyAti ? [true] : [false];
   if (currencies.length === 0)
     throw new Error('No target currencies resolved.');
   const currencyOptions: CurrencyRow[] = currencies;
@@ -631,6 +646,10 @@ async function main() {
   let totSuccess = 0;
   let totPartial = 0;
   let totFailure = 0;
+  /* Per-orientation tallies, so a divergence that only shows in one basis is
+   * attributable instead of buried in a single total. */
+  const perBasis = new Map<string, {ok: number; part: number; fail: number}>();
+  const basisLabel = (ati: boolean) => (ati ? 'ATI' : 'WT');
 
   for (const company of companies) {
     const companyId = company.id;
@@ -660,25 +679,27 @@ async function main() {
           [currencyOverride.codeISO],
         );
 
-        /* The two AOS sources for this combo — ep (batched endpoint) and so
-         * (per-product onchange) — are fetched in parallel; gv is then computed
-         * locally from the already-loaded data. No buyer → no sale order to
-         * price against, so skip `so` (compared gv-vs-ep). Otherwise carry the
-         * buyer's fiscal position so the onchange applies the same tax remap a
-         * real order would. */
+        /* `ep` (the batched endpoint) has no basis orientation, so it is fetched
+         * once and compared against both. */
         const partnerId = partnerSample.id;
         const fiscalPositionId =
           partnerSample.partner?.fiscalPosition?.id ?? null;
-        const [aosById, sos] = await Promise.all([
-          fetchAosPrices({
-            config,
-            productIds: products.map(p => p.id),
-            partnerId: partnerSample.id,
-            companyId,
-            currencyId: currencyOverride.id,
-            unitId: values.unit ?? null,
-          }),
-          processBatch(products, product =>
+        const aosById = await fetchAosPrices({
+          config,
+          productIds: products.map(p => p.id),
+          partnerId: partnerSample.id,
+          companyId,
+          currencyId: currencyOverride.id,
+          unitId: values.unit ?? null,
+        });
+
+        for (const atiPrimary of orientations) {
+          /* `so` (the per-product onchange) is per orientation — it prices a
+           * transient line on an order of that basis. No buyer → no sale order to
+           * price against, so skip it (compared gv-vs-ep). Otherwise carry the
+           * buyer's fiscal position so the onchange applies the same tax remap a
+           * real order would. */
+          const sos = await processBatch(products, product =>
             partnerId == null
               ? Promise.resolve(null)
               : fetchSaleOrderPrice({
@@ -693,60 +714,79 @@ async function main() {
                   today,
                   inAti: atiPrimary,
                 }),
-          ),
-        ]);
+          );
 
-        const rows = products.map((product, i) =>
-          compare3(
-            product,
-            computeGooveePrice({
+          const rows = products.map((product, i) =>
+            compare3(
               product,
-              company: {...company, id: companyId},
-              partner: partnerSample,
-              toCurrency: currencyOverride,
-              conversionLines,
-              companySpecificProductFields,
-              appConfig,
-              priceList,
-              priceListLines,
-              requestedUnit,
-              unitConversions,
-              atiPrimary,
-            }),
-            sos[i],
-            endpointResult(aosById.get(product.id)),
-            nb,
-            /* Did gv unit-convert this product? AOS invoice lines never
-             * unit-convert price (only the quick-price endpoint does), so when
-             * the requested unit differs from the sale unit `so` can't be the
-             * reference — validate gv against `ep` instead. */
-            requestedUnit != null &&
-              requestedUnit.id !==
-                (product.salesUnit?.id ?? product.unit?.id ?? null),
-          ),
-        );
+              computeGooveePrice({
+                product,
+                company: {...company, id: companyId},
+                partner: partnerSample,
+                toCurrency: currencyOverride,
+                conversionLines,
+                companySpecificProductFields,
+                appConfig,
+                priceList,
+                priceListLines,
+                requestedUnit,
+                unitConversions,
+                atiPrimary,
+              }),
+              sos[i],
+              endpointResult(aosById.get(product.id)),
+              nb,
+              /* Did gv unit-convert this product? AOS invoice lines never
+               * unit-convert price (only the quick-price endpoint does), so when
+               * the requested unit differs from the sale unit `so` can't be the
+               * reference — validate gv against `ep` instead. */
+              requestedUnit != null &&
+                requestedUnit.id !==
+                  (product.salesUnit?.id ?? product.unit?.id ?? null),
+            ),
+          );
 
-        const fail = rows.filter(r => r.status === 'failure').length;
-        const part = rows.filter(r => r.status === 'partial').length;
-        const succ = rows.length - fail - part;
-        totSuccess += succ;
-        totPartial += part;
-        totFailure += fail;
+          const fail = rows.filter(r => r.status === 'failure').length;
+          const part = rows.filter(r => r.status === 'partial').length;
+          const succ = rows.length - fail - part;
+          totSuccess += succ;
+          totPartial += part;
+          totFailure += fail;
 
-        const label =
-          `company=${company.name ?? companyId} buyer=${partnerSample.label} ` +
-          `cur=${currencyOverride.code}` +
-          (priceList ? ` [priceList ${priceList.id}]` : '');
-        const icon = fail ? `${RED}✖` : part ? `${YELLOW}◐` : `${GREEN}✔`;
-        console.log(
-          `\n${icon}${RESET} ${BOLD}${label}${RESET}  ` +
-            `${succ} ok / ${part} partial / ${fail} fail (of ${rows.length})`,
-        );
-        const visible = verbose
-          ? rows
-          : rows.filter(r => r.status !== 'success');
-        if (visible.length) renderRows(visible);
+          const basis = basisLabel(atiPrimary);
+          const tally = perBasis.get(basis) ?? {ok: 0, part: 0, fail: 0};
+          tally.ok += succ;
+          tally.part += part;
+          tally.fail += fail;
+          perBasis.set(basis, tally);
+
+          const label =
+            `company=${company.name ?? companyId} buyer=${partnerSample.label} ` +
+            `cur=${currencyOverride.code} basis=${basis}` +
+            (priceList ? ` [priceList ${priceList.id}]` : '');
+          const icon = fail ? `${RED}✖` : part ? `${YELLOW}◐` : `${GREEN}✔`;
+          console.log(
+            `\n${icon}${RESET} ${BOLD}${label}${RESET}  ` +
+              `${succ} ok / ${part} partial / ${fail} fail (of ${rows.length})`,
+          );
+          const visible = verbose
+            ? rows
+            : rows.filter(r => r.status !== 'success');
+          if (visible.length) renderRows(visible);
+        }
       }
+    }
+  }
+
+  /* Break the totals down by basis when both were swept: a divergence that only
+   * appears in one orientation is otherwise invisible in the combined figure. */
+  if (perBasis.size > 1) {
+    console.log('');
+    for (const [basis, {ok, part, fail}] of perBasis) {
+      const colour = fail === 0 ? GREEN : RED;
+      console.log(
+        `${colour}basis=${basis}: ${ok} success / ${part} partial / ${fail} failure${RESET}`,
+      );
     }
   }
 
