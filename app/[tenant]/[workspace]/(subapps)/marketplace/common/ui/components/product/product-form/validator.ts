@@ -3,7 +3,6 @@ import {uploadTokenSchema} from '@/lib/core/upload/validators';
 import {COVER_STYLES} from '../../../../constants/gradients';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 
-export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB per image
 export const MAX_IMAGES = 9; // total per product (existing + new)
 /* Common raster formats only. SVG is intentionally excluded: it can carry
