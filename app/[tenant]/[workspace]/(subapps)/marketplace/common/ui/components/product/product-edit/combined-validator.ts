@@ -1,14 +1,15 @@
 import {z} from 'zod';
+import {WorkspaceURLSchema} from '@/utils/validators';
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
 import {VERSION_NUMBER_PATTERN} from '../../../../utils/version-number';
 import {productSchema} from '../product-form/validator';
 
 /**
- * One editable version row in the combined page editor. Like the dialog's
- * `versionSchema` but (a) no `productId` — the page owns it — and (b)
- * `statusSelect` also allows `unpublished`, since the page stages status via
- * the "Mark as…" buttons rather than the dialog's separate unpublish action.
+ * One editable version row in the combined editor. The product it belongs to is
+ * owned by the editor, so the row carries no product reference of its own, and
+ * `statusSelect` allows `unpublished` because the editor stages status via its
+ * status segments rather than a separate unpublish action.
  */
 export const versionRowSchema = z
   .object({
@@ -41,15 +42,12 @@ export const versionRowSchema = z
      * policy. */
     bundleToken: uploadTokenSchema.optional(),
   })
-  .superRefine((values, context) => {
-    if (!values.id && !values.bundleToken) {
-      context.addIssue({
-        code: 'custom',
-        path: ['bundleToken'],
-        message: 'Bundle file is required for a new version',
-      });
-    }
-  });
+  .check(
+    z.refine(values => Boolean(values.id || values.bundleToken), {
+      path: ['bundleToken'],
+      message: 'Bundle file is required for a new version',
+    }),
+  );
 
 export type VersionRowValues = z.infer<typeof versionRowSchema>;
 
@@ -91,6 +89,8 @@ export type ProductEditBlock = z.infer<typeof productEditBlockSchema>;
  *   - `images` present → the full ordered screenshot list to reconcile (it's
  *     positional, so it's all-or-nothing); absent → screenshots untouched.
  *   - `versions`/`newVersions` are already upsert-only (only changed/new rows).
+ *   - `workspaceURL` scopes the access check, so it is part of what the action
+ *     validates rather than a separate hand-checked argument.
  */
 export const savePayloadSchema = z
   .object({
@@ -99,15 +99,13 @@ export const savePayloadSchema = z
     images: productSchema.shape.images.optional(),
     versions: z.array(versionRowSchema),
     newVersions: z.array(versionRowSchema),
+    workspaceURL: WorkspaceURLSchema,
   })
-  .superRefine((data, context) => {
-    if (!data.id && !data.product) {
-      context.addIssue({
-        code: 'custom',
-        path: ['product'],
-        message: 'Product details are required when creating a listing',
-      });
-    }
-  });
+  .check(
+    z.refine(data => Boolean(data.id || data.product), {
+      path: ['product'],
+      message: 'Product details are required when creating a listing',
+    }),
+  );
 
 export type SavePayload = z.infer<typeof savePayloadSchema>;

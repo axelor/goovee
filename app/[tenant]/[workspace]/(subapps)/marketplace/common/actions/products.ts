@@ -6,7 +6,6 @@ import type {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {clone} from '@/utils';
-import {unpackFromFormData} from '@/utils/formdata';
 import {getTotal} from '@/utils/pagination';
 import {BigDecimal} from '@goovee/orm';
 import {headers} from 'next/headers';
@@ -29,7 +28,10 @@ import {
   syncProductVersionPointers,
   withMyProductAccessFilter,
 } from '../orm';
-import {savePayloadSchema} from '../ui/components/product/product-edit/combined-validator';
+import {
+  savePayloadSchema,
+  type SavePayload,
+} from '../ui/components/product/product-edit/combined-validator';
 import {VERSIONS_PAGE_SIZE} from '../ui/components/versions/version-form/validator';
 import {canManageProducts} from '../utils/auth-helper';
 import {getMarketplaceConfig} from '../orm/config';
@@ -184,31 +186,24 @@ export async function searchProducts(
  * full DB state.
  */
 export async function saveProductWithVersions(
-  formData: FormData,
+  input: SavePayload,
 ): ActionResponse<{productId: string}> {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const raw = unpackFromFormData(formData) as Record<string, unknown> & {
-    workspaceURL?: string;
-  };
-  const workspaceURL = raw?.workspaceURL;
-  if (!workspaceURL) {
-    return {error: true, message: await t('Workspace is required')};
-  }
-  const {workspaceURL: _workspaceURL, ...rest} = raw;
   /* The editor only sends what changed (see `savePayloadSchema`): `product` is
    * present on create or a product-field edit and absent on a versions-only
    * edit; `images` is present only when the screenshots changed. So an
    * unchanged product / picture set is never re-written — no needless bump of
    * its optimistic-lock version, no false conflict with a concurrent edit. */
-  const parsed = savePayloadSchema.safeParse(rest);
+  const parsed = savePayloadSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
   const payload = parsed.data;
+  const {workspaceURL} = payload;
   const product = payload.product;
 
   const access = await ensureAccess({

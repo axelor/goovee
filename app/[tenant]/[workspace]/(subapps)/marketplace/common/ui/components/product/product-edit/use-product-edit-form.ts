@@ -3,7 +3,6 @@ import {i18n} from '@/locale';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
-import {packIntoFormData} from '@/utils/formdata';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
   useCallback,
@@ -451,7 +450,7 @@ export function useProductEditForm({
           /* `images` is written whole (`setValue('images', …)`), so its dirty
            * state is one flag, not one per screenshot. */
           const imagesChanged = Boolean(dirtyFields.images);
-          const formData = packIntoFormData({
+          const result = await saveProductWithVersions({
             id,
             ...(id == null || productChanged ? {product: productBlock} : {}),
             ...(imagesChanged ? {images} : {}),
@@ -459,7 +458,6 @@ export function useProductEditForm({
             newVersions,
             workspaceURL,
           });
-          const result = await saveProductWithVersions(formData);
           if (!result.success) {
             toast({variant: 'destructive', title: result.message});
             return;
