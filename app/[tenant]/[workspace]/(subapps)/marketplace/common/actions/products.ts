@@ -439,7 +439,9 @@ export async function saveProductWithVersions(
         if (row.id) {
           const currentVersion =
             await txClient.aOSMarketplaceProductVersion.findOne({
-              where: {id: row.id},
+              /* The row id comes from the client form; scoping to this product
+               * keeps a forged id from reaching another product's version. */
+              where: {id: row.id, marketplaceProduct: {id: productId}},
               select: {
                 id: true,
                 version: true,
