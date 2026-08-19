@@ -1,8 +1,9 @@
 /* Product price-parity test.
  *
- * Sweeps products × companies × buyers × currencies × tax-basis orientation and
- * scores each product across THREE prices:
- *   gv — goovee: the core's invoice price (getSaleUnitPrice + roundSaleUnitPrice)
+ * Sweeps products × companies × buyers × currencies × tax-basis orientation ×
+ * unit × quantity (× pricing config, on request) and scores each product across
+ * THREE prices:
+ *   gv — goovee: the core's invoice price (quoteProductPrice)
  *   so — the TRUE AOS sale-order / invoice line price, computed via the product
  *        onchange action on a transient line (no order is persisted)
  *   ep — AOS's /ws/aos/product/price endpoint (only INDICATIONAL: its
@@ -17,19 +18,31 @@
  *
  * Unit conversion (--unit) is the exception: AOS invoice lines never
  * unit-convert price — only the quick-price endpoint does (see the pricing-core
- * doc in pricing.ts). So when a product's requested unit differs from its sale
+ * doc in PRICING.md). So when a product's requested unit differs from its sale
  * unit, so is NOT a valid reference; gv's discounted line total is validated
- * against ep instead (indicational, so partial at worst). --unit is therefore
- * left out of the default sweep.
+ * against ep instead (indicational, so partial at worst). No unit is requested
+ * unless --unit asks for one, and the product's own unit is swept alongside it.
  *
- * A line rounds its primary tax basis and derives the other from the rounded
- * figure, so WT-primary and ATI-primary are separate paths that can disagree with
+ * The basis dimension is the ORDER's orientation. It selects which stored side
+ * drives the billable totals, and whether a fixed price-list discount has to be
+ * re-expressed — so the two orientations are separate paths that can disagree with
  * AOS independently. Both are swept by default and tallied separately; either can
  * be isolated with --wt-primary / --ati-primary.
  *
- * Pure product test: no marketplace involvement, nothing persisted. Every
- * dimension (product, company, partner, currency, unit, basis) is a CLI flag;
- * with none it sweeps sensible defaults.
+ * Quantity is a dimension too, not a scale factor: a price list's minQty
+ * thresholds can select a different discount line at a higher quantity. ep takes
+ * no quantity — it always quotes as if for one — so at any other quantity a tiered
+ * price list makes ep answer a different question, and it is dropped from the
+ * verdict; gv-vs-so is unaffected, both sides get the quantity.
+ *
+ * The pricing config itself (discount compute method, unit-price scale) changes
+ * the answer on both sides, so --sweep-config walks those combinations, writing
+ * each to AppBase over REST and restoring the original values at the end. It is
+ * the one part of this script that mutates the instance.
+ *
+ * Pure product test: no marketplace involvement, no order persisted. Every
+ * dimension (product, company, partner, currency, unit, quantity, basis, config)
+ * is a CLI flag; with none it sweeps sensible defaults.
  *
  * Run:  pnpm test-price -- --help
  */
@@ -45,8 +58,10 @@ import {getAOSAuthHeaders} from '@/tenant/auth';
 
 import {
   getDefaultPriceList,
+  ONE,
   PriceComputationError,
   quoteProductPrice,
+  toDecimalOrNull,
   todayInTimezone,
 } from '../../pricing';
 import type {PriceListRow} from '@/product/orm';
@@ -97,10 +112,12 @@ const {values} = parseArgs({
     partner: {type: 'string', multiple: true},
     company: {type: 'string', multiple: true},
     currency: {type: 'string', multiple: true},
-    unit: {type: 'string'},
+    unit: {type: 'string', multiple: true},
+    qty: {type: 'string', multiple: true},
     limit: {type: 'string'},
     'all-products': {type: 'boolean'},
     'all-partners': {type: 'boolean'},
+    'sweep-config': {type: 'boolean'},
     'ati-primary': {type: 'boolean'},
     'wt-primary': {type: 'boolean'},
     verbose: {type: 'boolean'},
@@ -113,7 +130,7 @@ const {values} = parseArgs({
 if (values.help) {
   console.log(`
 Product price-parity test — scores each product across three prices:
-  gv  goovee invoice price (getSaleUnitPrice + roundSaleUnitPrice)
+  gv  goovee invoice price (quoteProductPrice)
   so  the TRUE AOS sale-order / invoice line price (product onchange action,
       computed on a transient line — NO order is persisted)
   ep  AOS /ws/aos/product/price endpoint (only indicational)
@@ -126,7 +143,9 @@ Defaults sweep every sellable product, every company, one buyer per distinct
 set of target currencies — a few European, a few distinct, and one with no
 exchange rate (to show the error path): ${DEFAULT_CURRENCIES.join(', ')} — and
 BOTH tax-basis orientations, since a line rounds its primary basis and derives
-the other, so the two are separate code paths with separate answers.
+the other, so the two are separate code paths with separate answers. Quantity 1,
+the product's own unit, and the pricing config as it stands, unless asked
+otherwise.
 
 Usage:
   pnpm test-price [-- <options>]
@@ -138,10 +157,21 @@ Options:
                      (fiscalPosition, currency, priceList) + none.
   --currency <c>     Target currency code or id (repeatable). Override the
                      default curated set above.
-  --unit <id>        Quote every product in this unit id (needs conversions).
+  --unit <id>        ALSO quote every product in this unit id (repeatable). The
+                     product's own sale unit is always swept, so each --unit adds
+                     a pass rather than replacing the plain one.
+  --qty <n>          Quantity to price at (repeatable, default 1). Each value is
+                     its own pass; above 1 it starts reaching the price list's
+                     minQty thresholds.
   --limit <n>        Cap the number of products (quick runs).
   --all-products     Include non-sellable / all products, not just sellable.
   --all-partners     Use every partner instead of the sampled set.
+  --sweep-config     Also sweep the two AppBase settings that change the answer:
+                     discount compute method (separate / include-replace-only /
+                     include) x unit-price scale (2 / 4). Each combination is
+                     WRITTEN to AppBase over REST before its pass and the
+                     original values restored at the end — six times the passes,
+                     so pair it with a product subset.
   --ati-primary      Sweep ONLY the ATI-oriented basis (round ATI, derive WT).
   --wt-primary       Sweep ONLY the WT-oriented basis (round WT, derive ATI).
                      Default with neither: both, reported separately.
@@ -157,18 +187,40 @@ type GooveePrice =
       wt: number;
       ati: number;
       currencyCode: string;
-      /** The billable line totals (qty 1) — unit price after the residual
-       *  price-list discount, rounded to the currency. */
+      /** The billable line totals — the discounted unit price times the
+       *  quantity, rounded to the currency. */
       exTaxTotal: number;
       inTaxTotal: number;
     }
   | {ok: false; error: string};
 
-/* The quantity every price is computed at. A single knob so the unit-price
- * vs line-total relationship is explicit: at LINE_QTY the line total divided
- * by it is the discounted unit price (relied on by eqTotalToUnit). The sweep
- * doesn't vary quantity. */
-const LINE_QTY = BigDecimal.valueOf('1');
+/* The quantities to price at, one pass each. A quantity is a real dimension,
+ * not a scale factor: a price list's `minQty` thresholds mean a higher quantity
+ * can select a DIFFERENT discount line, so qty 1 only ever reaches the lowest
+ * tier. Within a pass the relationship stays explicit — the line total divided
+ * by the quantity is the discounted unit price (relied on by eqTotalToUnit). */
+const QTY_OPTIONS: BigDecimal[] = (
+  values.qty && values.qty.length > 0 ? values.qty : ['1']
+).map(value => BigDecimal.valueOf(value));
+
+/* The units to quote in, one pass each. `null` is the product's own sale unit
+ * and is always swept, so `--unit` widens the run instead of narrowing it to
+ * the converted case (which `so` cannot validate — see the header). */
+const UNIT_OPTIONS: (string | null)[] = [null, ...(values.unit ?? [])];
+
+/* The AppBase settings `--sweep-config` walks. The discount compute method
+ * decides whether a price-list discount is folded into the unit price or left
+ * separate for the total to apply, and the unit-price scale decides where every
+ * intermediate result is rounded — so the two cross rather than compose. */
+const CONFIG_SWEEP: Array<{
+  computeMethodDiscountSelect: number;
+  nbDecimalDigitForUnitPrice: number;
+}> = [1, 2, 3].flatMap(computeMethodDiscountSelect =>
+  [2, 4].map(nbDecimalDigitForUnitPrice => ({
+    computeMethodDiscountSelect,
+    nbDecimalDigitForUnitPrice,
+  })),
+);
 
 /* Comparison tolerance and display only — every price this script compares has
  * already been rounded by the core. */
@@ -190,6 +242,7 @@ function computeGooveePrice({
   requestedUnit,
   unitConversions,
   atiPrimary,
+  qty,
 }: {
   product: PriceProduct;
   company: CompanyRow & {id: string};
@@ -208,6 +261,7 @@ function computeGooveePrice({
   /** The order's tax-basis orientation (its `inAti`): which basis is the
    *  primary that gets rounded, the other being derived from it. */
   atiPrimary: boolean;
+  qty: BigDecimal;
 }): GooveePrice {
   try {
     /* The whole gv pipeline is the core's quoteProductPrice; the test only
@@ -225,7 +279,7 @@ function computeGooveePrice({
       priceListLines,
       computeMethodDiscountSelect: appConfig.computeMethodDiscountSelect,
       inAti: atiPrimary,
-      qty: LINE_QTY,
+      qty,
       ...(requestedUnit ? {requestedUnit, unitConversions} : {}),
       nbDecimalForUnitPrice: appConfig.nbDecimalForUnitPrice,
     });
@@ -306,6 +360,7 @@ async function fetchSaleOrderPrice({
   unitId,
   today,
   inAti,
+  qty,
 }: {
   config: {aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]}};
   productId: string;
@@ -317,6 +372,7 @@ async function fetchSaleOrderPrice({
   unitId: string | null;
   today: string;
   inAti: boolean;
+  qty: BigDecimal;
 }): Promise<PriceResult> {
   /* No try/catch: any network or non-2xx HTTP error propagates and crashes
    * the run (the preflight already confirmed AOS is up, so a failure now is
@@ -330,7 +386,9 @@ async function fetchSaleOrderPrice({
         context: {
           _model: 'com.axelor.apps.sale.db.SaleOrderLine',
           product: {id: Number(productId)},
-          qty: 1,
+          /* The same quantity gv priced at — a line's discount can depend on it
+           * through the price list's `minQty` thresholds. */
+          qty: qty.toNumber(),
           ...(unitId ? {unit: {id: Number(unitId)}} : {}),
           _parent: {
             _model: 'com.axelor.apps.sale.db.SaleOrder',
@@ -442,10 +500,14 @@ function eqTotal(
 
 /** gv's discounted unit price matches ep's unit price. Used only for the
  *  unit-converted case: ep folds the discount into its unit price, and gv's
- *  line total ÷ LINE_QTY is that same discounted unit-converted price, so the
- *  two are the comparable pair (dividing by LINE_QTY keeps this correct even
- *  if the quantity ever changes). */
-function eqTotalToUnit(gv: GooveePrice, ep: PriceResult, nb: number): boolean {
+ *  line total ÷ qty is that same discounted unit-converted price, so the two are
+ *  the comparable pair. */
+function eqTotalToUnit(
+  gv: GooveePrice,
+  ep: PriceResult,
+  nb: number,
+  lineQty: BigDecimal,
+): boolean {
   if (!gv.ok || !ep.ok) return false;
   if (
     !Number.isFinite(gv.exTaxTotal) ||
@@ -456,7 +518,7 @@ function eqTotalToUnit(gv: GooveePrice, ep: PriceResult, nb: number): boolean {
     return false;
   }
   const eps = 0.5 * 10 ** -nb;
-  const qty = LINE_QTY.toNumber();
+  const qty = lineQty.toNumber();
   return (
     Math.abs(gv.exTaxTotal / qty - ep.wt) < eps &&
     Math.abs(gv.inTaxTotal / qty - ep.ati) < eps
@@ -467,6 +529,16 @@ type RowStatus = 'success' | 'partial' | 'failure';
 
 type Row = {
   status: RowStatus;
+  /** Neither side could price this combination, so they agree only that it is
+   *  unpriceable — scored a success, but it validates nothing. Counted separately
+   *  so a run's success total can't be read as coverage it doesn't have. */
+  unpriced: boolean;
+  /** `ep` was left out of this row's verdict because the quantity would change
+   *  the answer and `ep` has no quantity to give. Counted separately: for a
+   *  buyer row `so` still decided it, but for a unit-converted row nothing did. */
+  epExcluded: boolean;
+  /** No reference at all was available — the row scored on nothing. */
+  unreferenced: boolean;
   productId: string;
   name: string;
   gv: string;
@@ -480,7 +552,8 @@ type Row = {
  *  sale-order / invoice line) and ep (the indicational endpoint).
  *
  *  Stage 1 — errors, on gv vs ep: both error → they agree it can't be priced
- *  (success); exactly one errors → failure.
+ *  (success); exactly one errors → failure. Whether a price EXISTS does not
+ *  depend on the quantity, so this stage always uses ep.
  *  Stage 2 — both gv and ep produced a value:
  *    - no buyer (no sale order to reference) → gv vs ep: match → success, else
  *      → partial;
@@ -491,9 +564,19 @@ type Row = {
  *
  *  `unitConverted` — gv priced in a unit other than the sale unit. AOS invoice
  *  lines never unit-convert price (only the endpoint does, see the pricing-core
- *  doc), so `so` is not a valid reference: instead compare gv's discounted line
- *  total (qty 1) against `ep`'s unit price — the one path that unit-converts.
- *  `ep` is indicational, so a mismatch is partial, never a failure. */
+ *  doc), so `so` is not a valid reference: instead compare gv's per-unit line
+ *  total against `ep`'s unit price — the one path that unit-converts. `ep` is
+ *  indicational, so a mismatch is partial, never a failure.
+ *
+ *  `epQuantityBlind` — ep quotes as if for a single unit and cannot be told
+ *  otherwise: its request carries no quantity, and it applies the price list at
+ *  a hardcoded 1 (`ProductPriceListServiceImpl.getDiscountsFromPriceLists` →
+ *  `getPriceListLine(product, ONE, …)`). At any other quantity a price list can
+ *  select a different line — a `minQty` of 1 stops applying below 1 just as a
+ *  `minQty` of 5 starts applying at 5 — so ep is then answering a different
+ *  question and is dropped from the verdict rather than counted as a disagreement.
+ *  Where no line's applicability differs between the two quantities, ep stays a
+ *  valid reference. */
 function compare3(
   product: PriceProduct,
   gv: GooveePrice,
@@ -501,21 +584,30 @@ function compare3(
   ep: PriceResult,
   nb: number,
   unitConverted: boolean,
+  lineQty: BigDecimal,
+  epQuantityBlind: boolean,
 ): Row {
   let status: RowStatus;
+  let unreferenced = false;
   if (!gv.ok || !ep.ok) {
     status = !gv.ok && !ep.ok ? 'success' : 'failure';
   } else if (unitConverted) {
-    status = eqTotalToUnit(gv, ep, nb) ? 'success' : 'partial';
+    /* ep is the ONLY reference for a unit-converted row, so when it is dropped
+     * the row has nothing left to be checked against. */
+    if (epQuantityBlind) {
+      status = 'partial';
+      unreferenced = true;
+    } else {
+      status = eqTotalToUnit(gv, ep, nb, lineQty) ? 'success' : 'partial';
+    }
   } else if (so === null) {
     status = eq(gv, ep, nb) ? 'success' : 'partial';
+  } else if (!eq(gv, so, nb) || !eqTotal(gv, so, nb)) {
+    status = 'failure';
   } else {
-    status =
-      !eq(gv, so, nb) || !eqTotal(gv, so, nb)
-        ? 'failure'
-        : eq(gv, ep, nb)
-          ? 'success'
-          : 'partial';
+    /* gv matches the real invoice line. ep only refines that to partial when it
+     * is answering the same question. */
+    status = epQuantityBlind || eq(gv, ep, nb) ? 'success' : 'partial';
   }
   const fmt = (r: GooveePrice | PriceResult) =>
     r.ok
@@ -527,11 +619,17 @@ function compare3(
       : '-';
   return {
     status,
+    unpriced: !gv.ok && !ep.ok,
+    /* Only the rows `so` went on to decide: an unreferenced row was left with no
+     * reference at all, and is reported on its own line. */
+    epExcluded: epQuantityBlind && gv.ok && ep.ok && !unreferenced,
+    unreferenced,
     productId: product.id,
     name: (product.name ?? product.code ?? product.id).slice(0, 28),
     gv: fmt(gv),
     so: so === null || unitConverted ? 'n/a' : fmt(so),
-    ep: fmt(ep),
+    /* Say so in the column rather than printing a figure that was not scored. */
+    ep: epQuantityBlind && gv.ok && ep.ok ? `${fmt(ep)} (qty1)` : fmt(ep),
     gvTot: fmtTot(gv),
     soTot: so === null || unitConverted ? 'n/a' : fmtTot(so),
   };
@@ -585,6 +683,103 @@ async function assertAosReachable(config: {aos: {url: string}}): Promise<void> {
   }
 }
 
+/* The AppBase record `--sweep-config` rewrites between passes, over the same
+ * REST resource the AOS client uses. It has to go through REST and not SQL: AOS
+ * keeps the config in Hibernate's second-level cache, so a direct UPDATE would
+ * leave the running instance pricing with the old value while our core read the
+ * new one — every comparison after it would be meaningless. */
+const APP_BASE_MODEL = 'com.axelor.studio.db.AppBase';
+
+type AosConfig = {
+  aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]};
+};
+
+type AppBaseSettings = {
+  computeMethodDiscountSelect: number;
+  nbDecimalDigitForUnitPrice: number;
+};
+
+type AppBaseRecord = {id: number; version: number} & AppBaseSettings;
+
+async function readAppBase(config: AosConfig): Promise<AppBaseRecord> {
+  const res = await axios.post(
+    `${config.aos.url}/ws/rest/${APP_BASE_MODEL}/search`,
+    {
+      fields: [
+        'version',
+        'computeMethodDiscountSelect',
+        'nbDecimalDigitForUnitPrice',
+      ],
+      data: {},
+      limit: 1,
+    },
+    {headers: getAOSAuthHeaders(config.aos.auth)},
+  );
+  const record = res.data?.data?.[0];
+  if (!record) {
+    throw new Error(
+      `Could not read ${APP_BASE_MODEL} over REST — needed to sweep the pricing config.`,
+    );
+  }
+  return {
+    id: Number(record.id),
+    version: Number(record.version),
+    computeMethodDiscountSelect: Number(record.computeMethodDiscountSelect),
+    nbDecimalDigitForUnitPrice: Number(record.nbDecimalDigitForUnitPrice),
+  };
+}
+
+/** Writes the two swept settings and returns the record's new version, so the
+ *  next write can follow without re-reading. */
+async function writeAppBase(
+  config: AosConfig,
+  current: {id: number; version: number},
+  settings: AppBaseSettings,
+): Promise<number> {
+  const res = await axios.post(
+    `${config.aos.url}/ws/rest/${APP_BASE_MODEL}`,
+    {data: {id: current.id, version: current.version, ...settings}},
+    {headers: getAOSAuthHeaders(config.aos.auth)},
+  );
+  const saved = res.data?.data?.[0];
+  if (res.data?.status !== 0 || saved?.version == null) {
+    throw new Error(
+      `Could not write ${APP_BASE_MODEL}: ${JSON.stringify(res.data).slice(0, 300)}`,
+    );
+  }
+  return Number(saved.version);
+}
+
+type Tally = {ok: number; part: number; fail: number};
+
+function bump(
+  map: Map<string, Tally>,
+  key: string,
+  succ: number,
+  part: number,
+  fail: number,
+): void {
+  const tally = map.get(key) ?? {ok: 0, part: 0, fail: 0};
+  tally.ok += succ;
+  tally.part += part;
+  tally.fail += fail;
+  map.set(key, tally);
+}
+
+/** Prints a per-dimension breakdown, but only when that dimension actually
+ *  varied — a divergence confined to one value of it is otherwise buried in the
+ *  combined total. */
+function printTally(title: string, map: Map<string, Tally>): void {
+  if (map.size < 2) return;
+  console.log(`\n${BOLD}by ${title}${RESET}`);
+  for (const [key, {ok, part, fail}] of map) {
+    const colour = fail === 0 ? GREEN : RED;
+    console.log(
+      `  ${colour}${key}: ${ok} success / ${part} partial / ${fail} failure${RESET}`,
+    );
+  }
+}
+
 async function main() {
   const tenantId = values.tenant ?? DEFAULT_TENANT;
   const tenant = await manager.getTenant(tenantId);
@@ -594,12 +789,10 @@ async function main() {
 
   await assertAosReachable(config);
 
-  const [appConfig, companySpecificProductFields, unitConversions] =
-    await Promise.all([
-      loadAppConfig(client),
-      loadCompanySpecificProductFields(client),
-      values.unit ? loadUnitConversions(client) : Promise.resolve([]),
-    ]);
+  const [companySpecificProductFields, unitConversions] = await Promise.all([
+    loadCompanySpecificProductFields(client),
+    values.unit?.length ? loadUnitConversions(client) : Promise.resolve([]),
+  ]);
 
   const [products, companies, currencies, partners] = await Promise.all([
     loadProducts(client, {
@@ -623,8 +816,6 @@ async function main() {
   if (products.length === 0) throw new Error('No products to test.');
   if (companies.length === 0) throw new Error('No companies found.');
 
-  const nb = appConfig.nbDecimalForUnitPrice;
-  const requestedUnit = values.unit ? {id: values.unit} : null;
   /* A line rounds its primary basis and derives the other from the rounded
    * figure, so the two orientations are separate paths that can disagree with
    * AOS independently. Sweep both unless one is asked for. */
@@ -640,160 +831,362 @@ async function main() {
   console.log(
     `\n${CYAN}→ tenant=${tenantId} products=${products.length} companies=${companies.length} ` +
       `partners=${partners.length} currencies=${currencies.map(c => c.code).join('/')} ` +
-      `nbDecimal=${nb} computeMethod=${appConfig.computeMethodDiscountSelect}${RESET}`,
+      `qty=${QTY_OPTIONS.map(quantity => quantity.toString()).join('/')} ` +
+      `units=${UNIT_OPTIONS.map(unitId => unitId ?? 'own').join('/')}${RESET}`,
   );
 
   let totSuccess = 0;
   let totPartial = 0;
   let totFailure = 0;
-  /* Per-orientation tallies, so a divergence that only shows in one basis is
-   * attributable instead of buried in a single total. */
-  const perBasis = new Map<string, {ok: number; part: number; fail: number}>();
+  /* Successes where neither side could price the combination. They agree, but on
+   * nothing — kept out of the headline so it reads as coverage, not just parity. */
+  let totUnpriced = 0;
+  /* Rows whose verdict left ep out because it prices at a hardcoded quantity of
+   * 1 — and, of those, the ones ep was the only reference for. */
+  let totEpExcluded = 0;
+  let totUnreferenced = 0;
+  /* Per-dimension tallies, so a divergence that only shows for one basis,
+   * quantity, unit or config is attributable instead of buried in one total. */
+  const perBasis = new Map<string, Tally>();
+  const perQty = new Map<string, Tally>();
+  const perUnit = new Map<string, Tally>();
+  const perConfig = new Map<string, Tally>();
   const basisLabel = (ati: boolean) => (ati ? 'ATI' : 'WT');
 
-  for (const company of companies) {
-    const companyId = company.id;
-    const today = todayInTimezone(company.timezone);
+  /* Without --sweep-config there is exactly one pass, on whatever AppBase
+   * already holds — nothing is written. */
+  const sweepConfig = Boolean(values['sweep-config']);
+  const original = sweepConfig ? await readAppBase(config) : null;
+  let appBaseVersion = original?.version ?? 0;
+  const configPasses: (AppBaseSettings | null)[] = sweepConfig
+    ? CONFIG_SWEEP
+    : [null];
 
-    for (const partnerSample of partners) {
-      /* The buyer's applicable sale price list (today, this company). */
-      const candidateLists =
-        partnerSample.partner?.salePartnerPriceList?.priceListSet ?? [];
-      const priceList = getDefaultPriceList(candidateLists, today);
-      if (priceList && !priceListLinesCache.has(priceList.id)) {
-        priceListLinesCache.set(
-          priceList.id,
-          await loadPriceListLines(client, priceList.id),
+  /* Ctrl-C during a config pass would skip the restore below and leave the whole
+   * instance on a swept setting, so put it back before exiting. The signal has to
+   * be handled to reach an await, and the exit code is the conventional 128+n. */
+  /* Held so every exit path can wait for it: the signal does not stop the sweep,
+   * so without this the run could finish and call `process.exit` while the restore
+   * is still in flight — ending clean and green with the instance still swept. */
+  const signalRestore: {pending: Promise<void> | null} = {pending: null};
+  const restoreOnSignal = (
+    signal: 'SIGINT' | 'SIGTERM',
+    signalNumber: number,
+  ) =>
+    process.on(signal, () => {
+      /* A second signal must not start a second restore: the two would race on
+       * the same record and the loser's version conflict would report a failure
+       * that never happened. */
+      if (signalRestore.pending) return;
+      signalRestore.pending = (async () => {
+        if (original) {
+          const {id, computeMethodDiscountSelect, nbDecimalDigitForUnitPrice} =
+            original;
+          try {
+            /* Read the record's version now rather than trusting the one this
+             * run last wrote: a pass write may have committed in between, and a
+             * stale version fails the lock and leaves the instance swept. */
+            const live = await readAppBase(config);
+            await writeAppBase(
+              config,
+              {id, version: live.version},
+              {computeMethodDiscountSelect, nbDecimalDigitForUnitPrice},
+            );
+            console.log(
+              `\n${DIM}${signal} — AppBase restored to ` +
+                `method=${computeMethodDiscountSelect} nb=${nbDecimalDigitForUnitPrice}.${RESET}`,
+            );
+          } catch (err) {
+            /* Say the value out loud: the run is ending either way, and an
+             * un-restored setting silently changes what every later run prices
+             * with. */
+            console.error(
+              `\n${RED}${signal} — could NOT restore AppBase. Set it back by hand: ` +
+                `computeMethodDiscountSelect=${computeMethodDiscountSelect}, ` +
+                `nbDecimalDigitForUnitPrice=${nbDecimalDigitForUnitPrice}.${RESET}`,
+              err,
+            );
+          }
+        }
+        process.exit(128 + signalNumber);
+      })();
+    });
+  if (sweepConfig) {
+    restoreOnSignal('SIGINT', 2);
+    restoreOnSignal('SIGTERM', 15);
+  }
+
+  try {
+    for (const pass of configPasses) {
+      if (pass && original) {
+        appBaseVersion = await writeAppBase(
+          config,
+          {id: original.id, version: appBaseVersion},
+          pass,
         );
       }
-      const priceListLines = priceList
-        ? (priceListLinesCache.get(priceList.id) ?? [])
-        : [];
+      /* Read our own side of the config back after the write, so both sides price
+       * under the same settings. */
+      const appConfig = await loadAppConfig(client);
+      const nb = appConfig.nbDecimalForUnitPrice;
+      const configLabel = `method=${appConfig.computeMethodDiscountSelect} nb=${nb}`;
+      if (sweepConfig) {
+        console.log(`\n${CYAN}══ config ${configLabel} ══${RESET}`);
+      }
 
-      for (const currencyOverride of currencyOptions) {
-        /* Conversion lines for this combo: from each product currency to the
-         * target (override) currency. */
-        const conversionLines = await loadConversionLines(
-          client,
-          products.map(p => p.saleCurrency?.codeISO),
-          [currencyOverride.codeISO],
-        );
+      for (const company of companies) {
+        const companyId = company.id;
+        const today = todayInTimezone(company.timezone);
 
-        /* `ep` (the batched endpoint) has no basis orientation, so it is fetched
-         * once and compared against both. */
-        const partnerId = partnerSample.id;
-        const fiscalPositionId =
-          partnerSample.partner?.fiscalPosition?.id ?? null;
-        const aosById = await fetchAosPrices({
-          config,
-          productIds: products.map(p => p.id),
-          partnerId: partnerSample.id,
-          companyId,
-          currencyId: currencyOverride.id,
-          unitId: values.unit ?? null,
-        });
+        for (const partnerSample of partners) {
+          /* The buyer's applicable sale price list (today, this company). */
+          const candidateLists =
+            partnerSample.partner?.salePartnerPriceList?.priceListSet ?? [];
+          const priceList = getDefaultPriceList(candidateLists, today);
+          if (priceList && !priceListLinesCache.has(priceList.id)) {
+            priceListLinesCache.set(
+              priceList.id,
+              await loadPriceListLines(client, priceList.id),
+            );
+          }
+          const priceListLines = priceList
+            ? (priceListLinesCache.get(priceList.id) ?? [])
+            : [];
 
-        for (const atiPrimary of orientations) {
-          /* `so` (the per-product onchange) is per orientation — it prices a
-           * transient line on an order of that basis. No buyer → no sale order to
-           * price against, so skip it (compared gv-vs-ep). Otherwise carry the
-           * buyer's fiscal position so the onchange applies the same tax remap a
-           * real order would. */
-          const sos = await processBatch(products, product =>
-            partnerId == null
-              ? Promise.resolve(null)
-              : fetchSaleOrderPrice({
-                  config,
-                  productId: product.id,
-                  companyId,
-                  partnerId,
-                  fiscalPositionId,
-                  priceListId: priceList?.id ?? null,
-                  currencyId: currencyOverride.id,
-                  unitId: values.unit ?? null,
-                  today,
-                  inAti: atiPrimary,
-                }),
-          );
+          /* Which products a given quantity selects a different discount line for
+           * than ep's hardcoded 1 does. A line's applicability flips between the
+           * two quantities exactly when its `minQty` sits above the lower and at
+           * or below the higher — so this catches quantities BELOW 1 as well,
+           * where a plain `minQty` of 1 applies for ep and not for the line being
+           * priced. At quantity 1 the range is empty and ep always stands. */
+          const flippingScopes = (lineQty: BigDecimal) => {
+            const below = lineQty.compareTo(ONE) < 0;
+            const lower = below ? lineQty : ONE;
+            const upper = below ? ONE : lineQty;
+            const productIds = new Set<string>();
+            const categoryIds = new Set<string>();
+            for (const line of priceListLines) {
+              const minQty = toDecimalOrNull(line.minQty);
+              if (minQty == null) continue;
+              if (minQty.compareTo(lower) <= 0) continue;
+              if (minQty.compareTo(upper) > 0) continue;
+              if (line.product?.id) productIds.add(line.product.id);
+              if (line.productCategory?.id) {
+                categoryIds.add(line.productCategory.id);
+              }
+            }
+            return {productIds, categoryIds};
+          };
 
-          const rows = products.map((product, i) =>
-            compare3(
-              product,
-              computeGooveePrice({
-                product,
-                company: {...company, id: companyId},
-                partner: partnerSample,
-                toCurrency: currencyOverride,
-                conversionLines,
-                companySpecificProductFields,
-                appConfig,
-                priceList,
-                priceListLines,
-                requestedUnit,
-                unitConversions,
-                atiPrimary,
-              }),
-              sos[i],
-              endpointResult(aosById.get(product.id)),
-              nb,
-              /* Did gv unit-convert this product? AOS invoice lines never
-               * unit-convert price (only the quick-price endpoint does), so when
-               * the requested unit differs from the sale unit `so` can't be the
-               * reference — validate gv against `ep` instead. */
-              requestedUnit != null &&
-                requestedUnit.id !==
-                  (product.salesUnit?.id ?? product.unit?.id ?? null),
-            ),
-          );
+          for (const currencyOverride of currencyOptions) {
+            /* Conversion lines for this combo: from each product currency to the
+             * target (override) currency. */
+            const conversionLines = await loadConversionLines(
+              client,
+              products.map(p => p.saleCurrency?.codeISO),
+              [currencyOverride.codeISO],
+            );
 
-          const fail = rows.filter(r => r.status === 'failure').length;
-          const part = rows.filter(r => r.status === 'partial').length;
-          const succ = rows.length - fail - part;
-          totSuccess += succ;
-          totPartial += part;
-          totFailure += fail;
+            const partnerId = partnerSample.id;
+            const fiscalPositionId =
+              partnerSample.partner?.fiscalPosition?.id ?? null;
 
-          const basis = basisLabel(atiPrimary);
-          const tally = perBasis.get(basis) ?? {ok: 0, part: 0, fail: 0};
-          tally.ok += succ;
-          tally.part += part;
-          tally.fail += fail;
-          perBasis.set(basis, tally);
+            for (const unitId of UNIT_OPTIONS) {
+              const requestedUnit = unitId ? {id: unitId} : null;
 
-          const label =
-            `company=${company.name ?? companyId} buyer=${partnerSample.label} ` +
-            `cur=${currencyOverride.code} basis=${basis}` +
-            (priceList ? ` [priceList ${priceList.id}]` : '');
-          const icon = fail ? `${RED}✖` : part ? `${YELLOW}◐` : `${GREEN}✔`;
-          console.log(
-            `\n${icon}${RESET} ${BOLD}${label}${RESET}  ` +
-              `${succ} ok / ${part} partial / ${fail} fail (of ${rows.length})`,
-          );
-          const visible = verbose
-            ? rows
-            : rows.filter(r => r.status !== 'success');
-          if (visible.length) renderRows(visible);
+              /* `ep` (the batched endpoint) prices a unit in the requested unit but
+               * has no basis orientation and no quantity, so one fetch per unit
+               * serves every orientation and quantity below it. */
+              const aosById = await fetchAosPrices({
+                config,
+                productIds: products.map(p => p.id),
+                partnerId: partnerSample.id,
+                companyId,
+                currencyId: currencyOverride.id,
+                unitId,
+              });
+
+              for (const atiPrimary of orientations) {
+                for (const lineQty of QTY_OPTIONS) {
+                  const flipping = flippingScopes(lineQty);
+
+                  /* `so` (the per-product onchange) is per orientation, unit and
+                   * quantity — it prices a transient line on an order of that basis.
+                   * No buyer → no sale order to price against, so skip it (compared
+                   * gv-vs-ep). Otherwise carry the buyer's fiscal position so the
+                   * onchange applies the same tax remap a real order would. */
+                  const sos = await processBatch(products, product =>
+                    partnerId == null
+                      ? Promise.resolve(null)
+                      : fetchSaleOrderPrice({
+                          config,
+                          productId: product.id,
+                          companyId,
+                          partnerId,
+                          fiscalPositionId,
+                          priceListId: priceList?.id ?? null,
+                          currencyId: currencyOverride.id,
+                          unitId,
+                          today,
+                          inAti: atiPrimary,
+                          qty: lineQty,
+                        }),
+                  );
+
+                  const rows = products.map((product, i) => {
+                    /* Is ep still answering the same question for this product?
+                     * Only a line that applies at one of the two quantities and
+                     * not the other makes the quantity matter. */
+                    const epQuantityBlind =
+                      flipping.productIds.has(product.id) ||
+                      (product.productCategory?.id != null &&
+                        flipping.categoryIds.has(product.productCategory.id));
+                    return compare3(
+                      product,
+                      computeGooveePrice({
+                        product,
+                        company: {...company, id: companyId},
+                        partner: partnerSample,
+                        toCurrency: currencyOverride,
+                        conversionLines,
+                        companySpecificProductFields,
+                        appConfig,
+                        priceList,
+                        priceListLines,
+                        requestedUnit,
+                        unitConversions,
+                        atiPrimary,
+                        qty: lineQty,
+                      }),
+                      sos[i],
+                      endpointResult(aosById.get(product.id)),
+                      nb,
+                      /* Did gv unit-convert this product? AOS invoice lines never
+                       * unit-convert price (only the quick-price endpoint does), so
+                       * when the requested unit differs from the sale unit `so`
+                       * can't be the reference — validate gv against `ep` instead. */
+                      requestedUnit != null &&
+                        requestedUnit.id !==
+                          (product.salesUnit?.id ?? product.unit?.id ?? null),
+                      lineQty,
+                      epQuantityBlind,
+                    );
+                  });
+
+                  const fail = rows.filter(r => r.status === 'failure').length;
+                  const part = rows.filter(r => r.status === 'partial').length;
+                  const succ = rows.length - fail - part;
+                  totSuccess += succ;
+                  totPartial += part;
+                  totFailure += fail;
+                  totUnpriced += rows.filter(r => r.unpriced).length;
+                  totEpExcluded += rows.filter(r => r.epExcluded).length;
+                  totUnreferenced += rows.filter(r => r.unreferenced).length;
+
+                  const basis = basisLabel(atiPrimary);
+                  const qtyLabel = lineQty.toString();
+                  const unitLabel = unitId ?? 'own';
+                  bump(perBasis, basis, succ, part, fail);
+                  bump(perQty, qtyLabel, succ, part, fail);
+                  bump(perUnit, unitLabel, succ, part, fail);
+                  bump(perConfig, configLabel, succ, part, fail);
+
+                  const label =
+                    `company=${company.name ?? companyId} buyer=${partnerSample.label} ` +
+                    `cur=${currencyOverride.code} basis=${basis} qty=${qtyLabel} unit=${unitLabel}` +
+                    (priceList ? ` [priceList ${priceList.id}]` : '');
+                  const icon = fail
+                    ? `${RED}✖`
+                    : part
+                      ? `${YELLOW}◐`
+                      : `${GREEN}✔`;
+                  console.log(
+                    `\n${icon}${RESET} ${BOLD}${label}${RESET}  ` +
+                      `${succ} ok / ${part} partial / ${fail} fail (of ${rows.length})`,
+                  );
+                  const visible = verbose
+                    ? rows
+                    : rows.filter(r => r.status !== 'success');
+                  if (visible.length) renderRows(visible);
+                }
+              }
+            }
+          }
         }
       }
     }
-  }
-
-  /* Break the totals down by basis when both were swept: a divergence that only
-   * appears in one orientation is otherwise invisible in the combined figure. */
-  if (perBasis.size > 1) {
-    console.log('');
-    for (const [basis, {ok, part, fail}] of perBasis) {
-      const colour = fail === 0 ? GREEN : RED;
-      console.log(
-        `${colour}basis=${basis}: ${ok} success / ${part} partial / ${fail} failure${RESET}`,
-      );
+  } finally {
+    /* Put the instance back the way it was found, even on a crash — a run that
+     * left AppBase mid-sweep would silently change what every later measurement
+     * (and the running app) prices with. A signal already started its own restore,
+     * and that one exits the process, so wait for it rather than writing twice. */
+    if (signalRestore.pending) {
+      await signalRestore.pending;
+    } else if (original) {
+      const {id, computeMethodDiscountSelect, nbDecimalDigitForUnitPrice} =
+        original;
+      try {
+        appBaseVersion = await writeAppBase(
+          config,
+          {id, version: appBaseVersion},
+          {computeMethodDiscountSelect, nbDecimalDigitForUnitPrice},
+        );
+        console.log(
+          `\n${DIM}AppBase restored to method=${computeMethodDiscountSelect} ` +
+            `nb=${nbDecimalDigitForUnitPrice}.${RESET}`,
+        );
+      } catch (err) {
+        /* Name the values instead of only throwing: this runs while an earlier
+         * error is on its way out, and a throw here would replace it and leave
+         * nothing on screen saying the instance is still swept. */
+        console.error(
+          `\n${RED}Could NOT restore AppBase. Set it back by hand: ` +
+            `computeMethodDiscountSelect=${computeMethodDiscountSelect}, ` +
+            `nbDecimalDigitForUnitPrice=${nbDecimalDigitForUnitPrice}.${RESET}`,
+          err,
+        );
+      }
     }
   }
 
+  /* Break the totals down per swept dimension: a divergence that only appears
+   * for one orientation, quantity, unit or config is otherwise invisible in the
+   * combined figure. */
+  printTally('basis', perBasis);
+  printTally('quantity', perQty);
+  printTally('unit', perUnit);
+  printTally('config', perConfig);
+
   console.log(
     `\n${totFailure === 0 ? GREEN : RED}${totSuccess} success / ${totPartial} partial / ` +
-      `${totFailure} failure across all combinations.${RESET}\n`,
+      `${totFailure} failure across all combinations.${RESET}`,
   );
+  /* Say plainly how much of that success validated nothing. Both sides refusing to
+   * price a combination scores a success — agreement, but on no number — so a run
+   * whose successes are mostly these has far less coverage than the total suggests. */
+  if (totUnpriced > 0) {
+    console.log(
+      `${DIM}of which ${totUnpriced} priced on neither side (no rate, no tax config): ` +
+        `agreement without a number.${RESET}`,
+    );
+  }
+  /* And how much of it was scored without ep. At a quantity other than 1, a price
+   * list whose applicable line changes makes ep answer a different question, so it
+   * is dropped rather than counted as a disagreement — which makes those rows rest
+   * on so alone. */
+  if (totEpExcluded > 0) {
+    console.log(
+      `${DIM}${totEpExcluded} scored without ep (it prices at quantity 1 only): ` +
+        `on the sale-order line alone.${RESET}`,
+    );
+  }
+  if (totUnreferenced > 0) {
+    console.log(
+      `${RED}${totUnreferenced} had no reference at all (unit-converted at a ` +
+        `quantity ep cannot answer for): not validated.${RESET}`,
+    );
+  }
+  console.log('');
   process.exit(totFailure === 0 ? 0 : 1);
 }
 
