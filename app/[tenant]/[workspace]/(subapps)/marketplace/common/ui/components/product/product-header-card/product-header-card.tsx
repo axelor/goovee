@@ -65,7 +65,7 @@ export async function ProductHeaderCard({
         scale: priceScale,
         currency: product.price.currency.code,
       })
-    : await t('Free');
+    : await t('Price free');
 
   const installCountLabel = await t(
     '{0} installs',

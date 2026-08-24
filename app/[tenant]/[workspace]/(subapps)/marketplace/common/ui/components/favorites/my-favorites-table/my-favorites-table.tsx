@@ -117,7 +117,7 @@ export function MyFavoritesTable({
                   scale: currency.numberOfDecimals,
                   currency: currency.code,
                 })
-              : i18n.t('Free')}
+              : i18n.t('Price free')}
           </span>
         );
       },

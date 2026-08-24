@@ -18,7 +18,7 @@ export interface ProductCardProps {
 }
 
 export async function ProductCard({product, workspaceURI}: ProductCardProps) {
-  const freeLabel = await t('Free');
+  const freeLabel = await t('Price free');
   const {
     slug,
     name,

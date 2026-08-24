@@ -30,8 +30,8 @@ export function PriceTypeSelect({currentPriceType}: PriceTypeSelectProps) {
         paddingRight: '2.5rem',
       }}>
       <option value="all">{i18n.t('All')}</option>
-      <option value="free">{i18n.t('Free')}</option>
-      <option value="paid">{i18n.t('Paid')}</option>
+      <option value="free">{i18n.t('Price free')}</option>
+      <option value="paid">{i18n.t('Price paid')}</option>
     </select>
   );
 }
