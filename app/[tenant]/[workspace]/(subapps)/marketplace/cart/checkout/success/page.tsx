@@ -124,7 +124,7 @@ export default async function CheckoutSuccessPage(props: {
                     </div>
                   </div>
                   {version?.id ? (
-                    <Button asChild variant="outline" size="sm">
+                    <Button asChild variant="ink-outline" size="sm">
                       <a
                         href={`${marketplaceBase}/api/products/${product.id}/versions/${version.id}/download`}>
                         <Download size={14} className="mr-1" />
@@ -142,7 +142,7 @@ export default async function CheckoutSuccessPage(props: {
           </ul>
         )}
 
-        <Button asChild>
+        <Button variant="royal" asChild>
           <Link href={`${marketplaceBase}/my-account/purchases`}>
             {await t('View all my purchases')}
           </Link>

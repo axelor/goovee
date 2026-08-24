@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/ui/components/alert-dialog';
-import {Button} from '@/ui/components/button';
+import {Button, buttonVariants} from '@/ui/components/button';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {Pencil, Trash2} from 'lucide-react';
@@ -74,7 +74,7 @@ export function YourReviewCard({
         title={i18n.t('Share your experience')}
         description={i18n.t('Sign in to leave a review.')}
         action={
-          <Button asChild>
+          <Button variant="royal" asChild>
             <Link href={loginHref}>{i18n.t('Sign in')}</Link>
           </Button>
         }
@@ -147,7 +147,7 @@ export function YourReviewCard({
           'Help others by sharing your experience with this product.',
         )}
         action={
-          <Button onClick={() => setEditing(true)}>
+          <Button variant="royal" onClick={() => setEditing(true)}>
             {i18n.t('Write a review')}
           </Button>
         }
@@ -276,10 +276,18 @@ export function YourReviewCard({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>
+            <AlertDialogCancel
+              className={cn(
+                buttonVariants({variant: 'ink-outline'}),
+                'hover:text-ink-700',
+              )}
+              disabled={pending}>
               {i18n.t('Cancel')}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={runDelete} disabled={pending}>
+            <AlertDialogAction
+              className={cn(buttonVariants({variant: 'royal'}))}
+              onClick={runDelete}
+              disabled={pending}>
               {i18n.t('Delete')}
             </AlertDialogAction>
           </AlertDialogFooter>

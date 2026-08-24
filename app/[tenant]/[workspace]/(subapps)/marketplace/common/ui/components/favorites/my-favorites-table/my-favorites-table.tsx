@@ -157,7 +157,7 @@ export function MyFavoritesTable({
         <p className="text-ink-500 mb-4">
           {i18n.t("You haven't saved any products yet.")}
         </p>
-        <Button asChild>
+        <Button variant="royal" asChild>
           <Link href={marketplaceBase}>{i18n.t('Browse marketplace')}</Link>
         </Button>
       </div>

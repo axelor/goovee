@@ -66,7 +66,10 @@ export function PublisherApplyForm({
           )}
         />
       </div>
-      <Button onClick={handleSubmit} disabled={isPending || !trimmed}>
+      <Button
+        variant="royal"
+        onClick={handleSubmit}
+        disabled={isPending || !trimmed}>
         {isPending ? i18n.t('Please wait...') : i18n.t('Submit application')}
       </Button>
     </div>

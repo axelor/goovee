@@ -78,7 +78,7 @@ export async function ProductHeaderCard({
       <div className="absolute top-4 right-4 z-10">
         {preview ? (
           <Button
-            variant="outline"
+            variant="ink-outline"
             size="icon"
             disabled
             title={await t('Inactive in preview')}
@@ -256,16 +256,17 @@ async function CTAButton({
     return paid ? (
       <div className="flex flex-col gap-2">
         <Button
+          variant="royal"
           size="lg"
-          className="gap-2 rounded-full"
+          className="gap-2"
           disabled
           title={await t('Inactive in preview')}>
           {await t('Buy now')}
         </Button>
         <Button
           size="lg"
-          variant="outline"
-          className="gap-2 rounded-full"
+          variant="ink-outline"
+          className="gap-2"
           disabled
           title={await t('Inactive in preview')}>
           {await t('Add to cart')}
@@ -273,8 +274,9 @@ async function CTAButton({
       </div>
     ) : (
       <Button
+        variant="royal"
         size="lg"
-        className="gap-2 rounded-full"
+        className="gap-2"
         disabled
         title={await t('Inactive in preview')}>
         <Download size={18} />
@@ -288,8 +290,9 @@ async function CTAButton({
   if (canDownload) {
     return (
       <Button
+        variant="royal"
         size="lg"
-        className="gap-2 rounded-full"
+        className="gap-2"
         asChild
         disabled={!product.currentVersion?.id}>
         <a
@@ -308,7 +311,7 @@ async function CTAButton({
 
   if (!user) {
     return (
-      <Button size="lg" className="gap-2 rounded-full" asChild>
+      <Button variant="royal" size="lg" className="gap-2" asChild>
         <Link
           href={getLoginURL({
             callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
@@ -347,7 +350,7 @@ async function CTAButton({
 
 function DocumentationButton({url, label}: {url: string; label: string}) {
   return (
-    <Button asChild variant="ghost" size="lg" className="gap-2 rounded-full">
+    <Button asChild variant="ghost" size="lg" className="gap-2">
       <Link href={url} target="_blank" rel="noopener noreferrer">
         <FileText size={18} />
         {label}

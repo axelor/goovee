@@ -68,7 +68,7 @@ export function CheckoutContent({config}: Props) {
     return (
       <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
         <p className="text-ink-500 mb-4">{i18n.t('Your cart is empty.')}</p>
-        <Button asChild>
+        <Button variant="royal" asChild>
           <Link href={`${marketplaceBase}`}>
             {i18n.t('Browse marketplace')}
           </Link>

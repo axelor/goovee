@@ -43,8 +43,9 @@ export function PublishNewButton({
   return (
     <>
       <Button
+        variant="royal"
         size="lg"
-        className="gap-2 rounded-full"
+        className="gap-2"
         onClick={() => setOpen(true)}>
         <Plus className="h-4 w-4" />
         {i18n.t('Publish new')}

@@ -10,7 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/ui/components/alert-dialog';
-import {Button} from '@/ui/components/button';
+import {Button, buttonVariants} from '@/ui/components/button';
+import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks';
 import {Flag} from 'lucide-react';
 import {useState, useTransition} from 'react';
@@ -85,10 +86,18 @@ export function ReportReviewButton({
             ))}
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>
+            <AlertDialogCancel
+              className={cn(
+                buttonVariants({variant: 'ink-outline'}),
+                'hover:text-ink-700',
+              )}
+              disabled={pending}>
               {i18n.t('Cancel')}
             </AlertDialogCancel>
-            <Button onClick={submit} disabled={pending || !reason}>
+            <Button
+              variant="royal"
+              onClick={submit}
+              disabled={pending || !reason}>
               {i18n.t('Report')}
             </Button>
           </AlertDialogFooter>

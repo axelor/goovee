@@ -48,12 +48,12 @@ export function BuyButtons({
   const {addItem, isInCart, loaded} = useMarketplaceCart();
 
   if (!loaded) {
-    return <div className="h-11 rounded-full bg-ink-50 animate-pulse" />;
+    return <div className="h-11 rounded-md bg-ink-50 animate-pulse" />;
   }
 
   if (isInCart(productId)) {
     return (
-      <Button asChild size="lg" className="gap-2 rounded-full">
+      <Button variant="royal" asChild size="lg" className="gap-2">
         <Link href={cartHref}>
           <ShoppingCart size={18} />
           {inCartLabel}
@@ -78,16 +78,17 @@ export function BuyButtons({
   return (
     <div className="flex flex-col gap-2">
       <Button
+        variant="royal"
         size="lg"
-        className="gap-2 rounded-full"
+        className="gap-2"
         onClick={() => addItem(item)}>
         <ShoppingCart size={18} />
         {addToCartLabel}
       </Button>
       <Button
         size="lg"
-        variant="outline"
-        className="gap-2 rounded-full"
+        variant="ink-outline"
+        className="gap-2"
         onClick={async () => {
           await addItem(item);
           router.push(cartHref);

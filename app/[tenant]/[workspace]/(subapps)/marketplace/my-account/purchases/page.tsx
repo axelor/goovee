@@ -169,7 +169,7 @@ export default async function MyPurchasesPage(props: {
           <p className="text-ink-500 mb-4">
             {await t("You haven't purchased anything yet.")}
           </p>
-          <Button asChild>
+          <Button variant="royal" asChild>
             <Link href={marketplaceBase}>{await t('Browse marketplace')}</Link>
           </Button>
         </div>

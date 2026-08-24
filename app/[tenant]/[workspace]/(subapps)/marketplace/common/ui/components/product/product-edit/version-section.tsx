@@ -343,7 +343,7 @@ export function VersionSection({
           {allowToPublish && (
             <Button
               type="button"
-              variant="outline"
+              variant="ink-outline"
               size="sm"
               onClick={model.addNew}>
               <Plus className="mr-1 h-4 w-4" />

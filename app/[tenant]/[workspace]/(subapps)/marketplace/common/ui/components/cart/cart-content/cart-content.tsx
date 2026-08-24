@@ -53,7 +53,7 @@ export function CartContent({
     return (
       <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
         <p className="text-ink-500 mb-4">{emptyLabel}</p>
-        <Button asChild>
+        <Button variant="royal" asChild>
           <Link href={browseHref}>{browseLabel}</Link>
         </Button>
       </div>
@@ -93,7 +93,7 @@ export function CartContent({
             {formatPrice(subtotal, firstScale, firstSymbol)}
           </span>
         </div>
-        <Button asChild>
+        <Button variant="royal" asChild>
           <Link href={checkoutHref}>{proceedLabel}</Link>
         </Button>
       </div>
