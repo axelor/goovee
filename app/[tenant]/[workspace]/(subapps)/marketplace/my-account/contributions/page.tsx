@@ -191,7 +191,7 @@ export default async function MyContributionsPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-ink-500 cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate">
                 <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
                   {await t('Marketplace')}
                 </Link>
@@ -201,7 +201,7 @@ export default async function MyContributionsPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-ink-500 cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate">
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`}>
                   {await t('My account')}

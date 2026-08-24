@@ -93,7 +93,7 @@ export default async function EditProductPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-ink-500 cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate">
                 <Link href={base}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -101,7 +101,7 @@ export default async function EditProductPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-ink-500 cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate">
                 <Link href={`${base}/my-account`}>{await t('My account')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -109,7 +109,7 @@ export default async function EditProductPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-ink-500 cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate">
                 <Link href={`${base}/my-account/contributions?tab=products`}>
                   {await t('My contributions')}
                 </Link>
