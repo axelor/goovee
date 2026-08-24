@@ -194,21 +194,36 @@ export default async function Page(props: {
 
   return (
     <>
-      <div className="container pt-8">
-        <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-royal">
-          {await t('Marketplace')}
-        </p>
-        <h1 className="mt-1.5 text-[26px] font-extrabold tracking-[-0.025em] text-ink-900">
-          {activeCategoryName ?? (await t('All extensions'))}
-        </h1>
-        <p className="mt-1 text-sm text-ink-500">
-          {totalCount === 1
-            ? await t('1 extension available')
-            : await t('{0} extensions available', String(totalCount))}
-        </p>
+      {/* Grid rather than stacked blocks so the refine controls can share the
+          title's row on desktop, where it is otherwise empty, and still fall
+          below the search box on a phone. Source order is the reading order,
+          so the tab sequence matches what you see at both sizes. */}
+      <div className="container pt-8 grid grid-cols-1 lg:grid-cols-[1fr_auto] lg:items-end gap-x-4">
+        <div className="lg:col-start-1 lg:row-start-1">
+          <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-royal">
+            {await t('Marketplace')}
+          </p>
+          <div className="mt-1.5 flex items-baseline gap-2.5 flex-wrap">
+            <h1 className="text-[26px] font-extrabold tracking-[-0.025em] text-ink-900">
+              {activeCategoryName ?? (await t('All extensions'))}
+            </h1>
+            <p className="text-sm text-ink-500">
+              {totalCount === 1
+                ? await t('1 extension available')
+                : await t('{0} extensions available', String(totalCount))}
+            </p>
+          </div>
+        </div>
+
         {/* Full-width search: the catalogue's primary way in, so it gets the
             whole measure rather than a corner of the header. */}
-        <Search className="mt-6 w-full" />
+        <Search className="mt-6 w-full lg:col-span-2 lg:row-start-2" />
+
+        <div className="mt-4 lg:mt-0 lg:col-start-2 lg:row-start-1 flex flex-wrap gap-3 lg:justify-end">
+          <ProductTypeSelect currentType={type} types={typeOptions} />
+          <PriceTypeSelect currentPriceType={priceType} />
+          <ProductSortSelect currentSort={sort || 'popular'} />
+        </div>
       </div>
 
       <div className="container py-8 space-y-6">
@@ -254,14 +269,6 @@ export default async function Page(props: {
               </button>
             </Link>
           ))}
-        </div>
-
-        <div className="flex items-center justify-end gap-3 flex-wrap">
-          <div className="flex gap-3">
-            <ProductTypeSelect currentType={type} types={typeOptions} />
-            <PriceTypeSelect currentPriceType={priceType} />
-            <ProductSortSelect currentSort={sort || 'popular'} />
-          </div>
         </div>
 
         {products.length > 0 ? (
