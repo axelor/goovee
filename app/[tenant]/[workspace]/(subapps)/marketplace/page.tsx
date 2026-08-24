@@ -195,22 +195,20 @@ export default async function Page(props: {
   return (
     <>
       <div className="container pt-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-royal">
-              {await t('Marketplace')}
-            </p>
-            <h1 className="mt-1.5 text-[26px] font-extrabold tracking-[-0.025em] text-ink-900">
-              {activeCategoryName ?? (await t('All extensions'))}
-            </h1>
-            <p className="mt-1 text-sm text-ink-500">
-              {totalCount === 1
-                ? await t('1 extension available')
-                : await t('{0} extensions available', String(totalCount))}
-            </p>
-          </div>
-          <Search className="w-full sm:w-[320px]" inputClassName="pr-3" />
-        </div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-royal">
+          {await t('Marketplace')}
+        </p>
+        <h1 className="mt-1.5 text-[26px] font-extrabold tracking-[-0.025em] text-ink-900">
+          {activeCategoryName ?? (await t('All extensions'))}
+        </h1>
+        <p className="mt-1 text-sm text-ink-500">
+          {totalCount === 1
+            ? await t('1 extension available')
+            : await t('{0} extensions available', String(totalCount))}
+        </p>
+        {/* Full-width search: the catalogue's primary way in, so it gets the
+            whole measure rather than a corner of the header. */}
+        <Search className="mt-6 w-full" />
       </div>
 
       <div className="container py-8 space-y-6">
