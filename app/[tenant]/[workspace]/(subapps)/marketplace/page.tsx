@@ -1,7 +1,6 @@
 import {SUBAPP_CODES} from '@/constants';
 import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import {t, tattr} from '@/locale/server';
-import type {OverlayColor} from '@/types';
 import type {NullableValues} from '@/types/util';
 import {
   Pagination,
@@ -47,7 +46,7 @@ import {
   searchParamsSchema,
   type SearchParams,
 } from './common/utils/validators';
-import {Hero} from './hero';
+import Search from './search';
 
 export default async function Page(props: {
   params: Promise<Record<string, string>>;
@@ -183,26 +182,36 @@ export default async function Page(props: {
     categories.map((cat: ListCategory) => tattr(cat.name)),
   );
 
+  /* Falls back to the "all" heading when the URL names a category that is not
+     in this workspace, rather than rendering an empty title. */
+  const activeCategoryIndex = category
+    ? categories.findIndex(
+        (listCategory: ListCategory) => listCategory.id === category,
+      )
+    : -1;
+  const activeCategoryName =
+    activeCategoryIndex === -1 ? null : categoryNames[activeCategoryIndex];
+
   return (
     <>
-      <Hero
-        title={config.marketplaceHeroTitle || (await t('Marketplace'))}
-        description={
-          config.marketplaceHeroDescription ||
-          (await t(
-            'Discover and install apps and skills to extend your portal.',
-          ))
-        }
-        background={
-          (config.marketplaceHeroOverlayColorSelect as OverlayColor | null) ??
-          null
-        }
-        image={
-          config.marketplaceHeroBgImage?.id
-            ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/hero/background`
-            : null
-        }
-      />
+      <div className="container pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-royal">
+              {await t('Marketplace')}
+            </p>
+            <h1 className="mt-1.5 text-[26px] font-extrabold tracking-[-0.025em] text-ink-900">
+              {activeCategoryName ?? (await t('All extensions'))}
+            </h1>
+            <p className="mt-1 text-sm text-ink-500">
+              {totalCount === 1
+                ? await t('1 extension available')
+                : await t('{0} extensions available', String(totalCount))}
+            </p>
+          </div>
+          <Search className="w-full sm:w-[320px]" inputClassName="pr-3" />
+        </div>
+      </div>
 
       <div className="container py-8 space-y-6">
         {/* Category Filters */}
@@ -249,12 +258,7 @@ export default async function Page(props: {
           ))}
         </div>
 
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="text-sm text-muted-foreground">
-            {totalCount === 1
-              ? await t('1 result')
-              : await t('{0} results', String(totalCount))}
-          </div>
+        <div className="flex items-center justify-end gap-3 flex-wrap">
           <div className="flex gap-3">
             <ProductTypeSelect currentType={type} types={typeOptions} />
             <PriceTypeSelect currentPriceType={priceType} />
