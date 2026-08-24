@@ -91,11 +91,9 @@ export function ProductEditDialogBody({
 
   return (
     <div className={scrollContainerClassName}>
-      <div className="sticky top-0 z-10 border-b border-border bg-background px-6 py-5">
-        <Title className="text-2xl font-semibold text-foreground">
-          {title}
-        </Title>
-        <Description className="mt-1 text-sm text-muted-foreground">
+      <div className="sticky top-0 z-10 border-b border-ink-100 bg-white px-6 py-5">
+        <Title className="text-2xl font-semibold text-ink-900">{title}</Title>
+        <Description className="mt-1 text-sm text-ink-500">
           {subtitle}
         </Description>
       </div>
@@ -201,9 +199,9 @@ function DialogForm({
         </div>
 
         {/* One combined save for the whole dialog. */}
-        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
+        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-ink-100 bg-white px-6 py-4">
           {model.uploadsInFlight ? (
-            <span className="mr-auto text-sm text-muted-foreground">
+            <span className="mr-auto text-sm text-ink-500">
               {i18n.t('Uploads in progress…')}
             </span>
           ) : model.uploadsPaused ? (

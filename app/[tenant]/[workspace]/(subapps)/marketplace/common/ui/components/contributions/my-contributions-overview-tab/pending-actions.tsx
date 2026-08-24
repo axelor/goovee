@@ -7,7 +7,7 @@ import {RECENT_REVIEW_WINDOW_DAYS} from '../../../../constants/review';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
 import {TooltipDate} from '../../shared/tooltip-date';
 
-const CARD = 'bg-card rounded-lg border border-border p-4 md:p-6';
+const CARD = 'bg-white rounded-lg border border-ink-100 p-4 md:p-6';
 
 export async function PendingActions({
   pending,
@@ -22,11 +22,11 @@ export async function PendingActions({
 
   return (
     <div className={`${CARD} space-y-4`}>
-      <h3 className="text-xl font-semibold text-foreground">
+      <h3 className="text-xl font-semibold text-ink-900">
         {await t('Pending actions')}
       </h3>
       {isEmpty ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-ink-500">
           {await t('Nothing needs your attention right now.')}
         </p>
       ) : (
@@ -37,7 +37,7 @@ export async function PendingActions({
             return (
               <div
                 key={`version-${index}`}
-                className="border-b border-border pb-3 last:border-0 last:pb-0">
+                className="border-b border-ink-100 pb-3 last:border-0 last:pb-0">
                 <div className="flex gap-3">
                   <div
                     className={`${
@@ -48,10 +48,10 @@ export async function PendingActions({
                     {isReview ? '⚠️' : '📝'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-foreground truncate">
+                    <div className="font-medium text-sm text-ink-900 truncate">
                       {version.marketplaceProduct.name} {version.versionLabel}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-ink-500">
                       {isReview ? t('In review') : t('Draft')}
                       {version.at && (
                         <>
@@ -72,21 +72,21 @@ export async function PendingActions({
           {reviews.map((review, index) => (
             <div
               key={`review-${index}`}
-              className="border-b border-border pb-3 last:border-0 last:pb-0">
+              className="border-b border-ink-100 pb-3 last:border-0 last:pb-0">
               <div className="flex gap-3">
                 <div className="bg-palette-red-light rounded-lg w-8 h-8 flex items-center justify-center flex-shrink-0">
                   🔔
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm text-foreground truncate">
+                  <div className="font-medium text-sm text-ink-900 truncate">
                     {t('{0} new reviews on', String(review.count))}{' '}
                     <Link
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${review.marketplaceProduct.slug}`}
-                      className="text-primary hover:underline">
+                      className="text-royal hover:underline">
                       {review.marketplaceProduct.name}
                     </Link>
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-ink-500">
                     {t(
                       'Average {0}★ · last {1} days',
                       review.avg.toFixed(1),

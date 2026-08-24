@@ -137,10 +137,10 @@ export default async function MyAccountPage(props: {
       <div className="pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
               {await t('My account')}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-ink-500 text-sm">
               {await t(
                 'Manage your purchases and, if you sell, your published products.',
               )}
@@ -160,20 +160,16 @@ export default async function MyAccountPage(props: {
           <Link
             key={card.href}
             href={card.href}
-            className="group rounded-lg border border-border bg-card p-6 flex items-start gap-4 transition-colors hover:border-primary">
-            <div className="rounded-md bg-muted p-3">
-              <card.icon className="h-6 w-6 text-primary" />
+            className="group rounded-lg border border-ink-100 bg-white p-6 flex items-start gap-4 transition-colors hover:border-royal">
+            <div className="rounded-md bg-ink-50 p-3">
+              <card.icon className="h-6 w-6 text-royal" />
             </div>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-foreground">
-                  {card.title}
-                </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                <span className="font-semibold text-ink-900">{card.title}</span>
+                <ChevronRight className="h-4 w-4 text-ink-500 transition-transform group-hover:translate-x-0.5" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                {card.description}
-              </p>
+              <p className="text-sm text-ink-500">{card.description}</p>
             </div>
           </Link>
         ))}

@@ -131,7 +131,7 @@ function ScreenshotsField({
       onDrop={handleDrop}
       className={cn(
         'flex flex-wrap gap-3 rounded-lg border-2 border-dashed p-3 transition-colors',
-        isDragging ? 'border-primary bg-primary/5' : 'border-transparent',
+        isDragging ? 'border-royal bg-royal/5' : 'border-transparent',
       )}>
       {images.map((image, index) => {
         const isFirst = index === 0;
@@ -147,7 +147,7 @@ function ScreenshotsField({
         return (
           <div
             key={key}
-            className="group relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
+            className="group relative aspect-video w-32 overflow-hidden rounded-lg border border-ink-100 bg-ink-50">
             {src && (
               <Image
                 src={src}
@@ -159,7 +159,7 @@ function ScreenshotsField({
               />
             )}
             {isFirst && (
-              <span className="absolute left-1 top-1 rounded bg-foreground/80 px-1.5 py-0.5 text-[10px] font-medium text-background">
+              <span className="absolute left-1 top-1 rounded bg-ink-900/80 px-1.5 py-0.5 text-[10px] font-medium text-white">
                 {i18n.t('Cover')}
               </span>
             )}
@@ -167,18 +167,18 @@ function ScreenshotsField({
               type="button"
               aria-label={i18n.t('Remove image')}
               onClick={() => onRemove(index)}
-              className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+              className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white hover:bg-ink-900">
               <X size={12} />
             </button>
             {/* Move controls — shown on hover/focus. Reordering rewrites the
                 ordered `images` array; array position becomes `sequence`. */}
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-foreground/70 py-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-ink-900/70 py-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
               <button
                 type="button"
                 aria-label={i18n.t('Move left')}
                 disabled={isFirst}
                 onClick={() => onReorder(index, index - 1)}
-                className="flex h-5 w-5 items-center justify-center rounded text-background hover:bg-background/20 disabled:opacity-30">
+                className="flex h-5 w-5 items-center justify-center rounded text-white hover:bg-ink-25/20 disabled:opacity-30">
                 <ChevronLeft size={14} />
               </button>
               {!isFirst && (
@@ -186,7 +186,7 @@ function ScreenshotsField({
                   type="button"
                   aria-label={i18n.t('Make cover image')}
                   onClick={() => onReorder(index, 0)}
-                  className="flex h-5 w-5 items-center justify-center rounded text-background hover:bg-background/20">
+                  className="flex h-5 w-5 items-center justify-center rounded text-white hover:bg-ink-25/20">
                   <Star size={12} />
                 </button>
               )}
@@ -195,7 +195,7 @@ function ScreenshotsField({
                 aria-label={i18n.t('Move right')}
                 disabled={isLast}
                 onClick={() => onReorder(index, index + 1)}
-                className="flex h-5 w-5 items-center justify-center rounded text-background hover:bg-background/20 disabled:opacity-30">
+                className="flex h-5 w-5 items-center justify-center rounded text-white hover:bg-ink-25/20 disabled:opacity-30">
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -205,7 +205,7 @@ function ScreenshotsField({
       {inFlight.map(tile => (
         <div
           key={tile.id}
-          className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
+          className="relative aspect-video w-32 overflow-hidden rounded-lg border border-ink-100 bg-ink-50">
           {tile.src && (
             <Image
               src={tile.src}
@@ -223,7 +223,7 @@ function ScreenshotsField({
                 aria-label={i18n.t('Pause')}
                 title={i18n.t('Pause')}
                 onClick={() => onPauseUpload(tile.id)}
-                className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white hover:bg-ink-900">
                 <Pause size={12} />
               </button>
             )}
@@ -237,7 +237,7 @@ function ScreenshotsField({
                   tile.status === 'paused' ? i18n.t('Resume') : i18n.t('Retry')
                 }
                 onClick={() => onResumeUpload(tile.id)}
-                className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white hover:bg-ink-900">
                 {tile.status === 'paused' ? (
                   <Play size={12} />
                 ) : (
@@ -250,7 +250,7 @@ function ScreenshotsField({
               aria-label={i18n.t('Remove')}
               title={i18n.t('Remove')}
               onClick={() => onCancelUpload(tile.id)}
-              className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+              className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white hover:bg-ink-900">
               <X size={12} />
             </button>
           </div>
@@ -268,7 +268,7 @@ function ScreenshotsField({
               /* The tones are light tints and the strip sits over a thumbnail,
                  so it needs its own light ground — otherwise the label reads
                  against the image wherever the fill has not reached yet. */
-              className="rounded bg-background px-1.5 py-0.5">
+              className="rounded bg-ink-25 px-1.5 py-0.5">
               <span
                 className={cn(
                   'block truncate text-[10px] font-medium',
@@ -276,7 +276,7 @@ function ScreenshotsField({
                     ? 'text-destructive'
                     : tile.status === 'paused'
                       ? 'text-status-pending-fg'
-                      : 'text-foreground',
+                      : 'text-ink-900',
                 )}>
                 {tile.status === 'error'
                   ? i18n.t('Upload failed')
@@ -292,7 +292,7 @@ function ScreenshotsField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
+          className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-ink-100 bg-ink-50/40 text-ink-500 transition-colors hover:border-ink-900/40 hover:text-ink-900">
           <Plus size={20} />
           <span className="text-xs">{i18n.t('Add or drop images')}</span>
         </button>
@@ -496,7 +496,7 @@ export function ScreenshotsFormField({
         <FormItem>
           <FormLabel>
             {i18n.t('Screenshots')}{' '}
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-ink-500">
               {i18n.t(
                 '({0}/{1}, up to {2})',
                 String(images.length + inFlight.length),
@@ -520,7 +520,7 @@ export function ScreenshotsFormField({
             />
           </FormControl>
           <FormMessageSpace />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-ink-500">
             {i18n.t(
               'Any image format. Max {1} per image, up to {0} per product. The first image is the cover.',
               String(MAX_IMAGES),

@@ -46,13 +46,13 @@ export function CartContent({
   const {cart, loaded, removeItem} = useMarketplaceCart();
 
   if (!loaded) {
-    return <div className="h-32 rounded-lg bg-muted/40 animate-pulse" />;
+    return <div className="h-32 rounded-lg bg-ink-50/40 animate-pulse" />;
   }
 
   if (cart.items.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-8 text-center">
-        <p className="text-muted-foreground mb-4">{emptyLabel}</p>
+      <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
+        <p className="text-ink-500 mb-4">{emptyLabel}</p>
         <Button asChild>
           <Link href={browseHref}>{browseLabel}</Link>
         </Button>
@@ -86,9 +86,9 @@ export function CartContent({
         })}
       </ul>
 
-      <div className="rounded-lg border border-border bg-card p-4 flex items-center justify-between">
+      <div className="rounded-lg border border-ink-100 bg-white p-4 flex items-center justify-between">
         <div className="flex items-baseline gap-3">
-          <span className="text-sm text-muted-foreground">{subtotalLabel}</span>
+          <span className="text-sm text-ink-500">{subtotalLabel}</span>
           <span className="text-lg font-semibold">
             {formatPrice(subtotal, firstScale, firstSymbol)}
           </span>

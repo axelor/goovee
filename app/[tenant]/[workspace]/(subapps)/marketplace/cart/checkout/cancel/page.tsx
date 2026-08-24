@@ -14,12 +14,12 @@ export default async function CheckoutCancelPage(props: {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
-      <div className="rounded-lg border border-border bg-card p-6 text-center">
-        <XCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+      <div className="rounded-lg border border-ink-100 bg-white p-6 text-center">
+        <XCircle className="w-12 h-12 mx-auto mb-3 text-ink-500" />
         <h1 className="text-2xl font-semibold mb-2">
           {await t('Payment cancelled')}
         </h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-ink-500 mb-6">
           {await t('Your cart is still saved. You can resume any time.')}
         </p>
         <Button asChild>

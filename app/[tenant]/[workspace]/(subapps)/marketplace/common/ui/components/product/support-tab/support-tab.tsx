@@ -16,22 +16,20 @@ export async function SupportTab({product}: SupportTabProps) {
 
   if (!hasAnyLink) {
     return (
-      <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">
-          {await t('No support links available')}
-        </p>
+      <div className="text-center py-12 bg-white rounded-lg border border-ink-100">
+        <p className="text-ink-500">{await t('No support links available')}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
+      <div className="bg-white rounded-lg border border-ink-100 p-4 md:p-8 space-y-6">
         <div className="space-y-3">
-          <h3 className="text-xl font-semibold text-foreground">
+          <h3 className="text-xl font-semibold text-ink-900">
             {await t('Need help?')}
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-ink-500">
             {await t(
               'Get in touch with the maintainer or browse the documentation.',
             )}

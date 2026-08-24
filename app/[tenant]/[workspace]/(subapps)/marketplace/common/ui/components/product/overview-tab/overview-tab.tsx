@@ -17,7 +17,7 @@ export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
       {/* Screenshots */}
       {images.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-xl font-bold text-ink-900">
             {await t('Screenshots')}
           </h2>
           <ScreenshotGallery
@@ -37,8 +37,8 @@ export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
       )}
 
       {/* About Section */}
-      <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
-        <h2 className="text-xl font-bold text-foreground">
+      <div className="bg-white rounded-lg border border-ink-100 p-4 md:p-8 space-y-4">
+        <h2 className="text-xl font-bold text-ink-900">
           {await t('About this plugin')}
         </h2>
         <RichTextViewer

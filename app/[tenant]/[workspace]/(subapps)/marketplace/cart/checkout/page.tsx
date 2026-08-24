@@ -82,7 +82,7 @@ export default async function CheckoutPage(props: {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-semibold text-foreground mb-6">
+      <h1 className="text-2xl font-semibold text-ink-900 mb-6">
         {await t('Checkout')}
       </h1>
 

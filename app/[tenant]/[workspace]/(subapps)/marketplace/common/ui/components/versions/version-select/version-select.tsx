@@ -63,7 +63,7 @@ export function VersionSelect({
               className="flex items-center justify-between gap-2">
               <span>v{option.versionNumber}</span>
               {option.id === latestId && (
-                <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success-dark">
+                <span className="rounded-full bg-mint-500/15 px-2 py-0.5 text-xs font-medium text-mint-700">
                   {i18n.t('Latest')}
                 </span>
               )}
@@ -81,7 +81,7 @@ export function VersionSelect({
           ref={buttonRef}
           variant="outline"
           className={cn(
-            'justify-between font-normal bg-primary/5 border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/40',
+            'justify-between font-normal bg-royal/5 border-royal/30 text-ink-900 hover:bg-royal/10 hover:border-royal/40',
             className,
           )}>
           <span className="inline-flex items-center gap-2">
@@ -89,7 +89,7 @@ export function VersionSelect({
               ? `v${selected.versionNumber}`
               : i18n.t('Select a version')}
             {selected && selected.id === latestId && (
-              <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success-dark">
+              <span className="rounded-full bg-mint-500/15 px-2 py-0.5 text-xs font-medium text-mint-700">
                 {i18n.t('Latest')}
               </span>
             )}

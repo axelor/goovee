@@ -80,13 +80,13 @@ function StatCard({
   return (
     <div className="flex flex-col justify-between h-full">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm text-ink-500">{label}</span>
         <div className={`${bgColor} rounded-lg p-2`}>{icon}</div>
       </div>
       <div className="space-y-1">
-        <div className="text-2xl font-bold text-foreground">
+        <div className="text-2xl font-bold text-ink-900">
           {value}{' '}
-          <span className="text-xs font-normal text-muted-foreground">
+          <span className="text-xs font-normal text-ink-500">
             ({monthLabel})
           </span>
         </div>
@@ -94,9 +94,7 @@ function StatCard({
             compare, it reads as the baseline rather than a change. */}
         <span
           className={`inline-flex items-center gap-0.5 text-xs ${
-            deltaText && (delta ?? 0) < 0
-              ? 'text-destructive'
-              : 'text-success-dark'
+            deltaText && (delta ?? 0) < 0 ? 'text-destructive' : 'text-mint-700'
           }`}>
           {!deltaText || delta === 0 ? (
             <ArrowRight className="h-3 w-3" />
@@ -149,7 +147,7 @@ export async function RevenueStatCard({
       vsLabel={vsLabel}
       baselineLabel={await t('Baseline')}
       icon="💰"
-      bgColor="bg-success/15"
+      bgColor="bg-mint-500/15"
     />
   );
 }

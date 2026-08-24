@@ -32,7 +32,7 @@ export function CartItemCard({
     GRADIENT_MAP[item.coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden flex">
+    <div className="rounded-lg border border-ink-100 bg-white overflow-hidden flex">
       <Link
         href={productHref}
         className={`shrink-0 w-24 sm:w-32 min-h-[96px] bg-gradient-to-br ${bgGradient} flex items-center justify-center self-stretch`}>
@@ -46,11 +46,11 @@ export function CartItemCard({
           <div className="flex items-center gap-2 mb-1">
             <Link
               href={productHref}
-              className="font-semibold text-sm text-foreground line-clamp-1 hover:underline">
+              className="font-semibold text-sm text-ink-900 line-clamp-1 hover:underline">
               {item.name}
             </Link>
             {item.currentVersionNumber && (
-              <span className="text-xs text-muted-foreground shrink-0">
+              <span className="text-xs text-ink-500 shrink-0">
                 {item.currentVersionNumber}
               </span>
             )}
@@ -59,7 +59,7 @@ export function CartItemCard({
             <InnerHTML
               content={item.description}
               as="p"
-              className="text-xs text-muted-foreground line-clamp-2"
+              className="text-xs text-ink-500 line-clamp-2"
             />
           )}
         </div>

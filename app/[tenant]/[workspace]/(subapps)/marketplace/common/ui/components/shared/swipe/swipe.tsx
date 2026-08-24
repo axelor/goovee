@@ -25,7 +25,7 @@ export function Swipe({items, className}: SwipeProps) {
         <SwiperSlide
           key={i}
           className={cn(
-            'bg-card rounded-lg shrink-0 cursor-pointer p-6 space-y-4 border border-border',
+            'bg-white rounded-lg shrink-0 cursor-pointer p-6 space-y-4 border border-ink-100',
             className,
           )}>
           {item}

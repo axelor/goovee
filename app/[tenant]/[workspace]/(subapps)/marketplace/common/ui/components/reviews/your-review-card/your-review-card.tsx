@@ -190,10 +190,10 @@ export function YourReviewCard({
             <PartnerAvatar partner={displayReview.author} tenantId={tenantId} />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-bold text-foreground text-sm">
+                <p className="font-bold text-ink-900 text-sm">
                   {displayReview.author.simpleFullName}
                 </p>
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                <span className="rounded-full bg-royal/10 px-2 py-0.5 text-xs font-medium text-royal">
                   {i18n.t('Your review')}
                 </span>
                 {displayReview.updatedOn && (
@@ -202,7 +202,7 @@ export function YourReviewCard({
                     displayType="relative"
                     showTooltip
                     prefix="•"
-                    className="text-xs text-muted-foreground"
+                    className="text-xs text-ink-500"
                   />
                 )}
               </div>
@@ -213,7 +213,7 @@ export function YourReviewCard({
                 className="mt-1"
               />
               {displayReview.reviewedVersion?.versionNumber && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-ink-500 mt-1">
                   {i18n.t('Reviewed')} v
                   {displayReview.reviewedVersion.versionNumber}
                 </p>
@@ -245,21 +245,21 @@ export function YourReviewCard({
             is decided server-side in the reviews list, so a hidden comment never
             reaches them. */}
         {isHidden && (
-          <div className="rounded-md border border-border bg-muted p-3 text-sm">
-            <p className="font-medium text-foreground">
+          <div className="rounded-md border border-ink-100 bg-ink-50 p-3 text-sm">
+            <p className="font-medium text-ink-900">
               {i18n.t('Hidden by a moderator')}
             </p>
           </div>
         )}
         {displayReview.reviewComment && (
           /* Ruled off while hidden, so it reads as withdrawn rather than
-             deleted. The colour carries no part of that signal: muted-foreground
-             on this ground is already the dimmest text the palette clears AA
-             with, so dimming it further would trade contrast for emphasis. */
+             deleted. The colour carries no part of that signal: ink-500 on this
+             ground is already the dimmest text the palette clears AA with, so
+             dimming it further would trade contrast for emphasis. */
           <p
             className={cn(
-              'text-muted-foreground text-sm leading-relaxed',
-              isHidden && 'border-l-2 border-border pl-3',
+              'text-ink-500 text-sm leading-relaxed',
+              isHidden && 'border-l-2 border-ink-100 pl-3',
             )}>
             {displayReview.reviewComment}
           </p>

@@ -62,22 +62,20 @@ export async function VersionsTab({
 
   if (totalVersionCount === 0) {
     return (
-      <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">
-          {await t('No versions available')}
-        </p>
+      <div className="text-center py-12 bg-white rounded-lg border border-ink-100">
+        <p className="text-ink-500">{await t('No versions available')}</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
+      <div className="bg-white rounded-lg border border-ink-100 overflow-hidden">
         {versions.map((version, index) => (
           <div
             key={version.id}
             className={cn({
-              'border-b border-border': index < versions.length - 1,
+              'border-b border-ink-100': index < versions.length - 1,
             })}>
             <VersionCard
               version={clone(version)}

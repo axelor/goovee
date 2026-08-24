@@ -84,8 +84,8 @@ export function AddToFavoriteButton({
       className={cn(
         'rounded-full',
         bare
-          ? 'h-auto w-auto p-1.5 hover:bg-muted'
-          : 'bg-card/90 backdrop-blur-sm shadow-sm hover:bg-card',
+          ? 'h-auto w-auto p-1.5 hover:bg-ink-50'
+          : 'bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white',
       )}>
       <Heart
         size={bare ? 16 : 18}

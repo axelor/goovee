@@ -153,10 +153,10 @@ export default async function MyPurchasesPage(props: {
       {/* Header */}
       <div className="pb-6">
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
             {await t('My purchases')}
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-ink-500 text-sm">
             {await t(
               "Review and manage the apps you've purchased from the marketplace.",
             )}
@@ -165,8 +165,8 @@ export default async function MyPurchasesPage(props: {
       </div>
 
       {purchases.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground mb-4">
+        <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
+          <p className="text-ink-500 mb-4">
             {await t("You haven't purchased anything yet.")}
           </p>
           <Button asChild>

@@ -117,7 +117,7 @@ export function ProductFields({
               <FormControl>
                 <div className="relative">
                   {currencySymbol && (
-                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-muted-foreground">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-ink-500">
                       {currencySymbol}
                     </span>
                   )}
@@ -281,8 +281,8 @@ export function ProductFields({
                         'aspect-square rounded-lg bg-gradient-to-br transition-all',
                         GRADIENT_MAP[code],
                         selected
-                          ? 'ring-2 ring-primary ring-offset-2'
-                          : 'hover:ring-2 hover:ring-foreground/20',
+                          ? 'ring-2 ring-royal ring-offset-2'
+                          : 'hover:ring-2 hover:ring-ink-900/20',
                       )}
                       aria-label={code}
                     />
@@ -317,7 +317,7 @@ export function ProductFields({
                         'flex h-12 w-12 items-center justify-center rounded-lg border transition-all',
                         selected
                           ? 'border-palette-indigo bg-palette-indigo/10 text-palette-indigo ring-1 ring-palette-indigo'
-                          : 'border-border bg-background text-foreground hover:ring-1 hover:ring-foreground/20',
+                          : 'border-ink-100 bg-ink-25 text-ink-900 hover:ring-1 hover:ring-ink-900/20',
                       )}>
                       <ProductIcon
                         code={code}
@@ -385,8 +385,8 @@ export function ProductFields({
   if (bare) return <div className="space-y-8">{body}</div>;
 
   return (
-    <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-foreground">
+    <div className="space-y-8 rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-ink-900">
         {i18n.t('Product details')}
       </h3>
       {body}

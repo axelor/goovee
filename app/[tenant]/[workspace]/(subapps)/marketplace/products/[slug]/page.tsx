@@ -230,7 +230,7 @@ export default async function ProductPage(props: {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-border sticky top-0 backdrop-blur-sm z-10">
+      <div className="border-b border-ink-100 sticky top-0 backdrop-blur-sm z-10">
         <div className="container flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Link
             href={tabNavLink(ProductTab.Overview)}
@@ -238,8 +238,8 @@ export default async function ProductPage(props: {
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Overview
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent',
+                ? 'text-royal border-royal'
+                : 'text-ink-500 hover:text-ink-900 border-transparent',
             )}>
             {await t('Overview')}
           </Link>
@@ -249,8 +249,8 @@ export default async function ProductPage(props: {
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Versions
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent',
+                ? 'text-royal border-royal'
+                : 'text-ink-500 hover:text-ink-900 border-transparent',
             )}>
             {await t('Versions')} (
             <Suspense fallback="...">
@@ -268,8 +268,8 @@ export default async function ProductPage(props: {
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Reviews
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent',
+                ? 'text-royal border-royal'
+                : 'text-ink-500 hover:text-ink-900 border-transparent',
             )}>
             {await t('Reviews ({0})', String(ratingCount))}
           </Link>
@@ -279,8 +279,8 @@ export default async function ProductPage(props: {
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Support
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent',
+                ? 'text-royal border-royal'
+                : 'text-ink-500 hover:text-ink-900 border-transparent',
             )}>
             {await t('Support')}
           </Link>
@@ -330,23 +330,23 @@ export default async function ProductPage(props: {
           {/* Static Sidebar - Always Visible */}
           <div className="space-y-6">
             {/* Details Card */}
-            <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
-              <h3 className="text-lg font-bold text-foreground">
+            <div className="bg-white rounded-lg border border-ink-100 p-4 md:p-8 space-y-6">
+              <h3 className="text-lg font-bold text-ink-900">
                 {await t('Details')}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-ink-500">
                     {await t('Version')}
                   </span>
-                  <span className="font-semibold text-foreground">
+                  <span className="font-semibold text-ink-900">
                     {product.currentVersion
                       ? formatVersionNumber(product.currentVersion)
                       : await t('N/A')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-ink-500">
                     {await t('Updated')}
                   </span>
                   {product.currentVersion?.publishDateTime ? (
@@ -354,16 +354,16 @@ export default async function ProductPage(props: {
                       date={product.currentVersion.publishDateTime}
                       displayType="relative"
                       showTooltip={true}
-                      className="font-semibold text-foreground"
+                      className="font-semibold text-ink-900"
                     />
                   ) : (
-                    <span className="font-semibold text-foreground">
+                    <span className="font-semibold text-ink-900">
                       {await t('N/A')}
                     </span>
                   )}
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-ink-500">
                     {await t('Published')}
                   </span>
                   {product.createdOn ? (
@@ -371,26 +371,26 @@ export default async function ProductPage(props: {
                       date={product.createdOn}
                       displayType="simple"
                       format="MMM YYYY"
-                      className="font-semibold text-foreground"
+                      className="font-semibold text-ink-900"
                     />
                   ) : (
-                    <span className="font-semibold text-foreground">
+                    <span className="font-semibold text-ink-900">
                       {await t('N/A')}
                     </span>
                   )}
                 </div>
                 {product.currentVersion?.bundleFile?.sizeText && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-ink-500">
                       {await t('Size')}
                     </span>
-                    <span className="font-semibold text-foreground">
+                    <span className="font-semibold text-ink-900">
                       {product.currentVersion.bundleFile.sizeText}
                     </span>
                   </div>
                 )}
-                <div className="border-t border-border pt-4">
-                  <span className="text-sm text-muted-foreground block mb-2">
+                <div className="border-t border-ink-100 pt-4">
+                  <span className="text-sm text-ink-500 block mb-2">
                     {await t('Compatibility')}
                   </span>
                   {product.currentVersion?.compatibilitySet &&
@@ -399,22 +399,22 @@ export default async function ProductPage(props: {
                       {product.currentVersion.compatibilitySet.map(version => (
                         <span
                           key={version.id}
-                          className="inline-block px-2 py-1 bg-muted rounded text-xs text-foreground">
+                          className="inline-block px-2 py-1 bg-ink-50 rounded text-xs text-ink-900">
                           {version.title}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-ink-500">
                       {await t('No compatible versions specified')}
                     </p>
                   )}
                 </div>
-                <div className="border-t border-border pt-4">
-                  <span className="text-sm text-muted-foreground">
+                <div className="border-t border-ink-100 pt-4">
+                  <span className="text-sm text-ink-500">
                     {await t('Category')}
                   </span>
-                  <p className="font-semibold text-foreground">
+                  <p className="font-semibold text-ink-900">
                     {product.categorySet?.length
                       ? product.categorySet
                           .map(c => c?.name)
@@ -423,8 +423,8 @@ export default async function ProductPage(props: {
                       : '—'}
                   </p>
                 </div>
-                <div className="border-t border-border pt-4">
-                  <span className="text-sm text-muted-foreground">
+                <div className="border-t border-ink-100 pt-4">
+                  <span className="text-sm text-ink-500">
                     {await t('License')}
                   </span>
                   {product.license ? (
@@ -434,16 +434,16 @@ export default async function ProductPage(props: {
                         target="_blank"
                         rel="noopener noreferrer"
                         prefetch={false}
-                        className="font-semibold text-foreground hover:underline block">
+                        className="font-semibold text-ink-900 hover:underline block">
                         {product.license.name}
                       </Link>
                     ) : (
-                      <p className="font-semibold text-foreground">
+                      <p className="font-semibold text-ink-900">
                         {product.license.name}
                       </p>
                     )
                   ) : (
-                    <p className="font-semibold text-foreground">—</p>
+                    <p className="font-semibold text-ink-900">—</p>
                   )}
                 </div>
               </div>
@@ -451,8 +451,8 @@ export default async function ProductPage(props: {
 
             {/* About Author Card */}
             {product.publisher && (
-              <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
-                <h3 className="text-lg font-bold text-foreground">
+              <div className="bg-white rounded-lg border border-ink-100 p-4 md:p-8 space-y-4">
+                <h3 className="text-lg font-bold text-ink-900">
                   {await t('About the author')}
                 </h3>
                 <div className="flex items-start gap-4">
@@ -470,10 +470,10 @@ export default async function ProductPage(props: {
                     />
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-semibold text-foreground">
+                    <p className="font-semibold text-ink-900">
                       {product.publisher.simpleFullName}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-ink-500">
                       {await t('Verified contributor')}
                     </p>
                   </div>

@@ -48,7 +48,7 @@ export function BuyButtons({
   const {addItem, isInCart, loaded} = useMarketplaceCart();
 
   if (!loaded) {
-    return <div className="h-11 rounded-full bg-muted animate-pulse" />;
+    return <div className="h-11 rounded-full bg-ink-50 animate-pulse" />;
   }
 
   if (isInCart(productId)) {

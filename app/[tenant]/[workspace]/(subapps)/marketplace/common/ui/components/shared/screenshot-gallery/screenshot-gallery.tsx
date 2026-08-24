@@ -75,7 +75,7 @@ export function ScreenshotGallery({images, alt}: ScreenshotGalleryProps) {
           key={img.id}
           type="button"
           onClick={() => openAt(idx)}
-          className="aspect-video bg-muted rounded-lg border border-border overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          className="aspect-video bg-ink-50 rounded-lg border border-ink-100 overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-royal">
           <Image
             src={img.src}
             alt={alt}

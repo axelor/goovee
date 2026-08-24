@@ -16,8 +16,8 @@ export function PromptCard({title, description, action}: PromptCardProps) {
         'flex items-center justify-between gap-4 flex-wrap',
       )}>
       <div>
-        <h3 className="font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-semibold text-ink-900">{title}</h3>
+        <p className="text-sm text-ink-500">{description}</p>
       </div>
       {action}
     </div>

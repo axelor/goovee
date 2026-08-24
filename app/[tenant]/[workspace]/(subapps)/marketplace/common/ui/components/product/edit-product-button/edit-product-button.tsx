@@ -87,11 +87,11 @@ export function EditProductButton({
             ? i18n.t('This product is under moderation and cannot be edited.')
             : undefined
         }
-        className="rounded-full p-1.5 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50">
+        className="rounded-full p-1.5 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-50">
         {loading ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-ink-500" />
         ) : (
-          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+          <Pencil className="h-3.5 w-3.5 text-ink-500" />
         )}
         <span className="sr-only">{i18n.t('Edit')}</span>
       </button>

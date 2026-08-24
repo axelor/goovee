@@ -64,12 +64,12 @@ function ProductSummary({
 
   return (
     <>
-      <span className="truncate text-sm font-normal text-muted-foreground">
+      <span className="truncate text-sm font-normal text-ink-500">
         {summary}
       </span>
       {productDirty && (
         <span
-          className="h-2 w-2 shrink-0 rounded-full bg-primary"
+          className="h-2 w-2 shrink-0 rounded-full bg-royal"
           title={i18n.t('Unsaved changes')}
           aria-label={i18n.t('Unsaved changes')}
         />
@@ -100,11 +100,11 @@ export function ProductCollapsible({
       collapsible
       value={expanded ? ITEM_VALUE : ''}
       onValueChange={value => onOpenChange(value === ITEM_VALUE)}
-      className="rounded-xl border border-border bg-card shadow-sm">
+      className="rounded-xl border border-ink-100 bg-white shadow-sm">
       <AccordionItem value={ITEM_VALUE} className="border-none">
         <AccordionTrigger icon className="px-4 hover:no-underline">
           <div className="flex min-w-0 flex-1 items-center gap-2 pr-2">
-            <h3 className="whitespace-nowrap text-base font-semibold text-foreground">
+            <h3 className="whitespace-nowrap text-base font-semibold text-ink-900">
               {i18n.t('Product details')}
             </h3>
             {/* Only mounted while collapsed, so its form subscriptions don't

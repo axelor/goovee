@@ -56,19 +56,19 @@ export function ReviewEditForm({
 
   return (
     <div className={cn(REVIEW_CARD_SHELL, 'space-y-4')}>
-      <h3 className="font-semibold text-foreground">
+      <h3 className="font-semibold text-ink-900">
         {initial ? i18n.t('Edit your review') : i18n.t('Leave a review')}
       </h3>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-foreground">
+        <label className="block text-sm font-medium text-ink-900">
           {i18n.t('Your rating')} *
         </label>
         <RatingInput value={rating} onChange={setRating} />
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-foreground">
+        <label className="block text-sm font-medium text-ink-900">
           {i18n.t('Comment')}
         </label>
         <Textarea
@@ -78,14 +78,14 @@ export function ReviewEditForm({
           onChange={e => setComment(e.target.value)}
           placeholder={i18n.t('Share what worked, what did not…')}
         />
-        <p className="text-xs text-muted-foreground text-right">
+        <p className="text-xs text-ink-500 text-right">
           {comment.length} / {REVIEW_COMMENT_MAX_LENGTH}
         </p>
       </div>
 
       {versions.length > 0 && (
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-foreground">
+          <label className="block text-sm font-medium text-ink-900">
             {i18n.t('Reviewing version')}
           </label>
           <VersionSelect

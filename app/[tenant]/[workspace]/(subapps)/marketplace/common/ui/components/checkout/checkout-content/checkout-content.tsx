@@ -61,15 +61,13 @@ export function CheckoutContent({config}: Props) {
   };
 
   if (!loaded) {
-    return <div className="h-32 rounded-lg bg-muted/40 animate-pulse" />;
+    return <div className="h-32 rounded-lg bg-ink-50/40 animate-pulse" />;
   }
 
   if (cart.items.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-8 text-center">
-        <p className="text-muted-foreground mb-4">
-          {i18n.t('Your cart is empty.')}
-        </p>
+      <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
+        <p className="text-ink-500 mb-4">{i18n.t('Your cart is empty.')}</p>
         <Button asChild>
           <Link href={`${marketplaceBase}`}>
             {i18n.t('Browse marketplace')}
@@ -99,8 +97,8 @@ export function CheckoutContent({config}: Props) {
           );
         })}
       </ul>
-      <div className="rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{i18n.t('Total')}</span>
+      <div className="rounded-lg border border-ink-100 bg-white px-4 py-3 flex items-center justify-between">
+        <span className="text-sm text-ink-500">{i18n.t('Total')}</span>
         <span className="text-lg font-semibold">
           {formatPrice(subtotal, firstScale, firstSymbol)}
         </span>

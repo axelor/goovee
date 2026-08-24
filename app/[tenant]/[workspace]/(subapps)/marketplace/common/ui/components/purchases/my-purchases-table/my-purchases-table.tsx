@@ -71,8 +71,8 @@ function TakenDownDownload({
         <button
           type="button"
           aria-label={i18n.t('Download')}
-          className="p-1.5 rounded-full hover:bg-muted transition-colors">
-          <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
+          className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
+          <DownloadIcon className="w-3.5 h-3.5 text-ink-500" />
         </button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -134,11 +134,11 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                 PRODUCT_MODERATION_STATUS.TAKEN_DOWN ? (
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
-                  className="font-medium text-foreground truncate hover:underline">
+                  className="font-medium text-ink-900 truncate hover:underline">
                   {product.name}
                 </Link>
               ) : (
-                <div className="font-medium text-foreground truncate">
+                <div className="font-medium text-ink-900 truncate">
                   {product.name}
                 </div>
               )}
@@ -149,7 +149,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                 </span>
               ) : (
                 product.description && (
-                  <div className="text-xs text-muted-foreground line-clamp-2">
+                  <div className="text-xs text-ink-500 line-clamp-2">
                     <InnerHTML content={product.description} />
                   </div>
                 )
@@ -176,7 +176,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       label: i18n.t('Purchased on'),
       desktopClassName: 'w-[20%]',
       content: (purchase, {dateFormat}) => (
-        <span className="text-sm text-muted-foreground whitespace-nowrap">
+        <span className="text-sm text-ink-500 whitespace-nowrap">
           {purchase.purchaseDateTime
             ? dateFormat.format(new Date(purchase.purchaseDateTime))
             : '—'}
@@ -191,11 +191,11 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
         purchase.productOrder?.saleOrder?.id ? (
           <Link
             href={`${workspaceURI}/${SUBAPP_CODES.orders}/${purchase.productOrder.saleOrder.id}`}
-            className="text-sm text-primary hover:underline">
+            className="text-sm text-royal hover:underline">
             {purchase.productOrder.saleOrder.saleOrderSeq ?? i18n.t('View')}
           </Link>
         ) : (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-ink-500">
             {i18n.t('Order pending')}
           </span>
         ),
@@ -208,11 +208,11 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
         purchase.productOrder?.invoice?.id ? (
           <Link
             href={`${workspaceURI}/${SUBAPP_CODES.invoices}/${purchase.productOrder.invoice.id}`}
-            className="text-sm text-primary hover:underline">
+            className="text-sm text-royal hover:underline">
             {purchase.productOrder.invoice.invoiceId ?? i18n.t('View')}
           </Link>
         ) : (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-ink-500">
             {i18n.t('Invoice pending')}
           </span>
         ),
@@ -224,8 +224,8 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
 
   if (purchases.length === 0) {
     return (
-      <div className="bg-card rounded-lg border border-border px-6 py-12 text-center">
-        <div className="text-sm text-muted-foreground">
+      <div className="bg-white rounded-lg border border-ink-100 px-6 py-12 text-center">
+        <div className="text-sm text-ink-500">
           {i18n.t("You haven't purchased anything yet.")}
         </div>
       </div>
@@ -235,7 +235,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
   return (
     <Table
       className={cn(
-        'rounded-lg border border-border bg-card text-card-foreground',
+        'rounded-lg border border-ink-100 bg-white text-ink-900',
         small && 'table-fixed',
       )}>
       <TableHeader>
@@ -280,8 +280,8 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                       type="button"
                       aria-label={open ? 'Collapse' : 'Expand'}
                       onClick={() => setOpenId(open ? null : purchase.id)}
-                      className="p-1 rounded-full hover:bg-muted transition-colors">
-                      <Arrow className="w-4 h-4 text-muted-foreground" />
+                      className="p-1 rounded-full hover:bg-ink-50 transition-colors">
+                      <Arrow className="w-4 h-4 text-ink-500" />
                     </button>
                   </TableCell>
                 )}
@@ -297,8 +297,8 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                         <a
                           href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
                           aria-label={i18n.t('Download')}
-                          className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                          <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                          className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
+                          <DownloadIcon className="w-3.5 h-3.5 text-ink-500" />
                         </a>
                       )
                     ) : null}
@@ -307,8 +307,8 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                         PRODUCT_MODERATION_STATUS.TAKEN_DOWN && (
                         <Link
                           href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
-                          className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                          className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
+                          <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
                         </Link>
                       )}
                   </div>
@@ -316,13 +316,13 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
               </TableRow>
               {small && subColumns.length > 0 && (
                 <Collapsible open={open} asChild>
-                  <TableRow className="bg-muted/30">
+                  <TableRow className="bg-ink-50/30">
                     <CollapsibleContent asChild>
                       <TableCell colSpan={mainColumns.length + 2}>
                         <div className="grid grid-cols-2 gap-y-2 items-center px-2 py-1">
                           {subColumns.map(c => (
                             <Fragment key={c.key}>
-                              <div className="text-xs font-semibold uppercase text-muted-foreground">
+                              <div className="text-xs font-semibold uppercase text-ink-500">
                                 {c.label}
                               </div>
                               <div className="flex justify-self-end items-center">

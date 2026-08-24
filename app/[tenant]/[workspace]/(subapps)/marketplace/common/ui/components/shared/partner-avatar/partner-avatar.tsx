@@ -17,7 +17,7 @@ export function PartnerAvatar({
   partner,
   tenantId,
   size = 40,
-  fallbackClassName = 'bg-muted',
+  fallbackClassName = 'bg-ink-50',
 }: PartnerAvatarProps) {
   const pictureId = partner.picture?.id;
   const initial = (partner.simpleFullName?.[0] ?? '?').toUpperCase();
