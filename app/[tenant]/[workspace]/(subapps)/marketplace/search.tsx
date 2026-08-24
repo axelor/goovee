@@ -93,7 +93,7 @@ export function Search({
         <CommandInput
           placeholder={i18n.t('Search marketplace')}
           className={cn(
-            'lg:placeholder:text-base placeholder:text-sm placeholder:font-normal lg:placeholder:font-medium pl-[10px] pr-[132px] h-12 lg:pl-4 border-none text-base font-medium rounded-lg focus-visible:ring-offset-0 focus-visible:ring-0 text-main-black',
+            'lg:placeholder:text-base placeholder:text-sm placeholder:font-normal lg:placeholder:font-medium pl-[10px] pr-[132px] h-12 lg:pl-4 border-none text-base font-medium rounded-lg focus-visible:ring-offset-0 focus-visible:ring-0 text-ink-900',
             inputClassName,
           )}
           value={search}
@@ -103,7 +103,7 @@ export function Search({
 
         <CommandList
           className={cn(
-            'absolute bg-white top-[60px] right-0 border border-grey-1 rounded-lg no-scrollbar text-main-black z-50 w-full p-0',
+            'absolute bg-white top-[60px] right-0 border border-ink-150 rounded-lg text-ink-900 z-50 w-full p-0',
             open ? 'block' : 'hidden',
           )}>
           <CommandEmpty>

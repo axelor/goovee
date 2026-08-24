@@ -201,7 +201,7 @@ export default async function ProductPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-ink-500 cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate">
                 <Link href={marketplaceHref}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
