@@ -146,7 +146,7 @@ export default async function MyAccountPage(props: {
               )}
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-full">
+          <Button asChild variant="ink-outline">
             <Link
               href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${partnerId}`}>
               {await t('See partner profile')}

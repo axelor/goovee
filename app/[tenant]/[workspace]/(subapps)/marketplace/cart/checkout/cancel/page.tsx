@@ -22,7 +22,7 @@ export default async function CheckoutCancelPage(props: {
         <p className="text-ink-500 mb-6">
           {await t('Your cart is still saved. You can resume any time.')}
         </p>
-        <Button asChild>
+        <Button variant="royal" asChild>
           <Link href={`${marketplaceBase}/cart`}>
             {await t('Back to cart')}
           </Link>

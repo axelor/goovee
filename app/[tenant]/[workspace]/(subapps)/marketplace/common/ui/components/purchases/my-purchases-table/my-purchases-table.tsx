@@ -3,6 +3,7 @@
 import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
+import {buttonVariants} from '@/ui/components/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,8 +86,16 @@ function TakenDownDownload({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{i18n.t('Close')}</AlertDialogCancel>
-          <AlertDialogAction asChild>
+          <AlertDialogCancel
+            className={cn(
+              buttonVariants({variant: 'ink-outline'}),
+              'hover:text-ink-700',
+            )}>
+            {i18n.t('Close')}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            asChild
+            className={cn(buttonVariants({variant: 'royal'}))}>
             <a href={downloadUrl} download>
               {i18n.t('Download anyway')}
             </a>

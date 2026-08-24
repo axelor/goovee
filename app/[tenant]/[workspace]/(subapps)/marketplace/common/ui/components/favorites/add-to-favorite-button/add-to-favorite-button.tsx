@@ -77,7 +77,7 @@ export function AddToFavoriteButton({
     <Button
       onClick={handleClick}
       disabled={isPending}
-      variant={bare ? 'ghost' : 'outline'}
+      variant={bare ? 'ghost' : 'ink-outline'}
       size="icon"
       title={label}
       aria-label={label}

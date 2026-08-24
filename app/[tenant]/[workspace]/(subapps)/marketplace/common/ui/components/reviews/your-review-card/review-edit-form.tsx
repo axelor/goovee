@@ -102,7 +102,10 @@ export function ReviewEditForm({
         <Button variant="ghost" onClick={onCancel} disabled={pending}>
           {i18n.t('Cancel')}
         </Button>
-        <Button onClick={handleSubmit} disabled={pending || rating < 1}>
+        <Button
+          variant="royal"
+          onClick={handleSubmit}
+          disabled={pending || rating < 1}>
           {initial ? i18n.t('Update review') : i18n.t('Post review')}
         </Button>
       </div>

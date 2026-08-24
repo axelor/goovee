@@ -79,7 +79,7 @@ export function VersionSelect({
       <Trigger asChild>
         <Button
           ref={buttonRef}
-          variant="outline"
+          variant="ink-outline"
           className={cn(
             'justify-between font-normal bg-royal/5 border-royal/30 text-ink-900 hover:bg-royal/10 hover:border-royal/40',
             className,

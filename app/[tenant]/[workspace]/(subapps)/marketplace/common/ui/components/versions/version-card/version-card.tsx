@@ -69,9 +69,9 @@ export function VersionCard({
         </div>
         {preview ? (
           <Button
-            variant="outline"
+            variant="ink-outline"
             size="sm"
-            className="gap-2 flex-shrink-0 rounded-full"
+            className="gap-2 flex-shrink-0"
             disabled
             title={i18n.t('Inactive in preview')}>
             <Download size={16} />
@@ -79,9 +79,9 @@ export function VersionCard({
           </Button>
         ) : canDownload ? (
           <Button
-            variant="outline"
+            variant="ink-outline"
             size="sm"
-            className="gap-2 flex-shrink-0 rounded-full"
+            className="gap-2 flex-shrink-0"
             asChild>
             <a href={downloadHref} download>
               <Download size={16} />

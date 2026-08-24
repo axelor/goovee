@@ -38,10 +38,7 @@ export async function SupportTab({product}: SupportTabProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {product.documentationUrl && (
-            <Button
-              asChild
-              variant="outline"
-              className="gap-2 rounded-full h-11">
+            <Button asChild variant="ink-outline" className="gap-2 h-11">
               <Link
                 href={product.documentationUrl}
                 target="_blank"
@@ -53,10 +50,7 @@ export async function SupportTab({product}: SupportTabProps) {
           )}
 
           {product.supportIssuesUrl && (
-            <Button
-              asChild
-              variant="outline"
-              className="gap-2 rounded-full h-11">
+            <Button asChild variant="ink-outline" className="gap-2 h-11">
               <Link
                 href={product.supportIssuesUrl}
                 target="_blank"
@@ -68,10 +62,7 @@ export async function SupportTab({product}: SupportTabProps) {
           )}
 
           {product.supportContactUrl && (
-            <Button
-              asChild
-              variant="outline"
-              className="gap-2 rounded-full h-11">
+            <Button asChild variant="ink-outline" className="gap-2 h-11">
               <Link
                 href={product.supportContactUrl}
                 target="_blank"
@@ -87,10 +78,7 @@ export async function SupportTab({product}: SupportTabProps) {
               drop this button or back it by a dedicated product field
               (e.g. `bugReportUrl` or a `mailto:`-style contact). */}
           {product.supportIssuesUrl && (
-            <Button
-              asChild
-              variant="outline"
-              className="gap-2 rounded-full h-11">
+            <Button asChild variant="ink-outline" className="gap-2 h-11">
               <Link
                 href={product.supportIssuesUrl}
                 target="_blank"

@@ -269,7 +269,7 @@ export function BundleDropzone({
       )}
       <Button
         type="button"
-        variant="outline"
+        variant="ink-outline"
         size="sm"
         onClick={e => {
           e.stopPropagation();

@@ -31,7 +31,7 @@ export async function PublisherAccessRequest({
   );
   let reason: string | null = null;
   let action: ReactNode = (
-    <Button asChild size="lg" className="rounded-full">
+    <Button variant="royal" asChild size="lg">
       <Link href={applyHref}>{await t('Sign up to become a publisher')}</Link>
     </Button>
   );
@@ -59,7 +59,7 @@ export async function PublisherAccessRequest({
         'Your previous request was declined. You can apply for publisher access again.',
       );
       action = (
-        <Button asChild size="lg" className="rounded-full">
+        <Button variant="royal" asChild size="lg">
           <Link href={applyHref}>{await t('Apply again')}</Link>
         </Button>
       );

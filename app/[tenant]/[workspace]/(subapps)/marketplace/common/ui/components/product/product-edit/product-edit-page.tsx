@@ -116,6 +116,7 @@ export function ProductEditPage({
             {i18n.t('Cancel')}
           </Button>
           <Button
+            variant="royal"
             type="button"
             onClick={model.save}
             disabled={model.pending || !isDirty || !model.uploadsStaged}>
