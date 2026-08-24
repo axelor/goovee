@@ -16,24 +16,19 @@ export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
     <div className="space-y-8">
       {/* Screenshots */}
       {images.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-ink-900">
-            {await t('Screenshots')}
-          </h2>
-          <ScreenshotGallery
-            images={images
-              .filter(img => img.picture?.id)
-              .map(img => ({
-                id: img.id,
-                src: getProductScreenshotURL({
-                  workspaceURI,
-                  productId: product.id,
-                  fileId: img.picture!.id,
-                }),
-              }))}
-            alt={await t('Product screenshot')}
-          />
-        </div>
+        <ScreenshotGallery
+          images={images
+            .filter(img => img.picture?.id)
+            .map(img => ({
+              id: img.id,
+              src: getProductScreenshotURL({
+                workspaceURI,
+                productId: product.id,
+                fileId: img.picture!.id,
+              }),
+            }))}
+          alt={await t('Product screenshot')}
+        />
       )}
 
       {/* About Section */}
