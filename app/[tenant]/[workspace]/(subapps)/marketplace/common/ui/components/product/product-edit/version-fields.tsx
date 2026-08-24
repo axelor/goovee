@@ -39,6 +39,10 @@ type VersionFieldsProps = {
   /** rowKey → in-flight bundle upload item id, owned by the session so it
    *  survives the remount. */
   bundleItemByRow: RefObject<Map<string, string>>;
+  /** Writes a bundle token to the row identified by `rowKey`, resolving its
+   *  current index at commit time. An upload settles long after it was picked,
+   *  by which point `namePrefix` may name a different row. */
+  commitBundleToken: (rowKey: string, token: string | undefined) => void;
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   workspaceURI: string;
   productId: string;
@@ -58,13 +62,13 @@ export function VersionFields({
   existingBundle,
   bundleUpload,
   bundleItemByRow,
+  commitBundleToken,
   compatibilityVersions,
   workspaceURI,
   productId,
 }: VersionFieldsProps) {
   const {toast} = useToast();
-  const {control, setValue, getValues, register} =
-    useFormContext<CombinedEditValues>();
+  const {control, getValues, register} = useFormContext<CombinedEditValues>();
 
   const path = (field: string) =>
     `${namePrefix}.${field}` as FieldPath<CombinedEditValues>;
@@ -108,10 +112,7 @@ export function VersionFields({
      * the staged token before staging the new file. */
     const prior = bundleItemByRow.current.get(rowKey);
     if (prior) bundleUpload.remove(prior);
-    setValue(path('bundleToken'), undefined, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    commitBundleToken(rowKey, undefined);
     const {ids, done} = bundleUpload.upload([file], {
       purpose: 'marketplace:bundle',
       /* Refuse an oversized bundle here rather than send it and have the route
@@ -123,10 +124,7 @@ export function VersionFields({
     bundleItemByRow.current.set(rowKey, ids[0]);
     done.then(([result]) => {
       if (!result) return; // failed or paused — the dropzone offers the resume
-      setValue(path('bundleToken'), result.token, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+      commitBundleToken(rowKey, result.token);
     });
   };
 
@@ -134,10 +132,7 @@ export function VersionFields({
     const prior = bundleItemByRow.current.get(rowKey);
     if (prior) bundleUpload.remove(prior);
     bundleItemByRow.current.delete(rowKey);
-    setValue(path('bundleToken'), undefined, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    commitBundleToken(rowKey, undefined);
   };
 
   const handleBundlePause = () => {
@@ -150,10 +145,7 @@ export function VersionFields({
     if (!itemId) return;
     bundleUpload.resume(itemId).then(result => {
       if (!result) return;
-      setValue(path('bundleToken'), result.token, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+      commitBundleToken(rowKey, result.token);
     });
   };
 

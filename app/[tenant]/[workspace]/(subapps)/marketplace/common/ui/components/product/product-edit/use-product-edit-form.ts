@@ -380,6 +380,66 @@ export function useProductEditForm({
     setCursor(cursor => Math.max(0, cursor - 1));
   }, [isNew, cursor, currentRowKey, bundleUpload, newVersionsFA]);
 
+  /* The field arrays as of the latest render, read (not closed over) when an
+   * upload settles. `commitBundleToken` capturing `fields` directly would carry
+   * the ordering from when the upload was picked — the same staleness the
+   * lookup exists to defeat. */
+  const rowsRef = useRef({
+    newRows: newVersionsFA.fields,
+    existingRows: versionsFA.fields,
+  });
+  rowsRef.current = {
+    newRows: newVersionsFA.fields,
+    existingRows: versionsFA.fields,
+  };
+
+  /* Commit a bundle token to the row that owns it, found by its stable
+   * field-array id rather than by the index path the caller started with.
+   * An upload resolves long after it was picked, and discarding an earlier new
+   * row reindexes everything after it, so a captured `newVersions.N` can by
+   * then name a different row or none at all. Resolving here, at commit time,
+   * is what keeps the token on its own row.
+   *
+   * Nothing calls this for a row that no longer exists — an aborted upload
+   * settles to null and returns before reaching here — so that branch is a
+   * guard against a future caller, not a live path. */
+  const commitBundleToken = useCallback(
+    (rowKey: string, token: string | undefined) => {
+      const {newRows, existingRows} = rowsRef.current;
+      const newIndex = newRows.findIndex(row => row.rhfId === rowKey);
+      const existingIndex =
+        newIndex === -1
+          ? existingRows.findIndex(row => row.rhfId === rowKey)
+          : -1;
+
+      if (newIndex === -1 && existingIndex === -1) {
+        /* The row is gone. Drop the token rather than write it to whichever row
+         * now holds that index, and take the upload with it: a token nobody can
+         * redeem is worth less than the storage it holds, and an entry left in
+         * the hook with no row to clear it would hold `uploadsStaged` false and
+         * Save disabled for good. `remove` gives up the server's copy too. */
+        const orphan = bundleItemByRow.current.get(rowKey);
+        if (orphan) bundleUpload.remove(orphan);
+        bundleItemByRow.current.delete(rowKey);
+        return;
+      }
+
+      const rowPath =
+        newIndex !== -1
+          ? `newVersions.${newIndex}`
+          : `versions.${existingIndex}`;
+      setValue(
+        `${rowPath}.bundleToken` as FieldPath<CombinedEditValues>,
+        token,
+        {
+          shouldValidate: true,
+          shouldDirty: true,
+        },
+      );
+    },
+    [setValue, bundleUpload],
+  );
+
   /* ---- status staging ---- */
 
   const setStatus = useCallback(
@@ -551,6 +611,7 @@ export function useProductEditForm({
     },
     bundleUpload,
     bundleItemByRow,
+    commitBundleToken,
     uploadsStaged,
     uploadsInFlight,
     uploadsPaused,

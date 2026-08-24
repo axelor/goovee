@@ -385,12 +385,16 @@ export function VersionSection({
             </div>
           </div>
 
-          {/* Keyed by the cursor path so it remounts per version — the
-              changelog editor then re-seeds from that row's persisted value. */}
+          {/* Keyed by the row's identity, not its index, so it remounts per
+              version — the changelog editor then re-seeds from that row's
+              persisted value. Discarding the first of several new rows leaves
+              the index path unchanged, so keying on that would hold the
+              discarded row's changelog open on its successor. */}
           <VersionFields
-            key={namePrefix}
+            key={model.currentRowKey}
             namePrefix={namePrefix}
             rowKey={model.currentRowKey}
+            commitBundleToken={model.commitBundleToken}
             existingBundle={currentVersionMeta?.bundle}
             bundleUpload={model.bundleUpload}
             bundleItemByRow={model.bundleItemByRow}
