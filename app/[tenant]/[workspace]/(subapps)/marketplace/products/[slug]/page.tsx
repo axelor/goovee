@@ -2,7 +2,7 @@ import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import type {NullableValues} from '@/types/util';
 import {t} from '@/locale/server';
-import {Badge, Button} from '@/ui/components';
+import {Button, StatusPill} from '@/ui/components';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {
   Breadcrumb,
@@ -20,7 +20,10 @@ import {Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
-import {MARKETPLACE_VERSION_STATUS_LABELS} from '../../common/constants/statuses';
+import {
+  MARKETPLACE_VERSION_STATUS_LABELS,
+  MARKETPLACE_VERSION_STATUS_TONES,
+} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
 import {
   canDownloadProduct,
@@ -180,6 +183,9 @@ export default async function ProductPage(props: {
     previewStatus && MARKETPLACE_VERSION_STATUS_LABELS[previewStatus]
       ? await t(MARKETPLACE_VERSION_STATUS_LABELS[previewStatus])
       : null;
+  const previewStatusTone = previewStatus
+    ? (MARKETPLACE_VERSION_STATUS_TONES[previewStatus] ?? 'draft')
+    : 'draft';
 
   return (
     <div className="min-h-screen">
@@ -190,7 +196,9 @@ export default async function ProductPage(props: {
           title={await t('Preview — not yet visible to buyers.')}
           description={await t('Buttons and actions are inactive in preview.')}>
           {previewStatusLabel && (
-            <Badge variant="outline">{previewStatusLabel}</Badge>
+            <StatusPill status={previewStatusTone}>
+              {previewStatusLabel}
+            </StatusPill>
           )}
         </NoticeBanner>
       )}

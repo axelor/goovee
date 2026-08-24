@@ -17,6 +17,7 @@ import {
 } from '@/ui/components/alert-dialog';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
 import {InnerHTML} from '@/ui/components/inner-html';
+import {StatusPill} from '@/ui/components/status-pill';
 import {
   Table,
   TableBody,
@@ -153,9 +154,17 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
               )}
               {product.moderationStatusSelect ===
               PRODUCT_MODERATION_STATUS.TAKEN_DOWN ? (
-                <span className="mt-1 inline-flex items-center rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">
-                  {i18n.t('No longer available')}
-                </span>
+                <StatusPill
+                  status="cancelled"
+                  size="sm"
+                  className="mt-1 max-w-full">
+                  {/* The pill is nowrap by default; this label is long enough
+                      to overflow the name column on a narrow phone, so let the
+                      text itself wrap inside the pill. */}
+                  <span className="min-w-0 whitespace-normal">
+                    {i18n.t('No longer available')}
+                  </span>
+                </StatusPill>
               ) : (
                 product.description && (
                   <div className="text-xs text-ink-500 line-clamp-2">

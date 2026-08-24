@@ -2,6 +2,7 @@ import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {Alert, AlertDescription, AlertTitle} from '@/ui/components/alert';
 import {Button} from '@/ui/components/button';
+import {StatusPill, type StatusKey} from '@/ui/components/status-pill';
 import {cn} from '@/utils/css';
 import {
   AlertTriangle,
@@ -24,7 +25,7 @@ type VersionStatus = VersionRowValues['statusSelect'];
 const STATUS = MARKETPLACE_VERSION_STATUS;
 
 type StatusSegment = {id: string; label: string; intent: VersionStatus};
-type StatusPillInfo = {label: string; tone: 'review' | 'rejected'};
+type StatusPillInfo = {label: string; tone: StatusKey};
 
 /**
  * The status segments offered for a version, gated by its current persisted
@@ -68,7 +69,7 @@ function statusOptions(
       };
     case STATUS.IN_REVIEW:
       return {
-        pill: {label: i18n.t('In review'), tone: 'review'},
+        pill: {label: i18n.t('In review'), tone: 'pending'},
         segments: [
           {
             id: 'inreview',
@@ -99,20 +100,6 @@ function statusOptions(
       // draft, or a brand-new version
       return {segments: [draft, publish]};
   }
-}
-
-function StatusPill({label, tone}: StatusPillInfo) {
-  return (
-    <span
-      className={cn(
-        'rounded-full px-2 py-0.5 text-xs font-medium',
-        tone === 'rejected'
-          ? 'bg-destructive/10 text-destructive'
-          : 'bg-palette-amber/15 text-palette-amber',
-      )}>
-      {label}
-    </span>
-  );
 }
 
 /**
@@ -372,7 +359,7 @@ export function VersionSection({
           />
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-ink-500">{i18n.t('Status')}</span>
-            {pill && <StatusPill label={pill.label} tone={pill.tone} />}
+            {pill && <StatusPill status={pill.tone}>{pill.label}</StatusPill>}
             {/* Segments are the lifecycle-legal targets; the highlighted one is
                 the staged value, applied on Save (not immediately). */}
             <div className="inline-flex overflow-hidden rounded-lg border border-ink-100">
