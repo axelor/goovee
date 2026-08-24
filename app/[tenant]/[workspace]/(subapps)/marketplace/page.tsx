@@ -228,8 +228,8 @@ export default async function Page(props: {
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
                 !category
-                  ? 'bg-ink-900 text-white'
-                  : 'bg-ink-25 text-ink-900 border border-ink-100 hover:border-ink-900',
+                  ? 'border border-royal bg-royal text-white'
+                  : 'bg-ink-25 text-ink-900 border border-ink-100 hover:border-royal',
               )}>
               {await t('All')}
             </button>
@@ -249,8 +249,8 @@ export default async function Page(props: {
                 className={cn(
                   'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
                   category === cat.id
-                    ? 'bg-ink-900 text-white'
-                    : 'bg-ink-25 text-ink-900 border border-ink-100 hover:border-ink-900',
+                    ? 'border border-royal bg-royal text-white'
+                    : 'bg-ink-25 text-ink-900 border border-ink-100 hover:border-royal',
                 )}>
                 {categoryNames[idx]}
               </button>

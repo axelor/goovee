@@ -210,8 +210,8 @@ export function VersionFields({
                         className={cn(
                           'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
                           selected
-                            ? 'border-ink-900 bg-ink-900 text-white'
-                            : 'border-ink-100 bg-ink-25 text-ink-500 hover:border-ink-900/50',
+                            ? 'border-royal bg-royal text-white'
+                            : 'border-ink-100 bg-ink-25 text-ink-500 hover:border-royal/50',
                         )}>
                         {compatibility.title}
                       </button>
