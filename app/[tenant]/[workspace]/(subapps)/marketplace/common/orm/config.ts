@@ -14,10 +14,6 @@ const marketplaceConfigSelect = {
   requiresReview: true,
   company: {id: true, timezone: true},
   defaultProductForMarketplace: {id: true, inAti: true},
-  marketplaceHeroTitle: true,
-  marketplaceHeroDescription: true,
-  marketplaceHeroOverlayColorSelect: true,
-  marketplaceHeroBgImage: {id: true},
   ...paymentConfigSelect,
 } as const satisfies SelectOptions<AOSPortalAppConfig>;
 
