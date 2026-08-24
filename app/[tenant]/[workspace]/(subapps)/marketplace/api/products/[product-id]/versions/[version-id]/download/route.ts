@@ -62,7 +62,19 @@ export async function GET(
     return new NextResponse('File not found', {status: 404});
   }
 
-  const response = await streamFile({...file, request});
+  /* `response.status` is fixed when the response is built, before a byte
+   * reaches the client, so a 200 only says the file was offered. The count
+   * comes from the transfer: an abandoned download is not counted, but one cut
+   * after the server has read the last byte is. */
+  let readWholeFile = false;
+
+  const response = await streamFile({
+    ...file,
+    request,
+    onWholeFileRead: () => {
+      readWholeFile = true;
+    },
+  });
 
   /* One install is one whole file handed over. A response here can also be a
    * revalidation (304), one range out of many (206), or the framework's HEAD
@@ -80,35 +92,43 @@ export async function GET(
    * answers 200 with no body at all. */
   const isWholeTransfer = request.method === 'GET' && response.status === 200;
 
+  if (!isWholeTransfer) {
+    return response;
+  }
+
   /* Telemetry: write the download record and bump installCount after the
    * response is flushed so it never blocks the stream. Both happen inside
    * a transaction — if the download insert fails, the increment rolls back
    * with it. The bump goes through raw SQL so it (a) is an atomic Postgres
    * `+= 1` (no read-modify-write race) and (b) does NOT touch the row's
    * optimistic-lock `version` column, so concurrent product edits aren't
-   * forced to retry. Failures are swallowed since this is best-effort. */
-  if (isWholeTransfer) {
-    after(async () => {
-      try {
-        await client.$transaction(async txClient => {
-          await createDownloadRecord({
-            client: txClient,
-            productId,
-            versionId,
-            partnerId: access.user?.id,
-          });
-          await incrementInstallCount({client: txClient, productId});
-        });
-      } catch (e) {
-        console.error('marketplace: failed to record install', {
+   * forced to retry. Failures are swallowed since this is best-effort.
+   *
+   * Runs when the response closes, which is after the file was read or after
+   * the transfer was cut short, so the flag can no longer change. It stays
+   * false for an answer that never handed the file over. */
+  after(async () => {
+    if (!readWholeFile) return;
+
+    try {
+      await client.$transaction(async txClient => {
+        await createDownloadRecord({
+          client: txClient,
           productId,
           versionId,
-          userId: access.user?.id ?? null,
-          error: e,
+          partnerId: access.user?.id,
         });
-      }
-    });
-  }
+        await incrementInstallCount({client: txClient, productId});
+      });
+    } catch (error) {
+      console.error('marketplace: failed to record install', {
+        productId,
+        versionId,
+        userId: access.user?.id ?? null,
+        error,
+      });
+    }
+  });
 
   return response;
 }
