@@ -19,16 +19,9 @@ import {useRouter} from 'next/navigation';
 import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {searchProducts} from './common/actions';
 import type {ProductSearchResult} from './common/orm';
-import {ProductIcon} from './common/ui/components/shared/product-icon';
-import {ProductTypeBadge} from './common/ui/components/shared/product-type-badge';
+import {SearchItem} from './common/ui/components/shared/search-item';
 
-export function Search({
-  className,
-  inputClassName,
-}: {
-  inputClassName?: string;
-  className?: string;
-}) {
+export function Search({className}: {className?: string}) {
   const router = useRouter();
   const {workspaceURL, workspaceURI} = useWorkspace();
   const {toast} = useToast();
@@ -36,6 +29,9 @@ export function Search({
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Cloned<ProductSearchResult>[]>([]);
+  /* The term these results were fetched for. Highlighting against the live
+     input would un-mark every row while the debounce is in flight. */
+  const [resultQuery, setResultQuery] = useState<string>('');
   const searchRef = useRef<string | undefined>(undefined);
 
   const fetchResults = useMemo(
@@ -44,6 +40,7 @@ export function Search({
         try {
           if (!query) {
             setResults([]);
+            setResultQuery('');
             return;
           }
           const {error, message, data} = await searchProducts({
@@ -53,10 +50,12 @@ export function Search({
           if (searchRef.current !== query) return;
           if (error) {
             setResults([]);
+            setResultQuery('');
             toast({variant: 'destructive', title: message});
             return;
           }
           setResults(data);
+          setResultQuery(query);
         } catch (e) {
           toast({
             variant: 'destructive',
@@ -92,10 +91,7 @@ export function Search({
       <Command className="p-0 bg-white" shouldFilter={false}>
         <CommandInput
           placeholder={i18n.t('Search marketplace')}
-          className={cn(
-            'lg:placeholder:text-base placeholder:text-sm placeholder:font-normal lg:placeholder:font-medium pl-[10px] pr-[132px] h-12 lg:pl-4 border-none text-base font-medium rounded-lg focus-visible:ring-offset-0 focus-visible:ring-0 text-ink-900',
-            inputClassName,
-          )}
+          className="lg:placeholder:text-base placeholder:text-sm placeholder:font-normal lg:placeholder:font-medium pl-[10px] h-12 lg:pl-4 border-none text-base font-medium rounded-lg focus-visible:ring-offset-0 focus-visible:ring-0 text-ink-900"
           value={search}
           onChangeCapture={handleSearch}
           loading={loading}
@@ -116,23 +112,8 @@ export function Search({
                     key={product.id}
                     value={product.slug}
                     onSelect={handleRedirection}
-                    className="flex items-center gap-3 px-3 py-2 cursor-pointer">
-                    <div className="w-8 h-8 rounded-md bg-ink-50 flex items-center justify-center flex-shrink-0">
-                      <ProductIcon
-                        code={product.iconCode}
-                        className="w-5 h-5"
-                      />
-                    </div>
-                    <span className="text-sm font-medium truncate">
-                      {product.name}
-                    </span>
-                    {product.marketplaceTypeSelect && (
-                      <ProductTypeBadge
-                        type={product.marketplaceTypeSelect}
-                        label={i18n.tattr(product.marketplaceTypeSelect)}
-                        className="ml-auto flex-shrink-0"
-                      />
-                    )}
+                    className="px-3 py-2 cursor-pointer">
+                    <SearchItem result={product} query={resultQuery} />
                   </CommandItem>
                 ))
               : null}

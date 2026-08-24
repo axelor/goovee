@@ -74,6 +74,7 @@ export async function findProductsBySearch({
       id: true,
       slug: true,
       name: true,
+      description: true,
       iconCode: true,
       coverStyle: true,
       marketplaceTypeSelect: true,
