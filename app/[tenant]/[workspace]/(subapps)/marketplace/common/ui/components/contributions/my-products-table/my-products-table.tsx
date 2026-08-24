@@ -5,6 +5,7 @@ import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
 import {InnerHTML} from '@/ui/components/inner-html';
+import {StatusPill} from '@/ui/components/status-pill';
 import {
   Table,
   TableBody,
@@ -20,29 +21,13 @@ import {Link} from '@/ui/components/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import {
-  MARKETPLACE_VERSION_STATUS,
   MARKETPLACE_VERSION_STATUS_LABELS,
+  MARKETPLACE_VERSION_STATUS_TONES,
   PRODUCT_MODERATION_STATUS,
+  PRODUCT_MODERATION_STATUS_LABELS,
+  PRODUCT_MODERATION_STATUS_TONES,
 } from '../../../../constants/statuses';
 
-function statusBadgeClass(status: string | null): string {
-  switch (status) {
-    case MARKETPLACE_VERSION_STATUS.PUBLISHED:
-      return 'bg-mint-500/15 text-mint-700';
-    case MARKETPLACE_VERSION_STATUS.IN_REVIEW:
-      return 'bg-palette-orange/40 text-palette-orange-dark';
-    case MARKETPLACE_VERSION_STATUS.REJECTED:
-      return 'bg-destructive/15 text-destructive';
-    default:
-      return 'bg-ink-50 text-ink-500';
-  }
-}
-
-function moderationBadgeClass(status: number): string {
-  return status === PRODUCT_MODERATION_STATUS.TAKEN_DOWN
-    ? 'bg-destructive/15 text-destructive'
-    : 'bg-palette-orange/40 text-palette-orange-dark';
-}
 import type {
   CompatibilityVersion,
   ListCategory,
@@ -142,34 +127,30 @@ export function MyProductsTable({
       label: i18n.t('Status'),
       desktopClassName: 'w-[15%]',
       content: product => {
+        const moderation = product.moderationStatusSelect;
         if (
-          product.moderationStatusSelect !== PRODUCT_MODERATION_STATUS.ACTIVE
+          moderation !== PRODUCT_MODERATION_STATUS.ACTIVE &&
+          PRODUCT_MODERATION_STATUS_LABELS[moderation]
         ) {
           return (
-            <span
-              title={product.moderationReason ?? undefined}
-              className={cn(
-                'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap',
-                moderationBadgeClass(product.moderationStatusSelect),
-              )}>
-              {product.moderationStatusSelect ===
-              PRODUCT_MODERATION_STATUS.FROZEN
-                ? i18n.t('Frozen')
-                : i18n.t('Taken down')}
-            </span>
+            <StatusPill
+              status={PRODUCT_MODERATION_STATUS_TONES[moderation] ?? 'draft'}
+              size="sm"
+              title={product.moderationReason ?? undefined}>
+              {i18n.t(PRODUCT_MODERATION_STATUS_LABELS[moderation])}
+            </StatusPill>
           );
         }
         const status = product.latestVersion?.statusSelect ?? null;
+        if (!status || !MARKETPLACE_VERSION_STATUS_LABELS[status]) {
+          return <span className="text-sm text-ink-500">{'—'}</span>;
+        }
         return (
-          <span
-            className={cn(
-              'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize whitespace-nowrap',
-              statusBadgeClass(status),
-            )}>
-            {status && MARKETPLACE_VERSION_STATUS_LABELS[status]
-              ? i18n.t(MARKETPLACE_VERSION_STATUS_LABELS[status])
-              : '—'}
-          </span>
+          <StatusPill
+            status={MARKETPLACE_VERSION_STATUS_TONES[status] ?? 'draft'}
+            size="sm">
+            {i18n.t(MARKETPLACE_VERSION_STATUS_LABELS[status])}
+          </StatusPill>
         );
       },
     },
