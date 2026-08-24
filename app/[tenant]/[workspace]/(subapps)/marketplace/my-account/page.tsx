@@ -117,7 +117,7 @@ export default async function MyAccountPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-foreground-muted cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate text-md">
                 <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
                   {await t('Marketplace')}
                 </Link>

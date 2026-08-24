@@ -126,7 +126,7 @@ export default async function MyPurchasesPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-foreground-muted cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate text-md">
                 <Link href={marketplaceBase}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -134,7 +134,7 @@ export default async function MyPurchasesPage(props: {
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-foreground-muted cursor-pointer truncate text-md">
+                className="text-ink-500 cursor-pointer truncate text-md">
                 <Link href={`${marketplaceBase}/my-account`}>
                   {await t('My account')}
                 </Link>
