@@ -282,7 +282,7 @@ export function ProductFields({
                         GRADIENT_MAP[code],
                         selected
                           ? 'ring-2 ring-royal ring-offset-2'
-                          : 'hover:ring-2 hover:ring-ink-900/20',
+                          : 'hover:ring-2 hover:ring-royal/30',
                       )}
                       aria-label={code}
                     />
@@ -316,15 +316,12 @@ export function ProductFields({
                       className={cn(
                         'flex h-12 w-12 items-center justify-center rounded-lg border transition-all',
                         selected
-                          ? 'border-palette-indigo bg-palette-indigo/10 text-palette-indigo ring-1 ring-palette-indigo'
-                          : 'border-ink-100 bg-ink-25 text-ink-900 hover:ring-1 hover:ring-ink-900/20',
+                          ? 'border-royal bg-royal/10 text-royal ring-1 ring-royal'
+                          : 'border-ink-100 bg-ink-25 text-ink-900 hover:ring-1 hover:ring-royal/30',
                       )}>
                       <ProductIcon
                         code={code}
-                        className={cn(
-                          'h-5 w-5',
-                          selected && 'text-palette-indigo',
-                        )}
+                        className={cn('h-5 w-5', selected && 'text-royal')}
                       />
                     </button>
                   );

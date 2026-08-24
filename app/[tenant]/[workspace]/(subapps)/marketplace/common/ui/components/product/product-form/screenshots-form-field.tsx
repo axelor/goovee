@@ -292,7 +292,7 @@ function ScreenshotsField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-ink-100 bg-ink-50/40 text-ink-500 transition-colors hover:border-ink-900/40 hover:text-ink-900">
+          className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-ink-100 bg-ink-50/40 text-ink-500 transition-colors hover:border-royal/40 hover:text-ink-900">
           <Plus size={20} />
           <span className="text-xs">{i18n.t('Add or drop images')}</span>
         </button>

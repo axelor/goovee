@@ -152,7 +152,7 @@ export function BundleDropzone({
         'flex cursor-pointer items-center gap-4 rounded-lg border-2 border-dashed bg-ink-50/30 p-8 transition-colors',
         isDragging
           ? 'border-royal bg-royal/5'
-          : 'border-ink-100 hover:border-ink-900/40',
+          : 'border-ink-100 hover:border-royal/40',
       )}>
       <FileArchive className="h-10 w-10 shrink-0 text-ink-500" />
       <div className="min-w-0 flex-1">
