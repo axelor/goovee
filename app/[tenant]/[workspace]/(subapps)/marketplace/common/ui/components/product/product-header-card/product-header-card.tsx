@@ -73,7 +73,7 @@ export async function ProductHeaderCard({
   );
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-8 relative">
+    <div className="bg-white rounded-2xl border border-ink-100 p-4 sm:p-8 relative">
       {/* Favorite — pinned top-right */}
       <div className="absolute top-4 right-4 z-10">
         {preview ? (
@@ -83,13 +83,13 @@ export async function ProductHeaderCard({
             disabled
             title={await t('Inactive in preview')}
             aria-label={await t('Add to favorites')}
-            className="rounded-full bg-card/90 backdrop-blur-sm shadow-sm">
+            className="rounded-full bg-white/90 backdrop-blur-sm shadow-sm">
             <Heart size={18} className="shrink-0" />
           </Button>
         ) : (
           <Suspense
             fallback={
-              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+              <div className="h-10 w-10 rounded-full bg-ink-50 animate-pulse" />
             }>
             <FavoriteButton
               productId={product.id}
@@ -127,7 +127,7 @@ export async function ProductHeaderCard({
               <Link key={c.id} href={`${marketplaceHref}?category=${c.id}`}>
                 <Badge
                   variant="outline"
-                  className="hover:bg-muted cursor-pointer">
+                  className="hover:bg-ink-50 cursor-pointer">
                   {c.name}
                 </Badge>
               </Link>
@@ -140,7 +140,7 @@ export async function ProductHeaderCard({
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
             {product.name}
           </h1>
 
@@ -148,14 +148,14 @@ export async function ProductHeaderCard({
           <InnerHTML
             content={product.description || undefined}
             as="p"
-            className="text-muted-foreground leading-relaxed text-sm"
+            className="text-ink-500 leading-relaxed text-sm"
           />
 
           {/* Creator, Rating, Stats */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm pt-2">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{await t('by')}</span>
-              <span className="font-semibold text-foreground">
+              <span className="text-ink-500">{await t('by')}</span>
+              <span className="font-semibold text-ink-900">
                 {product.publisher.simpleFullName ||
                   product.publisher.name ||
                   ''}
@@ -171,13 +171,13 @@ export async function ProductHeaderCard({
               })}
               count={ratingCount}
               size={16}
-              valueClassName="font-semibold text-foreground"
+              valueClassName="font-semibold text-ink-900"
             />
 
             {/* Installs */}
             <div className="flex items-center gap-1">
-              <Download size={16} className="text-muted-foreground" />
-              <span className="text-muted-foreground">{installCountLabel}</span>
+              <Download size={16} className="text-ink-500" />
+              <span className="text-ink-500">{installCountLabel}</span>
             </div>
 
             {/* Updated */}
@@ -197,7 +197,7 @@ export async function ProductHeaderCard({
           <div
             className={cn(
               'text-4xl font-bold text-right lg:pr-12',
-              paid ? 'text-foreground' : 'text-success',
+              paid ? 'text-ink-900' : 'text-mint-600',
             )}>
             {priceBadgeLabel}
           </div>

@@ -47,7 +47,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
 
   return (
     <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${slug}`}>
-      <div className="bg-card rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col h-full">
+      <div className="bg-white rounded-lg overflow-hidden border border-ink-100 hover:shadow-md transition-shadow flex flex-col h-full">
         {/* Header with gradient and icon */}
         <div
           className={`h-[140px] bg-gradient-to-br ${bgGradient} flex items-center justify-center relative`}>
@@ -62,9 +62,9 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
             </div>
           )}
           <div
-            className={`absolute top-3 right-3 px-2.5 py-1 rounded-full ${paid ? 'bg-primary/10' : 'bg-success-light'}`}>
+            className={`absolute top-3 right-3 px-2.5 py-1 rounded-full ${paid ? 'bg-royal/10' : 'bg-mint-100'}`}>
             <span
-              className={`text-xs font-medium ${paid ? 'text-primary' : 'text-success'}`}>
+              className={`text-xs font-medium ${paid ? 'text-royal' : 'text-mint-600'}`}>
               {priceLabel}
             </span>
           </div>
@@ -75,11 +75,11 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
           {/* Title and version */}
           <div className="pb-1.5">
             <div className="flex items-start justify-between mb-1.5 gap-2">
-              <h3 className="text-sm font-semibold text-foreground line-clamp-1">
+              <h3 className="text-sm font-semibold text-ink-900 line-clamp-1">
                 {name}
               </h3>
               {currentVersion && (
-                <span className="text-xs text-muted-foreground flex-shrink-0">
+                <span className="text-xs text-ink-500 flex-shrink-0">
                   {formatVersionNumber(currentVersion)}
                 </span>
               )}
@@ -91,22 +91,22 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
             <InnerHTML
               content={description || undefined}
               as="p"
-              className="text-xs text-muted-foreground line-clamp-2"
+              className="text-xs text-ink-500 line-clamp-2"
             />
           </div>
 
           {/* Footer with rating and download count */}
-          <div className="border-t border-border pt-3 flex items-center justify-between">
+          <div className="border-t border-ink-100 pt-3 flex items-center justify-between">
             <Rating
               value={averageRating}
               size={12}
-              valueClassName="text-xs text-muted-foreground"
+              valueClassName="text-xs text-ink-500"
             />
 
             {/* Download count */}
             <div className="flex items-center gap-1">
-              <Download size={12} className="text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
+              <Download size={12} className="text-ink-500" />
+              <span className="text-xs text-ink-500">
                 {formatNumber(installCount || 0)}
               </span>
             </div>

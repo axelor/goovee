@@ -36,7 +36,7 @@ export function RatingInput({
               'transition-colors',
               n <= active
                 ? 'fill-palette-amber text-palette-amber'
-                : 'fill-muted text-muted',
+                : 'fill-ink-100 text-ink-100',
             )}
           />
         </button>

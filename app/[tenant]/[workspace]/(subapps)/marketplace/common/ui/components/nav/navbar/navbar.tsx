@@ -43,8 +43,8 @@ function NavLinks() {
             className={cn(
               'px-4 pb-1 font-medium transition-colors border-b-2',
               active
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent',
+                ? 'text-royal border-royal'
+                : 'text-ink-500 hover:text-ink-900 border-transparent',
             )}>
             {i18n.t(item.title)}
           </Link>

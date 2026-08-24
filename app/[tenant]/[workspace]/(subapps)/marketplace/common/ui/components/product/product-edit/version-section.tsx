@@ -293,14 +293,14 @@ export function VersionSection({
   );
 
   return (
-    <section className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+    <section className="space-y-6 rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-foreground">
+          <h3 className="text-lg font-semibold text-ink-900">
             {i18n.t('Versions')}
           </h3>
           {position.total > 1 && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 text-sm text-ink-500">
               <Button
                 type="button"
                 variant="ghost"
@@ -354,14 +354,14 @@ export function VersionSection({
       </div>
 
       {position.total === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
+        <p className="py-8 text-center text-sm text-ink-500">
           {i18n.t('No versions yet. Add one to publish this product.')}
         </p>
       ) : model.awaitingNext ? (
         /* Parked at the frontier: the entry being fetched isn't loaded yet, so
             show a spinner in its place (the navigator already points at it). */
         <div className="flex items-center justify-center p-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-ink-500" />
         </div>
       ) : (
         <div className="space-y-6">
@@ -371,13 +371,11 @@ export function VersionSection({
             rejectionReason={currentVersionMeta?.rejectionReason}
           />
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-muted-foreground">
-              {i18n.t('Status')}
-            </span>
+            <span className="text-sm text-ink-500">{i18n.t('Status')}</span>
             {pill && <StatusPill label={pill.label} tone={pill.tone} />}
             {/* Segments are the lifecycle-legal targets; the highlighted one is
                 the staged value, applied on Save (not immediately). */}
-            <div className="inline-flex overflow-hidden rounded-lg border border-border">
+            <div className="inline-flex overflow-hidden rounded-lg border border-ink-100">
               {segments.map((segment, index) => {
                 const selected = status === segment.intent;
                 return (
@@ -388,10 +386,10 @@ export function VersionSection({
                     onClick={() => model.setStatus(segment.intent)}
                     className={cn(
                       'px-3 py-1.5 text-sm font-medium transition-colors',
-                      index > 0 && 'border-l border-border',
+                      index > 0 && 'border-l border-ink-100',
                       selected
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-background text-muted-foreground hover:bg-muted',
+                        ? 'bg-royal text-white'
+                        : 'bg-ink-25 text-ink-500 hover:bg-ink-50',
                     )}>
                     {segment.label}
                   </button>

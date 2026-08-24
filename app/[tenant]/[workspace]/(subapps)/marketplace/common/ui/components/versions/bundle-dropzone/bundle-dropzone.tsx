@@ -149,12 +149,12 @@ export function BundleDropzone({
       }}
       onDrop={handleDrop}
       className={cn(
-        'flex cursor-pointer items-center gap-4 rounded-lg border-2 border-dashed bg-muted/30 p-8 transition-colors',
+        'flex cursor-pointer items-center gap-4 rounded-lg border-2 border-dashed bg-ink-50/30 p-8 transition-colors',
         isDragging
-          ? 'border-primary bg-primary/5'
-          : 'border-border hover:border-foreground/40',
+          ? 'border-royal bg-royal/5'
+          : 'border-ink-100 hover:border-ink-900/40',
       )}>
-      <FileArchive className="h-10 w-10 shrink-0 text-muted-foreground" />
+      <FileArchive className="h-10 w-10 shrink-0 text-ink-500" />
       <div className="min-w-0 flex-1">
         {staged ? (
           <>
@@ -165,17 +165,15 @@ export function BundleDropzone({
                 label={i18n.t('Uploading {0}', staged.fileName)}
                 showValue
                 className="rounded-md px-2 py-1">
-                <p className="truncate text-sm text-foreground">
+                <p className="truncate text-sm text-ink-900">
                   {staged.fileName}
                 </p>
               </ProgressFill>
             ) : (
-              <p className="truncate text-sm text-foreground">
-                {staged.fileName}
-              </p>
+              <p className="truncate text-sm text-ink-900">{staged.fileName}</p>
             )}
             {staged.status === 'success' && (
-              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+              <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-500">
                 <CheckCircle2 className="h-3.5 w-3.5 text-palette-green" />
                 {i18n.t('Ready to save')}
               </p>
@@ -196,21 +194,19 @@ export function BundleDropzone({
               href={downloadHref}
               download
               onClick={e => e.stopPropagation()}
-              className="truncate text-sm font-medium text-primary hover:underline">
+              className="truncate text-sm font-medium text-royal hover:underline">
               {existingFileName}
             </a>
             {existingFileSizeText && (
-              <p className="text-xs text-muted-foreground">
-                {existingFileSizeText}
-              </p>
+              <p className="text-xs text-ink-500">{existingFileSizeText}</p>
             )}
           </>
         ) : (
           <>
-            <p className="truncate text-sm text-muted-foreground">
+            <p className="truncate text-sm text-ink-500">
               {i18n.t('No file selected')}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink-500">
               {i18n.t('Drag and drop a .zip here, or click to browse')}
             </p>
           </>

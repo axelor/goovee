@@ -33,7 +33,7 @@ export function VersionCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center p-4 sm:p-5">
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h3 className="font-semibold text-foreground">
+            <h3 className="font-semibold text-ink-900">
               v{formatVersionNumber(version)}
             </h3>
             {isLatest && <Badge variant="success">{i18n.t('Latest')}</Badge>}
@@ -43,13 +43,13 @@ export function VersionCard({
                 date={version.publishDateTime}
                 prefix={i18n.t('Released')}
                 lowercase
-                className="text-xs text-muted-foreground"
+                className="text-xs text-ink-500"
               />
             )}
           </div>
           {version.compatibilitySet && version.compatibilitySet.length > 0 ? (
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-ink-500">
                 {i18n.t('Compatible:')}
               </span>
               {version.compatibilitySet.map(axelorVersion => (
@@ -62,7 +62,7 @@ export function VersionCard({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-ink-500 mt-1">
               {i18n.t('No compatible versions specified')}
             </p>
           )}
@@ -94,8 +94,8 @@ export function VersionCard({
       {version.changelog && (
         <>
           {expanded && (
-            <div className="border-t border-border bg-muted/30 px-4 sm:px-5 py-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+            <div className="border-t border-ink-100 bg-ink-50/30 px-4 sm:px-5 py-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-500 mb-2">
                 {i18n.t('Changelog')}
               </h4>
               <RichTextViewer content={version.changelog} className="text-sm" />
@@ -106,7 +106,7 @@ export function VersionCard({
             type="button"
             onClick={() => setExpanded(prev => !prev)}
             aria-expanded={expanded}
-            className="group flex items-center justify-center gap-1.5 w-full border-t border-border py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+            className="group flex items-center justify-center gap-1.5 w-full border-t border-ink-100 py-2 text-xs font-medium text-ink-500 hover:text-ink-900 hover:bg-ink-50/50 transition-colors">
             {expanded ? i18n.t('Hide changelog') : i18n.t('View changelog')}
             <ChevronDown
               size={14}

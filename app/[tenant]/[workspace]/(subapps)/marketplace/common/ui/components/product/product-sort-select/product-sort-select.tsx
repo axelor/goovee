@@ -22,7 +22,7 @@ export function ProductSortSelect({currentSort}: ProductSortSelectProps) {
     <select
       defaultValue={currentSort}
       onChange={e => handleSort(e.target.value)}
-      className="bg-card border border-border rounded-lg px-4 py-2 text-sm text-foreground cursor-pointer hover:border-foreground transition-colors appearance-none pr-10 bg-no-repeat bg-right"
+      className="bg-white border border-ink-100 rounded-lg px-4 py-2 text-sm text-ink-900 cursor-pointer hover:border-ink-900 transition-colors appearance-none pr-10 bg-no-repeat bg-right"
       style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M3.5 5.5L7 9l3.5-3.5'/%3E%3C/svg%3E")`,
         backgroundPosition: 'right 0.7rem center',

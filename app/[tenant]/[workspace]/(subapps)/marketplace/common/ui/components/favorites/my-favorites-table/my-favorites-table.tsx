@@ -79,7 +79,7 @@ export function MyFavoritesTable({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="font-medium text-foreground truncate">
+                <div className="font-medium text-ink-900 truncate">
                   {favorite.name}
                 </div>
                 {favorite.marketplaceTypeSelect && (
@@ -90,7 +90,7 @@ export function MyFavoritesTable({
                   />
                 )}
               </div>
-              <div className="text-xs text-muted-foreground line-clamp-2">
+              <div className="text-xs text-ink-500 line-clamp-2">
                 <InnerHTML content={favorite.description ?? undefined} />
               </div>
             </div>
@@ -109,9 +109,7 @@ export function MyFavoritesTable({
           <span
             className={cn(
               'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap',
-              paid
-                ? 'bg-primary/10 text-primary'
-                : 'bg-success-light text-success',
+              paid ? 'bg-royal/10 text-royal' : 'bg-mint-100 text-mint-600',
             )}>
             {paid
               ? formatNumber(ati, {
@@ -147,16 +145,16 @@ export function MyFavoritesTable({
     /* No matches for active filters reads differently from an empty list. */
     if (filtered) {
       return (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">
+        <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
+          <p className="text-ink-500">
             {i18n.t('No products match your filters.')}
           </p>
         </div>
       );
     }
     return (
-      <div className="rounded-lg border border-border bg-card p-8 text-center">
-        <p className="text-muted-foreground mb-4">
+      <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
+        <p className="text-ink-500 mb-4">
           {i18n.t("You haven't saved any products yet.")}
         </p>
         <Button asChild>
@@ -169,7 +167,7 @@ export function MyFavoritesTable({
   return (
     <Table
       className={cn(
-        'rounded-lg border border-border bg-card text-card-foreground',
+        'rounded-lg border border-ink-100 bg-white text-ink-900',
         small && 'table-fixed',
       )}>
       <TableHeader>
@@ -208,8 +206,8 @@ export function MyFavoritesTable({
                       type="button"
                       aria-label={open ? 'Collapse' : 'Expand'}
                       onClick={() => setOpenId(open ? null : favorite.id)}
-                      className="p-1 rounded-full hover:bg-muted transition-colors">
-                      <Arrow className="w-4 h-4 text-muted-foreground" />
+                      className="p-1 rounded-full hover:bg-ink-50 transition-colors">
+                      <Arrow className="w-4 h-4 text-ink-500" />
                     </button>
                   </TableCell>
                 )}
@@ -218,8 +216,8 @@ export function MyFavoritesTable({
                     <Link
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${favorite.slug}`}
                       title={i18n.t('View live')}
-                      className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                      className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
+                      <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
                     </Link>
                     {/* Same toggle as the product header — toggles the heart
                         optimistically; the row stays so it can be re-added. */}
@@ -235,13 +233,13 @@ export function MyFavoritesTable({
               </TableRow>
               {small && subColumns.length > 0 && (
                 <Collapsible open={open} asChild>
-                  <TableRow className="bg-muted/30">
+                  <TableRow className="bg-ink-50/30">
                     <CollapsibleContent asChild>
                       <TableCell colSpan={mainColumns.length + 2}>
                         <div className="grid grid-cols-2 gap-y-2 items-center px-2 py-1">
                           {subColumns.map(c => (
                             <Fragment key={c.key}>
-                              <div className="text-xs font-semibold uppercase text-muted-foreground">
+                              <div className="text-xs font-semibold uppercase text-ink-500">
                                 {c.label}
                               </div>
                               <div className="flex justify-self-end items-center">

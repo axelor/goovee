@@ -92,9 +92,9 @@ export function ProductEditPage({
         </div>
 
         {/* One combined save for the whole page. */}
-        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
+        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-ink-100 bg-ink-25 px-6 py-4">
           {model.uploadsInFlight ? (
-            <span className="mr-auto text-sm text-muted-foreground">
+            <span className="mr-auto text-sm text-ink-500">
               {i18n.t('Uploads in progress…')}
             </span>
           ) : model.uploadsPaused ? (

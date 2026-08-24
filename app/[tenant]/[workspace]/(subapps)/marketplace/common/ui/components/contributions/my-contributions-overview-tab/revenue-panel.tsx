@@ -4,7 +4,8 @@ import {Skeleton} from '@/ui/components/skeleton';
 import type {RevenueSummary} from '../../../../orm';
 import {RevenueChart} from './revenue-chart';
 
-const CARD = 'lg:col-span-2 bg-card rounded-lg border border-border p-4 md:p-6';
+const CARD =
+  'lg:col-span-2 bg-white rounded-lg border border-ink-100 p-4 md:p-6';
 
 export async function RevenuePanel({
   revenue,
@@ -15,7 +16,7 @@ export async function RevenuePanel({
 
   return (
     <div className={`${CARD} space-y-4`}>
-      <h3 className="text-xl font-semibold text-foreground">
+      <h3 className="text-xl font-semibold text-ink-900">
         {await t('Revenue · last 12 months')}
       </h3>
       {currency?.codeISO ? (
@@ -27,9 +28,7 @@ export async function RevenuePanel({
         />
       ) : (
         <div className="flex h-64 items-center justify-center">
-          <p className="text-sm text-muted-foreground">
-            {await t('No sales yet.')}
-          </p>
+          <p className="text-sm text-ink-500">{await t('No sales yet.')}</p>
         </div>
       )}
     </div>

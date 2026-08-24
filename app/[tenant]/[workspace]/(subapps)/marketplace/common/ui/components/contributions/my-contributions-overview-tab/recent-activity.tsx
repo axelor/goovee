@@ -7,12 +7,12 @@ import {ProductTab} from '../../../../constants/tabs';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
 
-const CARD = 'bg-card rounded-lg border border-border p-4 md:p-6';
+const CARD = 'bg-white rounded-lg border border-ink-100 p-4 md:p-6';
 
 const ACTIVITY_STYLE: Record<ActivityItem['kind'], {bgColor: string}> = {
   review: {bgColor: 'bg-palette-amber-light'},
   download: {bgColor: 'bg-palette-blue-light'},
-  purchase: {bgColor: 'bg-success/15'},
+  purchase: {bgColor: 'bg-mint-500/15'},
 };
 
 export async function RecentActivity({
@@ -28,13 +28,11 @@ export async function RecentActivity({
 
   return (
     <div className={`${CARD} space-y-4`}>
-      <h3 className="text-xl font-semibold text-foreground">
+      <h3 className="text-xl font-semibold text-ink-900">
         {await t('Recent activity')}
       </h3>
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {await t('No activity yet.')}
-        </p>
+        <p className="text-sm text-ink-500">{await t('No activity yet.')}</p>
       ) : (
         <div className="space-y-4">
           {items.map((item, index) => (
@@ -71,7 +69,7 @@ async function ActivityRow({
     item.actor?.simpleFullName || item.actor?.name || (await t('Someone'));
 
   return (
-    <div className="border-b border-border pb-4 last:border-0 last:pb-0 flex items-center gap-4">
+    <div className="border-b border-ink-100 pb-4 last:border-0 last:pb-0 flex items-center gap-4">
       {item.actor ? (
         <PartnerAvatar
           partner={item.actor}
@@ -86,14 +84,14 @@ async function ActivityRow({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <div className="text-sm text-foreground">
+        <div className="text-sm text-ink-900">
           <span className="font-bold">{name}</span>
-          <span className="text-muted-foreground"> {action} </span>
+          <span className="text-ink-500"> {action} </span>
           <Link
             href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}${
               item.kind === 'review' ? `?tab=${ProductTab.Reviews}` : ''
             }`}
-            className="font-bold text-primary hover:underline">
+            className="font-bold text-royal hover:underline">
             {item.marketplaceProduct.name}
           </Link>
         </div>
@@ -102,7 +100,7 @@ async function ActivityRow({
         date={item.at}
         displayType="relative"
         lowercase
-        className="text-xs text-muted-foreground flex-shrink-0"
+        className="text-xs text-ink-500 flex-shrink-0"
       />
     </div>
   );

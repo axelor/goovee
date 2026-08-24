@@ -182,10 +182,10 @@ export default async function FavoritesPage(props: {
       {/* Header */}
       <div className="pb-6">
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
             {await t('Favorites')}
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-ink-500 text-sm">
             {await t('Your saved products.')}
           </p>
         </div>

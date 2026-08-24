@@ -33,11 +33,9 @@ export function NoticeBanner({
         )}>
         <div className="container flex items-center gap-2 py-2.5 text-sm">
           <Icon className="h-4 w-4 shrink-0 text-palette-amber" />
-          <span className="font-medium text-foreground">{title}</span>
+          <span className="font-medium text-ink-900">{title}</span>
           {children}
-          {description && (
-            <span className="text-muted-foreground">{description}</span>
-          )}
+          {description && <span className="text-ink-500">{description}</span>}
         </div>
       </div>
     );
@@ -53,10 +51,8 @@ export function NoticeBanner({
         <Icon className="h-4 w-4 text-palette-amber" />
       </div>
       <div className="space-y-1">
-        <div className="font-semibold text-sm text-foreground">{title}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        )}
+        <div className="font-semibold text-sm text-ink-900">{title}</div>
+        {description && <p className="text-xs text-ink-500">{description}</p>}
         {children}
       </div>
     </div>

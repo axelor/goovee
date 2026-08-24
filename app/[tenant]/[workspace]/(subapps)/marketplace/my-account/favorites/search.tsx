@@ -56,7 +56,7 @@ export function FavoritesSearch({className}: {className?: string}) {
 
   return (
     <div className={cn('relative w-full sm:max-w-xs', className)}>
-      <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-500" />
       <Input
         type="text"
         value={value}
@@ -71,7 +71,7 @@ export function FavoritesSearch({className}: {className?: string}) {
           onClick={handleClear}
           title={i18n.t('Clear')}
           aria-label={i18n.t('Clear')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-500 hover:bg-ink-50 hover:text-ink-900">
           <X className="h-4 w-4" />
         </button>
       )}

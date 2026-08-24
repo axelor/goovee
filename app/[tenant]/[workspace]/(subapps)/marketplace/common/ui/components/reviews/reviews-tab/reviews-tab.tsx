@@ -144,8 +144,8 @@ export async function ReviewsTab({
     return (
       <div className="space-y-6">
         {yourReviewCard}
-        <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <p className="text-muted-foreground">{await t('No reviews yet')}</p>
+        <div className="text-center py-12 bg-white rounded-lg border border-ink-100">
+          <p className="text-ink-500">{await t('No reviews yet')}</p>
         </div>
       </div>
     );
@@ -154,15 +154,15 @@ export async function ReviewsTab({
   return (
     <div className="space-y-6">
       {/* Rating Summary Card */}
-      <div className="bg-card rounded-lg border border-border p-6 space-y-6">
+      <div className="bg-white rounded-lg border border-ink-100 p-6 space-y-6">
         <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
           {/* Left: Average Rating */}
-          <div className="flex flex-col items-center gap-3 sm:border-r sm:border-border sm:pr-8">
-            <div className="text-5xl font-bold text-foreground">
+          <div className="flex flex-col items-center gap-3 sm:border-r sm:border-ink-100 sm:pr-8">
+            <div className="text-5xl font-bold text-ink-900">
               {(Number(product.averageRating) || 0).toFixed(1)}
             </div>
             <Rating value={product.averageRating} showValue={false} size={16} />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-500">
               {totalReviewCount === 1
                 ? await t('1 review')
                 : await t('{0} reviews', String(totalReviewCount))}
@@ -173,20 +173,20 @@ export async function ReviewsTab({
           <div className="flex-1 space-y-3">
             {[5, 4, 3, 2, 1].map(rating => (
               <div key={rating} className="flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground w-6">
+                <span className="text-sm font-medium text-ink-900 w-6">
                   {rating}
                 </span>
                 <Star
                   size={12}
                   className="fill-amber-400 text-amber-400 flex-shrink-0"
                 />
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="flex-1 h-1.5 bg-ink-50 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-amber-400 rounded-full"
                     style={{width: `${getRatingPercentage(rating)}%`}}
                   />
                 </div>
-                <span className="text-sm text-muted-foreground w-12 text-right">
+                <span className="text-sm text-ink-500 w-12 text-right">
                   {getRatingPercentage(rating)}%
                 </span>
               </div>
@@ -203,13 +203,13 @@ export async function ReviewsTab({
           return (
             <div
               key={review.id}
-              className="bg-card rounded-lg border border-border p-6 space-y-3">
+              className="bg-white rounded-lg border border-ink-100 p-6 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
                   <PartnerAvatar partner={review.author} tenantId={tenantId} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-foreground text-sm">
+                      <p className="font-bold text-ink-900 text-sm">
                         {review.author.simpleFullName}
                       </p>
                       {review.createdOn && (
@@ -218,7 +218,7 @@ export async function ReviewsTab({
                           displayType="relative"
                           showTooltip={true}
                           prefix="•"
-                          className="text-xs text-muted-foreground"
+                          className="text-xs text-ink-500"
                         />
                       )}
                     </div>
@@ -246,7 +246,7 @@ export async function ReviewsTab({
               {review.moderationStatusSelect !==
                 REVIEW_MODERATION_STATUS.HIDDEN &&
                 review.reviewComment && (
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="text-ink-500 text-sm leading-relaxed">
                     {review.reviewComment}
                   </p>
                 )}

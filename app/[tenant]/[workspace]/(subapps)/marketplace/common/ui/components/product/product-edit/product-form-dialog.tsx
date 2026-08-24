@@ -54,7 +54,7 @@ export function ProductFormDialog({
            * scrollbar, native arrow buttons hidden. */
           scrollContainerClassName={cn(
             'overflow-y-auto overscroll-contain',
-            '[scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border',
+            '[scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-ink-100',
             isSmall ? 'max-h-[90vh]' : 'h-[90vh]',
           )}
           onClose={() => onOpenChange(false)}

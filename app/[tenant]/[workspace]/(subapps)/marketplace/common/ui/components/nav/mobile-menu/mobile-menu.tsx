@@ -63,7 +63,7 @@ function Menu({icon, color}: {icon: string; color?: string}) {
                   onClick={closeSidebar}
                   className={cn(
                     'px-6 py-4 text-base font-medium transition-colors',
-                    active ? 'text-primary' : 'text-foreground hover:bg-muted',
+                    active ? 'text-royal' : 'text-ink-900 hover:bg-ink-50',
                   )}>
                   {i18n.t(item.title)}
                 </Link>

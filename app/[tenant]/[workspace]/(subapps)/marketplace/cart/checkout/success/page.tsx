@@ -78,19 +78,19 @@ export default async function CheckoutSuccessPage(props: {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
-      <div className="rounded-lg border border-border bg-card p-6 text-center">
-        <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-success" />
+      <div className="rounded-lg border border-ink-100 bg-white p-6 text-center">
+        <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-mint-600" />
         <h1 className="text-2xl font-semibold mb-2">
           {await t('Purchase complete')}
         </h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-ink-500 mb-6">
           {await t(
             'Thanks for your purchase. Your products are now available to download.',
           )}
         </p>
 
         {recent.length > 0 && (
-          <ul className="text-left divide-y divide-border rounded border border-border overflow-hidden mb-6">
+          <ul className="text-left divide-y divide-ink-100 rounded border border-ink-100 overflow-hidden mb-6">
             {recent.map(row => {
               const product = row.marketplaceProduct;
               const version = product.currentVersion;
@@ -113,11 +113,11 @@ export default async function CheckoutSuccessPage(props: {
                       />
                     </div>
                     <div className="min-w-0">
-                      <div className="font-medium text-foreground truncate">
+                      <div className="font-medium text-ink-900 truncate">
                         {product.name}
                       </div>
                       {product.description && (
-                        <div className="text-xs text-muted-foreground line-clamp-2">
+                        <div className="text-xs text-ink-500 line-clamp-2">
                           <InnerHTML content={product.description} />
                         </div>
                       )}
@@ -132,7 +132,7 @@ export default async function CheckoutSuccessPage(props: {
                       </a>
                     </Button>
                   ) : (
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-ink-500 text-xs">
                       {t('Unavailable')}
                     </span>
                   )}

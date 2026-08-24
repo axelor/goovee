@@ -29,8 +29,8 @@ export function Rating({
   count,
   showValue = true,
   size = 14,
-  valueClassName = 'text-sm text-foreground',
-  countClassName = 'text-sm text-muted-foreground',
+  valueClassName = 'text-sm text-ink-900',
+  countClassName = 'text-sm text-ink-500',
   className,
 }: RatingProps) {
   const rating = Number(value ?? 0);
@@ -49,7 +49,7 @@ export function Rating({
             className={
               i < rounded
                 ? 'fill-palette-amber text-palette-amber'
-                : 'fill-muted text-muted'
+                : 'fill-ink-100 text-ink-100'
             }
           />
         ))}

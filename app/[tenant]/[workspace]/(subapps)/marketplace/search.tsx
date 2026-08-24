@@ -89,7 +89,7 @@ export function Search({
 
   return (
     <div className={cn('w-full relative', className)}>
-      <Command className="p-0 bg-card" shouldFilter={false}>
+      <Command className="p-0 bg-white" shouldFilter={false}>
         <CommandInput
           placeholder={i18n.t('Search marketplace')}
           className={cn(
@@ -103,7 +103,7 @@ export function Search({
 
         <CommandList
           className={cn(
-            'absolute bg-card top-[60px] right-0 border border-grey-1 rounded-lg no-scrollbar text-main-black z-50 w-full p-0',
+            'absolute bg-white top-[60px] right-0 border border-grey-1 rounded-lg no-scrollbar text-main-black z-50 w-full p-0',
             open ? 'block' : 'hidden',
           )}>
           <CommandEmpty>
@@ -117,7 +117,7 @@ export function Search({
                     value={product.slug}
                     onSelect={handleRedirection}
                     className="flex items-center gap-3 px-3 py-2 cursor-pointer">
-                    <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-md bg-ink-50 flex items-center justify-center flex-shrink-0">
                       <ProductIcon
                         code={product.iconCode}
                         className="w-5 h-5"

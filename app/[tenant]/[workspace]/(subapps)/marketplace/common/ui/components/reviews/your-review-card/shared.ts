@@ -4,7 +4,7 @@ import type {MyReview} from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
 
 export const REVIEW_CARD_SHELL =
-  'rounded-lg border border-primary/40 bg-card p-6';
+  'rounded-lg border border-royal/40 bg-white p-6';
 
 /**
  * Minimum subset of a review the display markup actually reads. Both

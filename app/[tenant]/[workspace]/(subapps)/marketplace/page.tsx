@@ -228,8 +228,8 @@ export default async function Page(props: {
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
                 !category
-                  ? 'bg-foreground text-background'
-                  : 'bg-background text-foreground border border-border hover:border-foreground',
+                  ? 'bg-ink-900 text-white'
+                  : 'bg-ink-25 text-ink-900 border border-ink-100 hover:border-ink-900',
               )}>
               {await t('All')}
             </button>
@@ -249,8 +249,8 @@ export default async function Page(props: {
                 className={cn(
                   'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
                   category === cat.id
-                    ? 'bg-foreground text-background'
-                    : 'bg-background text-foreground border border-border hover:border-foreground',
+                    ? 'bg-ink-900 text-white'
+                    : 'bg-ink-25 text-ink-900 border border-ink-100 hover:border-ink-900',
                 )}>
                 {categoryNames[idx]}
               </button>
@@ -278,7 +278,7 @@ export default async function Page(props: {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-500">
               {await t('No products found')}
             </p>
           </div>

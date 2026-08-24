@@ -222,10 +222,10 @@ export default async function MyContributionsPage(props: {
       <div className="pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
               {await t('My contributions')}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-ink-500 text-sm">
               {await t(
                 "Manage the plugins and apps you've published on the Axelor marketplace.",
               )}
@@ -250,14 +250,14 @@ export default async function MyContributionsPage(props: {
       {/* Tabs — only an approved publisher gets the console tabs. */}
       {isPublisher && (
         <div className="pb-6">
-          <div className="border-b border-border flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="border-b border-ink-100 flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link
               href={tabNavLink(MyContributionsTab.Overview)}
               replace
               className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
                 tab === MyContributionsTab.Overview
-                  ? 'text-primary border-primary'
-                  : 'text-muted-foreground hover:text-foreground border-transparent'
+                  ? 'text-royal border-royal'
+                  : 'text-ink-500 hover:text-ink-900 border-transparent'
               }`}>
               {await t('Overview')}
             </Link>
@@ -266,8 +266,8 @@ export default async function MyContributionsPage(props: {
               replace
               className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
                 tab === MyContributionsTab.Products
-                  ? 'text-primary border-primary'
-                  : 'text-muted-foreground hover:text-foreground border-transparent'
+                  ? 'text-royal border-royal'
+                  : 'text-ink-500 hover:text-ink-900 border-transparent'
               }`}>
               {await t('Products')} (
               <Suspense fallback="...">
@@ -286,8 +286,8 @@ export default async function MyContributionsPage(props: {
               replace
               className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
                 tab === MyContributionsTab.Revenue
-                  ? 'text-primary border-primary'
-                  : 'text-muted-foreground hover:text-foreground border-transparent'
+                  ? 'text-royal border-royal'
+                  : 'text-ink-500 hover:text-ink-900 border-transparent'
               }`}>
               {await t('Revenue')}
             </Link>

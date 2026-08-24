@@ -74,13 +74,13 @@ export async function PublisherAccessRequest({
 
   return (
     <div className="flex flex-col items-center text-center max-w-lg mx-auto py-16 gap-4">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-        <Icon className="h-7 w-7 text-muted-foreground" />
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ink-50">
+        <Icon className="h-7 w-7 text-ink-500" />
       </div>
-      <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-      <p className="text-muted-foreground">{description}</p>
+      <h2 className="text-xl font-semibold text-ink-900">{title}</h2>
+      <p className="text-ink-500">{description}</p>
       {reason && (
-        <p className="text-sm text-muted-foreground italic border-l-2 border-border pl-3 text-left">
+        <p className="text-sm text-ink-500 italic border-l-2 border-ink-100 pl-3 text-left">
           {reason}
         </p>
       )}

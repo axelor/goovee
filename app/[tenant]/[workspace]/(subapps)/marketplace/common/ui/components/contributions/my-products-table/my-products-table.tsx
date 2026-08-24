@@ -28,13 +28,13 @@ import {
 function statusBadgeClass(status: string | null): string {
   switch (status) {
     case MARKETPLACE_VERSION_STATUS.PUBLISHED:
-      return 'bg-success/15 text-success-dark';
+      return 'bg-mint-500/15 text-mint-700';
     case MARKETPLACE_VERSION_STATUS.IN_REVIEW:
       return 'bg-palette-orange/40 text-palette-orange-dark';
     case MARKETPLACE_VERSION_STATUS.REJECTED:
       return 'bg-destructive/15 text-destructive';
     default:
-      return 'bg-muted text-muted-foreground';
+      return 'bg-ink-50 text-ink-500';
   }
 }
 
@@ -118,7 +118,7 @@ export function MyProductsTable({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="font-medium text-foreground truncate">
+                <div className="font-medium text-ink-900 truncate">
                   {product.name}
                 </div>
                 {product.marketplaceTypeSelect && (
@@ -129,7 +129,7 @@ export function MyProductsTable({
                   />
                 )}
               </div>
-              <div className="text-xs text-muted-foreground line-clamp-2">
+              <div className="text-xs text-ink-500 line-clamp-2">
                 <InnerHTML content={product.description ?? undefined} />
               </div>
             </div>
@@ -185,7 +185,7 @@ export function MyProductsTable({
           <div className="text-sm whitespace-nowrap">
             <div>{latest ? `v${formatVersionNumber(latest)}` : '—'}</div>
             {showLiveHint && current && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-ink-500">
                 {i18n.t('live: v{0}', formatVersionNumber(current))}
               </div>
             )}
@@ -214,8 +214,8 @@ export function MyProductsTable({
 
   if (products.length === 0) {
     return (
-      <div className="bg-card rounded-lg border border-border px-6 py-12 text-center">
-        <div className="text-sm text-muted-foreground">
+      <div className="bg-white rounded-lg border border-ink-100 px-6 py-12 text-center">
+        <div className="text-sm text-ink-500">
           {i18n.t('No {0} yet', title.toLowerCase())}
         </div>
       </div>
@@ -225,7 +225,7 @@ export function MyProductsTable({
   return (
     <Table
       className={cn(
-        'rounded-lg border border-border bg-card text-card-foreground',
+        'rounded-lg border border-ink-100 bg-white text-ink-900',
         small && 'table-fixed',
       )}>
       <TableHeader>
@@ -264,8 +264,8 @@ export function MyProductsTable({
                       type="button"
                       aria-label={open ? 'Collapse' : 'Expand'}
                       onClick={() => setOpenId(open ? null : product.id)}
-                      className="p-1 rounded-full hover:bg-muted transition-colors">
-                      <Arrow className="w-4 h-4 text-muted-foreground" />
+                      className="p-1 rounded-full hover:bg-ink-50 transition-colors">
+                      <Arrow className="w-4 h-4 text-ink-500" />
                     </button>
                   </TableCell>
                 )}
@@ -293,15 +293,15 @@ export function MyProductsTable({
                       <Link
                         href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
                         title={i18n.t('View live')}
-                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                        className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
                       </Link>
                     ) : (
                       <Link
                         href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?preview=1`}
                         title={i18n.t('Preview')}
-                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                        <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                        className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
+                        <Eye className="w-3.5 h-3.5 text-ink-500" />
                       </Link>
                     )}
                   </div>
@@ -309,13 +309,13 @@ export function MyProductsTable({
               </TableRow>
               {small && subColumns.length > 0 && (
                 <Collapsible open={open} asChild>
-                  <TableRow className="bg-muted/30">
+                  <TableRow className="bg-ink-50/30">
                     <CollapsibleContent asChild>
                       <TableCell colSpan={mainColumns.length + 2}>
                         <div className="grid grid-cols-2 gap-y-2 items-center px-2 py-1">
                           {subColumns.map(c => (
                             <Fragment key={c.key}>
-                              <div className="text-xs font-semibold uppercase text-muted-foreground">
+                              <div className="text-xs font-semibold uppercase text-ink-500">
                                 {c.label}
                               </div>
                               <div className="flex justify-self-end items-center">

@@ -167,7 +167,7 @@ const MultiSelectorTrigger = forwardRef<
     <div
       ref={ref}
       className={cn(
-        'flex flex-wrap gap-1 p-1 py-2 border border-muted rounded-lg bg-background',
+        'flex flex-wrap gap-1 p-1 py-2 border border-ink-100 rounded-lg bg-ink-25',
         className,
       )}
       {...props}>
@@ -176,7 +176,7 @@ const MultiSelectorTrigger = forwardRef<
           key={item}
           className={cn(
             'px-1 rounded-xl flex items-center gap-1',
-            activeIndex === index && 'ring-2 ring-muted-foreground ',
+            activeIndex === index && 'ring-2 ring-ink-500 ',
           )}
           variant={'outline'}>
           <span className="text-xs">{renderLabel?.(item) ?? item}</span>
@@ -214,7 +214,7 @@ const MultiSelectorInput = forwardRef<
       onFocus={() => setOpen(true)}
       onClick={() => setActiveIndex(-1)}
       className={cn(
-        'ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1',
+        'ml-2 bg-transparent outline-none placeholder:text-ink-500 flex-1',
         className,
         activeIndex !== -1 && 'caret-transparent',
       )}
@@ -246,14 +246,12 @@ const MultiSelectorList = forwardRef<
     <CommandList
       ref={ref}
       className={cn(
-        'p-2 flex flex-col gap-2 rounded-md scrollbar-thin scrollbar-track-transparent transition-colors scrollbar-thumb-muted-foreground dark:scrollbar-thumb-muted scrollbar-thumb-rounded-lg w-full absolute bg-background shadow-md z-10 border border-muted top-0',
+        'p-2 flex flex-col gap-2 rounded-md scrollbar-thin scrollbar-track-transparent transition-colors scrollbar-thumb-ink-500 dark:scrollbar-thumb-ink-50 scrollbar-thumb-rounded-lg w-full absolute bg-ink-25 shadow-md z-10 border border-ink-100 top-0',
         className,
       )}>
       {children}
       <CommandEmpty>
-        <span className="text-muted-foreground">
-          {i18n.t('No results found')}
-        </span>
+        <span className="text-ink-500">{i18n.t('No results found')}</span>
       </CommandEmpty>
     </CommandList>
   );

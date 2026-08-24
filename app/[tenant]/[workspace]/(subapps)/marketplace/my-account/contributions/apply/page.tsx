@@ -124,10 +124,10 @@ export default async function PublisherApplyPage(props: {
       </div>
 
       <div className="pb-6 space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
           {await t('Become a publisher')}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-ink-500 text-sm">
           {await t(
             'Tell us what you plan to publish and an admin will review your request.',
           )}
