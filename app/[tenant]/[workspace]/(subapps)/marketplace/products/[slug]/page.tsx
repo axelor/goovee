@@ -112,7 +112,10 @@ export default async function ProductPage(props: {
   const {tab, reviewPage, versionPage, preview} = searchParams;
 
   /* Preview of an unpublished product is a logged-in, seller-only capability:
-   * anyone requesting it without an account or publishing rights gets a 404. */
+   * anyone requesting it without an account or publishing rights gets a 404.
+   * The query behind it is owner-scoped, so this only ever shows the caller
+   * their own listing — publisher approval is a gate on publishing, not on
+   * looking at your own work. */
   if (
     preview &&
     (!access.user ||

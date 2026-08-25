@@ -8,9 +8,10 @@ export enum MARKETPLACE_VERSION_STATUS {
   UNPUBLISHED = 'unpublished',
 }
 
-/* Publisher access request states (integer-backed, workflow order). Approving a
- * request sets the partner's `isMarketplacePublisher` flag, which — with the
- * workspace's `allowToPublish` — is what actually gates publishing. */
+/* Publisher access request states (integer-backed, workflow order). There is one
+ * row per partner per workspace, and `APPROVED` on it is the publisher grant for
+ * that workspace, which — with the workspace's `allowToPublish` — is what gates
+ * publishing. */
 export enum PUBLISHER_REQUEST_STATUS {
   REQUESTED = 1,
   REJECTED = 2,
