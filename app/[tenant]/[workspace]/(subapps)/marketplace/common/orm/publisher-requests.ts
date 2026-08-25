@@ -16,15 +16,17 @@ export type PublisherRequest = Payload<
 >;
 
 export type PublisherAccess = {
-  /** The partner's publisher grant — the storefront's publish gate. */
+  /** Whether the partner may publish in this workspace — the publish gate. */
   isPublisher: boolean;
-  /** The current request row for this partner + workspace, if any. */
+  /** The request row for this partner + workspace, if any. */
   request: PublisherRequest | null;
 };
 
 /**
- * Resolve a partner's publisher access for a workspace: the granted flag (from
- * the partner) and the current request row (for the request/cooldown state).
+ * Resolve a partner's publisher access for one workspace. The request row for
+ * the pair is the grant: an approved row is access, and any other status (or no
+ * row) withholds it. Access is therefore per workspace — a decision taken in one
+ * says nothing about another.
  */
 export async function findPublisherAccess({
   client,
@@ -35,19 +37,13 @@ export async function findPublisherAccess({
   partnerId: ID;
   workspaceId: ID;
 }): Promise<PublisherAccess> {
-  const [partner, request] = await Promise.all([
-    client.aOSPartner.findOne({
-      where: {id: partnerId},
-      select: {isMarketplacePublisher: true},
-    }),
-    client.aOSMarketplacePublisherRequest.findOne({
-      where: {partner: {id: partnerId}, portalWorkspace: {id: workspaceId}},
-      select: publisherRequestSelect,
-    }),
-  ]);
+  const request = await client.aOSMarketplacePublisherRequest.findOne({
+    where: {partner: {id: partnerId}, portalWorkspace: {id: workspaceId}},
+    select: publisherRequestSelect,
+  });
 
   return {
-    isPublisher: partner?.isMarketplacePublisher === true,
+    isPublisher: request?.statusSelect === PUBLISHER_REQUEST_STATUS.APPROVED,
     request: request ?? null,
   };
 }

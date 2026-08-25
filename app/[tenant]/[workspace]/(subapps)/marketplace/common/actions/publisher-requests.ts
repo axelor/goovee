@@ -73,20 +73,13 @@ export async function requestPublisherAccess(
   const contactId = access.user.isContact ? String(access.user.id) : partnerId;
 
   try {
-    const {isPublisher, request: existing} = await findPublisherAccess({
+    const {request: existing} = await findPublisherAccess({
       client,
       partnerId,
       workspaceId,
     });
 
-    /* Already an approved publisher: nothing to do. `isMarketplacePublisher` is
-     * the authoritative gate, so this also covers a flag set directly in the
-     * back office with no (or a stale) request row. */
-    if (isPublisher) {
-      return {success: true, data: {status: PUBLISHER_REQUEST_STATUS.APPROVED}};
-    }
-
-    /* Already pending or approved: nothing to do. */
+    /* Already pending or approved for this workspace: nothing to do. */
     if (
       existing?.statusSelect === PUBLISHER_REQUEST_STATUS.REQUESTED ||
       existing?.statusSelect === PUBLISHER_REQUEST_STATUS.APPROVED

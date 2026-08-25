@@ -8,6 +8,7 @@ import {
   findCompatibilityVersions,
   findLicenses,
   findProductCategories,
+  findPublisherAccess,
   resolveNewListingCurrency,
 } from '../../../common/orm';
 import {canManageProducts} from '../../../common/utils/auth-helper';
@@ -59,8 +60,7 @@ export async function loadEditContext(params: {
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   /* Seller-only area — the same hard gate as the contributions listing, so
-   * non-sellers can't reach the edit routes by URL either. Publisher approval
-   * is not checked here. */
+   * non-sellers can't reach the edit routes by URL either. */
   if (
     !config?.allowToPublish ||
     !canManageProducts({user: access.user, subapp: access.subapp})
@@ -68,6 +68,18 @@ export async function loadEditContext(params: {
     notFound();
   }
   const partnerId = getPartnerId(access.user);
+
+  /* Editing also needs publisher access to this workspace, the same grant the
+   * save actions check, so a partner who has not been approved — or who was
+   * declined or banned — cannot open a listing's editor by URL. */
+  const {isPublisher} = await findPublisherAccess({
+    client,
+    partnerId,
+    workspaceId: access.workspace.id,
+  });
+  if (!isPublisher) {
+    notFound();
+  }
 
   const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([

@@ -226,10 +226,6 @@
       "target": "AOSMarketplaceProduct"
     },
     {
-      "type": "Boolean",
-      "name": "isMarketplacePublisher"
-    },
-    {
       "type": "ManyToOne",
       "name": "currency",
       "target": "AOSCurrency"
