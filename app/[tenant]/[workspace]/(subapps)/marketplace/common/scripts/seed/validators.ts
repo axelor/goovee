@@ -3,7 +3,11 @@ import {z} from 'zod';
 /* Source of truth for the marketplace seed payload. Runtime validation
  * uses these Zod schemas; the matching `seed.schema.json` is a hand-
  * derived JSON Schema purely for editor / IDE support inside `seed.json`.
- * If you change a Zod schema here, update the JSON Schema too. */
+ * If you change a Zod schema here, update the JSON Schema too.
+ *
+ * This file is deliberately not named `seed.schema.ts`: under
+ * @swc-node/register a `seed.schema` import resolves to `seed.schema.json`
+ * rather than the TypeScript source. */
 
 export const CategorySchema = z
   .object({
@@ -61,8 +65,8 @@ export const VersionSchema = z
     changelog: z.string().optional(),
     status: z.enum(['draft', 'published']),
     /* Dates are optional at the schema level but cross-validated by the
-     * seeder: required+ordered for `published`, absent for `draft`. See
-     * AUTHORING.md → "Date and version ordering". */
+     * seeder: required+ordered for `published`, absent for `draft`. The
+     * ordering rules live in `validate.ts`. */
     submittedAt: z.iso.datetime().optional(),
     releasedAt: z.iso.datetime().optional(),
     compatibilityVersions: z.array(z.string()).optional(),
@@ -72,7 +76,11 @@ export type VersionSeed = z.infer<typeof VersionSchema>;
 
 export const ReviewSchema = z
   .object({
-    authorEmail: z.email(),
+    authorEmail: z
+      .email()
+      .describe(
+        'An existing partner. `unzip -p bundle.zip reviewer-emails.txt` lists the addresses this database accepts.',
+      ),
     rating: z.number().int().min(1).max(5),
     comment: z.string().optional(),
     reviewedVersionNumber: z
@@ -89,16 +97,35 @@ export const ProductSchema = z
     supplierEmail: z
       .email()
       .optional()
-      .describe('Override the CLI --supplier default for this product.'),
-    description: z.string().max(280).optional(),
-    longDescription: z.string().optional(),
+      .describe(
+        'Own this product outright, instead of the owner --suppliers assigns.',
+      ),
+    description: z
+      .string()
+      .max(280)
+      .optional()
+      .describe(
+        'One short line. Shown clamped to two lines on the catalogue card, and again on the product detail page. Sanitized markup, so keep it prose.',
+      ),
+    longDescription: z
+      .string()
+      .optional()
+      .describe(
+        'An HTML fragment, as the rich text editor produces: no `<html>` or `<body>` wrapper, no inline styles and no scripts. Rendered as markup on the product detail page, in the Overview tab.',
+      ),
+    categoryCode: z
+      .string()
+      .describe(
+        "Must appear in this file's categories[], or have been seeded by an earlier run. The lookup is prefixed with the demo marker, so a pre-existing catalogue category cannot be referenced.",
+      ),
     type: z.enum(['skill', 'app']),
     coverStyle: z.string().regex(/^gradient-(10|[1-9])$/),
-    categoryCode: z.string(),
     price: z
       .number()
       .min(0)
-      .describe('In the workspace default sale currency. 0 = free.'),
+      .describe(
+        "In the publisher's currency — their partner currency, else the app-wide default. 0 = free.",
+      ),
     installCount: z
       .number()
       .int()

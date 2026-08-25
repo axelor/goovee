@@ -1,10 +1,11 @@
 import '@/load-swc-env';
 
+import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {manager} from '@/tenant';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
-import {findDefaultCurrency} from '../../orm';
+import {resolveNewListingCurrency} from '../../orm';
 import {slugify} from '../../utils/slugify';
 import {hash} from '../../utils/string';
 import {demoKey} from './constants';
@@ -54,13 +55,23 @@ Usage:
   pnpm marketplace:seed [options]
 
 Options:
-  --tenant <id>         Tenant ID (defaults to 'd' if MULTI_TENANCY=false)
+  --tenant <id>         Tenant ID (defaults to 'd' unless MULTI_TENANCY=true)
   --workspace <url>     Workspace URL (required for seeding)
-  --suppliers <emails>  Comma-separated supplier emails (required for seeding)
-                        Each product keeps the same owner across re-runs
+  --suppliers <emails>  Comma-separated supplier emails; each must be a
+                        customer partner (required for seeding). Re-running
+                        with the same list in the same order keeps every
+                        product's owner; a product's own supplierEmail wins
+                        over the assignment.
   --file <path>         Path to seed.json (defaults to local seed.json)
-  --validate            Run only validation (schema + cross-field rules)
+  --validate            Run only validation (schema + cross-field rules);
+                        makes no database connection
   --help                Show this help message
+
+Example:
+  pnpm marketplace:seed \\
+    --tenant d \\
+    --workspace http://localhost:3000/d/atlas-clients \\
+    --suppliers info@apollo.fr,info@blueberry-telecom.fr
 `);
   process.exit(0);
 }
@@ -132,12 +143,28 @@ async function main() {
       `\x1b[36m→ ${suppliers.length} suppliers: ${suppliers.map(s => s.name).join(', ')}\x1b[0m`,
     );
 
-    const saleCurrency = await findDefaultCurrency(txClient);
-    if (!saleCurrency) {
-      throw new Error(
-        `App-wide default currency not found; cannot seed marketplace products.`,
-      );
-    }
+    /* Price each seeded listing in the currency the app would give a listing
+     * its publisher created — their own partner currency, falling back to the
+     * app-wide default — so seeded and hand-created listings by the same
+     * publisher agree. Each partner is resolved once and reused. */
+    const saleCurrencyIdByPartner = new Map<string, string>();
+    const saleCurrencyIdFor = async (publisherPartnerId: string) => {
+      const cached = saleCurrencyIdByPartner.get(publisherPartnerId);
+      if (cached) return cached;
+      const currency = await resolveNewListingCurrency({
+        client: txClient,
+        mainPartnerId: publisherPartnerId,
+      });
+      if (!currency) {
+        /* A publisher without a currency of their own falls back, so the only
+         * way to get here is the app-wide default row being absent. */
+        throw new Error(
+          `No currency available: the app-wide default '${DEFAULT_CURRENCY_CODE}' currency is missing.`,
+        );
+      }
+      saleCurrencyIdByPartner.set(publisherPartnerId, currency.id);
+      return currency.id;
+    };
 
     const ctx: WorkspaceContext = {
       workspaceId: workspace.id,
@@ -146,8 +173,8 @@ async function main() {
         workspace.config.defaultProductForMarketplace!.id,
       defaults: {
         inAti: workspace.config.defaultProductForMarketplace?.inAti === true,
-        saleCurrencyId: saleCurrency.id,
       },
+      saleCurrencyIdFor,
     };
 
     /* Assign each product to a supplier by a stable hash of its slug rather

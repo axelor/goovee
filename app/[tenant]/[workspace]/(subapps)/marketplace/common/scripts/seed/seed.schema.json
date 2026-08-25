@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://goovee.axelor.com/marketplace/seed.schema.json",
   "title": "Marketplace seed",
-  "description": "Demo data for the marketplace subapp. Source of truth is scripts/seed/seed.schema.ts (Zod). Keep this file in sync.",
+  "description": "Demo data for the marketplace subapp. Source of truth is scripts/seed/validators.ts (Zod). Keep this file in sync.",
   "type": "object",
   "additionalProperties": false,
   "required": ["products"],
@@ -37,7 +37,7 @@
         "code": {
           "type": "string",
           "pattern": "^[A-Z][A-Z0-9-]+$",
-          "description": "Upsert key. AOSProductCategory.code; forced to forMarketPlace=true on seed."
+          "description": "Upsert key. AOSMarketplaceCategory.code, stored prefixed with the demo marker."
         },
         "name": {"type": "string", "minLength": 1},
         "iconCode": {"type": "string"},
@@ -136,10 +136,17 @@
         "supplierEmail": {
           "type": "string",
           "format": "email",
-          "description": "Override the CLI --supplier default."
+          "description": "Own this product outright, instead of the owner --suppliers assigns."
         },
-        "description": {"type": "string", "maxLength": 280},
-        "longDescription": {"type": "string"},
+        "description": {
+          "type": "string",
+          "maxLength": 280,
+          "description": "One short line. Shown clamped to two lines on the catalogue card, and again on the product detail page. Sanitized markup, so keep it prose."
+        },
+        "longDescription": {
+          "type": "string",
+          "description": "An HTML fragment, as the rich text editor produces: no `<html>` or `<body>` wrapper, no inline styles and no scripts. Rendered as markup on the product detail page, in the Overview tab."
+        },
         "type": {"enum": ["skill", "app"]},
         "coverStyle": {
           "type": "string",
@@ -148,12 +155,12 @@
         },
         "categoryCode": {
           "type": "string",
-          "description": "AOSProductCategory.code; either seeded above or already present with forMarketPlace=true."
+          "description": "Must appear in this file's categories[], or have been seeded by an earlier run. The lookup is prefixed with the demo marker, so a pre-existing catalogue category cannot be referenced."
         },
         "price": {
           "type": "number",
           "minimum": 0,
-          "description": "In the workspace default sale currency. 0 = free product."
+          "description": "In the publisher's currency — their partner currency, else the app-wide default. 0 = free."
         },
         "installCount": {
           "type": "integer",
