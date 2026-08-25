@@ -457,11 +457,16 @@ export async function saveProductWithVersions(
             throw new Error('INVALID_TRANSITION');
           }
           /* Unpublish is only valid from a live version — published or in
-           * review. Meant to reject only a stale or forged request, but the
-           * editor seeds an already-unpublished row's status to `unpublished`,
-           * so an ordinary save of such a row trips it.
-           * FIXME(#111822): treat an unchanged status as a no-op. */
+           * review. The editor never offers it for any other state, so this
+           * only ever rejects a stale or forged request. A save that leaves
+           * the status where it is asks for no transition at all: the editor
+           * stages an already-unpublished row at `unpublished`, the value
+           * meaning "no change", so an ordinary field edit re-sends it and
+           * must save like any other edit (SPEC §4.9.2). */
+          const statusUnchanged =
+            effectiveStatus === currentVersion.statusSelect;
           if (
+            !statusUnchanged &&
             effectiveStatus === MARKETPLACE_VERSION_STATUS.UNPUBLISHED &&
             currentVersion.statusSelect !==
               MARKETPLACE_VERSION_STATUS.PUBLISHED &&
