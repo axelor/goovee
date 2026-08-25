@@ -42,8 +42,10 @@ export type WorkspaceContext = {
   workspaceDefaultProductId: string;
   defaults: {
     inAti: boolean;
-    saleCurrencyId: string;
   };
+  /** The currency a listing owned by this partner is priced in, resolved the
+   *  same way the app resolves it for a listing a publisher creates. */
+  saleCurrencyIdFor: (publisherPartnerId: string) => Promise<string>;
 };
 
 const SCREENSHOT_PREFIX = `${DEMO_PREFIX}screenshot`;
@@ -169,6 +171,8 @@ export async function upsertCompatibilityVersion(
  * shared screenshots, only the storage filePath carries the prefix so
  * reset can match it. Changing DEMO_PREFIX never requires renaming this
  * file. */
+/* It also carries `reviewer-emails.txt`, the list of partner emails this
+ * database accepts for suppliers and review authors. */
 const BUNDLE_SOURCE_FILE = 'bundle.zip';
 const BUNDLE_FILE_PATH = `${DEMO_PREFIX}bundle.zip`;
 
@@ -334,6 +338,7 @@ export async function upsertProduct(
   const publisherPartnerId = product.supplierEmail
     ? (await findCustomerPartnerByEmail(client, product.supplierEmail)).id
     : defaultPublisherPartnerId;
+  const saleCurrencyId = await ctx.saleCurrencyIdFor(publisherPartnerId);
 
   /* Slug carries DEMO_PREFIX like every other seeded key (category/license/
    * compat resolved above). reset.ts matches it by `slug LIKE DEMO_PREFIX%`,
@@ -371,7 +376,7 @@ export async function upsertProduct(
     }),
     salePrice: new BigDecimal(String(product.price)),
     inAti: ctx.defaults.inAti,
-    saleCurrency: {select: {id: ctx.defaults.saleCurrencyId}},
+    saleCurrency: {select: {id: saleCurrencyId}},
     product: {select: {id: ctx.workspaceDefaultProductId}},
     portalWorkspace: {select: {id: ctx.workspaceId}},
     publisher: {select: {id: publisherPartnerId}},

@@ -32,7 +32,6 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
             code: true,
             inAti: true,
             productTypeSelect: true,
-            saleCurrency: {id: true, code: true},
           },
           company: {id: true, name: true, timezone: true},
         },
