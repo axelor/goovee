@@ -5,32 +5,6 @@ import {sql} from '@/utils/template-string';
 import type {CreateArgs} from '@goovee/orm';
 import type {ORMRecord} from './helpers';
 
-// ---- VERSION MUTATIONS ---- //
-
-/** Sets the status of an existing version.
- *  Unused since the combined editor replaced the standalone unpublish action.
- *  FIXME(#111822): delete. */
-export async function updateVersionStatus({
-  client,
-  versionId,
-  version,
-  statusSelect,
-}: {
-  client: Client;
-  versionId: ID;
-  version: number;
-  statusSelect: string;
-}): Promise<ORMRecord> {
-  return client.aOSMarketplaceProductVersion.update({
-    data: {
-      id: versionId,
-      version,
-      statusSelect,
-    },
-    select: {id: true},
-  });
-}
-
 // ---- DOWNLOAD TELEMETRY ---- //
 
 export async function createDownloadRecord({
