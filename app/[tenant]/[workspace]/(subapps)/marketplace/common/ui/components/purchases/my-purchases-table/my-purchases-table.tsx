@@ -27,6 +27,7 @@ import {
   TableRow,
 } from '@/ui/components/table';
 import {useResponsive} from '@/ui/hooks';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {cn} from '@/utils/css';
 import {
   ChevronDown,
@@ -308,12 +309,16 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                     {canDownload ? (
                       isTakenDown ? (
                         <TakenDownDownload
-                          downloadUrl={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                          downloadUrl={withBasePath(
+                            `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
+                          )}
                           reason={product.moderationReason}
                         />
                       ) : (
                         <a
-                          href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                          href={withBasePath(
+                            `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
+                          )}
                           aria-label={i18n.t('Download')}
                           className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
                           <DownloadIcon className="w-3.5 h-3.5 text-ink-500" />

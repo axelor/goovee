@@ -2,6 +2,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {getPartnerId} from '@/utils';
@@ -125,7 +126,9 @@ export default async function CheckoutSuccessPage(props: {
                   {version?.id ? (
                     <Button asChild variant="ink-outline" size="sm">
                       <a
-                        href={`${marketplaceBase}/api/products/${product.id}/versions/${version.id}/download`}>
+                        href={withBasePath(
+                          `${marketplaceBase}/api/products/${product.id}/versions/${version.id}/download`,
+                        )}>
                         <Download size={14} className="mr-1" />
                         {t('Download')}
                       </a>

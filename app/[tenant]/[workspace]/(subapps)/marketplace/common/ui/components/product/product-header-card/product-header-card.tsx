@@ -5,6 +5,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {Download, FileText, Heart} from 'lucide-react';
@@ -298,7 +299,9 @@ async function CTAButton({
         <a
           href={
             product.currentVersion?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`
+              ? withBasePath(
+                  `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`,
+                )
               : '#'
           }
           download>
