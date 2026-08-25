@@ -24,9 +24,8 @@ import {loadEditContext} from '../load-edit-context';
 
 /**
  * Full-page editor reached by id (deep-link / redirect), or by the literal
- * `new` for create (`?type=app|skill` fixes the kind). Product and versions are
- * edited together and saved once; the dialog remains the quick in-app path.
- * Save / cancel returns to the contributions products tab.
+ * `new` for create — `?type=app` opens the app form, anything else the skill
+ * form. Product and versions are edited together and saved once.
  */
 export default async function EditProductPage(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;

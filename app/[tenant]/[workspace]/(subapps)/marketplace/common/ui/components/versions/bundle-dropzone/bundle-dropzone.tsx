@@ -21,13 +21,14 @@ export type StagedBundle = {
   /** 0–100, and where the fill stops once it is paused or has failed. */
   progress: number;
   status: 'queued' | 'uploading' | 'success' | 'error' | 'paused';
-  /** Why it failed, already translated. Set whenever status is `error`. */
+  /** Why it failed, already translated. Always set when status is `error` —
+   *  the failure row renders it unguarded. */
   error?: string;
 };
 
 type BundleDropzoneProps = {
-  /** The staged upload for this version's bundle (uploading / done / failed
-   *  this session). Takes precedence over the existing-bundle display. */
+  /** The bundle staged this session — queued, uploading, paused, failed or
+   *  done. Takes precedence over the existing-bundle display. */
   staged?: StagedBundle | null;
   /** Details of the already-uploaded bundle (when editing an existing version). */
   existingFileName?: string | null;

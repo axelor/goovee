@@ -6,17 +6,17 @@
  * the configuration is broken. A storefront page must render anyway, so
  * `computePrice` here wraps the core with marketplace policy:
  *
- * - The LISTING's price fields win. A listing carries its own
- *   `salePrice` / `inAti` / `saleCurrency`, frozen at create; they are
- *   fed into the core's level 2 exactly like an AOS sale-order line
- *   that owns its price. Only the taxes still come from the workspace
- *   default product.
+ * - The LISTING's price fields win. A listing owns its `salePrice` /
+ *   `inAti` / `saleCurrency` — `inAti` and `saleCurrency` set at create,
+ *   `salePrice` editable — and they are used the way an AOS sale-order line
+ *   uses its own price. Only the taxes come from the workspace default
+ *   product.
  * - Broken tax configuration degrades to 0% tax instead of failing the
  *   page.
  * - Display currency is picked leniently, first one that works:
- *     1. the buyer's currency (their partner record's currency;
- *        contacts use their parent company's) — if an exchange rate to
- *        it exists;
+ *     1. the buyer's currency (`viewerCurrency` — their partner record's
+ *        currency; a contact resolves to their parent company's partner) —
+ *        if an exchange rate to it exists;
  *     2. the app-wide default currency (DEFAULT_CURRENCY_CODE) — same
  *        condition;
  *     3. the listing's own currency, shown as-is.
@@ -86,9 +86,9 @@ export function computePrice({
   company: {id: string; timezone: string | null} | null;
   /** The listing's own price fields, used EXACTLY as given — no
    *  fallback into the product's per-company rows or base fields, the
-   *  same way an AOS sale-order line owns its price once created (the
-   *  values enter the core at level 2). The product only supplies the
-   *  tax configuration, since a listing has none of its own. */
+   *  same way an AOS sale-order line owns its price once created. The
+   *  product only supplies the tax configuration, since a listing has none
+   *  of its own. */
   priceOverride: {
     salePrice: NonNullable<PriceableProduct['salePrice']>;
     saleCurrency: NonNullable<PriceableProduct['saleCurrency']>;
@@ -213,9 +213,11 @@ export function isPaid(value: number | string | null | undefined): boolean {
   return Number.isFinite(amount) && amount > 0;
 }
 
-/** Half-up rounding of a plain number to `scale` places. Used to total amounts
- *  that are already rounded to a currency's scale — a cart total, a month of
- *  revenue. */
+/** Rounds a plain number to `scale` places. Only ever used to total amounts
+ *  already rounded to a currency's scale — a cart total, a month of revenue —
+ *  which is what makes plain float arithmetic safe here. Not a substitute for
+ *  the core's BigDecimal HALF_UP: `Math.round` breaks ties toward +infinity,
+ *  so the two diverge on a negative amount, of which there are none here. */
 export function round(value: number, scale: number): number {
   const factor = 10 ** scale;
   return Math.round(value * factor) / factor;

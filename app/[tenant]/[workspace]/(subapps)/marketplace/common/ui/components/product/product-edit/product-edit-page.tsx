@@ -36,7 +36,7 @@ type ProductEditPageProps = {
   allowToPublish: boolean;
   workspaceURI: string;
   workspaceURL: string;
-  /** Where Save / Cancel return to (the contributions products tab). */
+  /** Where Save and Cancel navigate to. */
   returnHref: string;
 };
 

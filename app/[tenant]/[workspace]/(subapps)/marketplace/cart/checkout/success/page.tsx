@@ -18,11 +18,10 @@ import {ProductIcon} from '../../../common/ui/components/shared/product-icon';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
 
-/* Success destination after `onApprove` fires in the Payments component.
- * `onApprove` passes the marketplace order id created at this checkout via the
- * `orderId` query param; we re-read that order's lines (partner-scoped, so a
- * tampered id can't surface someone else's order) and show them.
- * Reaching this page without an order id means there's nothing to confirm. */
+/* Reached after payment with the new order's id in `?orderId=`. The order is
+ * re-read partner-scoped, so a tampered id cannot surface someone else's
+ * order. A successful payment can still arrive with no id — the redirect omits
+ * the param when the action returns none — and that 404s. */
 export default async function CheckoutSuccessPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{orderId?: string}>;

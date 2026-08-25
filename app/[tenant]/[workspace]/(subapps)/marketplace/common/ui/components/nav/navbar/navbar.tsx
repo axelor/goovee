@@ -30,8 +30,8 @@ function NavLinks() {
         const href = item.segment
           ? `${marketplaceBase}/${item.segment}`
           : marketplaceBase;
-        // For the root Products link, only highlight on the listing or
-        // product detail pages — not on sibling segments like my-contributions.
+        /* The root Products link highlights on the listing and product pages
+         * only, not on the sibling my-account tree. */
         const active = item.segment
           ? pathname.startsWith(href)
           : pathname === marketplaceBase ||

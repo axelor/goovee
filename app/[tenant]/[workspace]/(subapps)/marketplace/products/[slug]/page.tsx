@@ -133,9 +133,6 @@ export default async function ProductPage(props: {
   if (!product) notFound();
 
   const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-  // Category surfacing moved into the header card as multi-badges. The
-  // breadcrumb no longer carries category because a product can belong
-  // to multiple categories and there's no canonical "primary" one.
 
   const buildQuery = (
     overrides: Partial<NullableValues<ProductSearchParams>> = {},

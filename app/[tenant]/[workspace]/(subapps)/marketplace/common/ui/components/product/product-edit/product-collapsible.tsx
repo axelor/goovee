@@ -33,7 +33,8 @@ type ProductCollapsibleProps = {
  * The collapsed-state summary (name · type · price) plus a dot flagging unsaved
  * product edits that are folded out of sight. Isolated as its own component —
  * and rendered only while collapsed — so its `useWatch`/`useFormState`
- * subscriptions never re-render the (sibling) `ProductFields` on each keystroke.
+ * subscriptions do not sit in the parent, where they would re-render the
+ * expanded fields on every keystroke.
  */
 function ProductSummary({
   listingCurrency,
@@ -79,11 +80,12 @@ function ProductSummary({
 }
 
 /**
- * Dialog-only wrapper around `ProductFields`. A single-item accordion: collapsed
- * it shows a summary row (name · type · price) so the version surface stays the
- * focus; expanding animates open to the bare fields. A dirty dot flags product
- * edits that are currently hidden. The full-page editor renders `ProductFields`
- * directly (always open), so this lives only in the dialog.
+ * Dialog-only single-item accordion around `ProductFields` — the full-page
+ * editor renders those fields directly, always open, so it needs none of this.
+ * Collapsed it shows a summary
+ * row (name · type · price) so the version surface stays the focus; expanding
+ * animates open to the bare fields. A dirty dot flags product edits that are
+ * currently hidden.
  */
 export function ProductCollapsible({
   expanded,

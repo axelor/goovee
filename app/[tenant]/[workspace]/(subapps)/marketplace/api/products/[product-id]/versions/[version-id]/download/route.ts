@@ -76,20 +76,19 @@ export async function GET(
     },
   });
 
-  /* One install is one whole file handed over. A response here can also be a
-   * revalidation (304), one range out of many (206), or the framework's HEAD
-   * derived from this handler — none of which is a new download. Counting every
-   * response would credit a paused-and-resumed download twice and a segmented
-   * downloader once per connection, and this route now advertises
-   * `accept-ranges`, so clients are invited to segment.
+  /* One install is one whole file handed over. `streamFile` fires
+   * `onWholeFileRead` only for the 200 that streams the file, so the flag
+   * already excludes a revalidation and a range. `accept-ranges` invites
+   * clients to segment, and neither a paused-and-resumed download nor a
+   * segmented one may count more than once.
    *
-   * What was served decides this, not what the request asked for. A partial is
-   * only ever answered to an inbound range, so excluding anything but 200
-   * already excludes every partial — while a range the server declines to
-   * honour (for instance a stale `if-range` after the bundle changed under an
-   * interrupted download) sends the whole file as a 200, and that is a real
-   * download to count. HEAD needs the method tested separately, since it
-   * answers 200 with no body at all. */
+   * What was served decides this, not what the request asked for: a partial is
+   * only ever answered to an inbound range, while a range the server declines
+   * to honour — a stale `if-range` after the bundle changed under an
+   * interrupted download — sends the whole file as a 200, and that is a real
+   * download to count. The method is tested separately because only `GET` is
+   * exported here and the framework answers HEAD from this handler, with a 200
+   * and no body at all. */
   const isWholeTransfer = request.method === 'GET' && response.status === 200;
 
   if (!isWholeTransfer) {

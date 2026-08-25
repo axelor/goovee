@@ -8,9 +8,10 @@ import type {ProductSearchResult} from '../../../../orm';
 import {ProductIcon} from '../product-icon';
 import {ProductTypeBadge} from '../product-type-badge';
 
-/* Matches the search-item highlight used by forum and news: index-based rather
- * than a regex, so a query containing regex metacharacters needs no escaping,
- * and the original casing survives a case-insensitive match. */
+/* Kept byte-identical with the forum and news search-item highlights, so a
+ * change here needs the same change in both. Index-based rather than a regex, so
+ * a query containing regex metacharacters needs no escaping, and the original
+ * casing survives a case-insensitive match. */
 function highlight(text: string, query?: string) {
   const t = text || '';
   const q = (query || '').trim();
@@ -30,7 +31,8 @@ function highlight(text: string, query?: string) {
 
 /* The description column is unbounded, so a match near its end would be clipped
  * away by the single-line truncation — the very case that makes a result look
- * unrelated. Window the text around the match instead. */
+ * unrelated. Keep LEAD characters of lead-in before the match and drop
+ * everything earlier; the tail is left to the CSS truncation. */
 const LEAD = 24;
 
 function snippet(text: string, query?: string) {
@@ -42,7 +44,7 @@ function snippet(text: string, query?: string) {
   if (!q) return t;
   const i = t.toLowerCase().indexOf(q.toLowerCase());
   if (i <= LEAD) return t;
-  // start on a word boundary so the snippet does not open mid-word
+  // prefer a word boundary near the cut so the snippet rarely opens mid-word
   const space = t.indexOf(' ', i - LEAD);
   const from = space === -1 || space >= i ? i - LEAD : space + 1;
   return `…${t.slice(from)}`;

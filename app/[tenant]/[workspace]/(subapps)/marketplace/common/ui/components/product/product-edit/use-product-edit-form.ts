@@ -37,10 +37,9 @@ type VersionStatus = VersionRowValues['statusSelect'];
 
 /**
  * Read-only context for a loaded version, kept *outside* the RHF form (it's
- * never edited or sent to the server): the real persisted lifecycle status
- * (drives the legal status transitions + "current state" label) and the
- * existing bundle (drives the dropzone's current-file display). Indexed
- * alongside the loaded rows; new rows have none.
+ * never edited or sent to the server): the persisted lifecycle status, the
+ * existing bundle, and the newest rejection reason. Indexed alongside the
+ * loaded rows; new rows have none.
  */
 export type VersionMeta = {
   originalStatus: string;
@@ -107,18 +106,18 @@ type UseProductEditFormParams = {
   initialVersions: ExistingVersion[];
   initialTotal: number;
   workspaceURL: string;
-  /** Called after a successful combined save — the page navigates to the
-   *  contributions listing. */
+  /** Called after a successful combined save. */
   onSaved: () => void;
   /** Reports where the first validation error is on a failed save, so a host
-   *  that hides part of the form (the dialog: collapsed product / one version
-   *  at a time) can reveal it. The page shows everything at once and omits it. */
+   *  that hides part of the form can reveal it — the dialog expands its
+   *  collapsed product. Optional because the full-page editor's product card
+   *  is always open, so it has nothing to reveal. */
   onInvalidLocation?: (location: 'product' | 'version') => void;
 };
 
 /**
- * Combined full-page edit form: one RHF form holding the product fields plus
- * two version arrays — `versions` (loaded existing rows, grown a page at a time
+ * Combined product + versions edit form: one RHF form holding the product
+ * fields plus two version arrays — `versions` (loaded existing rows, grown a page at a time
  * via `append`) and `newVersions` (rows added this session). A cursor selects
  * which single version is shown. Save sends the product + the existing rows the
  * user actually edited + all new rows to `saveProductWithVersions` (one
@@ -149,8 +148,8 @@ export function useProductEditForm({
    * remount on navigation. */
   const bundleItemByRow = useRef<Map<string, string>>(new Map());
   /* Object-URL previews for new screenshots: by token once staged, by upload
-   * item id while still in flight. Held here so they outlive the dialog
-   * collapse that unmounts ScreenshotsFormField. */
+   * item id while still in flight. Owned by the editor session so they outlive
+   * any field remount. */
   const previewByToken = useRef<Map<string, string>>(new Map());
   const previewByItem = useRef<Map<string, string>>(new Map());
 
@@ -170,8 +169,8 @@ export function useProductEditForm({
   const uploadsFailed = uploadItems.some(item => item.status === 'error');
 
   /* Revoke every screenshot object URL when the editor session unmounts. The
-   * maps outlive individual field mounts (the dialog collapse), so the leaf
-   * field can't own this cleanup. */
+   * maps outlive individual field mounts, so the leaf field can't own this
+   * cleanup. */
   useEffect(
     () => () => {
       previewByToken.current.forEach(url => URL.revokeObjectURL(url));
@@ -316,7 +315,7 @@ export function useProductEditForm({
     productBaseline,
   ]);
 
-  /* Background-load the next page once only `VERSIONS_PREFETCH_AHEAD` loaded
+  /* Background-load the next page once `VERSIONS_PREFETCH_AHEAD` or fewer
    * entries remain ahead of `at`, so paging stays ahead of the user without a
    * blocking spinner. Deduped via loadMore's in-flight ref. */
   const prefetchAhead = useCallback(
@@ -382,8 +381,8 @@ export function useProductEditForm({
 
   /* The field arrays as of the latest render, read (not closed over) when an
    * upload settles. `commitBundleToken` capturing `fields` directly would carry
-   * the ordering from when the upload was picked — the same staleness the
-   * lookup exists to defeat. */
+   * the ordering from when the upload was picked — the same staleness its
+   * id-based row lookup exists to defeat. */
   const rowsRef = useRef({
     newRows: newVersionsFA.fields,
     existingRows: versionsFA.fields,
@@ -400,9 +399,9 @@ export function useProductEditForm({
    * then name a different row or none at all. Resolving here, at commit time,
    * is what keeps the token on its own row.
    *
-   * Nothing calls this for a row that no longer exists — an aborted upload
-   * settles to null and returns before reaching here — so that branch is a
-   * guard against a future caller, not a live path. */
+   * A missing row is unreachable in practice — an aborted upload settles to
+   * null and returns before it gets here — so that branch guards against a
+   * future caller rather than a live path. Not dead code. */
   const commitBundleToken = useCallback(
     (rowKey: string, token: string | undefined) => {
       const {newRows, existingRows} = rowsRef.current;
@@ -413,11 +412,12 @@ export function useProductEditForm({
           : -1;
 
       if (newIndex === -1 && existingIndex === -1) {
-        /* The row is gone. Drop the token rather than write it to whichever row
-         * now holds that index, and take the upload with it: a token nobody can
-         * redeem is worth less than the storage it holds, and an entry left in
-         * the hook with no row to clear it would hold `uploadsStaged` false and
-         * Save disabled for good. `remove` gives up the server's copy too. */
+        /* The row is gone. Drop the token rather than write it to whichever
+         * row now holds that index, and take the upload with it: a token
+         * nobody can redeem is worth less than the storage it holds, and an
+         * entry left in the hook with no row left to clear it would hold
+         * `uploadsStaged` false and Save disabled for good. `remove` gives up
+         * the server's copy too. */
         const orphan = bundleItemByRow.current.get(rowKey);
         if (orphan) bundleUpload.remove(orphan);
         bundleItemByRow.current.delete(rowKey);
@@ -486,7 +486,7 @@ export function useProductEditForm({
            *    list (positional), or `[]` when the user cleared them all.
            *  - `id`: always on edit, to scope ownership server-side.
            * Existing version rows stay upsert-only: only the dirty ones are sent,
-           * each stamped with the lock counter the form was loaded with (not an
+           * each carrying the lock counter the form was loaded with (not an
            * editable field, so the server snapshot is its source). */
           const {
             id,
@@ -540,14 +540,13 @@ export function useProductEditForm({
         key => key !== 'versions' && key !== 'newVersions',
       );
       if (hasProductError) {
-        /* A product field is invalid — let the host reveal it (the dialog
-         * expands the collapsed product) and don't yank the version cursor. */
+        /* A product field is invalid — report it and leave the version
+         * cursor alone. */
         onInvalidLocation?.('product');
         return;
       }
       /* Otherwise the error is on a version the user can't see (only one shows
-       * at a time) — move the cursor to the first invalid row and let the host
-       * switch to the version view. */
+       * at a time) — move the cursor to the first invalid row and report it. */
       const vErrors = errors.versions as Record<number, unknown> | undefined;
       const nvErrors = errors.newVersions as
         | Record<number, unknown>
@@ -580,9 +579,9 @@ export function useProductEditForm({
     /* Read-only context for the version under the cursor (undefined for new
      * rows) — the status transitions and the existing-bundle display. */
     currentVersionMeta: isNew ? undefined : loadedMeta[cursor - newCount],
-    /* `total` is the real count (existing versions + new rows this session),
-     * not how many are currently loaded — pagination grows the loaded set on
-     * demand, but the navigator should show the true total from the start. */
+    /* `position.total` counts every version — the server total plus rows added
+     * this session — not just the loaded ones, so the navigator shows the true
+     * total from the start. */
     position: {
       /* While parked at the frontier awaiting the next page, anticipate the
        * entry being fetched (the next slot) so the user lands on it with a

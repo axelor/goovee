@@ -28,7 +28,8 @@ interface VersionsTabProps {
   client: Client;
   versionPage: number;
   currentVersionId?: string;
-  /** Owner preview: download links rendered inert. */
+  /** Owner preview: also lists unpublished versions, and disables the
+   *  download control. */
   preview?: boolean;
   /** Returns the URL for a given page number (preserves other search params). */
   buildPageHref: (page: number) => string;

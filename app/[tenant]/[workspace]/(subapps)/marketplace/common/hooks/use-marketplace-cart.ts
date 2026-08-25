@@ -14,8 +14,8 @@ export type MarketplaceCartItem = {
   currencySymbol: string | null;
   /** Decimal places to render priceAti at. From the product's saleCurrency. */
   scale?: number;
-  /* Display-only snapshot used by the cart row so it can render a richer
-   * product card without a server roundtrip. These may go stale between
+  /* Display-only snapshot, so a stored row renders without a server
+   * roundtrip. These may go stale between
    * "add to cart" and checkout, which is fine — the server re-fetches
    * fresh values for price and ownership at checkout time. */
   description: string | null;
@@ -32,7 +32,9 @@ function emptyCart(): MarketplaceCart {
   return {items: []};
 }
 
-/** Count semantics for the unified cart icon: distinct products. */
+/** Count semantics for the unified cart icon — this is the marketplace's
+ *  `getCount` in the shared cart descriptors, which is why it takes `unknown`.
+ *  Distinct products, not quantities. */
 export function marketplaceCartCount(stored: unknown): number {
   const cart = stored as MarketplaceCart | null;
   return cart?.items?.length ?? 0;

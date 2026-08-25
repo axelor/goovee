@@ -16,9 +16,10 @@ import {getMarketplaceConfig} from '../../../common/orm/config';
 
 /**
  * Shared setup for the contributions edit routes: resolve the workspace, run the
- * seller-only auth guard (login redirect / 404 exactly as the listing page),
- * and load the reference data the form needs. Returns the authed context plus
- * the workspace-default currency and config flags.
+ * seller-only auth guard (login redirect / 404 exactly as the contributions
+ * listing), and load the reference data the form needs. Returns
+ * the authed context plus the currency a new listing is priced in and the
+ * config flags.
  */
 export async function loadEditContext(params: {
   tenant: string;
@@ -57,7 +58,9 @@ export async function loadEditContext(params: {
   const {client} = access.tenant;
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
-  /* Seller-only area — non-sellers can't reach the edit routes by URL either. */
+  /* Seller-only area — the same hard gate as the contributions listing, so
+   * non-sellers can't reach the edit routes by URL either. Publisher approval
+   * is not checked here. */
   if (
     !config?.allowToPublish ||
     !canManageProducts({user: access.user, subapp: access.subapp})

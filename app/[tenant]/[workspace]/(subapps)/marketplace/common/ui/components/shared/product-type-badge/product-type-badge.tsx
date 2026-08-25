@@ -13,8 +13,8 @@ export interface ProductTypeBadgeProps {
 /* Palette of readable tones, picked deterministically from the type
  * code so each new type gets a stable color without any code change
  * here. Each entry pairs a translucent fill with a saturated foreground
- * — same shape as the Free/Price pill so the two read as siblings on
- * both white cards and the gradient product header. */
+ * — same shape as the Free/Price pill so the two read as siblings, and
+ * legible both on a white row and over a card's gradient cover. */
 const TYPE_PALETTE = [
   'bg-palette-blue-dark/15 text-palette-blue-dark',
   'bg-palette-teal-dark/15 text-palette-teal-dark',

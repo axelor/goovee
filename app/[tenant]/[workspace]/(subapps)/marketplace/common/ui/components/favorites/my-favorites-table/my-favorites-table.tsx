@@ -43,8 +43,9 @@ type Props = {
   workspaceURI: string;
   workspaceURL: string;
   marketplaceBase: string;
-  /** A search/type/price filter is active — changes the empty state to
-   *  "no results" instead of the "nothing saved yet" call to action. */
+  /** A search / type / price filter is active — swaps the "nothing saved yet"
+   *  empty state and its browse call to action for a plain "no results". True
+   *  whenever a filter is set, whether or not it removed anything. */
   filtered: boolean;
 };
 
@@ -219,8 +220,8 @@ export function MyFavoritesTable({
                       className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
                       <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
                     </Link>
-                    {/* Same toggle as the product header — toggles the heart
-                        optimistically; the row stays so it can be re-added. */}
+                    {/* Un-favouriting leaves the row in place so it can be
+                        re-added; the list only shrinks on reload. */}
                     <AddToFavoriteButton
                       productId={favorite.id}
                       workspaceURL={workspaceURL}

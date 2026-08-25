@@ -29,8 +29,8 @@ const loadProductVersionsSchema = z.object({
 
 type LoadProductVersionsInput = z.infer<typeof loadProductVersionsSchema>;
 
-/* A page of a product's versions for the edit dialog, plus the total (from the
- * paginated query's `_count`). Ownership is enforced by the access filter
+/* A page of a product's versions, plus the total (from the paginated query's
+ * `_count`). Ownership is enforced by the access filter
  * inside the query. */
 export async function loadProductVersions(
   input: LoadProductVersionsInput,

@@ -31,15 +31,17 @@ export type ProductEditDialogBodyProps = {
   inAti: boolean;
   /** The product being edited; absent in create mode. */
   initial?: Cloned<MyProductForEdit>;
-  /** First page of existing versions, fetched together with the product (in the
-   *  trigger) so the dialog opens fully populated. Empty for create. */
+  /** First page of existing versions, fetched alongside the product in one
+   *  round-trip before the dialog opens, so it opens populated. Empty for
+   *  create. */
   initialVersions?: Cloned<MyProductVersion>[];
   initialTotal?: number;
   /** Fixed product type for create mode. */
   defaultType?: MARKETPLACE_TYPE;
-  /** Dismiss the dialog (Cancel / ✕). */
+  /** Dismiss from the Cancel button. Closing via ✕ or Escape goes through
+   *  the dialog wrapper's own visibility instead, never this. */
   onClose: () => void;
-  /** A combined save persisted — the host closes and refreshes the listing. */
+  /** Called once a combined save has persisted. */
   onSaved: () => void;
   /* ---- host-injected chrome ---- */
   Title?: ElementType;
@@ -50,9 +52,9 @@ export type ProductEditDialogBodyProps = {
 /**
  * Combined editor mounted inside the dialog: the product (collapsible) and the
  * version surface in one scroll, saved once. The product and its first page of
- * versions are fetched together by the trigger and passed in, so the dialog
- * opens fully populated. The full-page route uses `ProductEditPage` instead;
- * both drive the same `useProductEditForm`.
+ * versions are passed in, so the dialog opens populated. The full-page route
+ * is a parallel implementation in `ProductEditPage`; both drive the same
+ * `useProductEditForm`, and behaviour changes belong in both.
  */
 export function ProductEditDialogBody({
   mode,

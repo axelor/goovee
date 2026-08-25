@@ -10,7 +10,7 @@ export enum MARKETPLACE_VERSION_STATUS {
 
 /* Publisher access request states (integer-backed, workflow order). Approving a
  * request sets the partner's `isMarketplacePublisher` flag, which — with the
- * workspace master switch — is what actually gates publishing. */
+ * workspace's `allowToPublish` — is what actually gates publishing. */
 export enum PUBLISHER_REQUEST_STATUS {
   REQUESTED = 1,
   REJECTED = 2,
@@ -18,8 +18,8 @@ export enum PUBLISHER_REQUEST_STATUS {
   BANNED = 4,
 }
 
-// Untranslated display labels for each status value. Translate at runtime
-// with the appropriate translate function (`i18n.t` client / `t` server).
+/* Untranslated display labels; translate at the call site (`i18n.t` on the
+ * client, `t` on the server). */
 export const MARKETPLACE_VERSION_STATUS_LABELS: Record<string, string> = {
   [MARKETPLACE_VERSION_STATUS.DRAFT]: 'Draft',
   [MARKETPLACE_VERSION_STATUS.IN_REVIEW]: 'In review',
@@ -28,8 +28,8 @@ export const MARKETPLACE_VERSION_STATUS_LABELS: Record<string, string> = {
   [MARKETPLACE_VERSION_STATUS.UNPUBLISHED]: 'Unpublished',
 };
 
-/* Design-system tone for each version status. Keeps the publisher table, the
- * edit form and the preview banner rendering the same status the same way. */
+/* Design-system tone for each version status, so a status reads the same
+ * wherever it is shown. */
 export const MARKETPLACE_VERSION_STATUS_TONES: Record<string, StatusKey> = {
   [MARKETPLACE_VERSION_STATUS.DRAFT]: 'draft',
   [MARKETPLACE_VERSION_STATUS.IN_REVIEW]: 'pending',
@@ -46,8 +46,8 @@ export const PRODUCT_MODERATION_STATUS = {
   TAKEN_DOWN: 3,
 } as const;
 
-/* Only the two restricted states are ever shown as a pill; an active product
- * shows its version status instead. */
+/* No entry for ACTIVE: a product that is neither frozen nor taken down shows
+ * its latest version's status in place of a moderation label. */
 export const PRODUCT_MODERATION_STATUS_LABELS: Record<number, string> = {
   [PRODUCT_MODERATION_STATUS.FROZEN]: 'Frozen',
   [PRODUCT_MODERATION_STATUS.TAKEN_DOWN]: 'Taken down',

@@ -310,7 +310,7 @@ export async function getPendingActions({
     }),
   ]);
 
-  // Roll the recent reviews up per product: count + average + newest timestamp.
+  // Roll recent reviews up per product: count, rating sum, newest date.
   const byProduct = new Map<
     string,
     {
@@ -350,7 +350,6 @@ export async function getPendingActions({
     at: version.updatedOn ?? null,
   }));
 
-  // Cap the panel to `take` items total, versions first.
   const mappedReviews: PendingReviews[] = [...byProduct.values()].map(
     rollup => ({
       marketplaceProduct: rollup.marketplaceProduct,
@@ -483,28 +482,30 @@ export async function getRecentActivity({
 const REVENUE_MONTHS = 12;
 
 export type RevenueMonth = {
-  /** Month start as an ISO date ('YYYY-MM-01'); the UI formats it
-   *  locale-aware (e.g. "Jan") rather than baking an English label here. */
+  /** Month start as an ISO date ('YYYY-MM-01'), left unformatted so the label
+   *  can be produced in the reader's locale. */
   month: string;
   revenue: number;
 };
 
 export type RevenueSummary = {
-  /** Contributor's currency that `lastMonth`/`monthly` are expressed in (the
-   *  ORM payload), or null when there are no purchases / no usable currency. */
+  /** The currency `lastMonth` and `monthly` are expressed in — the
+   *  contributor's, or the app default when they have none. Null when there
+   *  are no purchases or no usable currency. */
   currency: Currency | null;
-  /** Net revenue for the last full calendar month (the stat-card headline). */
+  /** Net revenue for the last full calendar month. */
   lastMonth: number;
   /** Last-full-month vs the month before it, or null with no baseline. */
   deltaPct: number | null;
-  /** Trailing 12 calendar months, oldest first (the chart). */
+  /** The trailing `REVENUE_MONTHS` months, oldest first. */
   monthly: RevenueMonth[];
-  /** The month `lastMonth` covers (ISO 'YYYY-MM-01'); the UI formats it. */
+  /** The month `lastMonth` covers (ISO 'YYYY-MM-01'). */
   month: string;
   /** The month the trend compares against (the month before `month`). */
   previousMonth: string;
-  /** Purchases skipped for lack of an exchange rate to the contributor's
-   *  currency — surfaced so the totals aren't silently under-reported. */
+  /** Purchases left out of the totals — no currency on the row, or no rate to
+   *  the target currency. Surfaced so the totals aren't silently
+   *  under-reported. */
   unconvertible: number;
 };
 
@@ -576,8 +577,7 @@ export async function getRevenueSummary({
     };
   }
 
-  // The contributor's currency (+ conversion lines covering every charged
-  // currency) is the conversion target.
+  // Target currency: the contributor's, falling back to the app default.
   const priceContext = await getPriceContext({
     client,
     mainPartnerId,

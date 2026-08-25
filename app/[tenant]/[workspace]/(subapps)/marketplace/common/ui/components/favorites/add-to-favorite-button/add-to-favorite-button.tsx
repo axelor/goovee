@@ -16,8 +16,10 @@ interface AddToFavoriteButtonProps {
   workspaceURI: string;
   isFavorite?: boolean;
   /**
-   * - `overlay` (default): boxed button for image overlays (product cards/header).
-   * - `bare`: just the heart icon, for inline use in tables/lists.
+   * - `overlay` (default): translucent-white circle with an outline and
+   *   shadow, so it stays readable pinned over card content.
+   * - `bare`: borderless icon button sized to its content, for inline use in
+   *   tables and lists.
    */
   variant?: 'overlay' | 'bare';
 }

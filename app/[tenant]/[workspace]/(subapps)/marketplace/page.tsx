@@ -182,8 +182,9 @@ export default async function Page(props: {
     categories.map((cat: ListCategory) => tattr(cat.name)),
   );
 
-  /* Falls back to the "all" heading when the URL names a category that is not
-     in this workspace, rather than rendering an empty title. */
+  /* No match in the loaded list — unknown, archived, or past the 100 fetched —
+   * leaves the title on the "all" heading, though the product query still
+   * filters by the id. */
   const activeCategoryIndex = category
     ? categories.findIndex(
         (listCategory: ListCategory) => listCategory.id === category,
@@ -194,10 +195,11 @@ export default async function Page(props: {
 
   return (
     <>
-      {/* Grid rather than stacked blocks so the refine controls can share the
-          title's row on desktop, where it is otherwise empty, and still fall
-          below the search box on a phone. Source order is the reading order,
-          so the tab sequence matches what you see at both sizes. */}
+      {/* Grid so the refine controls can sit beside the title on desktop, where
+          that row is otherwise empty, and drop below the search box on a
+          phone. Note the search box comes second in the DOM but renders below
+          the controls on desktop, so tab order and visual order differ
+          there. */}
       <div className="container pt-8 grid grid-cols-1 lg:grid-cols-[1fr_auto] lg:items-end gap-x-4">
         <div className="lg:col-start-1 lg:row-start-1">
           <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-royal">

@@ -5,8 +5,8 @@ import axios from 'axios';
 
 /* Triggers the AOS side to build the SaleOrder + Invoice for a marketplace order and link them onto
  * the order. The order header and its lines are already persisted, so only the order id is sent —
- * the backend reads everything it needs server-side. Throws on failure; the order is then left for
- * admin recovery. */
+ * the backend reads everything it needs server-side. Throws if the call fails or AOS rejects it,
+ * leaving the order for recovery. */
 export async function createMarketplaceOrder({
   orderId,
   config,

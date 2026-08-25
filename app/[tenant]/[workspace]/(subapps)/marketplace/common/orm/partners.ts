@@ -18,7 +18,7 @@ export async function findPartnerInvoicingAddresses({
     where: {id: mainPartnerId},
     select: {
       partnerAddressList: {
-        /* This list picks the address stamped on the new invoice — a new
+        /* These addresses feed a new order — a new
          * use, not an existing relation — so archived rows are excluded. */
         where: {
           OR: [{archived: false}, {archived: null}],

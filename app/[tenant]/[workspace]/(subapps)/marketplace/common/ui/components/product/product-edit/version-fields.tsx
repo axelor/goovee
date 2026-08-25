@@ -50,11 +50,11 @@ type VersionFieldsProps = {
 
 /**
  * Version input fields for the combined editor, bound to one row of the form's
- * version array via `namePrefix`. The status control and cursor nav live around
- * this (in version-section); this renders only the editable fields. Read-only
- * context (current bundle) comes in via `existingBundle`, not the form. A picked
- * bundle is staged immediately (token stored in `bundleToken`); the dropzone
- * shows live progress sourced from the session upload hook.
+ * version array via `namePrefix`. This renders only the editable fields; the
+ * status control and cursor nav sit outside it. Read-only context (current
+ * bundle) comes in via `existingBundle`, not the form. A picked bundle starts
+ * uploading at once, the token reaching `bundleToken` only when the transfer
+ * succeeds; the dropzone shows live progress.
  */
 export function VersionFields({
   namePrefix,
@@ -119,8 +119,8 @@ export function VersionFields({
        * reject it. The purpose registry on the server stays the real check. */
       maxBytes: MAX_BUNDLE_SIZE,
     });
-    // ids are available synchronously, so the row's id is recorded before any
-    // navigation could remount this component.
+    /* upload() returns its item ids synchronously, so the row's entry lands
+     * before a remount could lose it. */
     bundleItemByRow.current.set(rowKey, ids[0]);
     done.then(([result]) => {
       if (!result) return; // failed or paused — the dropzone offers the resume
@@ -151,9 +151,10 @@ export function VersionFields({
 
   return (
     <div className="space-y-8">
-      {/* RHF persists field-array values only for registered fields, and this
-          one has no visible input — register it (hidden) so appended
-          (paginated) rows keep their id and aren't treated as brand-new. */}
+      {/* RHF keeps field-array values only for registered fields, and this one
+          has no visible input — register it hidden so appended (paginated)
+          rows carry their id into the save; otherwise the upsert reads them as
+          new versions. */}
       <input type="hidden" {...register(path('id'))} />
 
       <FormField

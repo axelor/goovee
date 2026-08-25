@@ -94,9 +94,8 @@ export default async function MyContributionsPage(props: {
   const {client} = access.tenant;
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
-  /* Contributions is a seller-only area; non-sellers can't reach it even by
-   * typing the URL. The workspace master switch and the manage-products role
-   * are hard gates; publisher approval (below) drives what's shown, not a 404. */
+  /* Seller-only area. `allowToPublish` and the manage-products role are hard
+   * gates; publisher approval (below) drives what's shown, not a 404. */
   if (
     !config?.allowToPublish ||
     !canManageProducts({user: access.user, subapp: access.subapp})
@@ -115,8 +114,7 @@ export default async function MyContributionsPage(props: {
   const isPublisher = publisherAccess.isPublisher;
 
   /* The categories/licenses/compatibility/currency reads feed only the publisher
-   * console (the Publish-new button and the products tab), so a non-publisher —
-   * who just sees the request panel — never pays for them. */
+   * console, so a non-publisher never pays for them. */
   const consoleData = isPublisher
     ? await Promise.all([
         findProductCategories({

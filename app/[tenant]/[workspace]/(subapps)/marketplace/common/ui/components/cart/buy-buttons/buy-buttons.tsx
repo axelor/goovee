@@ -23,11 +23,13 @@ type Props = {
   inCartLabel: string;
 };
 
-/* Buy / Add-to-cart CTAs for a paid product detail page. Three states:
- *   - not in cart: "Add to cart" + "Buy now"
- *   - in cart: "In cart — view cart"
- * "Buy now" = add + navigate to /cart. The login gate happens earlier;
- * by the time these buttons render, the user is authenticated. */
+/* Buy / Add-to-cart CTAs for a paid product. The stored cart lives in
+ * IndexedDB, so it is never loaded on first paint; a skeleton stands in until
+ * it is, rather than letting the control flip from add to in-cart under the
+ * user. After that it is either the add + buy pair or a single link to
+ * `cartHref`, and buy adds then follows that link. Every label is supplied by
+ * the caller. The login gate happens earlier, so by the time these render the
+ * user is authenticated. */
 export function BuyButtons({
   productId,
   productSlug,

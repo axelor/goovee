@@ -10,11 +10,9 @@ import type {MarketplaceConfig} from './config';
 import {computePrice, type ComputedPrice} from '../utils/price';
 import type {PriceableMarketplaceProduct} from './helpers';
 
-/** Enriches an MP listing row with the computed `price`. The listing's
- *  own `salePrice` / `inAti` / `saleCurrency` are fed through as
- *  `priceOverride` — they win over the workspace default product's
- *  matching fields. Tax / accountManagement / fallback currency still come from
- *  `mp.product` (same path AOS takes on the SO line). */
+/** Adds the computed `price` to a marketplace listing row. The listing's own
+ *  `salePrice` / `inAti` / `saleCurrency` go through as `priceOverride` and are
+ *  used as-is; `mp.product` supplies only the tax configuration. */
 export function withPrice<T extends PriceableMarketplaceProduct>(
   mp: T,
   config: MarketplaceConfig,
@@ -38,8 +36,8 @@ export function withPrice<T extends PriceableMarketplaceProduct>(
 /** Bundle of inputs `computePrice` needs that are *batch-wide* rather than
  *  per-product: the viewer/default currencies (the storefront display
  *  cascade), the conversion lines covering this batch, and the buyer's
- *  fiscal position. Built once per request via the core fetches, reused
- *  across every product in the batch. */
+ *  fiscal position. Built once per query and reused for every product in
+ *  it. */
 export type PriceContext = Awaited<ReturnType<typeof getPriceContext>>;
 export async function getPriceContext({
   client,
@@ -70,22 +68,20 @@ export async function getPriceContext({
   };
 }
 
-/** The app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) — a thin wrapper
- *  over the core's `findCurrencyByCodeISO`; the choice of *which* code is the
- *  app's policy. Used at product create time (`saveProductWithVersions`) and at display
- *  time (`getPriceContext`). Returns null if the row is missing — callers
- *  decide whether that's a hard failure (create) or a soft fallback (display). */
+/** The app-wide fallback currency — a thin wrapper over the core's
+ *  `findCurrencyByCodeISO`, where the choice of *which* code is the app's
+ *  policy. Returns null when the row is missing, and callers differ on what
+ *  that means: a hard failure at create, a soft fallback at display time. */
 export async function findDefaultCurrency(client: Client) {
   return findCurrencyByCodeISO({client, codeISO: DEFAULT_CURRENCY_CODE});
 }
 
 /** Resolves the currency to use for a brand-new marketplace listing:
  *  publisher's partner currency → app-wide default (`DEFAULT_CURRENCY_CODE`).
- *  Single source of truth shared between the create form (display symbol)
- *  and `saveProductWithVersions` (FK stamped on insert), so the price the supplier
- *  types is interpreted in the same currency that gets persisted.
- *  Existing listings keep their own `saleCurrency` — this helper is not
- *  consulted on edit. */
+ *  One value feeds both the price input's currency symbol and the FK written
+ *  on insert, so the price a publisher types is interpreted in the currency it
+ *  is stored in. An existing listing keeps its own `saleCurrency` — this is
+ *  only the default for a new one. */
 export async function resolveNewListingCurrency({
   client,
   mainPartnerId,

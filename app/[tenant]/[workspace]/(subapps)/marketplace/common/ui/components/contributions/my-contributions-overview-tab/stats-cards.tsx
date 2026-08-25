@@ -56,7 +56,8 @@ type StatCardProps = {
   /** Abbreviated month the value covers, e.g. "May" (shown in parentheses). */
   monthLabel: string;
   delta: number | null;
-  /** Formatted delta (e.g. "+15.8%"), or null when there is no prior month. */
+  /** Formatted delta (e.g. "+15.8%"), or null when the earlier month has
+   *  nothing to compare against. */
   deltaText: string | null;
   /** Trend suffix naming the compared month, e.g. "vs Apr". */
   vsLabel: string;
@@ -90,8 +91,8 @@ function StatCard({
             ({monthLabel})
           </span>
         </div>
-        {/* Trend row is always shown (icon + text). With no earlier month to
-            compare, it reads as the baseline rather than a change. */}
+        {/* The trend row always renders; with no comparable earlier figure it
+            shows the baseline rather than a change. */}
         <span
           className={`inline-flex items-center gap-0.5 text-xs ${
             deltaText && (delta ?? 0) < 0 ? 'text-destructive' : 'text-mint-700'
@@ -126,9 +127,9 @@ export function StatCardInnerSkeleton() {
 }
 
 /* Each card awaits only its own query and computes its own month labels, so it
- * streams into its Swipe slide independently — the fastest card appears first
- * rather than all four waiting on the slowest. The overview tab assembles them
- * into the Swipe, each behind its own Suspense. */
+ * streams in independently — the fastest card appears first rather than all
+ * four waiting on the slowest. Each is mounted behind its own Suspense
+ * boundary, which is what makes that true. */
 
 export async function RevenueStatCard({
   revenue,

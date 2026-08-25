@@ -79,9 +79,9 @@ export type MyProductVersion = Awaited<
   ReturnType<typeof findMyProductVersions>
 >[number];
 
-/* Versions for the product-edit screen: every status (draft, in-review,
- * published, unpublished), newest first, scoped to a product the caller
- * publishes. Paginated — a `take` makes goovee attach `_count` (the total for
+/* Versions for the product-edit screen: no status filter, highest version
+ * number first, scoped to a product the caller publishes. Paginated — a
+ * `take` makes goovee attach `_count` (the total for
  * this filter) to each returned row, so no separate count query is needed. */
 export async function findMyProductVersions({
   productId,
@@ -123,7 +123,7 @@ export async function findMyProductVersions({
       },
       /* No nested `take`: it would LIMIT the batched child query across the
        * whole page, not per version (goovee-orm#31). Rows are append-only, so
-       * id DESC is newest-first and the consumer reads `rejectionList[0]`.
+       * id DESC is newest-first, so `rejectionList[0]` is the latest.
        * TODO: once goovee-orm#32 ships, ask for `take: 1` here instead. */
       rejectionList: {
         select: {id: true, reason: true, rejectionDateTime: true},
@@ -137,8 +137,8 @@ export async function findMyProductVersions({
  * `marketplaceProduct.latestVersion`. Call after any
  * create/status-change/delete.
  *
- *   latestVersion  = highest sortkey across ALL versions of the product
- *   currentVersion = highest sortkey among PUBLISHED versions, or null */
+ *   latestVersion  = highest sortkey among non-archived versions
+ *   currentVersion = the same, restricted to PUBLISHED, or null */
 export async function syncProductVersionPointers({
   client,
   productId,

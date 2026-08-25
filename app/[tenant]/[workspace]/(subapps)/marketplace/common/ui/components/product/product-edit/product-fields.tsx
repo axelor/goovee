@@ -51,15 +51,16 @@ type ProductFieldsProps = {
    *  label wording. */
   inAti: boolean;
   /** Render just the fields, without the card surface + heading. The dialog
-   *  wraps them in a collapsible; the page shows the full card (default). */
+   *  passes this and wraps them in a collapsible; the full-page editor takes
+   *  the default and shows the card. */
   bare?: boolean;
 };
 
 /**
  * Product fields for the combined editor — bound to the form's root product
- * values via `useFormContext`. Shared by the full-page editor (always-open
- * card) and the dialog (wrapped in a collapsible). The Type select is always
- * disabled: it's fixed at create (preselected) and immutable on edit.
+ * values via `useFormContext`. Shared by the full-page editor and the dialog,
+ * so a change here lands in both. The Type select is always disabled: it's
+ * fixed at create (preselected) and immutable on edit.
  */
 export function ProductFields({
   categories,

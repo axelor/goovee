@@ -94,8 +94,8 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   }
 
   /* PaymentContext holds the validated cart verbatim. On the return leg
-   * `checkout()` trusts these server-stamped prices and only re-checks
-   * the time-sensitive invariants (ownership, published version, access). */
+   * `checkout()` trusts these server-set prices and only re-checks the
+   * time-sensitive invariants — ownership, published version, access. */
   const context = {
     cart,
     workspaceURL,
@@ -137,10 +137,10 @@ export async function createStripeCheckoutSession(props: {
   }
 
   try {
-    /* Return to the same checkout page; the Stripe button there detects
-     * `stripe_session_id` and runs `onStripeValidateSession` (which calls
-     * the unified `checkout()` finalize). On success, `onApprove` lands
-     * the buyer on /cart/checkout/success. */
+    /* Land back on the checkout page: the shared payment flow reads
+     * `stripe_session_id` from the URL and calls `checkout()` to finalize,
+     * then pushes the buyer to the success page. That is why this is not the
+     * success URL, while `cancelUrl` below is a page of its own. */
     const successUrl = `${parsed.data.workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${parsed.data.workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`;
 
@@ -398,8 +398,9 @@ export async function checkout(
   }
 
   /* Access is granted; the response returns immediately and the order/invoice is created on the AOS
-   * side after the response. If it fails (e.g. a missing invoicing address), the order is left for
-   * admin recovery and the buyer's purchases show "pending" until then. */
+   * side after the response. If it fails (e.g. a missing invoicing address), the order is left
+   * without its SaleOrder/Invoice link and the buyer's purchases read "Order pending" /
+   * "Invoice pending" until someone recovers it on the AOS side. */
   after(async () => {
     try {
       await createMarketplaceOrder({orderId, config});
