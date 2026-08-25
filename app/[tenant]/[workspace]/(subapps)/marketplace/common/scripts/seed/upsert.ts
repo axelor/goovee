@@ -8,8 +8,11 @@ import {MetaFileStoreType} from '@/lib/core/upload/file';
 import {sql} from '@/utils/template-string';
 import {BigDecimal, type CreateArgs} from '@goovee/orm';
 import {MARKETPLACE_ICONS} from '../../constants/icons';
-import {PRODUCT_MODERATION_STATUS} from '../../constants/statuses';
-import {REVIEW_MODERATION_STATUS} from '../../constants/statuses';
+import {
+  PRODUCT_MODERATION_STATUS,
+  PUBLISHER_REQUEST_STATUS,
+  REVIEW_MODERATION_STATUS,
+} from '../../constants/statuses';
 import {DEMO_PREFIX, demoKey} from './constants';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -395,6 +398,98 @@ export async function upsertProduct(
     select: {id: true},
   });
   return {id: created.id, supplierPartnerId: publisherPartnerId};
+}
+
+/* The plan text is where the demo marker lives. The storefront never reads it
+ * — only the back-office form shows it — so it labels the row's origin without
+ * appearing anywhere in the demo itself, and `reset` matches on it. */
+const seededPublishingPlan = `${DEMO_PREFIX}publisher — access granted with this partner's demo listings.`;
+
+/** What a run did, or declined to do, about one publisher's grant. */
+export type PublisherGrantOutcome =
+  | 'granted'
+  | 'already-granted'
+  | 're-approved'
+  | 'left-banned'
+  | 'left-approved'
+  | 'left-blocked';
+
+/**
+ * Grants publishing in this workspace to a partner the seeder gave listings
+ * to, so the demo storefront treats them as the publisher they appear to be.
+ *
+ * Only ever writes a row carrying the demo marker, and never overrides a ban.
+ * A request somebody else made is left exactly as it stands, so seeding cannot
+ * turn someone's rejection into a grant.
+ *
+ * Re-approving clears the cooldown and the rejection reason, but the decision
+ * fields are not exposed to this client — so on a row that was decided once
+ * before, they still name that earlier decision and its date.
+ */
+export async function upsertPublisherRequest({
+  client,
+  ctx,
+  publisherPartnerId,
+}: {
+  client: Client;
+  ctx: WorkspaceContext;
+  publisherPartnerId: string;
+}): Promise<PublisherGrantOutcome> {
+  const existing = await client.aOSMarketplacePublisherRequest.findOne({
+    where: {
+      partner: {id: publisherPartnerId},
+      portalWorkspace: {id: ctx.workspaceId},
+    },
+    select: {id: true, version: true, publishingPlan: true, statusSelect: true},
+  });
+
+  if (existing) {
+    const seeded = existing.publishingPlan?.startsWith(DEMO_PREFIX) === true;
+    if (!seeded) {
+      /* Someone else's row. Approved is the happy case and needs no comment;
+       * anything else means this partner cannot manage the listings the run
+       * just gave them, which is worth saying out loud. */
+      return existing.statusSelect === PUBLISHER_REQUEST_STATUS.APPROVED
+        ? 'left-approved'
+        : 'left-blocked';
+    }
+    if (existing.statusSelect === PUBLISHER_REQUEST_STATUS.APPROVED) {
+      return 'already-granted';
+    }
+    /* A ban stands even on a seeded row. It cannot be appealed through the
+     * storefront, so re-approving here would quietly erase a decision the
+     * partner has no way to get taken again. */
+    if (existing.statusSelect === PUBLISHER_REQUEST_STATUS.BANNED) {
+      return 'left-banned';
+    }
+    await client.aOSMarketplacePublisherRequest.update({
+      data: {
+        id: existing.id,
+        version: existing.version,
+        statusSelect: PUBLISHER_REQUEST_STATUS.APPROVED,
+        cooldownUntil: null,
+        rejectionReason: null,
+      },
+      select: {id: true},
+    });
+    return 're-approved';
+  }
+
+  await client.aOSMarketplacePublisherRequest.create({
+    data: {
+      partner: {select: {id: publisherPartnerId}},
+      portalWorkspace: {select: {id: ctx.workspaceId}},
+      /* Suppliers are companies rather than contacts, so the partner is also
+       * the applicant. The decision fields stay empty: a headless run has no
+       * deciding user, and the schema does not expose them. */
+      requestedByContact: {select: {id: publisherPartnerId}},
+      publishingPlan: seededPublishingPlan,
+      statusSelect: PUBLISHER_REQUEST_STATUS.APPROVED,
+      requestDateTime: new Date(),
+    },
+    select: {id: true},
+  });
+  return 'granted';
 }
 
 export async function upsertVersion({

@@ -7,7 +7,7 @@ import {DEMO_PREFIX} from './constants';
 
 /* Reset / teardown for the marketplace seed.
  *
- * Scope: everything created by `run.ts`. The seed stamps DEMO_PREFIX (see
+ * Scope: everything created by `run.ts`. The seed sets DEMO_PREFIX (see
  * constants.ts) on the natural key of every row it persists, so the
  * teardown matches it all by that one prefix (`${DEMO_PREFIX}%`):
  *   - AOSMarketplaceProduct.slug        (+ their versions, reviews,
@@ -16,6 +16,9 @@ import {DEMO_PREFIX} from './constants';
  *   - AOSMarketplaceCategory.code
  *   - AOSMarketplaceLicense.code
  *   - AOSMarketplaceAxelorVersion.name
+ *   - AOSMarketplacePublisherRequest.publishingPlan — the publishing rights
+ *     the seed granted its publishers. A request somebody applied for
+ *     carries no prefix, so it survives.
  *
  * Because the seeded dictionaries carry the prefix, they can't collide
  * with canonical reference data (a real `MIT` license, `v9.0.0` version),
@@ -24,7 +27,8 @@ import {DEMO_PREFIX} from './constants';
  * Intentionally NOT touched:
  *   - The workspace default AOSProduct (`defaultProductForMarketplace`)
  *     — shared, owned by the workspace config.
- *   - Partner / customer accounts referenced as publishers/authors.
+ *   - Partner / customer accounts referenced as publishers/authors. Only the
+ *     publishing rights the seed granted them go, not the accounts.
  *
  * Storage files (the DEMO_PREFIX bundle + screenshots) are removed from
  * disk best-effort after the DB transaction commits. */
@@ -70,7 +74,7 @@ async function confirm(): Promise<boolean> {
   if (values.yes) return true;
   return new Promise(resolve => {
     process.stdout.write(
-      `\x1b[33m? This will delete every ${DEMO_PREFIX}* marketplace row (products, files, categories, licenses, compat versions) on tenant '${tenantId}'. Continue? [y/N] \x1b[0m`,
+      `\x1b[33m? This will delete every ${DEMO_PREFIX}* marketplace row (products, files, categories, licenses, compat versions, seeded publishing rights) on tenant '${tenantId}'. Continue? [y/N] \x1b[0m`,
     );
     const onData = (chunk: Buffer) => {
       process.stdin.removeListener('data', onData);
@@ -123,6 +127,7 @@ async function main() {
       compatVersions: 0,
       licenses: 0,
       categories: 0,
+      publisherRequests: 0,
     };
 
     /* Product-scoped teardown (steps 1–3) only runs when seeded products
@@ -281,6 +286,16 @@ async function main() {
         where: {code: {like: `${DEMO_PREFIX}%`}},
       }),
     );
+    /* 6. The publishing rights the seed granted. Not a dictionary: the marker
+     *    sits on the plan text rather than a natural key, because a grant has
+     *    no code of its own. Only rows the seeder wrote carry it, so a request
+     *    somebody applied for — or that they re-applied for, which rewrites
+     *    the plan with their own words — survives. */
+    counts.publisherRequests = Number(
+      await txClient.aOSMarketplacePublisherRequest.deleteAll({
+        where: {publishingPlan: {like: `${DEMO_PREFIX}%`}},
+      }),
+    );
 
     return counts;
   });
@@ -307,6 +322,7 @@ async function main() {
       `  products ${deleted.products}, versions ${deleted.versions}, reviews ${deleted.reviews}, pictures ${deleted.pictures}\n` +
       `  purchases ${deleted.purchases}, downloads ${deleted.downloads}\n` +
       `  categories ${deleted.categories}, licenses ${deleted.licenses}, compat versions ${deleted.compatVersions}\n` +
+      `  publisher requests ${deleted.publisherRequests}\n` +
       `  meta files ${deleted.metaFiles}\n` +
       `  ${removedFiles} on-disk storage files removed.`,
   );

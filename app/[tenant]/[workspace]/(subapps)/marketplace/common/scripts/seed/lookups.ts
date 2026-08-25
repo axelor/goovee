@@ -88,7 +88,13 @@ export async function findCustomerPartnerByEmail(
 ) {
   const partner = await client.aOSPartner.findOne({
     where: {emailAddress: {address: email}},
-    select: {id: true, name: true, simpleFullName: true, isCustomer: true},
+    select: {
+      id: true,
+      name: true,
+      simpleFullName: true,
+      isCustomer: true,
+      isContact: true,
+    },
   });
   if (!partner) {
     throw new SeedLookupError(
@@ -98,6 +104,14 @@ export async function findCustomerPartnerByEmail(
   if (!partner.isCustomer) {
     throw new SeedLookupError(
       `Supplier partner with email '${email}' exists but is not a customer (isCustomer=false). Suppliers must be customers. Update the partner in AOS and try again.`,
+    );
+  }
+  /* A listing's publisher is the company, and the storefront resolves a
+   * contact's access through their parent company instead — so a contact here
+   * would own listings under an identity the gate never checks. */
+  if (partner.isContact) {
+    throw new SeedLookupError(
+      `Supplier partner with email '${email}' is a contact, not a company. Use the company partner's own email address.`,
     );
   }
   return partner;
