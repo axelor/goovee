@@ -69,38 +69,6 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
   return {...workspace, config};
 }
 
-/* Resolves an AOSCurrency by its ISO code.
- * Unused since listings moved to their own entity and currency moved onto the
- * workspace default product. FIXME(#111822): delete. */
-export async function findCurrencyByCode(client: Client, code: string) {
-  const currency = await client.aOSCurrency.findOne({
-    where: {code},
-    select: {id: true, code: true, symbol: true, numberOfDecimals: true},
-  });
-  if (!currency) {
-    throw new SeedLookupError(
-      `AOSCurrency with code '${code}' not found. Create it in AOS or change the fallback in @/constants.`,
-    );
-  }
-  return currency;
-}
-
-/* Resolves the partner currencies for a batch of supplier ids, as a
- * Map<partnerId, currencyId | null>.
- * Unused since listings moved to their own entity and currency moved onto the
- * workspace default product. FIXME(#111822): delete. */
-export async function findPartnerCurrencies(
-  client: Client,
-  partnerIds: string[],
-) {
-  if (!partnerIds.length) return new Map<string, string | null>();
-  const partners = await client.aOSPartner.find({
-    where: {id: {in: partnerIds}},
-    select: {id: true, currency: {id: true}},
-  });
-  return new Map(partners.map(p => [p.id, p.currency?.id ?? null]));
-}
-
 export async function findPartnerByEmail(client: Client, email: string) {
   const partner = await client.aOSPartner.findOne({
     where: {emailAddress: {address: email}},
