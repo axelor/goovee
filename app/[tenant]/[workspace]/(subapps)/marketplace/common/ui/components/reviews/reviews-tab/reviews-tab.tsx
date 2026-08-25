@@ -1,6 +1,3 @@
-'use server';
-
-import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {t} from '@/locale/server';
 import type {User} from '@/types';
@@ -34,7 +31,6 @@ import {TooltipDate} from '../../shared/tooltip-date';
 
 interface ReviewsTabProps {
   product: SingleProduct;
-  workspaceURI: string;
   workspaceURL: string;
   tenantId: string;
   client: Client;
@@ -43,11 +39,12 @@ interface ReviewsTabProps {
   loginHref: string;
   /** Owner preview: hide the write-a-review card (no interaction). */
   preview?: boolean;
+  /** Returns the URL for a given page number (preserves other search params). */
+  buildPageHref: (page: number) => string;
 }
 
 export async function ReviewsTab({
   product,
-  workspaceURI,
   workspaceURL,
   tenantId,
   client,
@@ -55,6 +52,7 @@ export async function ReviewsTab({
   user,
   loginHref,
   preview = false,
+  buildPageHref,
 }: ReviewsTabProps) {
   const REVIEWS_PAGE_SIZE = 4;
 
@@ -265,7 +263,7 @@ export async function ReviewsTab({
                 <Link
                   scroll={false}
                   replace
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage > 1 ? `&reviewPage=${reviewPage - 1}` : ''}`}
+                  href={buildPageHref(Math.max(1, reviewPage - 1))}
                   className={cn({
                     ['pointer-events-none opacity-50']: reviewPage <= 1,
                   })}>
@@ -288,10 +286,7 @@ export async function ReviewsTab({
               return (
                 <PaginationItem key={value}>
                   <PaginationLink isActive={reviewPage === value} asChild>
-                    <Link
-                      scroll={false}
-                      replace
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews&reviewPage=${value}`}>
+                    <Link scroll={false} replace href={buildPageHref(value)}>
                       {value}
                     </Link>
                   </PaginationLink>
@@ -303,7 +298,9 @@ export async function ReviewsTab({
                 <Link
                   scroll={false}
                   replace
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage < totalReviewPages ? `&reviewPage=${reviewPage + 1}` : ''}`}
+                  href={buildPageHref(
+                    Math.min(totalReviewPages, reviewPage + 1),
+                  )}
                   className={cn({
                     ['pointer-events-none opacity-50']:
                       reviewPage >= totalReviewPages,

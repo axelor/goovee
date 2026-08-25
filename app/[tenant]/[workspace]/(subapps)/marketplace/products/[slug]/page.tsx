@@ -319,13 +319,13 @@ export default async function ProductPage(props: {
             {tab === ProductTab.Reviews && (
               <ReviewsTab
                 product={product}
-                workspaceURI={workspaceURI}
                 workspaceURL={workspaceURL}
                 tenantId={tenantId}
                 client={client}
                 reviewPage={reviewPage}
                 user={access.user}
                 preview={preview}
+                buildPageHref={page => productUrl({reviewPage: page})}
                 loginHref={getLoginURL({
                   callbackurl: productUrl({tab: ProductTab.Reviews}),
                   workspaceURI,
