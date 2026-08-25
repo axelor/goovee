@@ -10,6 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
@@ -83,7 +84,9 @@ export async function VersionsTab({
               isLatest={version.id === currentVersionId}
               preview={preview}
               canDownload={canDownload}
-              downloadHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+              downloadHref={withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
+              )}
             />
           </div>
         ))}

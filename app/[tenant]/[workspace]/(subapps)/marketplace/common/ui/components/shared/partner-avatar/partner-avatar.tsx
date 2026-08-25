@@ -1,5 +1,6 @@
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {cn} from '@/utils/css';
+import {getPartnerImageURL} from '@/utils/files';
 
 type PartnerAvatarProps = {
   partner: {
@@ -27,7 +28,7 @@ export function PartnerAvatar({
     return (
       <Avatar className="rounded-full shrink-0" style={style}>
         <AvatarImage
-          src={`/api/tenant/${tenantId}/partner/image/${pictureId}`}
+          src={getPartnerImageURL(pictureId, tenantId)}
           alt={partner.simpleFullName || 'Reviewer'}
           size={size}
         />

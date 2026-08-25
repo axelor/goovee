@@ -1,6 +1,7 @@
 'use server';
 
 import {DEFAULT_CURRENCY_SCALE, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
@@ -11,6 +12,7 @@ import {TENANT_HEADER} from '@/proxy';
 import {PaymentOption} from '@/types';
 import type {ActionResponse} from '@/types/action';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
+import {ensureLeadingSlash} from '@/utils/url';
 import {WorkspaceURLSchema} from '@/utils/validators';
 import {headers} from 'next/headers';
 import {after} from 'next/server';
@@ -236,8 +238,8 @@ export async function payboxCreateOrder(props: {
       context,
       client: access.tenant.client,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${parsed.data.uri}?paybox_response=true`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${parsed.data.uri}?paybox_error=true`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${parsed.data.uri}?paybox_response=true`))}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${parsed.data.uri}?paybox_error=true`))}`,
       },
     });
     return {success: true, order: response};

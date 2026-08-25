@@ -13,6 +13,7 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
 import {cn} from '@/utils/css';
+import {getPartnerImageURL} from '@/utils/files';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {workspacePathname} from '@/utils/workspace';
@@ -463,11 +464,11 @@ export default async function ProductPage(props: {
                 <div className="flex items-start gap-4">
                   <Avatar className="rounded-full h-12 w-12 flex-shrink-0">
                     <AvatarImage
-                      src={
-                        product.publisher.picture?.id
-                          ? `/api/tenant/${tenantId}/partner/image/${product.publisher.picture.id}`
-                          : NO_IMAGE_URL
-                      }
+                      src={getPartnerImageURL(
+                        product.publisher.picture?.id,
+                        tenantId,
+                        {noimage: true, noimageSrc: NO_IMAGE_URL},
+                      )}
                       alt={
                         product.publisher.simpleFullName || (await t('Author'))
                       }
