@@ -8,7 +8,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-import {Button} from '@/ui/components';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
@@ -22,9 +21,12 @@ import {
 } from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound, redirect, unauthorized} from 'next/navigation';
+import {Suspense} from 'react';
 import {canManageProducts} from '../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getMarketplaceConfig} from '../common/orm/config';
+import {hasDirectoryAccess} from '../common/utils/directory';
+import {PartnerProfileLink} from '../common/ui/components/shared/partner-profile-link';
 import {myAccountParamsSchema} from '../common/utils/validators';
 
 export default async function MyAccountPage(props: {
@@ -76,6 +78,8 @@ export default async function MyAccountPage(props: {
   const isSeller =
     config.allowToPublish === true &&
     canManageProducts({user: access.user, subapp: access.subapp});
+  // Already resolved with the workspace, so this costs no extra query.
+  const directoryAvailable = hasDirectoryAccess(access.workspace.apps);
   const accountBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`;
 
   const cards: Array<{
@@ -146,12 +150,19 @@ export default async function MyAccountPage(props: {
               )}
             </p>
           </div>
-          <Button asChild variant="ink-outline">
-            <Link
-              href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${partnerId}`}>
-              {await t('See partner profile')}
-            </Link>
-          </Button>
+          {/* No fallback: the link is absent for a partner the Directory does
+            not list, so a placeholder would promise a control that never
+            arrives. */}
+          {directoryAvailable && (
+            <Suspense fallback={null}>
+              <PartnerProfileLink
+                client={access.tenant.client}
+                partnerId={partnerId}
+                href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${partnerId}`}
+                label={await t('See partner profile')}
+              />
+            </Suspense>
+          )}
         </div>
       </div>
 

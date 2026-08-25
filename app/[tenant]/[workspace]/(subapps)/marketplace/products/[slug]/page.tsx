@@ -2,7 +2,7 @@ import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import type {NullableValues} from '@/types/util';
 import {t} from '@/locale/server';
-import {Button, StatusPill} from '@/ui/components';
+import {StatusPill} from '@/ui/components';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {
   Breadcrumb,
@@ -39,6 +39,8 @@ import {ReviewsTab} from '../../common/ui/components/reviews/reviews-tab';
 import {SupportTab} from '../../common/ui/components/product/support-tab';
 import {VersionsTab} from '../../common/ui/components/versions/versions-tab';
 import {canManageProducts} from '../../common/utils/auth-helper';
+import {hasDirectoryAccess} from '../../common/utils/directory';
+import {PartnerProfileLink} from '../../common/ui/components/shared/partner-profile-link';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getMarketplaceConfig} from '../../common/orm/config';
 import {getPartnerId} from '@/utils';
@@ -487,16 +489,20 @@ export default async function ProductPage(props: {
                     </p>
                   </div>
                 </div>
-                {product.publisher.isInDirectory &&
-                  product.publisher.isCustomer &&
-                  !product.publisher.archived && (
-                    <Button asChild variant="ink-outline" className="w-full">
-                      <Link
-                        href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`}>
-                        {await t('View profile')}
-                      </Link>
-                    </Button>
-                  )}
+                {/* No fallback: the link is absent for a publisher the
+                  Directory does not list, so a placeholder would promise a
+                  control that never arrives. */}
+                {hasDirectoryAccess(access.workspace.apps) && (
+                  <Suspense fallback={null}>
+                    <PartnerProfileLink
+                      client={client}
+                      partnerId={product.publisher.id}
+                      href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`}
+                      label={await t('View profile')}
+                      className="w-full"
+                    />
+                  </Suspense>
+                )}
               </div>
             )}
           </div>
