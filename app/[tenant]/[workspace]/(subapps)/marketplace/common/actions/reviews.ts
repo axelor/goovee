@@ -59,10 +59,9 @@ export async function saveReview(
 
   let publisherId: string;
   if (payload.reviewedVersionId) {
-    /* Single query covering both guards: the reviewed version must be
-     * published AND belong to an accessible product. The version's own
-     * PUBLISHED status implies the product has a published version, so
-     * the plain access filter suffices here. */
+    /* One query for both guards: the version must be published and its
+     * product visible in this workspace. Note this path does not exclude
+     * taken-down products. */
     const matchingVersion = await client.aOSMarketplaceProductVersion.findOne({
       where: {
         id: payload.reviewedVersionId,
@@ -130,8 +129,10 @@ export async function saveReview(
           author: {select: {id: access.user.id}},
           rating: payload.rating,
           reviewComment: payload.reviewComment ?? null,
-          /* New reviews are visible; set it explicitly so the column is never
-           * null (moderation only ever flips it to hidden from the back-office). */
+          /* New reviews are visible; set explicitly so the column is never
+           * null. Only the back office ever writes HIDDEN — which is why the
+           * edit path above never touches this column: rewriting it would let
+           * an author clear a moderator's HIDDEN by editing their review. */
           moderationStatusSelect: REVIEW_MODERATION_STATUS.VISIBLE,
           ...(reviewedVersion && {reviewedVersion}),
         },

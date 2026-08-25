@@ -6,10 +6,10 @@ import type {ComponentType, ReactNode} from 'react';
 import {PUBLISHER_REQUEST_STATUS} from '../../../../constants/statuses';
 
 /**
- * Status-driven publisher-access panel shown in Contributions when the partner
- * is not yet an approved publisher: sign up, pending, declined (with the reason
- * and either a re-request date or an "apply again" link), or banned. The sign
- * up / apply again actions link to the application form at `applyHref`.
+ * Status-driven panel for a partner who is not an approved publisher: sign up,
+ * pending, declined — with the reason and either a re-request date or an
+ * "apply again" link — or banned. The sign up / apply again actions link to the
+ * form at `applyHref`.
  */
 export async function PublisherAccessRequest({
   applyHref,

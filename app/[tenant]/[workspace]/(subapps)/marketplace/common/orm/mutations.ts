@@ -7,8 +7,9 @@ import type {ORMRecord} from './helpers';
 
 // ---- VERSION MUTATIONS ---- //
 
-/** Sets the status of an existing version (used by the unpublish flow).
- *  Caller supplies id+version+statusSelect. */
+/** Sets the status of an existing version.
+ *  Unused since the combined editor replaced the standalone unpublish action.
+ *  FIXME(#111822): delete. */
 export async function updateVersionStatus({
   client,
   versionId,

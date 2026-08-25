@@ -24,8 +24,8 @@ type RequestPublisherAccessInput = z.infer<typeof requestPublisherAccessSchema>;
 /**
  * Submit (or re-open) this partner's publisher access request for the workspace.
  * Idempotent: a no-op when already pending or approved; re-opens a temporary
- * rejection once its cooldown has passed; refuses a banned partner. Only
- * total/admin contacts may request, and only where publishing is offered.
+ * rejection once its cooldown has passed; refuses a banned partner. Requires
+ * the workspace's `allowToPublish` and a caller who may manage products.
  */
 export async function requestPublisherAccess(
   input: RequestPublisherAccessInput,

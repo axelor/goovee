@@ -69,8 +69,9 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
   return {...workspace, config};
 }
 
-/* Resolves an AOSCurrency by its ISO code. Used for the fallback when a
- * supplier partner has no `currency` set. */
+/* Resolves an AOSCurrency by its ISO code.
+ * Unused since listings moved to their own entity and currency moved onto the
+ * workspace default product. FIXME(#111822): delete. */
 export async function findCurrencyByCode(client: Client, code: string) {
   const currency = await client.aOSCurrency.findOne({
     where: {code},
@@ -84,9 +85,10 @@ export async function findCurrencyByCode(client: Client, code: string) {
   return currency;
 }
 
-/* Resolves the partner currencies for a batch of supplier ids. Returns
- * a Map<partnerId, currencyId | null>; partners without a currency get
- * null and will fall back to DEFAULT_CURRENCY_CODE at the call site. */
+/* Resolves the partner currencies for a batch of supplier ids, as a
+ * Map<partnerId, currencyId | null>.
+ * Unused since listings moved to their own entity and currency moved onto the
+ * workspace default product. FIXME(#111822): delete. */
 export async function findPartnerCurrencies(
   client: Client,
   partnerIds: string[],

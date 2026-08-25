@@ -118,8 +118,8 @@ function ReviewStatusAlert({
   currentStatus: string | null;
   rejectionReason?: string;
 }) {
-  // Rejected or unpublished — saving brings the version back into circulation,
-  // either directly or via review depending on the workspace flag.
+  /* Rejected or unpublished — the version can be sent back out, directly or
+   * via review depending on the workspace flag. */
   if (
     currentStatus === STATUS.REJECTED ||
     currentStatus === STATUS.UNPUBLISHED
@@ -253,7 +253,8 @@ function ReviewStatusAlert({
  * The version surface of the combined editor: header with cursor nav, the
  * state-aware status segmented control, add/discard, and the fields for the
  * single version under the cursor. Shared by the full-page editor and the
- * dialog — both drive it with the same `useProductEditForm` model.
+ * dialog — both drive it with the same `useProductEditForm` model, so a change
+ * here lands in both. Holds no state of its own.
  */
 export function VersionSection({
   model,
@@ -387,7 +388,7 @@ export function VersionSection({
 
           {/* Keyed by the row's identity, not its index, so it remounts per
               version — the changelog editor then re-seeds from that row's
-              persisted value. Discarding the first of several new rows leaves
+              current form value. Discarding the first of several new rows leaves
               the index path unchanged, so keying on that would hold the
               discarded row's changelog open on its successor. */}
           <VersionFields

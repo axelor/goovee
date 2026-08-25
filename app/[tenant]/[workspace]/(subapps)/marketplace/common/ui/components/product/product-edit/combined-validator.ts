@@ -52,7 +52,7 @@ export const versionRowSchema = z
 export type VersionRowValues = z.infer<typeof versionRowSchema>;
 
 /**
- * The whole combined page form: the product fields (reused verbatim) plus two
+ * The whole combined editor form: the product fields (reused verbatim) plus two
  * version arrays — `versions` (loaded existing rows, edited in place) and
  * `newVersions` (rows the user added this session). Splitting them keeps RHF's
  * dirty tracking honest against paginated loading (see `useProductEditForm`).
@@ -67,8 +67,9 @@ export const combinedEditSchema = z.object({
 
 export type CombinedEditValues = z.infer<typeof combinedEditSchema>;
 
-/* The product fields as a self-contained block (the lock `version` plus every
- * editable column), reused by the save payload below. */
+/* The product fields as a self-contained block — the lock `version` plus every
+ * editable column, minus the id and screenshots the payload carries
+ * separately. */
 export const productEditBlockSchema = productSchema.omit({
   id: true,
   images: true,

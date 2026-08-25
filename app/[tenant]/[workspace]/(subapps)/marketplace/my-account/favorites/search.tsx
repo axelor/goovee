@@ -8,9 +8,9 @@ import {Search as SearchIcon, X} from 'lucide-react';
 import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 import {useMemo, useState, type ChangeEvent} from 'react';
 
-/** Filters the favourites table by name/description via the `?search=` param.
- *  Server-side filtering (so it spans every page), debounced, with a clear
- *  button. Resets to the first page on each new query. */
+/** Writes the `?search=` param, debounced. Filtering runs server-side over
+ *  name and description, so it spans every page rather than the one on
+ *  screen. */
 export function FavoritesSearch({className}: {className?: string}) {
   const router = useRouter();
   const pathname = usePathname();

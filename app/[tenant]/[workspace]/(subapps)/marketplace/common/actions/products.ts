@@ -103,8 +103,8 @@ export async function loadMyProductForEdit(
     };
   }
 
-  /* Load the product and its first page of versions together so the edit dialog
-   * opens fully populated in one round-trip. Mirrors the full-page editor route. */
+  /* Product and first page of versions in one round-trip. Kept in step with
+   * the full-page editor route, which loads the same pair. */
   const [product, versions] = await Promise.all([
     findMyProductForEdit({
       productId,
@@ -178,12 +178,12 @@ export async function searchProducts(
 }
 
 /**
- * Combined save for the full-page / dialog editor: persists the product and a
- * batch of versions (edited existing rows + newly created ones) in one
- * transaction. Creates the product when no id is sent, edits it otherwise.
- * Upsert-only: versions not in the batch (untouched or unloaded) are never
- * written or deleted; version pointers are recomputed once at the end from the
- * full DB state.
+ * Combined save: persists the product and a batch of versions (edited existing
+ * rows + newly created ones) in one transaction. Creates the product when no id
+ * is sent, edits it otherwise. Upsert-only: versions not in the batch — either
+ * untouched, or on a page the editor never loaded — are never written or
+ * deleted, so absence can never mean deletion. Version pointers are recomputed
+ * once at the end when any version row changed.
  */
 export async function saveProductWithVersions(
   input: SavePayload,
@@ -193,11 +193,6 @@ export async function saveProductWithVersions(
     return {error: true, message: await t('TenantId is required')};
   }
 
-  /* The editor only sends what changed (see `savePayloadSchema`): `product` is
-   * present on create or a product-field edit and absent on a versions-only
-   * edit; `images` is present only when the screenshots changed. So an
-   * unchanged product / picture set is never re-written — no needless bump of
-   * its optimistic-lock version, no false conflict with a concurrent edit. */
   const parsed = savePayloadSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
@@ -300,11 +295,9 @@ export async function saveProductWithVersions(
         ) {
           throw new Error('PRODUCT_UNDER_MODERATION');
         }
-        /* Rewrite the product row only when a product field actually changed —
-         * the editor omits the product block on a versions-only save, so it's
-         * left untouched (no needless write, no bumped optimistic-lock version,
-         * no false conflict with a concurrent product edit). Uses the category
-         * m2m diff and the lock the form was loaded with. */
+        /* An absent product block leaves the product row untouched, so an
+         * unchanged product never bumps its optimistic-lock version. Uses the
+         * category m2m diff and the lock the form was loaded with. */
         if (product) {
           if (product.version == null) throw new Error('MISSING_VERSION');
           const productVersion = product.version;
@@ -346,7 +339,7 @@ export async function saveProductWithVersions(
       } else {
         /* Create: the schema requires a product block when there's no id, so a
          * new listing always carries its full fields (and their defaults). Type/
-         * slug/currency/inAti/ownership are stamped once and never rewritten on
+         * slug/currency/inAti/ownership are set once and never rewritten on
          * edit. */
         if (!product) throw new Error('MISSING_PRODUCT');
         const workspaceDefaultProductId =
@@ -393,10 +386,10 @@ export async function saveProductWithVersions(
         productId = created.id;
       }
 
-      /* Reconcile screenshots only when they changed — the editor omits the
-       * `images` list otherwise, so a versions-only or product-only save won't
-       * re-sequence (and re-version) every picture. An empty list is still sent
-       * when the user clears all screenshots, so it reconciles to none. */
+      /* An absent `images` list leaves the screenshots untouched; an empty one
+       * clears them. Sending it puts every existing picture row through an
+       * optimistic-locked update, so one stale version fails the whole save;
+       * rows whose sequence did not move are not rewritten. */
       if (payload.images !== undefined) {
         await syncProductImages({
           client: txClient,
@@ -452,8 +445,8 @@ export async function saveProductWithVersions(
             });
           if (!currentVersion) throw new Error('VERSION_NOT_FOUND');
           /* A live version can't be demoted straight to draft — it must be
-           * unpublished first. The UI never offers Draft for these states, so
-           * this guards against a stale/forged request only. */
+           * unpublished first. The editor never offers Draft for these states,
+           * so this only ever rejects a stale or forged request. */
           if (
             effectiveStatus === MARKETPLACE_VERSION_STATUS.DRAFT &&
             (currentVersion.statusSelect ===
@@ -463,9 +456,11 @@ export async function saveProductWithVersions(
           ) {
             throw new Error('INVALID_TRANSITION');
           }
-          /* Unpublish is only valid from a live version (published or in
-           * review). The UI never offers it for other states, so this rejects
-           * a stale or forged request. */
+          /* Unpublish is only valid from a live version — published or in
+           * review. Meant to reject only a stale or forged request, but the
+           * editor seeds an already-unpublished row's status to `unpublished`,
+           * so an ordinary save of such a row trips it.
+           * FIXME(#111822): treat an unchanged status as a no-op. */
           if (
             effectiveStatus === MARKETPLACE_VERSION_STATUS.UNPUBLISHED &&
             currentVersion.statusSelect !==
@@ -538,9 +533,8 @@ export async function saveProductWithVersions(
       }
 
       /* Recompute current/latest once from the full DB state — correct no
-       * matter how many rows changed status (incl. bulk unpublish). Only needed
-       * when versions actually changed; a product-only edit leaves the pointers
-       * (and the product row) untouched. */
+       * matter how many rows changed status (incl. bulk unpublish). Nothing to
+       * do when no version row changed. */
       if (rows.length > 0) {
         await syncProductVersionPointers({client: txClient, productId});
       }
@@ -550,8 +544,9 @@ export async function saveProductWithVersions(
   } catch (caughtError) {
     const errorMessage =
       caughtError instanceof Error ? caughtError.message : '';
-    /* The ORM throws "optimistic lock on entity X failed, version N was
-     * expected, …"; match that phrasing. */
+    /* Two phrasings reach here: the ORM's own "Optimistic lock failed: …"
+     * when the row is gone, and typeorm's "The optimistic lock on entity X
+     * failed, version N was expected…" when the version moved. */
     if (/optimistic lock/i.test(errorMessage)) {
       return {
         error: true,

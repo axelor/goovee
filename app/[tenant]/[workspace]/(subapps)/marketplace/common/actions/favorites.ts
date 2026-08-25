@@ -55,8 +55,8 @@ export async function addProductToFavorites(
     tenantId,
   });
   if (!access.ok) {
-    /* Favouriting requires a login; bounce a guest to the sign-in page with a
-     * callback back to where they were, then surface other denials as errors. */
+    /* Favouriting requires a login: a guest is sent to sign-in with
+     * `returnUrl` as the callback; other denials become errors. */
     if (access.reason === 'unauthenticated') {
       redirect(
         getLoginURL({callbackurl: returnUrl, workspaceURI, tenant: tenantId}),

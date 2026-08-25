@@ -36,8 +36,8 @@ export type WorkspaceContext = {
   workspaceId: string;
   supplierPartnerId: string;
   /** The workspace default Product (PortalAppConfig.defaultProductForMarketplace).
-   *  Every seeded MarketplaceProduct points at this; tax/currency/unit
-   *  live there and the marketplace product only overrides salePrice/inAti. */
+   *  Seeded products point at it for unit and tax; salePrice, inAti and
+   *  saleCurrency are set on the marketplace row itself. */
   workspaceDefaultProductId: string;
   defaults: {
     inAti: boolean;
@@ -514,10 +514,10 @@ export async function upsertReview({
   });
 }
 
-/* Rebuilds (averageRating, ratingCount) from review rows for a set of
- * marketplace products in one raw UPDATE — avoids the read-modify-write
- * race that per-row helpers like `addRating`/`replaceRating` would cause
- * across idempotent re-runs. */
+/* Rebuilds (averageRating, ratingCount) for a set of marketplace products in
+ * one UPDATE rather than one per product, always recomputed from the review
+ * rows rather than adjusted incrementally, so a re-run cannot drift. Archived
+ * reviews are not excluded — the seed creates none. */
 export async function recomputeRatings(client: Client, productIds: string[]) {
   if (productIds.length === 0) return;
   await client.$raw(

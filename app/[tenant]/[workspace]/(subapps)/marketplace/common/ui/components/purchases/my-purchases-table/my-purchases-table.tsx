@@ -58,8 +58,8 @@ type Props = {
 };
 
 /* Download control for a taken-down purchase: the product is off the storefront,
-   so clicking download first opens a dialog with the moderation reason, then lets
-   the existing owner proceed. Works the same on mobile and desktop. */
+   so clicking download first opens a dialog explaining the takedown, then lets
+   the existing owner proceed. */
 function TakenDownDownload({
   downloadUrl,
   reason,

@@ -19,8 +19,8 @@ type Props = {
   checkoutHref: string;
 };
 
-/* Decimal-aware formatter using whatever scale the item was added with.
- * Each cart row may have its own currency symbol; we show it inline. */
+/* Formats at the scale the row was priced with; the symbol trails the
+ * amount. */
 function formatPrice(
   value: number,
   scale = 2,
@@ -60,9 +60,8 @@ export function CartContent({
     );
   }
 
-  /* All cart items should share a currency since saleCurrency is pinned
-   * to the workspace default at product-create time. We pick the first
-   * item's currency for the subtotal display; checkout enforces this. */
+  /* Mixed-currency carts are rejected at checkout, so the first item's
+   * currency is a safe stand-in for the subtotal. */
   const firstSymbol = cart.items[0]?.currencySymbol ?? undefined;
   const firstScale = cart.items[0]?.scale ?? 2;
   const subtotal = cart.items.reduce((sum, item) => sum + item.priceAti, 0);

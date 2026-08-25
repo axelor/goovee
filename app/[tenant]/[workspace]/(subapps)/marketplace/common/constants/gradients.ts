@@ -1,6 +1,6 @@
-/* The cover-style presets a publisher can pick. The tuple backs the zod enum
- * in the product form; GRADIENT_MAP resolves a persisted code to its
- * gradient classes. */
+/* Cover styles a publisher can pick. The persisted value is one of these
+ * codes; GRADIENT_MAP resolves it to gradient classes, and the tuple is also
+ * the product form's zod enum, so editing it changes validation. */
 export const COVER_STYLES = [
   'gradient-1',
   'gradient-2',

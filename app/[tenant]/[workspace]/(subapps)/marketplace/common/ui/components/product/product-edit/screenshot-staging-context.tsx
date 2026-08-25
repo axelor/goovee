@@ -6,11 +6,11 @@ import {createContext, useContext, type RefObject} from 'react';
 import type {UseStagedUpload} from '@/lib/core/upload/use-staged-upload';
 
 /**
- * Screenshot staging shared down to `ScreenshotsFormField`. The upload hook and
- * the object-URL preview maps are created once in `useProductEditForm` (the
- * editor session) and handed down through this context, so in-flight uploads
- * and their previews survive the dialog's product-collapse — which unmounts
- * `ScreenshotsFormField` — and any other leaf remount.
+ * Screenshot staging shared down to the screenshots field. The upload hook and
+ * the object-URL preview maps are created once in `useProductEditForm` and
+ * handed down through this context, so in-flight uploads and their previews
+ * survive the dialog's product-collapse — the accordion unmounts its contents
+ * when it closes — and any other leaf remount.
  */
 export type ScreenshotStaging = {
   upload: UseStagedUpload;

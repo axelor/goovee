@@ -9,14 +9,14 @@ import {ProductIcon} from '../../shared/product-icon';
 type Props = {
   item: MarketplaceCartItem;
   productHref: string;
-  /** Localised currency-aware formatter shared by all callers. */
+  /** Locale-aware money formatter, supplied by the caller: renders an amount
+   *  at the row's scale with its currency symbol. */
   formatPrice: (
     value: number,
     scale?: number,
     symbol?: string | null,
   ) => string;
-  /** Pass a handler to render the remove button (cart page). Omit for
-   *  read-only contexts like the checkout review. */
+  /** Omit to render the row read-only, with no remove button. */
   onRemove?: (productId: string) => void;
   removeLabel?: string;
 };

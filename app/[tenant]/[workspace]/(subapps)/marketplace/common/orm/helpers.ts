@@ -97,17 +97,17 @@ export function withMyProductAccessFilter(workspace: Workspace, partnerId: ID) {
 /**
  * Restricts a version query to bundles the caller is allowed to download.
  * Branches the caller can satisfy:
- *   - **Owner** of the marketplace product (publisher) → any version, any
- *     status (delegated to {@link getMyProductAccessFilter}).
+ *   - **Owner** of the marketplace product (publisher) → any status, still
+ *     non-archived (delegated to {@link getMyProductAccessFilter}).
  *   - **Free + published + not taken down** — `salePrice` ≤ 0 (or null); a
  *     taken-down free product has no purchase record to fall back on, so it
  *     stops being downloadable (owner aside).
  *   - **Paid + owned + published** — a MarketplaceProductPurchase row exists
  *     for the caller's partner (unaffected by take-down, so a purchaser keeps
- *     downloading a taken-down product from My Purchases).
+ *     downloading a taken-down product).
  *
- * Single query, no pre-fetch. Non-owner non-purchaser callers of paid
- * products never match.
+ * Pinned to the one `productId` passed in. Single query, no pre-fetch: a
+ * non-owner non-purchaser of a paid product never matches.
  */
 export function withBundleAccessFilter({
   workspace,

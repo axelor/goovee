@@ -1,6 +1,6 @@
 /* Single source of truth for the demo-data marker.
  *
- * Stamped on the natural key of everything the seed persists — product
+ * Set on the natural key of everything the seed persists — product
  * slug, category/license code, compat-version name, and the screenshot/
  * bundle file paths — so reset can match it all with one `${DEMO_PREFIX}%`
  * LIKE, and seeded rows never collide with canonical reference data (a

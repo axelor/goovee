@@ -61,7 +61,7 @@ export async function syncProductImages({
   }
 
   /* Walk in order; the index is the target sequence. Existing rows are
-   * re-stamped with the client's loaded version (optimistic-locked against
+   * updated under the client's loaded version (optimistic-locked against
    * concurrent edits); new tokens are redeemed and linked at the same
    * sequence. */
   for (let sequence = 0; sequence < images.length; sequence++) {

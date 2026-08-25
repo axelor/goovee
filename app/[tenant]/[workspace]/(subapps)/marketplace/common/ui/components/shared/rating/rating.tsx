@@ -8,7 +8,8 @@ type RatingProps = {
   value: number | string | BigDecimal | null | undefined;
   /** Pre-formatted value text shown next to the stars. Caller is responsible
    *  for locale-aware formatting (use `@/locale/formatters` on the client,
-   *  `@/locale/server/formatters` on the server). Defaults to `value.toFixed(1)`. */
+   *  `@/locale/server/formatters` on the server). Falls back to one decimal
+   *  place; an unrated value shows "—" whatever this is set to. */
   formattedValue?: string;
   /** When provided, renders "({count} review/reviews)" after the value. */
   count?: number | string | null;

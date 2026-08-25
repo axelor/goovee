@@ -38,17 +38,17 @@ export type ValidatedCart = {
 };
 
 /* Validate a list of product ids against the current DB state for the
- * checkout flow. Rules enforced (mirrors docs/marketplace-checkout-plan.md):
+ * checkout flow. Rules enforced:
  *   - All ids must resolve to a marketplace product the workspace can see.
  *   - Each product must be paid (free items must never reach checkout).
- *   - Each product must have a published current version.
- *   - Partner must not already own any of them (idempotency).
- *   - All items must share a single currency (mixed-currency carts are
- *     rejected — see docs Open items).
+ *   - Each product must be storefront-visible: at least one published,
+ *     non-archived version, and the product itself not taken down.
+ *   - Partner must not already own any of them.
+ *   - All items must share a single currency; mixed carts are rejected.
  *
- * Returns the recomputed cart with server-authoritative prices, suitable
- * for both stashing in PaymentContext and asserting against `paidAmount`
- * on the return leg. */
+ * Returns the cart re-priced from current DB state — these amounts are
+ * authoritative, not the client's. They are stashed in PaymentContext at
+ * prepare and asserted against `paidAmount` on the return leg. */
 export async function validateCart({
   client,
   workspace,
@@ -67,13 +67,10 @@ export async function validateCart({
     return {error: true as const, message: await t('Your cart is empty.')};
   }
 
-  /* Single query for everything checkout needs:
-   *   - product access (`withPublishedProductFilter`) so products
-   *   are filtered out at the DB level rather than slipped through;
-   *   - per-partner ownership rows via the
-   *     `marketplaceProductPurchaseList` back-relation — non-empty
-   *     means the partner already owns this product;
-   *   - tax chain for `computePrice`. */
+  /* Two queries in parallel: the visible-product query
+   * (`withPublishedProductFilter`, so an invisible product is dropped at the
+   * DB level rather than slipped through), which also carries the tax chain
+   * `computePrice` needs; and a purchase lookup that only sets `isOwned`. */
   const products = await findCartProducts({
     client,
     workspace,
@@ -171,13 +168,14 @@ export async function validateCart({
 }
 
 /* Time-sensitive re-check used on the payment-return leg. The validated
- * cart (with server-stamped prices) is already in PaymentContext from
+ * cart (with server-set prices) is already in PaymentContext from
  * the prepare step, so we don't recompute prices here — that would risk
  * rejecting a payment we already captured if a tax/currency line moved
  * between prepare and return. We only re-assert the invariants that can
  * actually change in that window:
  *   - workspace still allows the buyer to see the product;
- *   - product still has a published currentVersion;
+ *   - product is still storefront-visible (a published, non-archived
+ *     version, and not taken down);
  *   - partner doesn't already own it (another tab/session may have
  *     completed a parallel purchase). */
 export async function recheckCartAvailability({

@@ -150,13 +150,12 @@ async function main() {
       },
     };
 
-    /* Currency / unit / tax all live on the workspace default Product
-     * (config.defaultProductForMarketplace). The seeded marketplace
-     * products override only salePrice + inAti; the workspace default
-     * product supplies the rest at checkout time. */
-
-    /* Distribute products across suppliers: apps and skills evenly.
-     * Use deterministic hash of product slug to avoid bias from data ordering. */
+    /* Assign each product to a supplier by a stable hash of its slug rather
+     * than its position, so reordering the seed file does not reshuffle
+     * ownership and a re-run with the same `--suppliers` list keeps the same
+     * owner. FIXME(#111822): the apps/skills split below runs the same
+     * assignment over both lists, so the per-type balance it was scaffolded
+     * for is not implemented. */
     const appProducts = data.products.filter(p => p.type === 'app');
     const skillProducts = data.products.filter(p => p.type === 'skill');
 

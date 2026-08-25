@@ -9,8 +9,9 @@ import {getProductScreenshot} from '../../../../../common/orm';
 
 /**
  * Serves a marketplace product screenshot. Lives inside the marketplace app
- * so the workspace is in the path — the access check is workspace-scoped via
- * `getProductScreenshot` (withProductAccessFilter). The shared
+ * so the workspace is in the path — the access check is in the query and
+ * workspace-scoped: the product must be the caller's own or published. The
+ * shared
  * `/api/tenant/[tenant]/product/image/[id]` route only resolves metafiles
  * owned by a base AOSProduct, which marketplace pictures are not.
  */

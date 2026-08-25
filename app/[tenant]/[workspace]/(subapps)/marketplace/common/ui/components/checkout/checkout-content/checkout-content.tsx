@@ -37,11 +37,11 @@ function formatPrice(
   return currencySymbol ? `${amount} ${currencySymbol}` : amount;
 }
 
-/* Checkout content. Reads the localStorage cart, renders the line items
- * for visual confirmation, and mounts <Payments> wired to our per-
- * provider session actions. Server-side guards (auth, drift, paid-only,
- * not-owned) run inside each action so the buyer can't tamper with the
- * cart between this page and the provider redirect. */
+/* Checkout content. Reads the browser-persisted cart, renders the line items
+ * for visual confirmation, and mounts <Payments> wired to the per-provider
+ * session actions. Only product ids are sent: each action revalidates the cart
+ * and recomputes prices server-side, so the buyer cannot influence what is
+ * charged. */
 export function CheckoutContent({config}: Props) {
   const router = useRouter();
   const {workspaceURI, workspaceURL} = useWorkspace();

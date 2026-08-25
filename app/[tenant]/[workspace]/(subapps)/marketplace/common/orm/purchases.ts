@@ -16,9 +16,9 @@ export type PurchasePriceInput = {
 
 /* A marketplace order groups a checkout's purchase (access) lines and owns the context needed to
  * build the SaleOrder + Invoice. goovee writes the header + lines in the grant transaction; the
- * order/invoice is then created on the AOS side (at checkout via after(), or by admin recovery) and
- * linked onto the header — never read back here. The buyer's listings reach the order/invoice via
- * each line's `productOrder`. The unique (owner, marketplaceProduct) constraint keeps ownership
+ * SaleOrder/Invoice are then created on the AOS side (at checkout via after(), or by admin
+ * recovery) and linked onto the header, which is where a purchase line reads them from. The
+ * unique (owner, marketplaceProduct) constraint keeps ownership
  * one row per product: a concurrent re-checkout of an owned product collides on it and rolls back
  * the whole create, so the buyer is never granted the same product twice. */
 
@@ -144,7 +144,8 @@ export async function recordOrder({
   return order.id;
 }
 
-/* Determines if a user can download a product based on ownership (the access key on the line). */
+/* Free products are open to anyone; a paid one needs the publisher or a
+ * purchase row owned by the caller. */
 export async function canDownloadProduct({
   client,
   productId,

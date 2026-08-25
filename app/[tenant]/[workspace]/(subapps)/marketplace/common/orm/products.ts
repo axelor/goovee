@@ -20,8 +20,8 @@ import {getPriceContext, withPrice} from './price';
 
 // ---- PRODUCTS ---- //
 
-/** Resolves a product visitors may interact with (favorite, review):
- *  workspace-scoped, non-archived AND carrying a published version. */
+/** Resolves a product a visitor may act on: workspace-scoped, non-archived,
+ *  carrying a published version, and not taken down. */
 export async function findProductAccess<
   T extends SelectOptions<AOSMarketplaceProduct>,
 >({
@@ -272,8 +272,7 @@ export async function generateUniqueProductSlug({
  * Resolves a single screenshot metafile for a marketplace product, in one
  * access-checked query: the product must pass {@link withScreenshotAccessFilter}
  * AND own a picture pointing at `fileId`.
- * Returns the picture's metafile (its id) or null. Used by the marketplace
- * image route to stream the file only when the caller may see the product.
+ * Returns the picture metafile (id only), or null.
  */
 export async function getProductScreenshot({
   client,

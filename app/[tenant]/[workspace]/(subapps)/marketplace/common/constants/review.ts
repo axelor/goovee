@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 export const REVIEW_COMMENT_MAX_LENGTH = 1500;
 
-/** How far back the contributor dashboard's "new reviews" rollup looks. */
+/** How many days a review still counts toward the "new reviews" rollup. */
 export const RECENT_REVIEW_WINDOW_DAYS = 7;
 
 export const saveReviewSchema = z.object({
@@ -28,7 +28,7 @@ export const deleteReviewSchema = z.object({
 
 export type DeleteReviewInput = z.infer<typeof deleteReviewSchema>;
 
-/* Fixed set of report reasons a user picks in the report popup; mirrors the
+/* Fixed set of report reasons; mirrors the
  * string selection portal.marketplace.review.report.reason.select on the
  * backend. No free-text. */
 export const REPORT_REASONS = [
