@@ -68,6 +68,7 @@ export async function ReviewsTab({
       take: REVIEWS_PAGE_SIZE,
       skip: getSkip(REVIEWS_PAGE_SIZE, reviewPage),
       where: user ? {author: {id: {ne: user.id}}} : undefined,
+      orderBy: {createdOn: 'DESC'},
     }),
     user
       ? findMyReview({productId: product.id, userId: user.id, client})

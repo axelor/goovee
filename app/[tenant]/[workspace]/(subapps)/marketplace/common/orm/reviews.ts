@@ -44,7 +44,6 @@ export async function findProductReviews({
       },
       reviewedVersion: {id: true, ...versionNumberFields},
     },
-    orderBy: {createdOn: 'DESC'},
   });
 }
 

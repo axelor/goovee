@@ -36,6 +36,9 @@ export async function findVersionCount({
   });
 }
 
+/* Ordering is fixed to `versionSortOrder` (newest version number first), not a
+ * caller's choice, so `orderBy` is left out of the arguments rather than
+ * accepted and ignored. */
 export async function findProductVersions({
   productId,
   client,
@@ -47,7 +50,7 @@ export async function findProductVersions({
   productId: ID;
   client: Client;
   includeUnpublished?: boolean;
-} & QueryProps<AOSMarketplaceProductVersion>) {
+} & Omit<QueryProps<AOSMarketplaceProductVersion>, 'orderBy'>) {
   return client.aOSMarketplaceProductVersion.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
