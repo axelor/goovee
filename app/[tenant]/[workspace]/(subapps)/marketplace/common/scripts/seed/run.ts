@@ -57,7 +57,7 @@ Options:
   --tenant <id>         Tenant ID (defaults to 'd' if MULTI_TENANCY=false)
   --workspace <url>     Workspace URL (required for seeding)
   --suppliers <emails>  Comma-separated supplier emails (required for seeding)
-                        Apps and skills distributed equally among suppliers
+                        Each product keeps the same owner across re-runs
   --file <path>         Path to seed.json (defaults to local seed.json)
   --validate            Run only validation (schema + cross-field rules)
   --help                Show this help message
@@ -153,25 +153,15 @@ async function main() {
     /* Assign each product to a supplier by a stable hash of its slug rather
      * than its position, so reordering the seed file does not reshuffle
      * ownership and a re-run with the same `--suppliers` list keeps the same
-     * owner. FIXME(#111822): the apps/skills split below runs the same
-     * assignment over both lists, so the per-type balance it was scaffolded
-     * for is not implemented. */
-    const appProducts = data.products.filter(p => p.type === 'app');
-    const skillProducts = data.products.filter(p => p.type === 'skill');
-
+     * owner. Which supplier a product lands on is arbitrary: a hash spreads
+     * the catalogue without balancing it, so with three or more suppliers the
+     * counts differ. */
     const productSupplierMap = new Map<string, string>();
-    appProducts.forEach(p => {
-      const h = hash(slugify(p.name));
+    data.products.forEach(product => {
+      const slug = slugify(product.name);
       productSupplierMap.set(
-        slugify(p.name),
-        suppliers[h % suppliers.length]!.id,
-      );
-    });
-    skillProducts.forEach(p => {
-      const h = hash(slugify(p.name));
-      productSupplierMap.set(
-        slugify(p.name),
-        suppliers[h % suppliers.length]!.id,
+        slug,
+        suppliers[hash(slug) % suppliers.length]!.id,
       );
     });
 
