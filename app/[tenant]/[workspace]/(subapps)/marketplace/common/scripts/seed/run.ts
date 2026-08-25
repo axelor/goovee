@@ -1,11 +1,13 @@
 import '@/load-swc-env';
 
-import {DEFAULT_CURRENCY_CODE} from '@/constants';
+import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
+import type {Client} from '@/goovee/.generated/client';
+import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
-import {resolveNewListingCurrency} from '../../orm';
+import {getMarketplaceConfig, resolveNewListingCurrency} from '../../orm';
 import {slugify} from '../../utils/slugify';
 import {hash} from '../../utils/string';
 import {demoKey} from './constants';
@@ -18,6 +20,8 @@ import {
   upsertCompatibilityVersion,
   upsertLicense,
   upsertProduct,
+  upsertPublisherRequest,
+  type PublisherGrantOutcome,
   upsertReview,
   upsertScreenshots,
   upsertSharedBundleMetaFile,
@@ -87,6 +91,78 @@ function fail(message: string): never {
   process.exit(1);
 }
 
+const GREEN = (text: string) => `\x1b[32m${text}\x1b[0m`;
+const YELLOW = (text: string) => `\x1b[33m${text}\x1b[0m`;
+
+function grantOutcomeLine(
+  label: string,
+  outcome: PublisherGrantOutcome,
+): string {
+  switch (outcome) {
+    case 'granted':
+      return `${GREEN('✓')} publisher access ${label}`;
+    case 'already-granted':
+      return `${GREEN('✓')} publisher access ${label} (already granted)`;
+    case 're-approved':
+      return `${GREEN('✓')} publisher access ${label} (re-approved a seeded request that had been declined)`;
+    case 'left-banned':
+      return `${YELLOW('!')} ${label} is banned from publishing here — left banned, so these listings stay unmanageable`;
+    case 'left-approved':
+      return `${GREEN('✓')} publisher access ${label} (granted outside the seeder, left untouched)`;
+    case 'left-blocked':
+      return `${YELLOW('!')} ${label} has a publisher request nobody seeded that does not grant access — left untouched, so these listings stay unmanageable`;
+  }
+}
+
+/**
+ * Says what each publisher will actually meet in the storefront. Resolved per
+ * publisher the way `ensureAccess` resolves it, so it cannot answer differently
+ * from the real gate. None of it blocks seeding: the rows are still worth
+ * having for back-office work, so shortfalls only warn.
+ */
+async function reportPublisherReachability({
+  client,
+  workspaceURL,
+  publishers,
+}: {
+  client: Client;
+  workspaceURL: string;
+  publishers: Map<string, string>;
+}) {
+  for (const [publisherPartnerId, label] of publishers) {
+    /* One lookup answers both halves of the publish gate. It has to be per
+     * publisher: the app config hangs off a partner's own membership of the
+     * workspace, so two publishers here can be governed by different configs.
+     * A publisher is always a company — the supplier lookup rejects contacts,
+     * whose access runs through their parent company instead. */
+    const workspace = await findWorkspace({
+      url: workspaceURL,
+      user: {
+        id: publisherPartnerId,
+        isContact: false,
+        mainPartnerId: publisherPartnerId,
+      },
+      client,
+    });
+    const subapp = workspace?.apps.find(
+      app => app.code === SUBAPP_CODES.marketplace,
+    );
+    if (!workspace || !subapp) {
+      console.log(
+        `  ${YELLOW('!')} ${label} cannot reach the marketplace in this workspace — they will not see these listings until they are a member with the app enabled`,
+      );
+      continue;
+    }
+
+    const config = await getMarketplaceConfig(workspace.config.id, client);
+    if (config?.allowToPublish !== true) {
+      console.log(
+        `  ${YELLOW('!')} publishing is switched off for ${label} here — their grant cannot be used until "allow to publish" is on for their workspace membership`,
+      );
+    }
+  }
+}
+
 if (!values.validate) {
   if (!tenantId) fail('--tenant is required (or set MULTI_TENANCY=false).');
   if (!workspaceURL) fail('--workspace=<url> is required.');
@@ -129,6 +205,10 @@ async function main() {
   console.log(
     `\x1b[36m→ ${data.categories?.length ?? 0} categories, ${data.compatibilityVersions?.length ?? 0} compat versions, ${data.products.length} products\x1b[0m`,
   );
+
+  /* Every publisher the run gave a listing to, by the label to report them
+   * under, kept for the post-commit reachability report. */
+  const seededPublishers = new Map<string, string>();
 
   await client.$transaction(async txClient => {
     const workspace = await findWorkspaceByUrl(txClient, workspaceURL!);
@@ -234,7 +314,7 @@ async function main() {
       const product = data.products[index];
       const supplierIdForProduct =
         productSupplierMap.get(slugify(product.name)) || ctx.supplierPartnerId;
-      const {id: productId} = await upsertProduct(
+      const {id: productId, supplierPartnerId} = await upsertProduct(
         txClient,
         ctx,
         product,
@@ -242,6 +322,15 @@ async function main() {
         product.price > 0 ? paidLicenseCodes : freeLicenseCodes,
       );
       seededProductIds.push(productId);
+      /* A product's own supplierEmail can override the assignment, so the
+       * owner is whoever the upsert settled on. Label them by name when they
+       * came from the CLI list, otherwise by the email that named them. */
+      seededPublishers.set(
+        supplierPartnerId,
+        suppliers.find(supplier => supplier.id === supplierPartnerId)?.name ??
+          product.supplierEmail ??
+          supplierPartnerId,
+      );
 
       const screenshotCount = index % 10; // 0,1,2,…,9,0,1,…
       await upsertScreenshots({
@@ -290,16 +379,40 @@ async function main() {
         });
       }
 
-      const supplierName = suppliers.find(
-        s => s.id === supplierIdForProduct,
-      )?.name;
+      const ownerLabel = seededPublishers.get(supplierPartnerId);
       console.log(
-        `  \x1b[32m✓\x1b[0m product ${demoKey(slugify(product.name))} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${supplierName}`,
+        `  ${GREEN('✓')} product ${demoKey(slugify(product.name))} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${ownerLabel}`,
       );
     }
 
     await recomputeRatings(txClient, seededProductIds);
+
+    /* Give every publisher the seeder handed listings to the grant the
+     * storefront checks, so they can manage what they appear to own. */
+    for (const [publisherPartnerId, label] of seededPublishers) {
+      const outcome = await upsertPublisherRequest({
+        client: txClient,
+        ctx,
+        publisherPartnerId,
+      });
+      console.log(`  ${grantOutcomeLine(label, outcome)}`);
+    }
   });
+
+  /* Reported once the seed is safely committed. These reads only diagnose what
+   * the publisher will meet in the storefront, so neither a failure nor a
+   * shortfall may undo or fail the rows that were just written. */
+  try {
+    await reportPublisherReachability({
+      client,
+      workspaceURL: workspaceURL!,
+      publishers: seededPublishers,
+    });
+  } catch (err) {
+    console.log(
+      `  ${YELLOW('!')} could not check what these publishers will reach: ${(err as Error).message}`,
+    );
+  }
 
   console.log('\x1b[32m🔥 Success — marketplace seed applied.\x1b[0m');
 }
