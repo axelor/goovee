@@ -249,8 +249,17 @@ export async function reportReview(
   const reporterId = access.user.id;
 
   try {
+    /* Accept only a review this caller is actually shown a report control
+     * for: on a product visible in their workspace, not archived, and not
+     * already hidden. Anything else answers "not found", so an id from
+     * another workspace reveals nothing about whether it exists. */
     const review = await client.aOSMarketplaceReview.findOne({
-      where: {id: reviewId},
+      where: {
+        id: reviewId,
+        OR: [{archived: false}, {archived: null}],
+        moderationStatusSelect: {ne: REVIEW_MODERATION_STATUS.HIDDEN},
+        marketplaceProduct: withProductAccessFilter(access.workspace)(),
+      },
       select: {id: true, author: {id: true}},
     });
     if (!review) {
