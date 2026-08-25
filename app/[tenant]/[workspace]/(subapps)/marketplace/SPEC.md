@@ -626,7 +626,8 @@ new reference. Concretely:
 
 - **Listings** — invisible to everyone (see [§5.1](#51-listing-visibility)).
 - **Versions** — not shown in the Versions tab, not downloadable, and never
-  elected as the listing's **current** or **latest** version.
+  **newly** elected as the listing's **current** or **latest** version; an
+  election already made stands (see [§9](#9-current-limitations--gotchas)).
 - **Reviews** — no longer shown on the listing page.
 - **Purchases** — hidden from My Purchases (the customer's access itself is
   unaffected).
@@ -816,6 +817,10 @@ Set by an admin in the AOS; each affects storefront behaviour:
   the listing page, but the average rating and rating count are only recomputed
   when a review is saved or deleted through the storefront — an AOS-side archive
   leaves the old rating baked into the average.
+- **Archiving a version doesn't move the current/latest pointers.** They are
+  recomputed only when a version is saved, approved, or rejected — so archiving
+  the elected version leaves it elected, and its download is refused rather than
+  falling back to the previous release.
 - **Version-number uniqueness is app-level only.** Unlike slugs (backed by a
   database constraint), the "must be unique within the listing" rule for version
   numbers is enforced only by the save-time check — two simultaneous saves of
