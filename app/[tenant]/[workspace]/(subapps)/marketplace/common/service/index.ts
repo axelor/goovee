@@ -24,10 +24,8 @@ export async function createMarketplaceOrder({
   );
 
   if (res?.data?.status === -1) {
-    throw new Error(
-      res?.data?.message
-        ? await t(res.data.message)
-        : await t('Order creation failed.'),
-    );
+    /* The AOS message is an arbitrary backend string with no catalogue entry,
+     * so it is forwarded as-is; only the fallback can be translated. */
+    throw new Error(res?.data?.message || (await t('Order creation failed.')));
   }
 }
