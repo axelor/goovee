@@ -205,7 +205,7 @@ export function MyFavoritesTable({
                   <TableCell className="p-3 w-10">
                     <button
                       type="button"
-                      aria-label={open ? 'Collapse' : 'Expand'}
+                      aria-label={open ? i18n.t('Collapse') : i18n.t('Expand')}
                       onClick={() => setOpenId(open ? null : favorite.id)}
                       className="p-1 rounded-full hover:bg-ink-50 transition-colors">
                       <Arrow className="w-4 h-4 text-ink-500" />

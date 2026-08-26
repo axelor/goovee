@@ -197,7 +197,11 @@ export async function paypalCreateOrder(props: {
     });
     return {success: true, order: response?.result};
   } catch (e) {
-    return err(await t((e as any)?.message ?? 'PayPal order failed.'));
+    return err(
+      e instanceof Error && e.message
+        ? await t(e.message)
+        : await t('PayPal order failed.'),
+    );
   }
 }
 
@@ -244,7 +248,11 @@ export async function payboxCreateOrder(props: {
     });
     return {success: true, order: response};
   } catch (e) {
-    return err(await t((e as any)?.message ?? 'Paybox order failed.'));
+    return err(
+      e instanceof Error && e.message
+        ? await t(e.message)
+        : await t('Paybox order failed.'),
+    );
   }
 }
 
@@ -308,7 +316,10 @@ export async function checkout(
   } catch (e) {
     return {
       error: true,
-      message: await t((e as Error).message ?? 'Payment context not found.'),
+      message:
+        e instanceof Error && e.message
+          ? await t(e.message)
+          : await t('Payment context not found.'),
     };
   }
 

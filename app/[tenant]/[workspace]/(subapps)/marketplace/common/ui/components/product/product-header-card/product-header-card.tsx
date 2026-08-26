@@ -49,7 +49,14 @@ export async function ProductHeaderCard({
 
   const rating = Number(product.averageRating || 0);
   const ratingCount = Number(product.ratingCount || 0);
-  const categories = (product.categorySet ?? []).filter(c => !!c?.id);
+  const categories = (product.categorySet ?? []).filter(
+    category => !!category?.id,
+  );
+  /* Category names are back-office data, translated through `tattr` — the same
+   * way the listing renders them, so a category reads alike on both screens. */
+  const categoryNames = await Promise.all(
+    categories.map(category => tattr(category.name)),
+  );
   const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
   const priceScale = product.price.currency.numberOfDecimals;
@@ -124,12 +131,14 @@ export async function ProductHeaderCard({
             )}
             {/* Each category badge acts like a breadcrumb-style filter
                 link back to the marketplace listing. */}
-            {categories.map(c => (
-              <Link key={c.id} href={`${marketplaceHref}?category=${c.id}`}>
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={`${marketplaceHref}?category=${category.id}`}>
                 <Badge
                   variant="outline"
                   className="hover:bg-ink-50 cursor-pointer">
-                  {c.name}
+                  {categoryNames[index]}
                 </Badge>
               </Link>
             ))}
