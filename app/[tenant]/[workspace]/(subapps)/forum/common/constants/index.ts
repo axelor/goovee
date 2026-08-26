@@ -70,7 +70,7 @@ export const MAX_IMAGES_BEFORE_OVERLAY = 3;
 
 export const COMMENTS_PER_LOAD = 3;
 
-export const MAX_FILE_SIZE = 20000000; // 20 MB
+export const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 /* Max attachments per post. A post carries either images or documents (not
  * both), so this caps whichever type is in use. Enforced client-side at pick
