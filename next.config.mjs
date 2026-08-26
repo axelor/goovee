@@ -38,7 +38,7 @@ const nextConfig = {
     taint: true,
     authInterrupts: true,
     serverActions: {
-      bodySizeLimit: '25mb',
+      bodySizeLimit: '5mb',
     },
   },
   reactStrictMode: false,
