@@ -149,4 +149,4 @@ export const PARTNER_PICTURE_PURPOSE = 'partner:picture';
 /* Maximum accepted size for a profile / company picture (15 MB) — comfortably
  * covers modern phone photos while rejecting raw / oversized files. The cap is
  * also enforced server-side as a streaming limit by the stage route. */
-export const PARTNER_PICTURE_MAX_FILE_SIZE = 15000000;
+export const PARTNER_PICTURE_MAX_FILE_SIZE = 15 * 1024 * 1024;

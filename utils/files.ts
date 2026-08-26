@@ -3,15 +3,23 @@ import type {ID} from '@/types';
 // ---- CORE IMPORTS ---- //
 import {withBasePath} from '@/lib/core/path/base-path';
 
+const KILOBYTE = 1024;
+const MEGABYTE = KILOBYTE * 1024;
+const GIGABYTE = MEGABYTE * 1024;
+
+/**
+ * Formats a byte count for display in binary units, where 1 KB is 1024 bytes —
+ * so a limit written as `5 * 1024 * 1024` reads back as "5.00 MB". Returns an
+ * empty string for 0.
+ */
 export function getFileSizeText(fileSize: number) {
   if (!fileSize) return '';
 
-  if (fileSize > 1000000000)
-    return (fileSize / 1000000000.0).toFixed(2) + ' GB';
+  if (fileSize >= GIGABYTE) return (fileSize / GIGABYTE).toFixed(2) + ' GB';
 
-  if (fileSize > 1000000) return (fileSize / 1000000.0).toFixed(2) + ' MB';
+  if (fileSize >= MEGABYTE) return (fileSize / MEGABYTE).toFixed(2) + ' MB';
 
-  if (fileSize >= 1000) return (fileSize / 1000.0).toFixed(2) + ' KB';
+  if (fileSize >= KILOBYTE) return (fileSize / KILOBYTE).toFixed(2) + ' KB';
 
   return fileSize + ' B';
 }
