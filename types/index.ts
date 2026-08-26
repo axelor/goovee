@@ -91,7 +91,7 @@ export interface PortalAddress {
   townName?: string | null;
   streetName?: string | null;
   companyName?: string | null;
-  department?: string | null;
+  subDepartment?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   fullName?: string | null;
@@ -164,7 +164,7 @@ export interface Address extends Model {
   fullName?: string;
   formattedFullName?: string;
   countrySubDivision?: string;
-  department?: string;
+  subDepartment?: string;
 }
 
 export interface Company extends Model {

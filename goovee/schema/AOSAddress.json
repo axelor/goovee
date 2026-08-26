@@ -67,7 +67,7 @@
     },
     {
       "type": "String",
-      "name": "department"
+      "name": "subDepartment"
     },
     {
       "type": "Decimal",

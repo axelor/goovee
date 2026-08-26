@@ -106,9 +106,10 @@ export function AddressEditModal({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      /* The label lives in `department`; legacy rows kept it in addressl2 too,
-       * so read either. */
-      label: address?.address?.addressl2 || address?.address?.department || '',
+      /* The label lives in `subDepartment`; legacy rows kept it in addressl2
+       * too, so read either. */
+      label:
+        address?.address?.addressl2 || address?.address?.subDepartment || '',
       /* First and last name are captured so editing a legacy address does not
        * drop the stored name. */
       firstName: address?.address?.firstName ?? '',
@@ -155,7 +156,7 @@ export function AddressEditModal({
      * fullName drifts from what AOS produces. L6 is the "zip city" line. */
     const addressL6 = [zip, townName].filter(Boolean).join(' ');
     const lines = [
-      '', // L2 — recipient; left empty (the Goovee label lives in department)
+      '', // L2 — recipient; left empty (the Goovee label lives in subDepartment)
       addressAddition, // L3 — address precisions / addition
       streetName, // L4 — number and street
       '', // L5 — distribution precisions (unused)
@@ -175,7 +176,7 @@ export function AddressEditModal({
       },
       /* AFNOR lines feeding fullName. addressl2 is cleared so a legacy label
        * stored there no longer leaks into fullName; the label lives in
-       * `department`, where the address book reads it from. */
+       * `subDepartment`, where the address book reads it from. */
       addressl2: '',
       addressl3: addressAddition,
       addressl4: streetName,
@@ -188,7 +189,7 @@ export function AddressEditModal({
       companyName: values.contact || null,
       firstName: values.firstName || null,
       lastName: values.lastName || null,
-      department: values.label,
+      subDepartment: values.label,
       fullName: computeFullName(),
       formattedFullName: formattedFullName(),
     };
