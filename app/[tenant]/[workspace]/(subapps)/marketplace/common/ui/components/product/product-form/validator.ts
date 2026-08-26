@@ -1,20 +1,9 @@
 import {z} from 'zod';
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
 import {COVER_STYLES} from '../../../../constants/gradients';
+import {ICON_CODES} from '../../../../constants/icons';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
-
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB per image
-export const MAX_IMAGES = 9; // total per product (existing + new)
-/* Common raster formats only. SVG is intentionally excluded: it can carry
- * embedded scripts/external refs, so serving user-supplied SVG is an XSS
- * vector. Used for both the schema refine and the <input accept> attribute. */
-export const ACCEPTED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/avif',
-] as const;
+import {MAX_IMAGES} from '../../../../constants/uploads';
 
 const optionalUrl = z.union([z.httpUrl(), z.literal('')]).optional();
 
@@ -25,9 +14,13 @@ export const productSchema = z.object({
    * of silently overwritten. Absent on create. */
   version: z.number().optional(),
   marketplaceTypeSelect: z.enum([MARKETPLACE_TYPE.SKILL, MARKETPLACE_TYPE.APP]),
-  name: z.string().min(1, 'Name is required').max(120),
+  /* `.trim()` precedes the length checks on both fields below, so whitespace
+   * alone cannot satisfy the minimum and padding does not count towards the
+   * maximum. The parse returns the trimmed value, so that is what persists. */
+  name: z.string().trim().min(1, 'Name is required').max(120),
   description: z
     .string()
+    .trim()
     .min(1, 'Short description is required')
     .max(280, 'Keep it under 280 characters'),
   longDescription: z.string().max(20000).optional(),
@@ -36,7 +29,7 @@ export const productSchema = z.object({
     .min(1, 'At least one category is required'),
   licenseId: z.string().min(1, 'License is required'),
   coverStyle: z.enum(COVER_STYLES, 'Cover is required'),
-  iconCode: z.string().min(1, 'Icon is required'),
+  iconCode: z.enum(ICON_CODES, 'Icon is required'),
   documentationUrl: optionalUrl,
   supportIssuesUrl: optionalUrl,
   supportContactUrl: optionalUrl,

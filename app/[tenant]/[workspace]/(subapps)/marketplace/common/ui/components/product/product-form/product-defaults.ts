@@ -1,6 +1,6 @@
 import type {Cloned} from '@/types/util';
 import {type CoverStyle} from '../../../../constants/gradients';
-import {DEFAULT_ICON_CODE} from '../../../../constants/icons';
+import {DEFAULT_ICON_CODE, isIconCode} from '../../../../constants/icons';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {MyProductForEdit} from '../../../../orm';
 import {type ProductFormValues} from './validator';
@@ -46,7 +46,12 @@ export function buildProductDefaults(
         .filter((id): id is string => !!id) ?? [],
     licenseId: initial.license?.id ?? '',
     coverStyle: (initial.coverStyle as CoverStyle) ?? 'gradient-1',
-    iconCode: initial.iconCode ?? DEFAULT_ICON_CODE,
+    /* A stored code outside the catalogue opens on the default icon, so the
+     * editor starts from a value it can save; the next save writes that
+     * default over the stored code. */
+    iconCode: isIconCode(initial.iconCode)
+      ? initial.iconCode
+      : DEFAULT_ICON_CODE,
     documentationUrl: initial.documentationUrl ?? '',
     supportIssuesUrl: initial.supportIssuesUrl ?? '',
     supportContactUrl: initial.supportContactUrl ?? '',

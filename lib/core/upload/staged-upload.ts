@@ -39,6 +39,11 @@ import {
   MAX_FILE_SIZE as RESOURCE_MAX_FILE_SIZE,
   RESOURCE_DMS_UPLOAD_PURPOSE,
 } from '@/subapps/resources/common/constants';
+import {MAX_BUNDLE_SIZE} from '@/subapps/marketplace/common/ui/components/versions/version-form/validator';
+import {
+  ACCEPTED_IMAGE_TYPES,
+  MAX_IMAGE_SIZE,
+} from '@/subapps/marketplace/common/constants/uploads';
 
 /**
  * Generic, app-agnostic pre-upload mechanism. A file is *staged* before the
@@ -124,12 +129,12 @@ export const UPLOAD_PURPOSES = {
     ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
   },
   /*
-   * Marketplace version bundle. Mirror `MAX_BUNDLE_SIZE` and the `BundleDropzone`
-   * accept rule (app/.../marketplace/common/ui/components/versions/): a real zip
-   * mime OR a `.zip` filename — some browsers send octet-stream for `.zip`.
+   * A `.zip` filename is accepted alongside the zip mimes because some
+   * browsers send octet-stream for `.zip`. The same rule is spelled out in
+   * `BundleDropzone`'s accept attribute, so a change here needs one there.
    */
   'marketplace:bundle': {
-    maxBytes: 20 * 1024 * 1024,
+    maxBytes: MAX_BUNDLE_SIZE,
     file: z
       .file()
       .refine(
@@ -140,19 +145,13 @@ export const UPLOAD_PURPOSES = {
         {error: 'Bundle must be a .zip file'},
       ),
   },
-  /*
-   * Marketplace product screenshot. Mirror `MAX_IMAGE_SIZE` and
-   * `ACCEPTED_IMAGE_TYPES` (app/.../marketplace/common/ui/components/product/
-   * product-form/validator.ts). SVG is intentionally excluded (XSS vector).
-   */
+  /* Raster formats only: SVG can carry embedded scripts and external refs, so
+   * accepting user-supplied SVG here would serve an XSS vector. */
   'marketplace:screenshot': {
-    maxBytes: 5 * 1024 * 1024,
-    file: z
-      .file()
-      .mime(
-        ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
-        {error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed'},
-      ),
+    maxBytes: MAX_IMAGE_SIZE,
+    file: z.file().mime([...ACCEPTED_IMAGE_TYPES], {
+      error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed',
+    }),
   },
 } satisfies Record<string, UploadPolicy>;
 

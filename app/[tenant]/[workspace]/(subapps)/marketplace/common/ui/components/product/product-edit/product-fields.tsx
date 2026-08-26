@@ -304,15 +304,15 @@ export function ProductFields({
             <FormLabel>{i18n.t('Icon')} *</FormLabel>
             <FormControl>
               <div className="flex flex-wrap gap-2">
-                {MARKETPLACE_ICONS.map(({code, label}) => {
+                {MARKETPLACE_ICONS.map(({code, labelKey}) => {
                   const selected = field.value === code;
                   return (
                     <button
                       key={code}
                       type="button"
                       onClick={() => field.onChange(code)}
-                      title={i18n.t(label)}
-                      aria-label={i18n.t(label)}
+                      title={i18n.t(labelKey)}
+                      aria-label={i18n.t(labelKey)}
                       aria-pressed={selected}
                       className={cn(
                         'flex h-12 w-12 items-center justify-center rounded-lg border transition-all',

@@ -32,9 +32,8 @@ import {
   ACCEPTED_IMAGE_TYPES,
   MAX_IMAGES,
   MAX_IMAGE_SIZE,
-  type ProductFormValues,
-  type ProductImage,
-} from './validator';
+} from '../../../../constants/uploads';
+import {type ProductFormValues, type ProductImage} from './validator';
 
 /** A screenshot that has not committed yet — transferring, paused or failed.
  *  Rendered after the committed tiles, with its progress, until its token
