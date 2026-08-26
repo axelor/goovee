@@ -437,7 +437,7 @@ version, not the listing. Fields and rules:
 | Version number  | Yes           | Yes               | ≤ 40 chars;<br>**1–3 numeric segments with an optional `-tag`** (e.g. `2`, `1.4`, `1.2.3`, `1.2.3-rc1`);<br>**must be unique** within the listing |
 | Changelog       | No            | Yes               | ≤ 5,000 characters                                                                                                                                |
 | Compatibility   | Yes           | Yes               | at least one compatibility target                                                                                                                 |
-| Bundle file     | Yes on create | Yes               | a single file, **≤ 20 MB**; replaceable                                                                                                           |
+| Bundle file     | Yes on create | Yes               | a single file, **≤ 100 MB**; replaceable                                                                                                          |
 | Status (intent) | Yes           | Yes (with limits) | the contributor picks **Draft** or **Publish**;<br>the _effective_ status is resolved by workspace policy (see lifecycle below)                   |
 
 **How version numbers are handled.**
