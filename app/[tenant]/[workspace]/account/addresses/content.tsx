@@ -363,7 +363,7 @@ function Content({
 function getLabel(address: PortalAddress | null | undefined): string {
   return (
     address?.addressl2 ||
-    address?.department ||
+    address?.subDepartment ||
     address?.companyName ||
     [address?.firstName, address?.lastName].filter(Boolean).join(' ') ||
     i18n.t('Address')
