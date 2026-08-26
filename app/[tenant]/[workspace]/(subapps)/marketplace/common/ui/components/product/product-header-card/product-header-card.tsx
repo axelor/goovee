@@ -52,8 +52,8 @@ export async function ProductHeaderCard({
   const categories = (product.categorySet ?? []).filter(
     category => !!category?.id,
   );
-  /* Category names are back-office data, translated through `tattr` — the same
-   * way the listing renders them, so a category reads alike on both screens. */
+  /* Category names are back-office data, so they are translated as values
+   * rather than rendered raw — a category reads the same wherever it shows. */
   const categoryNames = await Promise.all(
     categories.map(category => tattr(category.name)),
   );

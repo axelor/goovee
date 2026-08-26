@@ -26,8 +26,8 @@ export function RatingInput({
         <button
           key={starCount}
           type="button"
-          /* Singular and plural are separate keys so each carries its own
-           * translation — a locale may inflect the two differently. */
+          /* One and many can inflect differently, so the singular is its own
+           * key rather than an interpolation of the plural. */
           aria-label={
             starCount === 1
               ? i18n.t('Rate 1 star')
