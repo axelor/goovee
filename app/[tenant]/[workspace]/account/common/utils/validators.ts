@@ -108,7 +108,7 @@ const AddressObjectSchema = z.object({
   addressl5: z.string().optional(),
   addressl6: z.string().optional(),
   countrySubDivision: z.string().optional(),
-  department: z.string().optional(),
+  subDepartment: z.string().optional(),
 });
 
 export const CreateAddressSchema = z.object({
