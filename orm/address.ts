@@ -17,7 +17,7 @@ const addressFields = {
     firstName: true,
     lastName: true,
     companyName: true,
-    department: true,
+    subDepartment: true,
     townName: true,
     country: {
       id: true,
@@ -90,7 +90,7 @@ export async function createPartnerAddress(
           zip: values.address.zip,
           townName: values.address.townName,
           countrySubDivision: values.address.countrySubDivision,
-          department: values.address.department,
+          subDepartment: values.address.subDepartment,
           country: {
             select: {
               id: values.address.country?.id,
@@ -176,7 +176,7 @@ export async function updatePartnerAddress(
           zip: values.address.zip,
           townName: values.address.townName,
           countrySubDivision: values.address.countrySubDivision,
-          department: values.address.department,
+          subDepartment: values.address.subDepartment,
           country: {
             select: {
               id: values.address.country?.id,
