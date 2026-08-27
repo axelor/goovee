@@ -36,6 +36,11 @@ export default function Footer({
             rel="noopener noreferrer"
             className="flex items-center">
             <div className="text-xs">{i18n.t('Powered by')}</div>
+            {/* Where the bar shows, it sits at the bottom of a full-height
+            shell, so it is in view from the first paint on any page whose
+            content does not fill the screen. Waiting for the browser to decide
+            the logo is needed makes it the last thing to appear on an otherwise
+            finished page. */}
             <Image
               src={withBasePath('/images/axelor.png')}
               alt="Axelor Logo"
@@ -43,6 +48,7 @@ export default function Footer({
               height={25}
               className="h-6 ml-1"
               style={{width: 'auto', height: 'auto'}}
+              loading="eager"
             />
           </Link>
         </div>
