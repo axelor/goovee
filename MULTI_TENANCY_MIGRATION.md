@@ -46,6 +46,10 @@ inherited from another tenant or the environment:
 | `includeLanguage`                         | no       | `INCLUDE_LANGUAGE`                                                                                                                                                          |
 | `uploadRecordRetentionHours`              | no       | `UPLOAD_RECORD_RETENTION_HOURS`                                                                                                                                             |
 
+`payments.hubpisp` needs one more field that no environment variable carried:
+`certsDir`. Migrating writes `certs/hubpisp`, the path the previous release
+read; a tenant added by hand needs its own.
+
 Browser variables (`publicEnv`) keys: `GOOVEE_PUBLIC_HOST`,
 `GOOVEE_PUBLIC_PAYPAL_CLIENT_ID`, `GOOVEE_PUBLIC_LINKEDIN_URL`,
 `GOOVEE_PUBLIC_TWITTER_URL`, `GOOVEE_PUBLIC_INSTAGRAM_URL`,
@@ -118,6 +122,9 @@ realm/issuer and client.
 
 ## 6. Provision storage and certificate mounts (per tenant)
 
+Every path in the document (`aos.storage`, `certsDir`) is read against the
+server process's working directory. Give mounted volumes absolute paths.
+
 - Set `aos.storage` to the AOS instance's `data.upload.dir` base and back it
   with a mounted volume. For a tenant on a shared AOS (`aosTenantId` set,
   topology B), goovee reads and writes under `<aos.storage>/<aosTenantId>` to
@@ -125,7 +132,8 @@ realm/issuer and client.
   path as-is. Tenants sharing one AOS therefore share the same `aos.storage`
   base value.
 - For Hub PISP, place `client.crt` and `private-key.pem` in each tenant's
-  `certsDir` (default `certs/hubpisp`).
+  `certsDir`. Every tenant declaring `payments.hubpisp` needs one, and no two
+  may share a directory.
 
 ## 7. Build and deploy
 
@@ -136,9 +144,10 @@ realm/issuer and client.
 ## 8. Cut over and verify
 
 1. Deploy the application with the matching AOS connector change (step 4) live.
-2. Register OAuth redirect URIs (step 5) and gateway webhook URLs (step 3)
-   before flipping traffic.
-3. Flip traffic. The server fails to start on a missing or invalid document — a
-   successful boot confirms it.
-4. Watch gateway and notification delivery logs for 404s and signature
+2. Register OAuth redirect URIs (step 5) and gateway webhook URLs (step 3).
+3. Confirm the document was accepted: it was rejected if the boot log carries
+   `could not read the configuration`. The server starts either way, so that
+   line is what to check.
+4. Flip traffic.
+5. Watch gateway and notification delivery logs for 404s and signature
    failures, and re-point any registration that failed.

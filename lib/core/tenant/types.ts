@@ -86,9 +86,11 @@ export type TenantConfig = {
       beneficiaryName: string;
       iban: string;
       bic?: string;
-      /* Directory holding client.crt and private-key.pem for mTLS;
-       * defaults to certs/hubpisp. */
-      certsDir?: string;
+      /* Directory holding this tenant's client.crt and private-key.pem for
+       * mTLS. That certificate is the tenant's enrolled bank identity, so
+       * every HUB PISP tenant needs its own directory and there is no shared
+       * default to fall back on. */
+      certsDir: string;
     };
   };
   mail?: {

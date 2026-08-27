@@ -126,6 +126,10 @@ function paymentsFromEnv(): TenantConfig['payments'] {
       beneficiaryName: process.env.HUBPISP_BENEFICIARY_NAME,
       iban: process.env.HUBPISP_IBAN,
       bic: process.env.HUBPISP_BIC || undefined,
+      /* No environment variable ever carried this — the path was hardcoded
+       * before the configuration document existed, so this is where the
+       * certificates of the deployment being migrated already are. */
+      certsDir: 'certs/hubpisp',
     };
   }
 
