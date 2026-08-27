@@ -146,6 +146,7 @@ export default function SignUp({
                 height={24}
                 width={24}
                 className="me-2"
+                unoptimized
               />
 
               {i18n.t('Sign Up with Google')}
