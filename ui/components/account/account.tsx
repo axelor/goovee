@@ -15,6 +15,7 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
@@ -124,6 +125,9 @@ export function Account({
             <AlertDialogTitle>
               {i18n.t('Do you want to logout?')}
             </AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('You will be signed out and returned to the login page.')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={closeConfirmation}>

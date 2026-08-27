@@ -32,7 +32,8 @@ export function OrderAlert() {
 
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
-      <DialogContent className="py-16 px-10">
+      {/* The title is the entire dialog, so there is nothing left to describe. */}
+      <DialogContent className="py-16 px-10" aria-describedby={undefined}>
         <DialogTitle className="text-center">
           {i18n.t('Order completed successfully.')}
         </DialogTitle>

@@ -141,8 +141,12 @@ export default function Content({
   if (isPending) {
     return (
       <Dialog open>
-        <DialogTitle></DialogTitle>
-        <DialogContent className="space-y-2" hideClose>
+        {/* A spinner and nothing else, so the title carries the whole meaning. */}
+        <DialogContent
+          className="space-y-2"
+          hideClose
+          aria-describedby={undefined}>
+          <DialogTitle className="sr-only">{i18n.t('Loading')}</DialogTitle>
           <div className="flex items-center justify-center">
             <MdOutlineRefresh className="h-6 w-6 animate-spin" />
           </div>
