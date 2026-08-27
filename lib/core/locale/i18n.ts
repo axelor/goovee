@@ -5,6 +5,24 @@ import {withBasePath} from '@/lib/core/path/base-path';
 
 const rest = axios.create();
 
+/* A failed request is refused by its status, but something between the browser
+ * and the application — a captive portal, a proxy that does not route the
+ * application's own addresses — can answer with a page of its own and call it
+ * success. That arrives as one long string, which spreading would key by
+ * character position. Anything that is not an object of text values is read as
+ * no translations at all. */
+function asTranslations(data: unknown): Record<string, string> {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(data).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string',
+    ),
+  );
+}
+
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
@@ -19,18 +37,10 @@ export const i18n = (() => {
         : `/api/locales/${locale}`,
     );
 
-    try {
-      const result = await rest
-        .get(url)
-        .then(result => result?.data || {})
-        .catch(() => ({}));
-
-      translations = {
-        ...result,
-      };
-    } catch (err) {
-      console.error(err);
-    }
+    translations = await rest
+      .get(url)
+      .then(result => asTranslations(result?.data))
+      .catch(() => ({}));
   }
 
   function t(text: string, ...interpolations: string[]) {
