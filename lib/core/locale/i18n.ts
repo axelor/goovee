@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {findLocaleLanguage, translate} from '@/locale/utils';
+import {translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
 import {withBasePath} from '@/lib/core/path/base-path';
 
@@ -17,44 +17,21 @@ export const i18n = (() => {
       return {};
     }
 
-    if (tenant) {
-      try {
-        const result = await rest
-          .get(
-            `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
-          )
-          .then(result => result?.data || {})
-          .catch(() => ({}));
+    const url = tenant
+      ? `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`
+      : withBasePath(`/api/locales/${locale}`);
 
-        translations = {
-          ...result,
-        };
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      const fetchLocale = async (locale: string) =>
-        rest
-          .get(withBasePath(`/locales/${locale}.json`))
-          .then(r => (r?.status === 200 && r?.data ? r.data : {}))
-          .catch(() => ({}));
+    try {
+      const result = await rest
+        .get(url)
+        .then(result => result?.data || {})
+        .catch(() => ({}));
 
-      const lang = findLocaleLanguage(locale);
-
-      await Promise.all([
-        ...(lang !== locale ? [fetchLocale(lang)] : []),
-        fetchLocale(locale),
-      ])
-        .then(([langTranslations, localeTranslations]) => {
-          translations = {
-            ...translations,
-            ...langTranslations,
-            ...localeTranslations,
-          };
-        })
-        .catch(err => {
-          console.error(err);
-        });
+      translations = {
+        ...result,
+      };
+    } catch (err) {
+      console.error(err);
     }
   }
 
