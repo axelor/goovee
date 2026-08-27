@@ -116,16 +116,15 @@ export default function Content({
     }
 
     /* OAuth is per-tenant: sign in through the generic provider registered
-     * under google-<tenantId>. */
+     * under google-<tenantId>. The tenant is not sent along with the request —
+     * the provider signed in through is what tells the callback which tenant it
+     * is acting for. */
     await authClient.signIn.oauth2({
       providerId: googleProviderId,
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
       ),
-      additionalData: {
-        tenantId,
-      },
     });
   };
 
@@ -144,7 +143,6 @@ export default function Content({
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
       ),
       additionalData: {
-        tenantId,
         workspaceURI,
         locale: l10n.getLocale(),
       },

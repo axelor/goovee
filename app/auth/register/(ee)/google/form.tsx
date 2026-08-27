@@ -157,7 +157,6 @@ export default function SignUp({
       requestSignUp: true,
       additionalData: {
         ...values,
-        tenantId,
         workspaceURL: workspace?.url,
         locale: l10n.getLocale(),
       },

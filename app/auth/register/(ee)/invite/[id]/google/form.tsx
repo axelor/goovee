@@ -74,7 +74,6 @@ export default function SignUp({
       requestSignUp: true,
       additionalData: {
         ...values,
-        tenantId,
         inviteId,
         locale: l10n.getLocale(),
       },
