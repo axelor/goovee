@@ -27,6 +27,7 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
@@ -908,6 +909,9 @@ export default function Personal({
             <AlertDialogTitle>
               {i18n.t('Do you want to delete picture?')}
             </AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('This action cannot be undone.')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={closeConfirmation}>

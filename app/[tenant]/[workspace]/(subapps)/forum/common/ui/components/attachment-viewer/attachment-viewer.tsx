@@ -74,6 +74,8 @@ export function AttachmentViewer({images}: {images: Attachment[]}) {
       <Dialog open={isOpen} onOpenChange={o => !o && setOpenIndex(null)}>
         <DialogContent
           hideClose
+          // The picture is the whole dialog; its name is already the title.
+          aria-describedby={undefined}
           className="max-w-4xl p-3 bg-black/90 border-none">
           <DialogTitle className="sr-only">
             {current?.name || i18n.t('Image')}
