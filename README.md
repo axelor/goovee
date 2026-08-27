@@ -82,7 +82,7 @@ Merge your development branches (`dev`, `wip`, `dev-1.6`, etc.) into `main` or t
 **2. Prepare the release**
 
 ```bash
-pnpm prepare:release
+pnpm release:prepare
 ```
 
 **3. Push and trigger the release**
@@ -97,7 +97,7 @@ pnpm release
 Merge release branch back into your development branches, then bump the version to prepare for the next cycle:
 
 ```bash
-pnpm prepare:bump <major|minor|patch>
+pnpm release:bump <major|minor|patch>
 ```
 
 ## License
