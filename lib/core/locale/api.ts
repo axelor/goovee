@@ -64,8 +64,12 @@ async function findGeneralTranslations(locale: string): Promise<Translations> {
 
   const lang = findLocaleLanguage(locale);
 
+  /* INCLUDE_LANGUAGE governs the translations a tenant holds, not the ones
+   * shipped with the application: a shipped file keeps a language's
+   * translations under the language alone, and the ones named for a region
+   * hold only what that region says differently. */
   const [langTranslations, localeTranslations] = await Promise.all([
-    lang !== locale && includeLanguage() ? readwritecache(lang) : {},
+    lang !== locale ? readwritecache(lang) : {},
     readwritecache(locale),
   ]);
 
