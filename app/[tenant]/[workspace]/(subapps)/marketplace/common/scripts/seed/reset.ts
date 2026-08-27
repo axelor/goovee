@@ -1,8 +1,8 @@
 import '@/load-swc-env';
-import {manager} from '@/tenant';
+import * as out from '@/scripts/lib/output';
+import {runTenantScript, type TenantHandle} from '@/scripts/lib/tenant-script';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {parseArgs} from 'node:util';
 import {DEMO_PREFIX} from './constants';
 
 /* Reset / teardown for the marketplace seed.
@@ -33,69 +33,7 @@ import {DEMO_PREFIX} from './constants';
  * Storage files (the DEMO_PREFIX bundle + screenshots) are removed from
  * disk best-effort after the DB transaction commits. */
 
-const args = process.argv.slice(2).filter(arg => arg !== '--');
-const {values} = parseArgs({
-  args,
-  options: {
-    tenant: {type: 'string'},
-    yes: {type: 'boolean'},
-    help: {type: 'boolean'},
-  },
-  strict: true,
-  allowPositionals: false,
-});
-
-if (values.help) {
-  console.log(`
-Marketplace Reset
-
-Usage:
-  pnpm marketplace:reset --tenant=<id> [--yes]
-
-Options:
-  --tenant <id>   Tenant ID (defaults to 'd' if MULTI_TENANCY=false)
-  --yes           Skip the confirmation prompt
-  --help          Show this help
-`);
-  process.exit(0);
-}
-
-const tenantId =
-  values.tenant ?? (process.env.MULTI_TENANCY === 'true' ? undefined : 'd');
-
-function fail(message: string): never {
-  console.error(`\x1b[31m✖ ${message}\x1b[0m`);
-  process.exit(1);
-}
-
-if (!tenantId) fail('--tenant is required (or set MULTI_TENANCY=false).');
-
-async function confirm(): Promise<boolean> {
-  if (values.yes) return true;
-  return new Promise(resolve => {
-    process.stdout.write(
-      `\x1b[33m? This will delete every ${DEMO_PREFIX}* marketplace row (products, files, categories, licenses, compat versions, seeded publishing rights) on tenant '${tenantId}'. Continue? [y/N] \x1b[0m`,
-    );
-    const onData = (chunk: Buffer) => {
-      process.stdin.removeListener('data', onData);
-      process.stdin.pause();
-      const answer = chunk.toString().trim().toLowerCase();
-      resolve(answer === 'y' || answer === 'yes');
-    };
-    process.stdin.resume();
-    process.stdin.on('data', onData);
-  });
-}
-
-async function main() {
-  if (!(await confirm())) {
-    console.log('Aborted.');
-    process.exit(0);
-  }
-
-  const tenant = await manager.getTenant(tenantId!);
-  if (!tenant) fail(`Tenant '${tenantId}' not found.`);
-  const {client, config} = tenant;
+async function resetMarketplace({client, config, tenantId}: TenantHandle) {
   const storage = config.aos.storage;
 
   const deleted = await client.$transaction(async txClient => {
@@ -311,14 +249,14 @@ async function main() {
       }
     }
   } catch (err) {
-    console.warn(
-      `\x1b[33m⚠ Could not clean storage dir '${storage}': ${(err as Error).message}\x1b[0m`,
+    out.warn(
+      `Could not clean storage dir '${storage}': ${out.describeFailure(err)}`,
     );
   }
 
   const totalRows = Object.values(deleted).reduce((sum, n) => sum + n, 0);
-  console.log(
-    `\x1b[32m🔥 Reset done — tenant=${tenantId} (${totalRows} ${DEMO_PREFIX}* DB rows deleted)\x1b[0m\n` +
+  out.ok(
+    `Reset done — tenant=${tenantId} (${totalRows} ${DEMO_PREFIX}* DB rows deleted)\n` +
       `  products ${deleted.products}, versions ${deleted.versions}, reviews ${deleted.reviews}, pictures ${deleted.pictures}\n` +
       `  purchases ${deleted.purchases}, downloads ${deleted.downloads}\n` +
       `  categories ${deleted.categories}, licenses ${deleted.licenses}, compat versions ${deleted.compatVersions}\n` +
@@ -328,7 +266,15 @@ async function main() {
   );
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
+runTenantScript({
+  command: 'pnpm marketplace:reset',
+  title: 'Marketplace reset',
+  summary: `Deletes every ${DEMO_PREFIX}* marketplace row the seeder created —
+products with their versions, reviews, pictures, purchases and downloads, plus
+the seeded categories, licences, compatibility versions and publishing rights.
+The partner accounts themselves are left in place, and the seeded files are
+removed from storage after the deletion commits.`,
+  run: async ({openTenant}) => {
+    await resetMarketplace(await openTenant());
+  },
 });

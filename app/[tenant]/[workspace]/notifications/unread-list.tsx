@@ -68,7 +68,7 @@ type Period = (typeof PERIODS)[number];
 
 /* Each label is translated from a literal so the extractor can see it. Passing
  * the period straight to i18n.t() resolves fine at runtime, but leaves the
- * strings invisible to `pnpm missing-tr`, so a renamed or added label silently
+ * strings invisible to `pnpm translations:check`, so a renamed or added label silently
  * falls back to its English source until someone edits the locale files. */
 function periodLabel(period: Period): string {
   switch (period) {

@@ -536,9 +536,13 @@ Populate the database with template definitions and demo content.
 
 ## Commands
 
+Every command below takes the tenant as `--tenant <id>`, and answers `--help` with
+its own options. The tenant may be left out only when `MULTI_TENANCY` is not true,
+in which case the single configured tenant is used.
+
 ```bash
 # Seed template structure (components and fields)
-pnpm website:seed:templates
+pnpm website:templates:seed --tenant <id>
 ```
 
 Creates the `AOSPortalCmsComponent` and `AOSMetaJsonField` records in the database based on the template schemas.
@@ -548,24 +552,28 @@ As a workaround, run the reset script before seeding again to ensure a clean imp
 
 ```bash
 # Seed content with demo data
-pnpm website:seed:contents
+pnpm website:contents:seed --tenant <id>
 ```
 
-**Prerequisites:** This script must be run **after** `website:seed:templates`.
+**Prerequisites:** This script must be run **after** `website:templates:seed`.
 
 Creates `AOSPortalCmsContent` records using the demo data defined in each template’s `meta.ts` file.
+
+Either every content is created or none is: a content the run cannot finish —
+a demo asset that is missing, a database error — leaves the tenant as it was and
+exits non-zero. It does not report success on a partial seed.
 
 ⚠️ **Known Issue:** Re-running this command creates duplicate `meta-json` records and overwrites existing metafiles (images, etc.), potentially losing manual changes.
 
 ```bash
 # Seed website structure and pages
-pnpm website:seed:website
+pnpm website:sites:seed --tenant <id>
 ```
 
 <details>
 <summary>Website Configuration (`site.ts`)</summary>
 
-The `website:seed:website` script is configured by the `website` object in `app/[tenant]/[workspace]/(subapps)/website/common/templates/site.ts`. It defines the website's name and its language-specific sites.
+The `website:sites:seed` script is configured by the `website` object in `app/[tenant]/[workspace]/(subapps)/website/common/templates/site.ts`. It defines the website's name and its language-specific sites.
 
 **Example:**
 
@@ -595,7 +603,7 @@ export const website = {
 
 </details>
 
-**Prerequisites:** This script must be run **after** `website:seed:contents`, as it uses the content records created by that script.
+**Prerequisites:** This script must be run **after** `website:contents:seed`, as it uses the content records created by that script.
 
 **What it does:**
 
@@ -607,7 +615,7 @@ export const website = {
 
 ```bash
 # Reset all templates and content (clean slate)
-pnpm website:reset:templates
+pnpm website:templates:reset --tenant <id>
 ```
 
 Deletes all custom fields, models, and selections created by the seeding process.
