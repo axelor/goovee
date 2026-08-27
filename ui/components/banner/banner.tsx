@@ -5,6 +5,7 @@ import {cva, type VariantProps} from 'class-variance-authority';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
+import {isVectorImage} from '@/lib/core/image/vector';
 import {cn} from '@/utils/css';
 
 const bannerVariants = cva('absolute inset-0 z-1 pointer-events-none', {
@@ -77,7 +78,7 @@ export const Banner = ({
   groupClassName?: string;
   title: string;
   description: string;
-  image?: any;
+  image: string;
   renderSearch?: any;
   className?: string;
 } & VariantProps<BannerVariants>) => {
@@ -87,12 +88,16 @@ export const Banner = ({
         'relative flex-col lg:w-auto w-full h-[300px] lg:h-[353px] flex items-center justify-center bg-secondary',
         className,
       )}>
+      {/* A vector background is one file at every size, so it is asked for as
+      it is rather than as a set of width candidates that are all the same
+      file. */}
       <Image
         fill
         src={image}
         alt="Hero"
         className="object-cover z-0"
         priority
+        unoptimized={isVectorImage(image)}
       />
       <div className={cn(bannerVariants({blendMode, background}))} />
       <div className="relative z-2 px-4 flex text-white items-center flex-col justify-center py-0.5">
@@ -108,6 +113,7 @@ export const Banner = ({
               alt="Group"
               className={cn('rounded-lg object-cover', groupImgClassName)}
               sizes="96px"
+              unoptimized={isVectorImage(groupImg)}
             />
           </div>
         )}

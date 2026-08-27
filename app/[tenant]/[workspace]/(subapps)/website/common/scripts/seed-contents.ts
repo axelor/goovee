@@ -1,32 +1,20 @@
 import '@/load-swc-env';
+import * as out from '@/scripts/lib/output';
+import {runTenantScript} from '@/scripts/lib/tenant-script';
 import {seedContents} from '@/subapps/website/common/utils/templates';
-import {manager} from '@/tenant';
 
-const tenantId = process.env.MULTI_TENANCY === 'true' ? process.argv[2] : 'd';
+runTenantScript({
+  command: 'pnpm website:contents:seed',
+  title: 'Website content seeder',
+  summary: `Creates the demo content for every website template. Requires the
+templates to have been seeded first.`,
+  run: async ({openTenant}) => {
+    const {client} = await openTenant();
 
-if (!tenantId) {
-  console.error('\x1b[31m✖ Tenant id is required.\x1b[0m');
-  process.exit(1);
-}
-
-manager
-  .getTenant(tenantId)
-  .then(tenant => {
-    if (!tenant) {
-      console.error('\x1b[31m✖ Tenant not found.\x1b[0m');
-      process.exit(1);
-    }
-    return seedContents(tenant.client);
-  })
-  .then(res => {
-    const failed = res.filter(res => res.status === 'rejected');
-    if (failed.length) {
-      console.log('\x1b[31m🔥 Failed:\x1b[0m');
-      console.dir(failed, {depth: null});
-    }
-    console.log('\x1b[32m🔥 Success:\x1b[0m Contents seeded successfully!');
-  })
-  .catch(e => {
-    console.error(e);
-    process.exit(1);
-  });
+    // One entry per template, each holding that template's own contents.
+    const contents = await seedContents(client);
+    out.ok(
+      `Contents seeded successfully — ${contents.flat().length} contents across ${contents.length} templates.`,
+    );
+  },
+});

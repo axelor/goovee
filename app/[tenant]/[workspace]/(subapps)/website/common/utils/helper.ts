@@ -84,21 +84,6 @@ export function getImage(
 
 const BATCH_SIZE = 100;
 
-export async function processBatchSettled<T, R>(
-  data: T[],
-  action: (data: NoInfer<T>) => Promise<R>,
-  batchSize: number = BATCH_SIZE,
-): Promise<PromiseSettledResult<R>[]> {
-  const chunks = chunkArray(data, batchSize);
-
-  const results: PromiseSettledResult<R>[] = [];
-  for (const chunk of chunks) {
-    const result = await Promise.allSettled(chunk.map(data => action(data)));
-    results.push(...result);
-  }
-  return results;
-}
-
 export async function processBatch<T, R>(
   data: T[],
   action: (data: NoInfer<T>) => Promise<R>,

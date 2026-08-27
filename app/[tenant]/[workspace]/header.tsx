@@ -25,6 +25,7 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
@@ -159,6 +160,9 @@ function ProfilePill({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{i18n.t('Confirm logout')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('You will be signed out and returned to the login page.')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{i18n.t('Cancel')}</AlertDialogCancel>

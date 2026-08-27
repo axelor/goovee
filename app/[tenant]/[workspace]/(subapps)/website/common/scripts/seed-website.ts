@@ -1,27 +1,17 @@
 import '@/load-swc-env';
+import * as out from '@/scripts/lib/output';
+import {runTenantScript} from '@/scripts/lib/tenant-script';
 import {seedWebsite} from '@/subapps/website/common/utils/templates';
-import {manager} from '@/tenant';
 
-const tenantId = process.env.MULTI_TENANCY === 'true' ? process.argv[2] : 'd';
+runTenantScript({
+  command: 'pnpm website:sites:seed',
+  title: 'Website seeder',
+  summary: `Creates the demo sites and their pages from the seeded content, and
+sets each site's homepage. Requires the contents to have been seeded first.`,
+  run: async ({openTenant}) => {
+    const {client} = await openTenant();
 
-if (!tenantId) {
-  console.error('\x1b[31m✖ Tenant id is required.\x1b[0m');
-  process.exit(1);
-}
-
-manager
-  .getTenant(tenantId)
-  .then(tenant => {
-    if (!tenant) {
-      console.error('\x1b[31m✖ Tenant not found.\x1b[0m');
-      process.exit(1);
-    }
-    return seedWebsite(tenant.client);
-  })
-  .then(() =>
-    console.log('\x1b[32m🔥 Success:\x1b[0m Website seeded successfully!'),
-  )
-  .catch(e => {
-    console.error(e);
-    process.exit(1);
-  });
+    await seedWebsite(client);
+    out.ok('Website seeded successfully.');
+  },
+});
