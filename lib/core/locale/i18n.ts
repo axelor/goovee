@@ -8,18 +8,16 @@ const rest = axios.create();
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
-  async function load(
-    locale: string = DEFAULT_LOCALE,
-    tenant?: string,
-    host?: string,
-  ) {
+  async function load(locale: string = DEFAULT_LOCALE, tenant?: string) {
     if (!locale) {
       return {};
     }
 
-    const url = tenant
-      ? `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`
-      : withBasePath(`/api/locales/${locale}`);
+    const url = withBasePath(
+      tenant
+        ? `/api/tenant/${tenant}/locales/${locale}`
+        : `/api/locales/${locale}`,
+    );
 
     try {
       const result = await rest
