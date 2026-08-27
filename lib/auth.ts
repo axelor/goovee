@@ -11,7 +11,9 @@ import {
 import {APIError, getOAuthState} from 'better-auth/api';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
-import oauthProviders from './core/auth/(ee)/oauth-providers';
+import oauthProviders, {
+  findOAuthRegistration,
+} from './core/auth/(ee)/oauth-providers';
 import credentials from './core/auth/credentials';
 import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
 import {
@@ -23,9 +25,19 @@ import {withBasePath} from '@/lib/core/path/base-path';
 
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
+  PROVIDER_NOT_REGISTERED: 'Unknown sign-in provider',
+  TENANT_NOT_FOUND: 'Tenant not found',
+  EMAIL_REQUIRED: 'Email is required',
   PARTNER_NOT_FOUND: 'Partner not found',
   REGISTRATION_FAILED: 'Registration failed',
 });
+
+/* The route an OAuth callback arrives on, matched by both hooks below to
+ * recognise one. The path belongs to the generic OAuth plugin, so a plugin
+ * upgrade that moves the callback leaves both hooks matching nothing: the
+ * sign-in is then refused for a session carrying no tenant, rather than one
+ * being issued without a tenant behind it. */
+const OAUTH_CALLBACK_PATH = '/oauth2/callback/:providerId';
 
 const options = {
   onAPIError: {
@@ -35,38 +47,47 @@ const options = {
     user: {
       create: {
         before: async (user, ctx) => {
-          if (
-            ctx?.path === '/callback/:id' ||
-            ctx?.path === '/oauth2/callback/:providerId'
-          ) {
-            const data = await getOAuthState();
-            if (!data?.tenantId || !user.email) {
+          if (ctx?.path === OAUTH_CALLBACK_PATH) {
+            /* Which tenant this callback acts on is read from the provider it
+             * arrived through, not from the state: the state is what the caller
+             * posted when starting the flow, so trusting the tenant it names
+             * would let one tenant's identity provider vouch for another
+             * tenant's users. */
+            const registration = findOAuthRegistration(ctx.params?.providerId);
+            if (!registration) {
               throw new APIError(
-                'UNPROCESSABLE_ENTITY',
-                ERROR_CODES.TENANT_ID_REQUIRED,
+                'UNAUTHORIZED',
+                ERROR_CODES.PROVIDER_NOT_REGISTERED,
               );
             }
 
-            const tenant = await manager.getTenant(data.tenantId);
+            const {provider, tenantId} = registration;
+
+            if (!user.email) {
+              throw new APIError(
+                'UNPROCESSABLE_ENTITY',
+                ERROR_CODES.EMAIL_REQUIRED,
+              );
+            }
+
+            const data = await getOAuthState();
+
+            const tenant = await manager.getTenant(tenantId);
             if (!tenant) {
               throw new APIError(
                 'UNPROCESSABLE_ENTITY',
-                ERROR_CODES.TENANT_ID_REQUIRED,
+                ERROR_CODES.TENANT_NOT_FOUND,
               );
             }
             const {client, config} = tenant;
 
-            /* OAuth applications are per-tenant, registered as generic
-             * providers under "<provider>-<tenantId>". */
-            const isGoogle = ctx.params?.providerId?.startsWith('google-');
-            const isKeycloak = ctx.params?.providerId?.startsWith('keycloak-');
-
             let partner = await findGooveeUserByEmail(user.email, client);
             if (!partner) {
-              if (isGoogle && data.requestSignUp) {
+              if (provider === 'google' && data?.requestSignUp) {
                 const registrationData = {
                   ...data,
                   email: user.email,
+                  tenantId,
                 };
 
                 const {success: inviteSuccess, data: inviteData} =
@@ -124,7 +145,7 @@ const options = {
 
                 partner = await findGooveeUserByEmail(user.email, client);
               }
-              if (isKeycloak) {
+              if (provider === 'keycloak') {
                 const {
                   success,
                   data: keycloakData,
@@ -132,9 +153,9 @@ const options = {
                 } = KeycloakRegisterSchema.safeParse({
                   email: user.email,
                   name: user.name,
-                  tenantId: data.tenantId,
-                  workspaceURI: data.workspaceURI,
-                  locale: data.locale,
+                  tenantId,
+                  workspaceURI: data?.workspaceURI,
+                  locale: data?.locale,
                 });
 
                 if (!success) {
@@ -178,21 +199,22 @@ const options = {
     session: {
       create: {
         before: async (session, ctx) => {
-          if (
-            ctx?.path === '/callback/:id' ||
-            ctx?.path === '/oauth2/callback/:providerId'
-          ) {
-            const data = await getOAuthState();
-            if (!data?.tenantId) {
+          if (ctx?.path === OAUTH_CALLBACK_PATH) {
+            /* The session's tenant is set from the provider's registration, so
+             * a session cannot be issued for a tenant other than the one whose
+             * identity provider just authenticated the user. */
+            const registration = findOAuthRegistration(ctx.params?.providerId);
+            if (!registration) {
               throw new APIError(
-                'UNPROCESSABLE_ENTITY',
-                ERROR_CODES.TENANT_ID_REQUIRED,
+                'UNAUTHORIZED',
+                ERROR_CODES.PROVIDER_NOT_REGISTERED,
               );
             }
+
             return {
               data: {
                 ...session,
-                tenantId: data.tenantId,
+                tenantId: registration.tenantId,
               },
             };
           }
