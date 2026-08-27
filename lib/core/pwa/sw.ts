@@ -105,9 +105,12 @@ const serwist = new Serwist({
      * HTTP cache unless translations actually changed. Must be listed before
      * defaultCache to override the default NetworkFirst rule for /api/**.
      *
-     * Matches both the tenant-scoped route and the one for pages that carry no
-     * tenant — the entry, sign-in and error pages — which are held per
-     * registration like everything else here. */
+     * The tenant-less address is matched for completeness rather than effect.
+     * This worker is registered for one tenant's path, so it controls only the
+     * pages under it, and those always name their tenant in the address they
+     * ask for. The entry, sign-in and error pages are the ones asking without a
+     * tenant, and no registration covers them — their translations revalidate
+     * through the browser's own cache instead of from here. */
     {
       matcher: /\/api\/(tenant\/[^/]+\/)?locales\//,
       handler: new StaleWhileRevalidate({
