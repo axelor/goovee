@@ -50,6 +50,8 @@ export const SelectionPopup = ({
     <Dialog open={visible} onOpenChange={handleClose}>
       <DialogContent
         style={style}
+        // The title says all there is to say; the rest of the dialog is a grid.
+        aria-describedby={undefined}
         className="flex flex-col self-center items-center max-h-[80%] max-w-[50rem] px-10 py-4">
         <DialogTitle>{i18n.t('Select a record')}</DialogTitle>
         <div className="overflow-y-auto">

@@ -49,7 +49,6 @@ import {
   formatComponentCode,
   formatCustomFieldName,
   processBatch,
-  processBatchSettled,
 } from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
@@ -275,7 +274,7 @@ function formatSchema<T extends TemplateSchema>(schema: T): T {
 export async function seedComponents(client: GooveeClient) {
   const _schemas = metas.map(demo => demo.schema);
   if (!validateSchemas(_schemas)) {
-    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+    throw new Error('Invalid schema.');
   }
   const schemas = _schemas.map(formatSchema);
   return await client.$transaction(async client => {
@@ -376,11 +375,11 @@ export async function resetFields(client: GooveeClient) {
 export async function seedContents(client: GooveeClient) {
   const _schemas = metas.map(demo => demo.schema);
   if (!validateSchemas(_schemas)) {
-    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+    throw new Error('Invalid schema.');
   }
   return await client.$transaction(async client => {
     const fileCache = new Cache<Promise<{id: string}>>();
-    return await processBatchSettled(metas, async ({schema, demos}) => {
+    return await processBatch(metas, async ({schema, demos}) => {
       return await createCMSContent({
         client,
         schema: formatSchema(schema),
@@ -394,7 +393,7 @@ export async function seedContents(client: GooveeClient) {
 export async function seedWebsite(client: GooveeClient) {
   const _schemas = metas.map(meta => meta.schema);
   if (!validateSchemas(_schemas)) {
-    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+    throw new Error('Invalid schema.');
   }
   await client.$transaction(async client => {
     const {sites} = await createCMSWebsite({

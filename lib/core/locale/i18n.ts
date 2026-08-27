@@ -1,61 +1,46 @@
 import axios from 'axios';
-import {findLocaleLanguage, translate} from '@/locale/utils';
+import {translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 const rest = axios.create();
 
+/* A failed request is refused by its status, but something between the browser
+ * and the application — a captive portal, a proxy that does not route the
+ * application's own addresses — can answer with a page of its own and call it
+ * success. That arrives as one long string, which spreading would key by
+ * character position. Anything that is not an object of text values is read as
+ * no translations at all. */
+function asTranslations(data: unknown): Record<string, string> {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(data).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string',
+    ),
+  );
+}
+
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
-  async function load(
-    locale: string = DEFAULT_LOCALE,
-    tenant?: string,
-    host?: string,
-  ) {
+  async function load(locale: string = DEFAULT_LOCALE, tenant?: string) {
     if (!locale) {
       return {};
     }
 
-    if (tenant) {
-      try {
-        const result = await rest
-          .get(
-            `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
-          )
-          .then(result => result?.data || {})
-          .catch(() => ({}));
+    const url = withBasePath(
+      tenant
+        ? `/api/tenant/${tenant}/locales/${locale}`
+        : `/api/locales/${locale}`,
+    );
 
-        translations = {
-          ...result,
-        };
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      const fetchLocale = async (locale: string) =>
-        rest
-          .get(withBasePath(`/locales/${locale}.json`))
-          .then(r => (r?.status === 200 && r?.data ? r.data : {}))
-          .catch(() => ({}));
-
-      const lang = findLocaleLanguage(locale);
-
-      await Promise.all([
-        ...(lang !== locale ? [fetchLocale(lang)] : []),
-        fetchLocale(locale),
-      ])
-        .then(([langTranslations, localeTranslations]) => {
-          translations = {
-            ...translations,
-            ...langTranslations,
-            ...localeTranslations,
-          };
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    }
+    translations = await rest
+      .get(url)
+      .then(result => asTranslations(result?.data))
+      .catch(() => ({}));
   }
 
   function t(text: string, ...interpolations: string[]) {

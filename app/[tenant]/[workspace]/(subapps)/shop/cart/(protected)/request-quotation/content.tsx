@@ -73,8 +73,17 @@ export default function Content({
   return (
     <>
       <Dialog open>
-        <DialogTitle></DialogTitle>
-        <DialogContent className="space-y-2" hideClose>
+        {/*
+          The address picker carries its own heading, so the dialog title is
+          only there to name the dialog itself.
+        */}
+        <DialogContent
+          className="space-y-2"
+          hideClose
+          aria-describedby={undefined}>
+          <DialogTitle className="sr-only">
+            {i18n.t('Request Quotation')}
+          </DialogTitle>
           {!requestingQuotation ? (
             <>
               <AddressSelection

@@ -17,6 +17,7 @@ import {Link} from '@/ui/components/link';
 import {useEnvironment} from '@/lib/core/environment';
 import {isSameOrigin} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {isVectorImage} from '@/lib/core/image/vector';
 import {
   AuthShell,
   AuthField,
@@ -140,8 +141,12 @@ export default function Content({
   if (isPending) {
     return (
       <Dialog open>
-        <DialogTitle></DialogTitle>
-        <DialogContent className="space-y-2" hideClose>
+        {/* A spinner and nothing else, so the title carries the whole meaning. */}
+        <DialogContent
+          className="space-y-2"
+          hideClose
+          aria-describedby={undefined}>
+          <DialogTitle className="sr-only">{i18n.t('Loading')}</DialogTitle>
           <div className="flex items-center justify-center">
             <MdOutlineRefresh className="h-6 w-6 animate-spin" />
           </div>
@@ -152,6 +157,9 @@ export default function Content({
 
   const successMessage = searchParams.get('success');
   const showSso = showGoogleOauth || showKeycloakOauth;
+  const keycloakButtonImage =
+    env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE ||
+    withBasePath('/images/keycloak.svg');
 
   return (
     <AuthShell workspaceName={workspaceName}>
@@ -260,6 +268,7 @@ export default function Content({
                   src={withBasePath('/images/google.svg')}
                   height={20}
                   width={20}
+                  unoptimized
                 />
                 {i18n.t('Log In with Google')}
               </button>
@@ -270,14 +279,18 @@ export default function Content({
                 onClick={loginWithKeycloak}
                 disabled={submitting}
                 className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border border-ink-150 bg-white px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-25 disabled:opacity-60">
+                {/*
+                  The icon can be replaced by configuration, so its ratio is
+                  unknown: it is fitted into a square box rather than stretched
+                  to it.
+                */}
                 <Image
                   alt="Keycloak"
-                  src={
-                    env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE ||
-                    withBasePath('/images/keycloak.svg')
-                  }
+                  src={keycloakButtonImage}
                   height={20}
                   width={20}
+                  className="h-5 w-5 shrink-0 object-contain"
+                  unoptimized={isVectorImage(keycloakButtonImage)}
                 />
                 {i18n.t(
                   env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL ||
