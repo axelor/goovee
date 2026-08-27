@@ -47,6 +47,7 @@ interface IconMapping {
   account: IconType;
   chat: IconType;
   home: IconType;
+  marketplace: IconType;
 }
 
 function getIcon(type: keyof IconMapping): IconType | undefined {
@@ -72,6 +73,7 @@ function getIcon(type: keyof IconMapping): IconType | undefined {
     website: MdOutlineWeb,
     chat: MdOutlineForum,
     home: MdOutlineHome,
+    marketplace: MdStorefront,
   };
 
   const icon = iconMapping[type];

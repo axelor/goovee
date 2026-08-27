@@ -1,0 +1,34 @@
+import {t} from '@/locale/server';
+import type {Tenant} from '@/tenant';
+import {getAOSHeaders} from '@/tenant/auth';
+import axios from 'axios';
+
+/* Triggers the AOS side to build the SaleOrder + Invoice for a marketplace order and link them onto
+ * the order. The order header and its lines are already persisted, so only the order id is sent —
+ * the backend reads everything it needs server-side. Throws if the call fails or AOS rejects it,
+ * leaving the order for recovery. */
+export async function createMarketplaceOrder({
+  orderId,
+  config,
+}: {
+  orderId: string;
+  config: Tenant['config'];
+}): Promise<void> {
+  const aos = config.aos;
+  const ws = `${aos.url}/ws/portal/marketplace/order`;
+
+  const res = await axios.post(
+    ws,
+    {marketplaceOrderId: orderId},
+    /* The full AOS headers, not the credentials alone: a tenant sharing an AOS
+     * instance selects itself with X-Tenant-ID, and without it the order would
+     * be built in whichever tenant that instance serves by default. */
+    {headers: getAOSHeaders(aos)},
+  );
+
+  if (res?.data?.status === -1) {
+    /* The AOS message is an arbitrary backend string with no catalogue entry,
+     * so it is forwarded as-is; only the fallback can be translated. */
+    throw new Error(res?.data?.message || (await t('Order creation failed.')));
+  }
+}

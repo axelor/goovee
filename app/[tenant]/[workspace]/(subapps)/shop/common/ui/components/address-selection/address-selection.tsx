@@ -4,7 +4,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {AddressLines, Button, Loader} from '@/ui/components';
 import {ADDRESS_TYPE} from '@/constants';
@@ -27,14 +27,14 @@ export function AddressSelection({
   callbackURL?: string;
   title?: string;
 }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [invoicingAddress, setInvoicingAddress] =
     useState<PartnerAddress | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState<PartnerAddress | null>(
     null,
   );
 
-  const {cart, updateAddress} = useCart();
+  const {cart, loaded: cartLoaded, updateAddress} = useCart();
   const {workspaceURI, workspaceURL} = useWorkspace();
 
   const {
@@ -102,12 +102,18 @@ export function AddressSelection({
   }, [updateAddress, workspaceURL]);
 
   useEffect(() => {
+    /* Wait for the stored cart to be read. An unread cart reports no addresses,
+     * which would send this down the default-resolution branch — and that branch
+     * writes the partner defaults back to the cart, replacing the addresses the
+     * user actually chose. */
+    if (!cartLoaded) return;
     if (cartDeliveryAddress && cartInvoicingAddress) {
       resolveFromCartAddresses();
     } else {
       resolveDefaultAddresses();
     }
   }, [
+    cartLoaded,
     cartDeliveryAddress,
     cartInvoicingAddress,
     resolveFromCartAddresses,
@@ -139,7 +145,7 @@ export function AddressSelection({
       <h2 className="text-lg font-bold text-ink-900 mb-4">
         {title || i18n.t('Contact')}
       </h2>
-      {loading ? (
+      {loading || !cartLoaded ? (
         <Loader />
       ) : noAddress ? (
         <div className="rounded-lg border border-ink-150 p-4 flex flex-col gap-3">

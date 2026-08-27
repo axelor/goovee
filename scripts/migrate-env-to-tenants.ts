@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
-import {parseArgs} from 'node:util';
 
 import {config as loadDotenv} from 'dotenv';
+
+import * as out from '@/scripts/lib/output';
+import {runScript} from '@/scripts/lib/script';
 
 import {DEFAULT_TENANT} from '@/constants';
 import {
@@ -12,18 +14,6 @@ import {
   type PublicEnv,
   type TenantConfig,
 } from '@/tenant/types';
-
-/*
- * One-shot migration helper. Loads the .env files the same way Next.js does for
- * the chosen mode (production by default, development with --dev), then writes a
- * single-tenant configuration document — a "$global" section plus one "d"
- * tenant — to a file: tenants.config.json by default, or a path passed as the
- * first positional argument. Prompts before overwriting an existing file.
- *
- * Run: pnpm tenants:migrate                              # writes ./tenants.config.json
- *      pnpm tenants:migrate --dev                        # use development-mode .env files
- *      pnpm tenants:migrate /run/secrets/tenants.config.json
- */
 
 /* Load .env files with Next.js precedence for the chosen mode (more-specific
  * files win — loaded first, never overridden). This matches the set Next loads
@@ -273,42 +263,44 @@ function confirmOverwrite(filePath: string): Promise<boolean> {
   });
 }
 
-async function main() {
-  const {values, positionals} = parseArgs({
-    args: process.argv.slice(2),
-    options: {dev: {type: 'boolean', default: false}},
-    allowPositionals: true,
-  });
+type Values = {dev?: boolean};
 
-  loadEnv(Boolean(values.dev));
+runScript<Values, [string | null]>({
+  command: 'pnpm tenants:migrate',
+  title: 'Environment to tenant document',
+  summary: `Writes a configuration document — a "$global" section plus one
+"${DEFAULT_TENANT}" tenant — from the .env files the application would read, so a
+deployment already configured through the environment can move to a document
+without its settings being retyped. Prompts before overwriting an existing file.`,
+  options: command =>
+    command
+      .option('--dev', 'Read the development-mode .env files')
+      .argument('[path]', 'Where to write the document'),
+  run: async ({values, args}) => {
+    loadEnv(Boolean(values.dev));
 
-  /* Built after loadEnv so the *FromEnv builders read the loaded values.
-   * JSON.stringify drops `undefined` keys, so omitted sections disappear. */
-  const document: Record<string, string | GlobalConfig | TenantConfig> = {
-    $schema: './tenants.config.schema.json',
-    $global: buildGlobal(),
-    [DEFAULT_TENANT]: buildDefaultTenant(),
-  };
+    /* Built after loadEnv so the *FromEnv builders read the loaded values.
+     * JSON.stringify drops `undefined` keys, so omitted sections disappear. */
+    const document: Record<string, string | GlobalConfig | TenantConfig> = {
+      $schema: './tenants.config.schema.json',
+      $global: buildGlobal(),
+      [DEFAULT_TENANT]: buildDefaultTenant(),
+    };
 
-  const outPath = path.resolve(
-    process.cwd(),
-    positionals[0] ?? 'tenants.config.json',
-  );
+    const outPath = path.resolve(
+      process.cwd(),
+      args[0] ?? 'tenants.config.json',
+    );
 
-  if (fs.existsSync(outPath) && !(await confirmOverwrite(outPath))) {
-    console.error('Aborted — existing file left unchanged.');
-    process.exit(1);
-  }
+    if (fs.existsSync(outPath) && !(await confirmOverwrite(outPath))) {
+      out.fail('Aborted — existing file left unchanged.');
+    }
 
-  fs.writeFileSync(outPath, JSON.stringify(document, null, 2) + '\n');
+    fs.writeFileSync(outPath, JSON.stringify(document, null, 2) + '\n');
 
-  console.log(`Wrote ${outPath}`);
-  console.log(
-    'Review it, fill any blank required fields, then set TENANTS_CONFIG_FILE to its path.',
-  );
-}
-
-main().catch(err => {
-  console.error(err instanceof Error ? err.message : err);
-  process.exit(1);
+    out.ok(
+      `Wrote ${outPath} — review it, fill any blank required fields, then set ` +
+        `TENANTS_CONFIG_FILE to its path.`,
+    );
+  },
 });

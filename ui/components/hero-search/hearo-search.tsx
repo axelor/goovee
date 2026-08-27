@@ -9,7 +9,7 @@ type HearoSerchTypes = {
   groupImg?: string;
   title: string;
   description?: string;
-  image: any;
+  image: string;
   renderSearch?: any;
   className?: string;
   groupImgClassName?: string;

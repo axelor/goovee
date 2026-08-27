@@ -1,0 +1,224 @@
+/* Marketplace price display — the storefront layer on top of the
+ * generic pricing core (`@/product/pricing`).
+ *
+ * The core computes a price exactly the way AOS does and throws a
+ * `PriceComputationError` (with the matching AOS error code) whenever
+ * the configuration is broken. A storefront page must render anyway, so
+ * `computePrice` here wraps the core with marketplace policy:
+ *
+ * - The LISTING's price fields win. A listing owns its `salePrice` /
+ *   `inAti` / `saleCurrency` — `inAti` and `saleCurrency` set at create,
+ *   `salePrice` editable — and they are used the way an AOS sale-order line
+ *   uses its own price. Only the taxes come from the workspace default
+ *   product.
+ * - Broken tax configuration degrades to 0% tax instead of failing the
+ *   page.
+ * - Display currency is picked leniently, first one that works:
+ *     1. the buyer's currency (`viewerCurrency` — their partner record's
+ *        currency; a contact resolves to their parent company's partner) —
+ *        if an exchange rate to it exists;
+ *     2. the app-wide default currency (DEFAULT_CURRENCY_CODE) — same
+ *        condition;
+ *     3. the listing's own currency, shown as-is.
+ *   AOS itself converts to a single target and hard-fails without a
+ *   rate — the cascade is purely storefront behaviour.
+ * - Amounts are rounded to the display currency's decimal count.
+ */
+
+import {DEFAULT_CURRENCY_SCALE} from '@/constants';
+import type {ConversionLine, Currency, PriceableProduct} from '@/product/orm';
+import {
+  computeWtAti,
+  getExchangeRate,
+  getSaleTaxLineSet,
+  getTotalTaxRateInPercentage,
+  PriceComputationError,
+  scaled,
+  taxFactor,
+  todayInTimezone,
+  toDecimalOrNull,
+  ZERO,
+} from '@/product/pricing';
+import type {BigDecimal} from '@goovee/orm';
+import type {PriceContext} from '../orm';
+
+const DEFAULT_TAX_RATE = ZERO;
+
+export type ComputedPrice = {
+  /** The price without tax. */
+  wt: number;
+  /** The price with all taxes included. */
+  ati: number;
+  /** Total applied tax percentage (sum of all matched tax lines). */
+  taxRate: number;
+  /** The currency `wt`/`ati` are expressed in — the buyer's own currency
+   *  when a conversion was possible, otherwise the listing's. `codeISO`
+   *  is the machine identity (payment providers, the AOS order
+   *  endpoint); `code` is the printing code, for display only. */
+  currency: {
+    code: string;
+    codeISO: string;
+    symbol: string;
+    numberOfDecimals: number;
+  };
+};
+
+/** Computes what a listing costs, as the storefront should display it:
+ *  WT and ATI amounts, the tax percentage, and the display currency.
+ *
+ *  The listing's own price fields (`priceOverride`) are always the
+ *  source; only the taxes come from the workspace default product. To
+ *  price a bare product instead (fields resolved off the product, with
+ *  per-company overrides), use the core's `getSaleUnitPrice`.
+ *
+ *  Which currency the result is shown in, first one that works:
+ *    1. the buyer's currency — if an exchange rate to it exists;
+ *    2. the app default currency — same condition;
+ *    3. the listing's own currency, as-is. */
+export function computePrice({
+  product,
+  priceContext,
+  company,
+  priceOverride,
+}: {
+  product: PriceableProduct;
+  priceContext: PriceContext;
+  company: {id: string; timezone: string | null} | null;
+  /** The listing's own price fields, used EXACTLY as given — no
+   *  fallback into the product's per-company rows or base fields, the
+   *  same way an AOS sale-order line owns its price once created. The
+   *  product only supplies the tax configuration, since a listing has none
+   *  of its own. */
+  priceOverride: {
+    salePrice: NonNullable<PriceableProduct['salePrice']>;
+    saleCurrency: NonNullable<PriceableProduct['saleCurrency']>;
+    inAti: NonNullable<PriceableProduct['inAti']>;
+  };
+}): ComputedPrice {
+  const {viewerCurrency, defaultCurrency, conversionLines, fiscalPosition} =
+    priceContext;
+  const {id: companyId, timezone: companyTimezone} = company || {};
+
+  const today = todayInTimezone(companyTimezone);
+
+  const {salePrice: _salePrice, inAti, saleCurrency} = priceOverride;
+  const salePrice = toDecimalOrNull(_salePrice) ?? ZERO;
+
+  /* Resolve the tax percentage through the strict core. If the tax
+   * configuration is broken (any PriceComputationError), show the price
+   * untaxed rather than failing the page — a storefront page must
+   * render. */
+  let taxRate: BigDecimal;
+  try {
+    const lineSet = getSaleTaxLineSet({
+      product,
+      companyId,
+      fiscalPosition,
+      today,
+    });
+    taxRate = getTotalTaxRateInPercentage(lineSet);
+  } catch (e) {
+    if (!(e instanceof PriceComputationError)) throw e;
+    taxRate = DEFAULT_TAX_RATE;
+  }
+  /* Deriving WT from an ATI-stored price divides by 1 + rate, so a rate of
+   * exactly -100% has no answer and the core throws. AOS's own tax lines are
+   * constrained to 0..100 and cannot hold it, so this only comes from corrupt
+   * data: treat it as one more broken tax configuration and fall back to
+   * untaxed rather than failing the page. The WT-stored direction never divides,
+   * so it is left as it is — it yields ATI 0, which the storefront reads as a
+   * free listing. */
+  if (Boolean(inAti) && taxFactor(taxRate).compareTo(ZERO) === 0) {
+    taxRate = DEFAULT_TAX_RATE;
+  }
+
+  const {wt, ati} = computeWtAti(salePrice, Boolean(inAti), taxRate);
+
+  /* Pick the display currency: try the buyer's currency, then the app
+   * default; keep the listing's own when neither has a usable exchange
+   * rate. */
+  const lines = conversionLines ?? [];
+  const fromCode = saleCurrency?.codeISO;
+  let resolvedCurrency = saleCurrency;
+  let convertedWt = wt;
+  let convertedAti = ati;
+  let resolvedScale = saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
+
+  if (fromCode) {
+    /* Note: a target that IS the listing's currency stays in the list —
+     * it "converts" at rate 1. That way a buyer whose currency matches
+     * the listing's sees the price as-is instead of having it converted
+     * to the app default. */
+    const seen = new Set<string>();
+    const targets = [viewerCurrency, defaultCurrency].filter(
+      (c): c is Currency => {
+        if (!c?.codeISO || seen.has(c.codeISO)) return false;
+        seen.add(c.codeISO);
+        return true;
+      },
+    );
+    for (const target of targets) {
+      const wtResult = tryConvert(wt, fromCode, target, today, lines);
+      const atiResult = tryConvert(ati, fromCode, target, today, lines);
+      if (wtResult && atiResult) {
+        convertedWt = wtResult.value;
+        convertedAti = atiResult.value;
+        resolvedCurrency = target;
+        resolvedScale = target.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
+        break;
+      }
+    }
+  }
+
+  // Both amounts are rounded to the display currency's scale, once, here.
+  return {
+    wt: scaled(convertedWt, resolvedScale).toNumber(),
+    ati: scaled(convertedAti, resolvedScale).toNumber(),
+    taxRate: taxRate.toNumber(),
+    currency: {
+      code: resolvedCurrency?.code ?? '',
+      codeISO: resolvedCurrency?.codeISO ?? '',
+      symbol: resolvedCurrency?.symbol ?? '',
+      numberOfDecimals: resolvedScale,
+    },
+  };
+}
+
+/** One attempt of the display-currency cascade: convert `amount` into
+ *  `toCurrency`, or return null when no usable exchange rate exists so
+ *  the caller can try the next target. (This is the lenient wrapper
+ *  around the strict `getExchangeRate`.) */
+function tryConvert(
+  amount: BigDecimal,
+  fromCode: string,
+  toCurrency: Currency,
+  today: string,
+  lines: ConversionLine[],
+): {value: BigDecimal; currency: Currency} | null {
+  try {
+    const rate = getExchangeRate(fromCode, toCurrency.codeISO, today, lines);
+    return {value: amount.multiply(rate), currency: toCurrency};
+  } catch (e) {
+    if (!(e instanceof PriceComputationError)) throw e;
+    return null;
+  }
+}
+
+/** Is this listing Paid (true) or Free (false)? Accepts either the raw
+ *  `salePrice` (form context) or a computed `price.ati` (display
+ *  context). Anything above zero is Paid; everything else — null, 0,
+ *  negative, unreadable — is Free. */
+export function isPaid(value: number | string | null | undefined): boolean {
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) && amount > 0;
+}
+
+/** Rounds a plain number to `scale` places. Only ever used to total amounts
+ *  already rounded to a currency's scale — a cart total, a month of revenue —
+ *  which is what makes plain float arithmetic safe here. Not a substitute for
+ *  the core's BigDecimal HALF_UP: `Math.round` breaks ties toward +infinity,
+ *  so the two diverge on a negative amount, of which there are none here. */
+export function round(value: number, scale: number): number {
+  const factor = 10 ** scale;
+  return Math.round(value * factor) / factor;
+}

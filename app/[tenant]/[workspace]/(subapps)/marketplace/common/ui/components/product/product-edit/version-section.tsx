@@ -1,0 +1,410 @@
+import {i18n} from '@/locale';
+import type {Cloned} from '@/types/util';
+import {Alert, AlertDescription, AlertTitle} from '@/ui/components/alert';
+import {Button} from '@/ui/components/button';
+import {StatusPill, type StatusKey} from '@/ui/components/status-pill';
+import {cn} from '@/utils/css';
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Loader2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import {useWatch, type FieldPath} from 'react-hook-form';
+import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
+import type {CompatibilityVersion} from '../../../../orm';
+import type {CombinedEditValues, VersionRowValues} from './combined-validator';
+import type {ProductEditFormModel} from './use-product-edit-form';
+import {VersionFields} from './version-fields';
+
+type VersionStatus = VersionRowValues['statusSelect'];
+
+const STATUS = MARKETPLACE_VERSION_STATUS;
+
+type StatusSegment = {id: string; label: string; intent: VersionStatus};
+type StatusPillInfo = {label: string; tone: StatusKey};
+
+/**
+ * The status segments offered for a version, gated by its current persisted
+ * status so only lifecycle-legal transitions appear (SPEC §4.9.2): a
+ * Published / In-review version can only be unpublished (never demoted straight
+ * to Draft); Unpublished / Rejected versions can go to Draft or be (re)submitted;
+ * Rejected is a reviewer outcome shown read-only via a pill. Each segment's
+ * `intent` is the editable value sent to the server (draft/published/
+ * unpublished); "Publish" resolves to In-review when the workspace requires it.
+ */
+function statusOptions(
+  original: string | undefined,
+  requiresReview: boolean,
+): {pill?: StatusPillInfo; segments: StatusSegment[]} {
+  const publish: StatusSegment = {
+    id: 'publish',
+    label: requiresReview ? i18n.t('Submit for review') : i18n.t('Publish'),
+    intent: STATUS.PUBLISHED,
+  };
+  const draft: StatusSegment = {
+    id: 'draft',
+    label: i18n.t('Draft'),
+    intent: STATUS.DRAFT,
+  };
+  const unpublish: StatusSegment = {
+    id: 'unpublish',
+    label: i18n.t('Unpublish'),
+    intent: STATUS.UNPUBLISHED,
+  };
+  switch (original) {
+    case STATUS.PUBLISHED:
+      return {
+        segments: [
+          {
+            id: 'published',
+            label: i18n.t('Published'),
+            intent: STATUS.PUBLISHED,
+          },
+          unpublish,
+        ],
+      };
+    case STATUS.IN_REVIEW:
+      return {
+        pill: {label: i18n.t('In review'), tone: 'pending'},
+        segments: [
+          {
+            id: 'inreview',
+            label: i18n.t('Keep in review'),
+            intent: STATUS.PUBLISHED,
+          },
+          unpublish,
+        ],
+      };
+    case STATUS.UNPUBLISHED:
+      return {
+        segments: [
+          {
+            id: 'unpublished',
+            label: i18n.t('Unpublished'),
+            intent: STATUS.UNPUBLISHED,
+          },
+          draft,
+          publish,
+        ],
+      };
+    case STATUS.REJECTED:
+      return {
+        pill: {label: i18n.t('Rejected'), tone: 'rejected'},
+        segments: [draft, publish],
+      };
+    default:
+      // draft, or a brand-new version
+      return {segments: [draft, publish]};
+  }
+}
+
+/**
+ * What saving will do to the version under the cursor, keyed on its real
+ * persisted status (not the staged intent) and the workspace review policy.
+ * `currentStatus` is null for an unsaved new row. A rejected version also
+ * surfaces the reviewer's latest rejection reason so the author knows what to
+ * fix before resubmitting.
+ */
+function ReviewStatusAlert({
+  requiresReview,
+  currentStatus,
+  rejectionReason,
+}: {
+  requiresReview: boolean;
+  currentStatus: string | null;
+  rejectionReason?: string;
+}) {
+  /* Rejected or unpublished — the version can be sent back out, directly or
+   * via review depending on the workspace flag. */
+  if (
+    currentStatus === STATUS.REJECTED ||
+    currentStatus === STATUS.UNPUBLISHED
+  ) {
+    const resubmitHint = requiresReview
+      ? i18n.t(
+          'You may submit this version for review again. It becomes visible once approved.',
+        )
+      : i18n.t(
+          'You may publish this version again. Changes are visible to the community immediately.',
+        );
+    if (currentStatus === STATUS.REJECTED && rejectionReason) {
+      return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>{i18n.t('Rejected')}</AlertTitle>
+          <AlertDescription className="space-y-1">
+            <p>
+              <span className="font-medium">
+                {i18n.t('Rejection reason')}:{' '}
+              </span>
+              {rejectionReason}
+            </p>
+            <p>{resubmitHint}</p>
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    const title =
+      currentStatus === STATUS.REJECTED
+        ? i18n.t('Rejected')
+        : i18n.t('Unpublished');
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{title}</AlertTitle>
+        <AlertDescription>{resubmitHint}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  // In review — independent of workspace flag, the version is already queued.
+  if (currentStatus === STATUS.IN_REVIEW) {
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{i18n.t('In review')}</AlertTitle>
+        <AlertDescription>
+          {i18n.t(
+            'This version is awaiting approval. Saving will requeue it for review.',
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Published — editing a live version.
+  if (currentStatus === STATUS.PUBLISHED) {
+    if (requiresReview) {
+      return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>
+            {i18n.t('Published · editing sends back for review')}
+          </AlertTitle>
+          <AlertDescription>
+            {i18n.t(
+              'Saving moves this version to "in review" and unlists it. If this is your only published version, the product itself will be hidden from listings until a new version is approved.',
+            )}
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{i18n.t('Published · live')}</AlertTitle>
+        <AlertDescription>
+          {i18n.t(
+            'Saving will update the published version. Changes are visible to the community immediately.',
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Draft — editing an existing draft.
+  if (currentStatus === STATUS.DRAFT) {
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>
+          {requiresReview ? i18n.t('Draft · review required') : i18n.t('Draft')}
+        </AlertTitle>
+        <AlertDescription>
+          {requiresReview
+            ? i18n.t(
+                'Keep saving as a draft, or submit for review to make this version live.',
+              )
+            : i18n.t(
+                'Keep saving as a draft, or publish to make this version live.',
+              )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // New version (no saved state yet).
+  return (
+    <Alert variant="primary">
+      <Info className="h-4 w-4" />
+      <AlertTitle>
+        {requiresReview
+          ? i18n.t('New version · review required')
+          : i18n.t('New version')}
+      </AlertTitle>
+      <AlertDescription>
+        {requiresReview
+          ? i18n.t(
+              'Save as a draft, or submit for review. The version becomes visible once approved.',
+            )
+          : i18n.t(
+              'Save as a draft, or publish to make this version live immediately.',
+            )}
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+/**
+ * The version surface of the combined editor: header with cursor nav, the
+ * state-aware status segmented control, add/discard, and the fields for the
+ * single version under the cursor. Shared by the full-page editor and the
+ * dialog — both drive it with the same `useProductEditForm` model, so a change
+ * here lands in both. Holds no state of its own.
+ */
+export function VersionSection({
+  model,
+  requiresReview,
+  allowToPublish,
+  compatibilityVersions,
+  workspaceURI,
+}: {
+  model: ProductEditFormModel;
+  requiresReview: boolean;
+  allowToPublish: boolean;
+  compatibilityVersions: Cloned<CompatibilityVersion>[];
+  workspaceURI: string;
+}) {
+  const {position, namePrefix, isNew, currentVersionMeta} = model;
+  const status = useWatch({
+    control: model.form.control,
+    name: `${namePrefix}.statusSelect` as FieldPath<CombinedEditValues>,
+  }) as VersionStatus | undefined;
+
+  const {pill, segments} = statusOptions(
+    currentVersionMeta?.originalStatus,
+    requiresReview,
+  );
+
+  return (
+    <section className="space-y-6 rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-ink-900">
+            {i18n.t('Versions')}
+          </h3>
+          {position.total > 1 && (
+            <div className="flex items-center gap-1 text-sm text-ink-500">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={model.goPrev}
+                disabled={!model.canPrev || model.awaitingNext}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span>
+                {position.current} / {position.total}
+                {isNew ? ` (${i18n.t('new')})` : ''}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={model.goNext}
+                disabled={!model.canNext || model.awaitingNext}>
+                {model.awaitingNext ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isNew && position.total > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={model.discardCurrentNew}
+              className="text-destructive hover:text-destructive">
+              <Trash2 className="mr-1 h-4 w-4" />
+              {i18n.t('Discard')}
+            </Button>
+          )}
+          {allowToPublish && (
+            <Button
+              type="button"
+              variant="ink-outline"
+              size="sm"
+              onClick={model.addNew}>
+              <Plus className="mr-1 h-4 w-4" />
+              {i18n.t('Add new version')}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {position.total === 0 ? (
+        <p className="py-8 text-center text-sm text-ink-500">
+          {i18n.t('No versions yet. Add one to publish this product.')}
+        </p>
+      ) : model.awaitingNext ? (
+        /* Parked at the frontier: the entry being fetched isn't loaded yet, so
+            show a spinner in its place (the navigator already points at it). */
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="h-6 w-6 animate-spin text-ink-500" />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <ReviewStatusAlert
+            requiresReview={requiresReview}
+            currentStatus={currentVersionMeta?.originalStatus ?? null}
+            rejectionReason={currentVersionMeta?.rejectionReason}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-ink-500">{i18n.t('Status')}</span>
+            {pill && <StatusPill status={pill.tone}>{pill.label}</StatusPill>}
+            {/* Segments are the lifecycle-legal targets; the highlighted one is
+                the staged value, applied on Save (not immediately). */}
+            <div className="inline-flex overflow-hidden rounded-lg border border-ink-100">
+              {segments.map((segment, index) => {
+                const selected = status === segment.intent;
+                return (
+                  <button
+                    key={segment.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => model.setStatus(segment.intent)}
+                    className={cn(
+                      'px-3 py-1.5 text-sm font-medium transition-colors',
+                      index > 0 && 'border-l border-ink-100',
+                      selected
+                        ? 'bg-royal text-white'
+                        : 'bg-ink-25 text-ink-500 hover:bg-ink-50',
+                    )}>
+                    {segment.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Keyed by the row's identity, not its index, so it remounts per
+              version — the changelog editor then re-seeds from that row's
+              current form value. Discarding the first of several new rows leaves
+              the index path unchanged, so keying on that would hold the
+              discarded row's changelog open on its successor. */}
+          <VersionFields
+            key={model.currentRowKey}
+            namePrefix={namePrefix}
+            rowKey={model.currentRowKey}
+            commitBundleToken={model.commitBundleToken}
+            existingBundle={currentVersionMeta?.bundle}
+            bundleUpload={model.bundleUpload}
+            bundleItemByRow={model.bundleItemByRow}
+            compatibilityVersions={compatibilityVersions}
+            workspaceURI={workspaceURI}
+            productId={model.productId}
+          />
+        </div>
+      )}
+    </section>
+  );
+}

@@ -14,7 +14,7 @@ type TranslationBundle = {
   translations: Translations;
   hash: string;
   /* The tenant's own translations are missing because they could not be read,
-   * not because it has none. Such a bundle is served but never kept. */
+   * not because it has none. Such a bundle is served but never cached. */
   partial: boolean;
 };
 
@@ -32,10 +32,7 @@ const tcache: Record<string, Translations> = {};
 const localesDir = path.resolve(process.cwd(), 'public', 'locales');
 const localesPromise = fs.readdir(localesDir).catch(() => [] as string[]);
 
-async function findGeneralTranslations(
-  locale: string,
-  includeLanguage: boolean,
-): Promise<Translations> {
+async function findGeneralTranslations(locale: string): Promise<Translations> {
   if (!locale) {
     return {};
   }
@@ -67,8 +64,13 @@ async function findGeneralTranslations(
 
   const lang = findLocaleLanguage(locale);
 
+  /* `includeLanguage` governs the translations a tenant holds, not the ones
+   * shipped with the application: a shipped file keeps a language's
+   * translations under the language alone, and the ones named for a region
+   * hold only what that region says differently. So the language is always
+   * read here, whatever the acting tenant asked for. */
   const [langTranslations, localeTranslations] = await Promise.all([
-    lang !== locale && includeLanguage ? readwritecache(lang) : {},
+    lang !== locale ? readwritecache(lang) : {},
     readwritecache(locale),
   ]);
 
@@ -130,17 +132,18 @@ function computeHash(translations: Translations): string {
  *
  * A tenant whose own translations cannot be read still gets a bundle, in the
  * shipped wording, marked `partial`: every page and every error message is built
- * through here, so a database that is briefly unreachable must not be what takes
- * the portal down. The mark is what stops it being kept — the caller does not
- * cache it, and the route serving the browser refuses it.
+ * through here, so one query that fails must not be what takes the portal down.
+ * The mark is what stops it being kept, so the next request reads again instead
+ * of serving the shortfall for the life of the entry.
  */
 async function loadTranslationBundle(
   locale: string,
   tenantId?: string,
   config?: TenantConfig | null,
 ): Promise<TranslationBundle> {
-  /* includeLanguage (also load the base language, e.g. `en` for `en-US`) is a
-   * per-tenant toggle; tenant-less contexts default to off. */
+  /* Whether this tenant also holds its own translations under the base language
+   * (`fr` for `fr_FR`), which only its own rows are read for. A per-tenant
+   * setting; a context with no tenant has none to read either way. */
   const includeLanguage = Boolean(config?.includeLanguage);
 
   let partial = false;
@@ -164,13 +167,29 @@ async function loadTranslationBundle(
   };
 
   const [generalTranslations, tenantTranslations] = await Promise.all([
-    findGeneralTranslations(locale, includeLanguage),
+    findGeneralTranslations(locale),
     readTenantTranslations(),
   ]);
 
   const translations = {...generalTranslations, ...tenantTranslations};
 
   return {translations, hash: computeHash(translations), partial};
+}
+
+/* Reading the configuration throws when the document is missing or malformed.
+ * Every page and every error message is built through here, so that is reported
+ * and treated as no tenant rather than raised: the shipped wording still
+ * renders, where an exception would leave the reader an error page instead. */
+function readTenantConfig(tenantId: string): TenantConfig | null {
+  try {
+    return getTenantConfigSync(tenantId);
+  } catch (error) {
+    console.error(
+      `Could not read the configuration for tenant "${tenantId}":`,
+      error,
+    );
+    return null;
+  }
 }
 
 export async function findTranslations(
@@ -189,7 +208,7 @@ export async function findTranslations(
    * Resolving through the config provider rather than the tenant manager keeps
    * this a map read: computing a cache key must not connect a database, and an
    * unknown id must not be indistinguishable from an unreachable one. */
-  const config = tenantId ? getTenantConfigSync(tenantId) : null;
+  const config = tenantId ? readTenantConfig(tenantId) : null;
   const resolvedTenantId = config ? tenantId : undefined;
 
   const cacheKey = `${resolvedTenantId ?? ''}:${locale}`;
@@ -203,8 +222,7 @@ export async function findTranslations(
   bundleCache.put(cacheKey, bundle);
 
   /* Held only once it proves complete. A bundle that fell back to the shipped
-   * wording, or failed outright, is dropped so the next request tries again
-   * rather than serving the shortfall for the rest of the entry's life. */
+   * wording, or failed outright, is dropped so the next request reads again. */
   bundle
     .then(loaded => loaded.partial && bundleCache.delete(cacheKey))
     .catch(() => bundleCache.delete(cacheKey));

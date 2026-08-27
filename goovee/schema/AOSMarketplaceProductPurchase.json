@@ -1,0 +1,55 @@
+{
+  "name": "AOSMarketplaceProductPurchase",
+  "table": "portal_marketplace_product_purchase",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "productOrder",
+      "target": "AOSMarketplaceProductOrder",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "owner",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceProduct",
+      "target": "AOSMarketplaceProduct",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "purchaseDateTime",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "priceWt",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "priceAti",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "taxRate",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency",
+      "required": true
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

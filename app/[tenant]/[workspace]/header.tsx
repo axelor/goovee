@@ -25,6 +25,7 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
@@ -37,7 +38,7 @@ import type {Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
-import Cart from '@/app/[tenant]/[workspace]/cart';
+import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
@@ -159,6 +160,9 @@ function ProfilePill({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{i18n.t('Confirm logout')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('You will be signed out and returned to the login page.')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{i18n.t('Cancel')}</AlertDialogCancel>
@@ -178,14 +182,14 @@ export default function Header({
   workspaces,
   workspace,
   config,
-  showCart,
+  cartCodes = [],
 }: {
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
-  showCart?: boolean | null;
+  cartCodes?: string[];
 }) {
   const router = useRouter();
   const {data: session} = authClient.useSession();
@@ -207,7 +211,7 @@ export default function Header({
     : false;
 
   const shouldDisplayIcons = visible && !loading;
-  const showCartIcon = showCart && shouldDisplayIcons;
+  const showCartIcon = shouldDisplayIcons && cartCodes.length > 0;
   const isFixedHeader = config.isFixedHeader;
   const headerRef = useRef<HTMLDivElement | null>(null);
 
@@ -259,6 +263,9 @@ export default function Header({
         )}>
         <Logo workspace={workspace} config={config} />
 
+        {/** Subapp-injected header nav slot (filled via Portal). */}
+        <div id="subapp-header-nav" className="ml-8 hidden" />
+
         <div className="grow" />
 
         {isLarge && (
@@ -303,7 +310,7 @@ export default function Header({
                   );
                 })}
             {user && <Notification />}
-            {showCartIcon && <Cart />}
+            {showCartIcon && <CartIcon enabledCodes={cartCodes} />}
             {user && (
               <>
                 <div className="w-px h-6 bg-ink-100 mx-1.5" />

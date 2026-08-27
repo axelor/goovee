@@ -9,7 +9,14 @@
     },
     {
       "type": "String",
-      "name": "code"
+      "name": "code",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "codeISO",
+      "column": "codeiso",
+      "required": true
     },
     {
       "type": "String",

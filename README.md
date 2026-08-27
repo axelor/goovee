@@ -23,6 +23,7 @@ Goovee is a modern web portal built with Next.js for clients and partners, provi
 | -------------- | ------------------------ |
 | **v2.0.x**     | 9.0.4+                   |
 | **v2.1.x**     | 9.0.13+, 9.1.2+          |
+| **v2.2.x**     | 9.0.14+, 9.1.4+          |
 
 > Goovee 1.x compatibility is maintained on the `1.x-wip` branch.
 
@@ -77,7 +78,7 @@ Merge your development branches (`dev`, `wip`, `dev-1.6`, etc.) into `main` or t
 **2. Prepare the release**
 
 ```bash
-pnpm prepare:release
+pnpm release:prepare
 ```
 
 **3. Push and trigger the release**
@@ -92,7 +93,7 @@ pnpm release
 Merge release branch back into your development branches, then bump the version to prepare for the next cycle:
 
 ```bash
-pnpm prepare:bump <major|minor|patch>
+pnpm release:bump <major|minor|patch>
 ```
 
 ## License

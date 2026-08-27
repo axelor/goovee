@@ -1,0 +1,63 @@
+{
+  "name": "AOSMarketplaceProductOrder",
+  "table": "portal_marketplace_product_order",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "orderedBy",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "company",
+      "target": "AOSCompany"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "paymentMode",
+      "target": "AOSPaymentMode"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "invoicingAddress",
+      "target": "AOSAddress"
+    },
+    {
+      "type": "String",
+      "name": "invoicingAddressStr"
+    },
+    {
+      "type": "String",
+      "name": "paymentContextId"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "paidAmount",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "saleOrder",
+      "target": "AOSOrder"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "invoice",
+      "target": "AOSInvoice"
+    },
+    {
+      "type": "OneToMany",
+      "name": "purchaseList",
+      "target": "AOSMarketplaceProductPurchase",
+      "mappedBy": "productOrder"
+    }
+  ]
+}

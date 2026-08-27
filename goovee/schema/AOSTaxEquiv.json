@@ -1,0 +1,22 @@
+{
+  "name": "AOSTaxEquiv",
+  "table": "account_tax_equiv",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "fiscalPosition",
+      "target": "AOSFiscalPosition"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "fromTaxSet",
+      "target": "AOSTax"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "toTaxSet",
+      "target": "AOSTax"
+    }
+  ]
+}

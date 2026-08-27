@@ -1,0 +1,45 @@
+{
+  "name": "AOSMarketplacePublisherRequest",
+  "table": "portal_marketplace_publisher_request",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "partner",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "portalWorkspace",
+      "target": "AOSPortalWorkspace",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "requestedByContact",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "String",
+      "name": "publishingPlan"
+    },
+    {
+      "type": "Int",
+      "name": "statusSelect",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "cooldownUntil"
+    },
+    {
+      "type": "String",
+      "name": "rejectionReason"
+    },
+    {
+      "type": "DateTime",
+      "name": "requestDateTime"
+    }
+  ]
+}

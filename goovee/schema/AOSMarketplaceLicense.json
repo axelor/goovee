@@ -1,0 +1,37 @@
+{
+  "name": "AOSMarketplaceLicense",
+  "table": "portal_marketplace_license",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "code",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "name",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "url"
+    },
+    {
+      "type": "String",
+      "name": "description"
+    },
+    {
+      "type": "Boolean",
+      "name": "isPaid"
+    },
+    {
+      "type": "Int",
+      "name": "sequence"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

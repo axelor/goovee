@@ -1,0 +1,42 @@
+{
+  "name": "AOSPriceList",
+  "table": "base_price_list",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "title"
+    },
+    {
+      "type": "Int",
+      "name": "typeSelect"
+    },
+    {
+      "type": "Boolean",
+      "name": "isActive"
+    },
+    {
+      "type": "Decimal",
+      "name": "generalDiscount"
+    },
+    {
+      "type": "Date",
+      "name": "applicationBeginDate"
+    },
+    {
+      "type": "Date",
+      "name": "applicationEndDate"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency"
+    },
+    {
+      "type": "OneToMany",
+      "name": "priceListLineList",
+      "target": "AOSPriceListLine",
+      "mappedBy": "priceList"
+    }
+  ]
+}

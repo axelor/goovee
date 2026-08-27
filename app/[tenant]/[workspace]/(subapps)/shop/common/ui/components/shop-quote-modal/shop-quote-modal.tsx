@@ -15,7 +15,7 @@ import {SUBAPP_CODES, SUBAPP_PAGE, ADDRESS_TYPE, MAIN_PRICE} from '@/constants';
 import {Link} from '@/ui/components/link';
 import {AddressLines} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
@@ -422,7 +422,7 @@ function QuoteAddressPicker({
   loadingLabel: string;
   addressesHref: string;
 }) {
-  const {cart, updateAddress} = useCart();
+  const {cart, loaded: cartLoaded, updateAddress} = useCart();
   const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -436,6 +436,11 @@ function QuoteAddressPicker({
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      /* Wait for the stored cart to be read before doing anything. This runs
+       * once, so the cart it reads is the one captured for this pass: an unread
+       * cart reports no address of this type, and the write below would then
+       * replace the address the cart already holds with the default. */
+      if (!cartLoaded) return;
       try {
         const [list, def] = await Promise.all([
           isInvoicing
@@ -483,7 +488,7 @@ function QuoteAddressPicker({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cartLoaded]);
 
   const handleSelect = (addr: PartnerAddress) => {
     setSelectedId(String(addr.id));

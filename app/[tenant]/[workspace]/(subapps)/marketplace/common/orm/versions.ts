@@ -1,0 +1,233 @@
+import type {Client} from '@/goovee/.generated/client';
+import type {AOSMarketplaceProductVersion} from '@/goovee/.generated/models';
+import type {ID} from '@/types';
+import {and} from '@/utils/orm';
+import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
+import type {Workspace} from '@/orm/workspace';
+import {
+  versionNumberFields,
+  versionSortOrder,
+  withBundleAccessFilter,
+  withMyProductAccessFilter,
+  type QueryProps,
+} from './helpers';
+
+export type ListProductVersion = Awaited<
+  ReturnType<typeof findProductVersions>
+>[number];
+
+export async function findVersionCount({
+  client,
+  productId,
+  includeUnpublished = false,
+}: {
+  client: Client;
+  productId: ID;
+  includeUnpublished?: boolean;
+}) {
+  return client.aOSMarketplaceProductVersion.count({
+    where: and<AOSMarketplaceProductVersion>([
+      {OR: [{archived: false}, {archived: null}]},
+      {marketplaceProduct: {id: productId}},
+      !includeUnpublished && {
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+    ]),
+  });
+}
+
+/* Ordering is fixed to `versionSortOrder` (newest version number first), not a
+ * caller's choice, so `orderBy` is left out of the arguments rather than
+ * accepted and ignored. */
+export async function findProductVersions({
+  productId,
+  client,
+  where,
+  take,
+  skip,
+  includeUnpublished = false,
+}: {
+  productId: ID;
+  client: Client;
+  includeUnpublished?: boolean;
+} & Omit<QueryProps<AOSMarketplaceProductVersion>, 'orderBy'>) {
+  return client.aOSMarketplaceProductVersion.find({
+    ...(take ? {take} : {}),
+    ...(skip ? {skip} : {}),
+    where: and<AOSMarketplaceProductVersion>([
+      {OR: [{archived: false}, {archived: null}]},
+      {marketplaceProduct: {id: productId}},
+      !includeUnpublished && {
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+      where,
+    ]),
+    select: {
+      id: true,
+      ...versionNumberFields,
+      publishDateTime: true,
+      changelog: true,
+      statusSelect: true,
+      bundleFile: {id: true},
+      compatibilitySet: {
+        select: {title: true},
+        orderBy: {releaseDateTime: 'DESC'},
+      },
+    },
+    orderBy: versionSortOrder,
+  });
+}
+
+export type MyProductVersion = Awaited<
+  ReturnType<typeof findMyProductVersions>
+>[number];
+
+/* Versions for the product-edit screen: no status filter, highest version
+ * number first, scoped to a product the caller publishes. Paginated — a
+ * `take` makes goovee attach `_count` (the total for
+ * this filter) to each returned row, so no separate count query is needed. */
+export async function findMyProductVersions({
+  productId,
+  mainPartnerId,
+  client,
+  workspace,
+  take,
+  skip,
+}: {
+  productId: ID;
+  mainPartnerId: ID;
+  client: Client;
+  workspace: Workspace;
+  take: number;
+  skip: number;
+}) {
+  return client.aOSMarketplaceProductVersion.find({
+    take,
+    ...(skip ? {skip} : {}),
+    where: {
+      marketplaceProduct: withMyProductAccessFilter(
+        workspace,
+        mainPartnerId,
+      )({
+        id: productId,
+      }),
+    },
+    orderBy: versionSortOrder,
+    select: {
+      id: true,
+      version: true,
+      ...versionNumberFields,
+      changelog: true,
+      statusSelect: true,
+      publishDateTime: true,
+      bundleFile: {id: true, fileName: true, sizeText: true},
+      compatibilitySet: {
+        select: {id: true, title: true, name: true},
+      },
+      /* No nested `take`: it would LIMIT the batched child query across the
+       * whole page, not per version (goovee-orm#31). Rows are append-only, so
+       * id DESC is newest-first, so `rejectionList[0]` is the latest.
+       * TODO: once goovee-orm#32 ships, ask for `take: 1` here instead. */
+      rejectionList: {
+        select: {id: true, reason: true, rejectionDateTime: true},
+        orderBy: {id: 'DESC'},
+      },
+    },
+  });
+}
+
+/* Single source of truth for `marketplaceProduct.currentVersion` and
+ * `marketplaceProduct.latestVersion`. Call after any
+ * create/status-change/delete.
+ *
+ *   latestVersion  = highest sortkey among non-archived versions
+ *   currentVersion = the same, restricted to PUBLISHED, or null */
+export async function syncProductVersionPointers({
+  client,
+  productId,
+}: {
+  client: Client;
+  productId: ID;
+}): Promise<void> {
+  const [latest, currentPublished, product] = await Promise.all([
+    client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        OR: [{archived: false}, {archived: null}],
+        marketplaceProduct: {id: productId},
+      },
+      orderBy: versionSortOrder,
+      select: {id: true},
+    }),
+    client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        OR: [{archived: false}, {archived: null}],
+        marketplaceProduct: {id: productId},
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+      orderBy: versionSortOrder,
+      select: {id: true},
+    }),
+    client.aOSMarketplaceProduct.findOne({
+      where: {id: productId},
+      select: {
+        id: true,
+        version: true,
+        latestVersion: {id: true},
+        currentVersion: {id: true},
+      },
+    }),
+  ]);
+  if (!product) return;
+
+  const nextLatest = latest?.id ?? null;
+  const nextCurrent = currentPublished?.id ?? null;
+  /* Idempotent: only write when a pointer actually moved, so a version edit that
+   * didn't change any status (e.g. a changelog or compatibility tweak) doesn't
+   * needlessly rewrite — and bump the version of — the product row. */
+  if (
+    (product.latestVersion?.id ?? null) === nextLatest &&
+    (product.currentVersion?.id ?? null) === nextCurrent
+  ) {
+    return;
+  }
+
+  await client.aOSMarketplaceProduct.update({
+    data: {
+      id: product.id,
+      version: product.version,
+      latestVersion: {select: {id: nextLatest}},
+      currentVersion: {select: {id: nextCurrent}},
+    },
+    select: {id: true},
+  });
+}
+
+export type VersionForDownload = NonNullable<
+  Awaited<ReturnType<typeof findVersionForDownload>>
+>;
+
+export async function findVersionForDownload({
+  client,
+  workspace,
+  mainPartnerId,
+  productId,
+  versionId,
+}: {
+  client: Client;
+  workspace: Workspace;
+  mainPartnerId: string | null | undefined;
+  productId: ID;
+  versionId: ID;
+}) {
+  return client.aOSMarketplaceProductVersion.findOne({
+    where: withBundleAccessFilter({
+      workspace,
+      mainPartnerId: mainPartnerId ?? undefined,
+      productId,
+    })({id: versionId}),
+    select: {
+      id: true,
+      bundleFile: {id: true},
+    },
+  });
+}

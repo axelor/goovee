@@ -40,6 +40,8 @@ export const AdditionPopup = ({
     <Dialog open={visible} onOpenChange={onClose}>
       <DialogContent
         style={style}
+        // The title says all there is to say; the rest of the dialog is a form.
+        aria-describedby={undefined}
         className="flex flex-col self-center items-center max-h-[80%] max-w-[50rem] px-0 py-4">
         <DialogTitle>{i18n.t('Create new row')}</DialogTitle>
         <div className="overflow-y-auto">

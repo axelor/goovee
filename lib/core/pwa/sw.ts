@@ -100,18 +100,16 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     /* Locale translations: served from cache instantly, revalidated in the
-     * background on every load. The API route sets ETag + Cache-Control:
+     * background on every load. The API routes set ETag + Cache-Control:
      * no-cache, so the background fetch is a bodyless 304 via the browser
      * HTTP cache unless translations actually changed. Must be listed before
      * defaultCache to override the default NetworkFirst rule for /api/**.
      *
-     * No plugin is passed on purpose. A bundle the route could not complete is
-     * answered 503 carrying the wording it fell back to, so a page renders from
-     * what the server rendered from without that standing in for the held copy.
-     * Only a 200 is held, and the default enforcing that is installed only while
-     * no plugin of this rule's own defines `cacheWillUpdate`. */
+     * Matches both the tenant-scoped route and the one for pages that carry no
+     * tenant — the entry, sign-in and error pages — which are held per
+     * registration like everything else here. */
     {
-      matcher: /\/api\/tenant\/[^/]+\/locales\//,
+      matcher: /\/api\/(tenant\/[^/]+\/)?locales\//,
       handler: new StaleWhileRevalidate({
         cacheName: tenantCacheName('locale-translations'),
       }),

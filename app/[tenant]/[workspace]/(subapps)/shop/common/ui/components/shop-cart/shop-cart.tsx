@@ -14,7 +14,7 @@ import {
 
 import {SUBAPP_CODES, SEARCH_PARAMS} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
@@ -77,7 +77,7 @@ export function ShopCart({
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
   const pathname = usePathname() ?? '';
-  const {cart, removeItem, updateQuantity} = useCart();
+  const {cart, loaded: cartLoaded, removeItem, updateQuantity} = useCart();
   const {data: session} = authClient.useSession();
   const authenticated = !!session?.user?.id;
 
@@ -94,7 +94,14 @@ export function ShopCart({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!cart) return;
+      /* Hold the loading state until the stored cart has been read — an unread
+       * cart is indistinguishable from an empty one. Re-armed rather than just
+       * skipped, because switching workspace puts an already-loaded cart back
+       * into the unread state. */
+      if (!cartLoaded) {
+        if (!cancelled) setLoading(true);
+        return;
+      }
       const items = cart.items ?? [];
       if (!items.length) {
         if (!cancelled) {
@@ -151,7 +158,7 @@ export function ShopCart({
     return () => {
       cancelled = true;
     };
-  }, [cart, workspaceURL, removeItem]);
+  }, [cart, cartLoaded, workspaceURL, removeItem]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])

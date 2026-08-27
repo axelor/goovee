@@ -1,0 +1,4507 @@
+{
+  "$schema": "./seed.schema.json",
+  "categories": [
+    {
+      "code": "PRODUCTIVITY",
+      "name": "Productivity"
+    },
+    {
+      "code": "AI-ML",
+      "name": "AI & Machine Learning"
+    },
+    {
+      "code": "FINANCE",
+      "name": "Finance & Accounting"
+    },
+    {
+      "code": "CRM",
+      "name": "CRM & Sales"
+    },
+    {
+      "code": "LOGISTICS",
+      "name": "Logistics & Supply Chain"
+    },
+    {
+      "code": "HR",
+      "name": "Human Resources"
+    },
+    {
+      "code": "ANALYTICS",
+      "name": "Data & Analytics"
+    },
+    {
+      "code": "DEVELOPER",
+      "name": "Developer Tools"
+    }
+  ],
+  "compatibilityVersions": [
+    {
+      "name": "v8.5.0",
+      "title": "Axelor 8.5.0",
+      "releaseDateTime": "2024-01-15T09:00:00Z"
+    },
+    {
+      "name": "v8.5.5",
+      "title": "Axelor 8.5.5",
+      "releaseDateTime": "2024-05-20T10:00:00Z"
+    },
+    {
+      "name": "v9.0.0",
+      "title": "Axelor 9.0.0",
+      "releaseDateTime": "2024-09-01T08:30:00Z"
+    },
+    {
+      "name": "v9.0.1",
+      "title": "Axelor 9.0.1",
+      "releaseDateTime": "2024-10-15T11:00:00Z"
+    },
+    {
+      "name": "v9.0.5",
+      "title": "Axelor 9.0.5",
+      "releaseDateTime": "2025-01-10T14:00:00Z"
+    },
+    {
+      "name": "v9.0.7",
+      "title": "Axelor 9.0.7",
+      "releaseDateTime": "2025-03-05T12:00:00Z"
+    },
+    {
+      "name": "v9.0.8",
+      "title": "Axelor 9.0.8",
+      "releaseDateTime": "2025-04-12T09:00:00Z"
+    },
+    {
+      "name": "v9.0.9",
+      "title": "Axelor 9.0.9",
+      "releaseDateTime": "2025-05-10T15:00:00Z"
+    },
+    {
+      "name": "v8.4.0",
+      "title": "Axelor 8.4.0",
+      "releaseDateTime": "2024-01-15T10:00:00Z"
+    },
+    {
+      "name": "v8.4.5",
+      "title": "Axelor 8.4.5",
+      "releaseDateTime": "2024-02-20T14:30:00Z"
+    },
+    {
+      "name": "v8.6.0",
+      "title": "Axelor 8.6.0",
+      "releaseDateTime": "2024-04-10T09:00:00Z"
+    },
+    {
+      "name": "v9.0.2",
+      "title": "Axelor 9.0.2",
+      "releaseDateTime": "2024-10-05T11:15:00Z"
+    },
+    {
+      "name": "v9.0.4",
+      "title": "Axelor 9.0.4",
+      "releaseDateTime": "2024-11-18T16:45:00Z"
+    },
+    {
+      "name": "v9.0.6",
+      "title": "Axelor 9.0.6",
+      "releaseDateTime": "2025-01-12T13:20:00Z"
+    }
+  ],
+  "licenses": [
+    {
+      "code": "MIT",
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT",
+      "description": "Permissive license — do anything, just keep the copyright notice.",
+      "isPaid": false,
+      "sequence": 10
+    },
+    {
+      "code": "Apache-2.0",
+      "name": "Apache License 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0",
+      "description": "Permissive license with an explicit patent grant.",
+      "isPaid": false,
+      "sequence": 20
+    },
+    {
+      "code": "BSD-3-Clause",
+      "name": "BSD 3-Clause License",
+      "url": "https://opensource.org/licenses/BSD-3-Clause",
+      "description": "Permissive license with a no-endorsement clause.",
+      "isPaid": false,
+      "sequence": 30
+    },
+    {
+      "code": "ISC",
+      "name": "ISC License",
+      "url": "https://opensource.org/licenses/ISC",
+      "description": "MIT-equivalent permissive license with shorter wording.",
+      "isPaid": false,
+      "sequence": 40
+    },
+    {
+      "code": "MPL-2.0",
+      "name": "Mozilla Public License 2.0",
+      "url": "https://www.mozilla.org/MPL/2.0/",
+      "description": "File-level copyleft — middle ground between permissive and GPL.",
+      "isPaid": false,
+      "sequence": 50
+    },
+    {
+      "code": "LGPL-3.0-only",
+      "name": "GNU Lesser General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/lgpl-3.0.html",
+      "description": "Weak copyleft — friendlier for libraries linked from closed-source code.",
+      "isPaid": false,
+      "sequence": 60
+    },
+    {
+      "code": "GPL-3.0-only",
+      "name": "GNU General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+      "description": "Strong copyleft — derivative works must also be GPL.",
+      "isPaid": false,
+      "sequence": 70
+    },
+    {
+      "code": "AGPL-3.0-only",
+      "name": "GNU Affero General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.html",
+      "description": "Strong copyleft extended to network/SaaS use.",
+      "isPaid": false,
+      "sequence": 80
+    },
+    {
+      "code": "BUSL-1.1",
+      "name": "Business Source License 1.1",
+      "url": "https://mariadb.com/bsl11/",
+      "description": "Source-available — paid for production use until it converts to OSS after N years.",
+      "isPaid": true,
+      "sequence": 90
+    },
+    {
+      "code": "Elastic-2.0",
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license",
+      "description": "Source-available — restricts hosted-service resale and license-key circumvention.",
+      "isPaid": true,
+      "sequence": 100
+    },
+    {
+      "code": "LicenseRef-Proprietary",
+      "name": "Proprietary (EULA)",
+      "description": "Custom end-user license agreement specific to the vendor.",
+      "isPaid": true,
+      "sequence": 110
+    },
+    {
+      "code": "LicenseRef-Commercial",
+      "name": "Commercial subscription",
+      "description": "Paid commercial subscription / SaaS terms of service.",
+      "isPaid": true,
+      "sequence": 120
+    }
+  ],
+  "products": [
+    {
+      "name": "BPM Workflow Generator",
+      "description": "Generate BPMN workflows from a YAML spec — no clicking around in the editor.",
+      "longDescription": "<p>A code-first complement to the BPM Studio. Define your process in a YAML file, run a single command, and the toolkit emits the BPMN XML and registers it against your workflow engine.</p><h3>What it does</h3><ul><li>Compiles YAML process definitions into valid BPMN 2.0 XML.</li><li>Validates against the schema before installing.</li><li>Supports timer events, sub-processes, and inclusive gateways.</li></ul>",
+      "type": "skill",
+      "coverStyle": "gradient-1",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 0,
+      "documentationUrl": "https://docs.example.com/bpm-workflow-generator",
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-09-10T10:00:00Z",
+          "releasedAt": "2024-09-15T15:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Adds support for sub-processes.",
+          "submittedAt": "2025-02-10T11:30:00Z",
+          "releasedAt": "2025-02-14T17:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-03-02T17:00:00Z",
+          "releasedAt": "2025-03-05T17:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-03-16T17:00:00Z",
+          "releasedAt": "2025-03-21T17:00:00Z",
+          "compatibilityVersions": ["v8.6.0", "v9.0.0", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-04-11T17:00:00Z",
+          "releasedAt": "2025-04-12T17:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.david@apollo.fr",
+          "rating": 5,
+          "comment": "Stable and well-documented."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Saves me hours every sprint."
+        }
+      ],
+      "installCount": 97,
+      "supportIssuesUrl": "https://issues.example.com/bpm-workflow-generator",
+      "supportContactUrl": "https://support.example.com/bpm-workflow-generator"
+    },
+    {
+      "name": "AI Sentiment Analyzer",
+      "description": "Automatically detect tone and sentiment in CRM emails and support tickets.",
+      "longDescription": "<p>Leverage local LLMs to categorize incoming communication. Tag tickets as 'Frustrated', 'Happy', or 'Urgent' before a human even reads them.</p><h3>Features</h3><ul><li>Zero-latency processing.</li><li>Customizable sentiment thresholds.</li><li>Dashboard widgets for overall customer health.</li></ul>",
+      "type": "app",
+      "coverStyle": "gradient-2",
+      "categoryCode": "AI-ML",
+      "price": 49.99,
+      "supportIssuesUrl": "https://github.com/example/sentiment/issues",
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "First stable build.",
+          "submittedAt": "2025-01-05T09:00:00Z",
+          "releasedAt": "2025-01-08T10:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-01-08T10:00:00Z",
+          "releasedAt": "2025-01-13T10:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-01-17T10:00:00Z",
+          "releasedAt": "2025-01-18T10:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.6", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-01-22T10:00:00Z",
+          "releasedAt": "2025-01-27T10:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.5.0",
+            "v9.0.4",
+            "v9.0.7",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.2.2",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-02-02T10:00:00Z",
+          "releasedAt": "2025-02-06T10:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.4.5", "v8.5.0", "v9.0.6"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "info@axelor.com",
+          "rating": 5,
+          "comment": "The urgency detection is spot on."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 234
+    },
+    {
+      "name": "Smart Invoice Parser",
+      "description": "Extract data from PDF invoices and auto-create accounting entries.",
+      "longDescription": "<p>Stop manual data entry. This app uses OCR and pattern matching to extract vendor, amount, tax, and line items from any PDF invoice.</p><h3>Why use it?</h3><ul><li>99% accuracy on standard formats.</li><li>Learns from corrections.</li><li>Direct integration with Axelor Accounting.</li></ul>",
+      "type": "app",
+      "coverStyle": "gradient-3",
+      "categoryCode": "FINANCE",
+      "price": 199,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release with basic PDF support.",
+          "submittedAt": "2024-01-05T09:00:00Z",
+          "releasedAt": "2024-01-10T10:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved table extraction logic.",
+          "submittedAt": "2024-03-12T11:00:00Z",
+          "releasedAt": "2024-03-15T14:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Support for multi-page invoices.",
+          "submittedAt": "2024-05-20T10:00:00Z",
+          "releasedAt": "2024-05-25T16:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.3.0",
+          "status": "published",
+          "changelog": "Batch processing performance boost.",
+          "submittedAt": "2024-07-15T09:00:00Z",
+          "releasedAt": "2024-07-18T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.0.0",
+          "status": "published",
+          "changelog": "Major update: AI-powered layout detection.",
+          "submittedAt": "2024-09-05T10:00:00Z",
+          "releasedAt": "2024-09-10T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.0.1",
+          "status": "published",
+          "changelog": "Bugfix for regional date formats.",
+          "submittedAt": "2024-10-10T09:00:00Z",
+          "releasedAt": "2024-10-12T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "2.1.0",
+          "status": "published",
+          "changelog": "Improved OCR engine for handwritten notes.",
+          "submittedAt": "2025-01-05T14:00:00Z",
+          "releasedAt": "2025-01-10T16:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "2.1.1",
+          "status": "published",
+          "changelog": "Small fix for tax calculation on edge cases.",
+          "submittedAt": "2025-02-15T10:00:00Z",
+          "releasedAt": "2025-02-18T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.2.0",
+          "status": "published",
+          "changelog": "Added support for ZUGFeRD and Factur-X formats.",
+          "submittedAt": "2025-03-20T09:00:00Z",
+          "releasedAt": "2025-03-25T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.3.0",
+          "status": "published",
+          "changelog": "Direct integration with Axelor Document Management.",
+          "submittedAt": "2025-04-10T10:00:00Z",
+          "releasedAt": "2025-04-15T15:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "2.4.0",
+          "status": "published",
+          "changelog": "Enhanced security for encrypted PDF files.",
+          "submittedAt": "2025-05-01T09:00:00Z",
+          "releasedAt": "2025-05-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "2.5.0",
+          "status": "draft",
+          "changelog": "WIP: Next generation parser with cloud-sync.",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.4.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-05-25T11:00:00Z",
+          "releasedAt": "2025-05-27T11:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.1"]
+        },
+        {
+          "versionNumber": "2.4.2",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-06-03T11:00:00Z",
+          "releasedAt": "2025-06-08T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5", "v9.0.7"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "a.david@axelor.com",
+          "rating": 5,
+          "comment": "Game changer for our accounting department."
+        },
+        {
+          "authorEmail": "a.girault@axelor.com",
+          "rating": 5
+        },
+        {
+          "authorEmail": "a.sasaki@sasaki-components.com",
+          "rating": 4
+        },
+        {
+          "authorEmail": "a.zhang@top-components.com",
+          "rating": 5,
+          "comment": "Worth every penny."
+        },
+        {
+          "authorEmail": "b.blanc@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Very good, but struggling with some complex layouts."
+        },
+        {
+          "authorEmail": "c.democrm@axelor.com",
+          "rating": 4,
+          "comment": "Solid invoice automation. Handles multiple formats and languages. Integration with our payment system works seamlessly."
+        },
+        {
+          "authorEmail": "c.marchal@axelor.com",
+          "rating": 5
+        },
+        {
+          "authorEmail": "c.sanchez@masson.fr",
+          "rating": 5,
+          "comment": "Incredible accuracy."
+        },
+        {
+          "authorEmail": "e.martinez@tgm-consulting.com",
+          "rating": 5
+        },
+        {
+          "authorEmail": "f.gerard@gerard-solutions.fr",
+          "rating": 4
+        },
+        {
+          "authorEmail": "j.charles@bourgeois-industries.fr",
+          "rating": 5,
+          "comment": "Highly recommended."
+        },
+        {
+          "authorEmail": "j.roger@123-services.fr",
+          "rating": 4,
+          "comment": "Support was very helpful during setup."
+        },
+        {
+          "authorEmail": "k.guillot@esl-banking.fr",
+          "rating": 5
+        },
+        {
+          "authorEmail": "l.richard@axelor.com",
+          "rating": 5,
+          "comment": "Our invoice processing backlog is gone. Vendor management became proactive. Payment terms are automatically calculated and applied."
+        },
+        {
+          "authorEmail": "p.meunier@esl-banking.fr",
+          "rating": 5
+        },
+        {
+          "authorEmail": "r.colin@axelor.com",
+          "rating": 5
+        },
+        {
+          "authorEmail": "s.garcia@tgm-consulting.com",
+          "rating": 4
+        },
+        {
+          "authorEmail": "y.li@silverelec.com",
+          "rating": 5,
+          "comment": "Best in class."
+        },
+        {
+          "authorEmail": "z.arafi@bourgeois-industries.fr",
+          "rating": 5
+        }
+      ],
+      "installCount": 371,
+      "documentationUrl": "https://docs.example.com/smart-invoice-parser",
+      "supportIssuesUrl": "https://issues.example.com/smart-invoice-parser",
+      "supportContactUrl": "https://support.example.com/smart-invoice-parser"
+    },
+    {
+      "name": "Inventory Optimizer",
+      "description": "Predictive stock management to reduce waste and prevent stockouts.",
+      "longDescription": "<p>Uses historical sales data to suggest optimal reorder points. Works across multiple warehouses.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-4",
+      "categoryCode": "LOGISTICS",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "0.9.0",
+          "status": "draft",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        }
+      ],
+      "installCount": 508,
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Very solid plugin. The reporting features are comprehensive and give us the visibility we needed. Only downside is the setup took a bit longer than expected."
+        },
+        {
+          "authorEmail": "j.charles@bourgeois-industries.fr",
+          "rating": 5,
+          "comment": "Worth every cent. We use this daily and it has become indispensable. The automated reorder suggestions alone have saved us from stockouts."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "This tool has fundamentally changed how we manage inventory. The predictive analytics are spot-on and have helped us reduce excess stock by 25%. Integration with our existing workflows was seamless."
+        }
+      ]
+    },
+    {
+      "name": "CRM Gamification",
+      "description": "Boost sales performance with leaderboards, badges, and real-time challenges.",
+      "longDescription": "<p>Turn CRM usage into a friendly competition. Award points for logging calls, updating deals, and closing opportunities.</p>",
+      "type": "app",
+      "coverStyle": "gradient-5",
+      "categoryCode": "CRM",
+      "price": 29.5,
+      "versions": [
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "submittedAt": "2024-11-01T10:00:00Z",
+          "releasedAt": "2024-11-05T12:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-11-09T12:00:00Z",
+          "releasedAt": "2024-11-10T12:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v9.0.5", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-11-24T12:00:00Z",
+          "releasedAt": "2024-11-29T12:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v8.5.5",
+            "v9.0.2",
+            "v9.0.6",
+            "v9.0.9"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "c.democrm@axelor.com",
+          "rating": 5,
+          "comment": "The team loves the new badges!"
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 645,
+      "documentationUrl": "https://docs.example.com/crm-gamification",
+      "supportIssuesUrl": "https://issues.example.com/crm-gamification",
+      "supportContactUrl": "https://support.example.com/crm-gamification"
+    },
+    {
+      "name": "HR Onboarding Toolkit",
+      "description": "Automate the onboarding process for new hires with checklists and auto-emails.",
+      "longDescription": "<p>Create a seamless experience for new employees. Assign tasks to IT, Finance, and Managers automatically.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-6",
+      "categoryCode": "HR",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-05-10T09:00:00Z",
+          "releasedAt": "2024-05-15T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-05-31T11:00:00Z",
+          "releasedAt": "2024-06-02T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.7", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-06-07T11:00:00Z",
+          "releasedAt": "2024-06-12T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.4", "v9.0.5"]
+        }
+      ],
+      "installCount": 782,
+      "reviews": [
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 5,
+          "comment": "Onboarding new employees used to be chaotic with documents scattered everywhere. This toolkit centralizes everything and automates the checklist process completely."
+        },
+        {
+          "authorEmail": "x.masson@masson.fr",
+          "rating": 4,
+          "comment": "Good solution overall. Handles the basics very well, though we had to use some workarounds for our unique approval chains. Support helped us find solutions quickly."
+        },
+        {
+          "authorEmail": "y.marques@axelor.com",
+          "rating": 5,
+          "comment": "The template library is excellent and saves hours of configuration. We customized it for our workflows in under an hour, and employees love the clear onboarding experience."
+        }
+      ]
+    },
+    {
+      "name": "Visual SQL Query Builder",
+      "description": "Build complex SQL queries without writing a single line of code.",
+      "longDescription": "<p>Drag and drop tables, join them visually, and apply filters. Export as SQL or use directly in reports.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-7",
+      "categoryCode": "DEVELOPER",
+      "price": 19,
+      "versions": [
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "submittedAt": "2025-02-15T10:00:00Z",
+          "releasedAt": "2025-02-20T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-02-26T14:00:00Z",
+          "releasedAt": "2025-02-27T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.5.0",
+            "v8.5.5",
+            "v9.0.0",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.3.0",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-03-24T14:00:00Z",
+          "releasedAt": "2025-03-26T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.4", "v9.0.8", "v9.0.9"]
+        }
+      ],
+      "installCount": 919,
+      "reviews": [
+        {
+          "authorEmail": "c.martin@axelor.com",
+          "rating": 5,
+          "comment": "As a developer, this saves me significant time writing queries. The visual interface is clean and does not hide the SQL, so I can still inspect and optimize when needed."
+        },
+        {
+          "authorEmail": "r.costa@axelor.com",
+          "rating": 4,
+          "comment": "Powerful tool for building complex queries without memorizing every syntax rule. Performance has been solid on our 500GB+ datasets. Feature request: saved query templates across the team."
+        },
+        {
+          "authorEmail": "t.lamy@axelor.com",
+          "rating": 5,
+          "comment": "Our non-technical analysts can now pull reports without bothering developers. Training took 30 minutes and they were productive immediately. This has been a game-changer."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/sql-query-builder",
+      "supportIssuesUrl": "https://issues.example.com/sql-query-builder",
+      "supportContactUrl": "https://support.example.com/sql-query-builder"
+    },
+    {
+      "name": "Analytics Dashboard Pro",
+      "description": "High-performance data visualization for your Axelor dashboard.",
+      "longDescription": "<p>Stunning charts and real-time updates for all your key metrics. Supports Drill-down and export to PDF/Excel.</p>",
+      "type": "app",
+      "coverStyle": "gradient-8",
+      "categoryCode": "ANALYTICS",
+      "price": 99,
+      "versions": [
+        {
+          "versionNumber": "3.0.0",
+          "status": "published",
+          "submittedAt": "2025-04-20T11:00:00Z",
+          "releasedAt": "2025-04-25T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "3.0.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-05-19T15:00:00Z",
+          "releasedAt": "2025-05-21T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.6",
+            "v9.0.7",
+            "v9.0.8"
+          ]
+        },
+        {
+          "versionNumber": "3.0.2",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-06-08T15:00:00Z",
+          "releasedAt": "2025-06-13T15:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.2", "v9.0.9"]
+        }
+      ],
+      "installCount": 106,
+      "reviews": [
+        {
+          "authorEmail": "s.garcia@tgm-consulting.com",
+          "rating": 5,
+          "comment": "The customization options are endless. We went from basic KPI displays to advanced trend analysis with forecast overlays. Performance is snappy even with millions of data points."
+        },
+        {
+          "authorEmail": "v.louis@axelor.com",
+          "rating": 5,
+          "comment": "Built a company-wide analytics dashboard in half the time expected. The chart library is extensive and real-time refresh capability keeps executives with current information always available."
+        },
+        {
+          "authorEmail": "z.arafi@bourgeois-industries.fr",
+          "rating": 4,
+          "comment": "Solid enterprise tool. Dashboard creation workflow is smooth, though export features could be more comprehensive. Overall very happy with the investment."
+        }
+      ]
+    },
+    {
+      "name": "Visual Warehouse Mapping",
+      "description": "Manage your stock locations with a 2D/3D map of your warehouse.",
+      "longDescription": "<p>Optimize picking routes and see stock levels by location visually. Integrates with existing inventory modules.</p>",
+      "type": "app",
+      "coverStyle": "gradient-9",
+      "categoryCode": "LOGISTICS",
+      "price": 149,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-12-10T09:00:00Z",
+          "releasedAt": "2024-12-15T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-12-29T11:00:00Z",
+          "releasedAt": "2025-01-03T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.2", "v9.0.6", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-01-08T11:00:00Z",
+          "releasedAt": "2025-01-09T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.5.5",
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.5"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-01-23T11:00:00Z",
+          "releasedAt": "2025-01-28T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.4.5",
+            "v8.6.0",
+            "v9.0.1",
+            "v9.0.2"
+          ]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-02-01T11:00:00Z",
+          "releasedAt": "2025-02-05T11:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.8"]
+        }
+      ],
+      "installCount": 243,
+      "reviews": [
+        {
+          "authorEmail": "a.sasaki@sasaki-components.com",
+          "rating": 5,
+          "comment": "Mobile app integration is fantastic. Our warehouse crew can check optimal paths from their phones. Has genuinely improved operational efficiency and worker satisfaction greatly."
+        },
+        {
+          "authorEmail": "e.martinez@tgm-consulting.com",
+          "rating": 4,
+          "comment": "Great visualization tool with solid fundamentals. The heatmap feature showing high-traffic zones has helped us reorganize layout for efficiency significantly."
+        },
+        {
+          "authorEmail": "k.thompson@tgm-consulting.com",
+          "rating": 5,
+          "comment": "Warehouse operations are completely different now. We can visualize inventory locations, optimize picking routes, and train new staff using the interactive maps effectively."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/warehouse-mapping",
+      "supportIssuesUrl": "https://issues.example.com/warehouse-mapping",
+      "supportContactUrl": "https://support.example.com/warehouse-mapping"
+    },
+    {
+      "name": "Automatic ERP Translator",
+      "description": "Translate your product descriptions and field labels using DeepL or Google Translate.",
+      "longDescription": "<p>Go global instantly. This skill adds a 'Translate' button to all translatable fields in Axelor.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-10",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-03-01T10:00:00Z",
+          "releasedAt": "2024-03-05T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-03-09T14:00:00Z",
+          "releasedAt": "2024-03-11T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.1", "v9.0.2", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-04-03T14:00:00Z",
+          "releasedAt": "2024-04-05T14:00:00Z",
+          "compatibilityVersions": ["v9.0.0", "v9.0.1", "v9.0.2"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-04-28T14:00:00Z",
+          "releasedAt": "2024-05-02T14:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.4", "v9.0.7"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "v.louis@axelor.com",
+          "rating": 4,
+          "comment": "Works well, but needs a DeepL API key."
+        }
+      ],
+      "installCount": 380
+    },
+    {
+      "name": "Custom Report Engine",
+      "description": "Create pixel-perfect PDF reports using HTML/CSS templates.",
+      "longDescription": "<p>Bypass the limitations of standard reporting. Use full HTML/CSS power to design your invoices, quotes, and reports.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-1",
+      "categoryCode": "DEVELOPER",
+      "price": 49,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-06-15T09:00:00Z",
+          "releasedAt": "2024-06-20T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.0.0",
+          "status": "published",
+          "submittedAt": "2025-01-15T10:00:00Z",
+          "releasedAt": "2025-01-20T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.1.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-01-24T15:00:00Z",
+          "releasedAt": "2025-01-26T15:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.5"]
+        },
+        {
+          "versionNumber": "2.1.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-02-03T15:00:00Z",
+          "releasedAt": "2025-02-08T15:00:00Z",
+          "compatibilityVersions": ["v9.0.7", "v9.0.8"]
+        },
+        {
+          "versionNumber": "2.1.2",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-02-09T15:00:00Z",
+          "releasedAt": "2025-02-14T15:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.5.0",
+            "v8.5.5",
+            "v9.0.4",
+            "v9.0.6"
+          ]
+        }
+      ],
+      "installCount": 517,
+      "reviews": [
+        {
+          "authorEmail": "f.gerard@gerard-solutions.fr",
+          "rating": 4,
+          "comment": "The formula engine is powerful but has a learning curve. Once the team got past that, they were able to create sophisticated reports without touching code ever."
+        },
+        {
+          "authorEmail": "j.roger@123-services.fr",
+          "rating": 5,
+          "comment": "Scheduling and distribution features are top-notch. Reports run automatically and land in stakeholders inboxes on time, every time without fail."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/custom-report-engine",
+      "supportIssuesUrl": "https://issues.example.com/custom-report-engine",
+      "supportContactUrl": "https://support.example.com/custom-report-engine"
+    },
+    {
+      "name": "AI Support Chatbot",
+      "description": "Deflect common support queries with an AI-powered chatbot that knows your documentation.",
+      "longDescription": "<p>Integrate directly with your website and CRM. The chatbot uses RAG to answer questions based on your support articles.</p>",
+      "type": "app",
+      "coverStyle": "gradient-2",
+      "categoryCode": "AI-ML",
+      "price": 79,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2025-02-01T09:00:00Z",
+          "releasedAt": "2025-02-05T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-02-19T11:00:00Z",
+          "releasedAt": "2025-02-21T11:00:00Z",
+          "compatibilityVersions": ["v9.0.5", "v9.0.6", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-03-04T11:00:00Z",
+          "releasedAt": "2025-03-09T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.6", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-03-09T11:00:00Z",
+          "releasedAt": "2025-03-14T11:00:00Z",
+          "compatibilityVersions": ["v9.0.0", "v9.0.7", "v9.0.8", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-03-20T11:00:00Z",
+          "releasedAt": "2025-03-24T11:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.7", "v9.0.8"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "a.sasaki@sasaki-components.com",
+          "rating": 4,
+          "comment": "Good conversational AI. Training on domain-specific FAQ improved accuracy significantly."
+        },
+        {
+          "authorEmail": "b.blanc@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good support experience. Bot continues learning from interactions."
+        },
+        {
+          "authorEmail": "c.martin@axelor.com",
+          "rating": 5,
+          "comment": "Natural language understanding is eerily good. Bot learns from corrections. Escalation to human agents is seamless when needed."
+        },
+        {
+          "authorEmail": "contact@silverelec.com",
+          "rating": 4,
+          "comment": "Works reliably. Performance even under load is excellent."
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 5,
+          "comment": "Reduced support ticket backlog dramatically. Team loves not dealing with routine questions anymore."
+        },
+        {
+          "authorEmail": "info@axelor.com",
+          "rating": 5,
+          "comment": "Support automation becomes intelligent and actually helpful. Customer satisfaction scores improved immediately after rollout. The bot handles 70% of inquiries without human intervention."
+        },
+        {
+          "authorEmail": "info@blueberry-telecom.fr",
+          "rating": 5,
+          "comment": "Cost savings from reduced support headcount are significant. ROI within six months of deployment."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "p.meunier@esl-banking.fr",
+          "rating": 5,
+          "comment": "Customer experience improved noticeably. Bot personality is configurable per department."
+        },
+        {
+          "authorEmail": "w.andre@axelor.com",
+          "rating": 5,
+          "comment": "Reduced our ticket volume by 40%."
+        },
+        {
+          "authorEmail": "x.nguyen@gerard-solutions.fr",
+          "rating": 5,
+          "comment": "Deployment was smooth and zero downtime. Support has been responsive to our feature requests."
+        },
+        {
+          "authorEmail": "y.li@silverelec.com",
+          "rating": 5,
+          "comment": "Analytics show exactly which questions are driving support volume. Helped us improve documentation."
+        },
+        {
+          "authorEmail": "y.marques@axelor.com",
+          "rating": 4
+        }
+      ],
+      "installCount": 654
+    },
+    {
+      "name": "Recurring Billing Manager",
+      "description": "Automate subscription invoicing and payment collection.",
+      "longDescription": "<p>Perfect for SaaS or service companies. Define billing cycles, auto-generate invoices, and track failed payments.</p>",
+      "type": "app",
+      "coverStyle": "gradient-3",
+      "categoryCode": "FINANCE",
+      "price": 129,
+      "versions": [
+        {
+          "versionNumber": "1.5.0",
+          "status": "published",
+          "submittedAt": "2024-10-20T10:00:00Z",
+          "releasedAt": "2024-10-25T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.6.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-10-31T14:00:00Z",
+          "releasedAt": "2024-11-02T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.5",
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.4",
+            "v9.0.6"
+          ]
+        },
+        {
+          "versionNumber": "1.7.0",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-11-15T14:00:00Z",
+          "releasedAt": "2024-11-20T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.6.0", "v9.0.0", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.8.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-12-12T14:00:00Z",
+          "releasedAt": "2024-12-15T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v9.0.6", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.8.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-01-03T14:00:00Z",
+          "releasedAt": "2025-01-08T14:00:00Z",
+          "compatibilityVersions": ["v9.0.4", "v9.0.8", "v9.0.9"]
+        }
+      ],
+      "installCount": 791,
+      "reviews": [
+        {
+          "authorEmail": "contact@gerard-solutions.fr",
+          "rating": 4,
+          "comment": "Solid recurring billing solution. Pricing tiers and usage-based billing work well. Request: more granular proration options for mid-cycle changes would help."
+        },
+        {
+          "authorEmail": "l.parker@msn.com",
+          "rating": 5,
+          "comment": "Billing used to be a manual nightmare with spreadsheets and late invoices. This app handles the entire subscription lifecycle including renewals and amendments completely."
+        },
+        {
+          "authorEmail": "s.mitchell@yahoo.com",
+          "rating": 5,
+          "comment": "The customer portal is slick and handles billing inquiries without involving our finance team. Support tickets dropped dramatically after implementation."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/recurring-billing",
+      "supportIssuesUrl": "https://issues.example.com/recurring-billing",
+      "supportContactUrl": "https://support.example.com/recurring-billing"
+    },
+    {
+      "name": "Slack Notifier",
+      "description": "Send Axelor notifications directly to your Slack channels.",
+      "longDescription": "<p>Keep your team updated. Notify Slack when a lead is created, a sale is closed, or a stock level is low.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-4",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-04-10T09:00:00Z",
+          "releasedAt": "2024-04-15T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-05-03T11:00:00Z",
+          "releasedAt": "2024-05-08T11:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.2", "v9.0.5", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-06-04T11:00:00Z",
+          "releasedAt": "2024-06-06T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.5.5",
+            "v8.6.0",
+            "v9.0.0",
+            "v9.0.7"
+          ]
+        }
+      ],
+      "installCount": 928,
+      "reviews": [
+        {
+          "authorEmail": "a.david@axelor.com",
+          "rating": 4,
+          "comment": "Integrates smoothly with existing Slack workflows. Message formatting could be more customizable, but overall very functional and stable for our needs."
+        },
+        {
+          "authorEmail": "c.democrm@axelor.com",
+          "rating": 5,
+          "comment": "The two-way integration is amazing. We can approve orders and respond to notifications right from Slack without switching windows at all."
+        },
+        {
+          "authorEmail": "w.andre@axelor.com",
+          "rating": 5,
+          "comment": "Slack has become our hub for ERP notifications. Instead of checking the system constantly, critical events land in our channels immediately and trigger action."
+        }
+      ]
+    },
+    {
+      "name": "Audit Log Explorer",
+      "description": "A powerful UI for searching and filtering through Axelor audit logs.",
+      "longDescription": "<p>Easily track who changed what and when. Essential for compliance and troubleshooting.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-5",
+      "categoryCode": "DEVELOPER",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-09-20T10:00:00Z",
+          "releasedAt": "2024-09-25T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-10-24T14:00:00Z",
+          "releasedAt": "2024-10-25T14:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v8.6.0", "v9.0.1", "v9.0.5"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-10-29T14:00:00Z",
+          "releasedAt": "2024-11-02T14:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.0", "v9.0.7", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-11-14T14:00:00Z",
+          "releasedAt": "2024-11-19T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5"]
+        }
+      ],
+      "installCount": 115,
+      "reviews": [
+        {
+          "authorEmail": "l.richard@axelor.com",
+          "rating": 5,
+          "comment": "The UI makes searching audit logs enjoyable instead of tedious. We can segment by user, action, timestamp perfectly and find issues immediately."
+        },
+        {
+          "authorEmail": "r.colin@axelor.com",
+          "rating": 4,
+          "comment": "Covers all the bases for audit requirements. Export functionality is solid and integration with our SIEM system works as expected."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/audit-log-viewer",
+      "supportIssuesUrl": "https://issues.example.com/audit-log-viewer",
+      "supportContactUrl": "https://support.example.com/audit-log-viewer"
+    },
+    {
+      "name": "Smart Lead Enrichment",
+      "description": "Automatically find LinkedIn profiles and company data for your CRM leads.",
+      "longDescription": "<p>Save your sales team's time. This app fetches missing data from public APIs based on the lead's email or domain.</p>",
+      "type": "app",
+      "coverStyle": "gradient-6",
+      "categoryCode": "CRM",
+      "price": 49,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2025-03-01T09:00:00Z",
+          "releasedAt": "2025-03-05T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-03-14T11:00:00Z",
+          "releasedAt": "2025-03-19T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.1", "v9.0.2"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-03-29T11:00:00Z",
+          "releasedAt": "2025-04-01T11:00:00Z",
+          "compatibilityVersions": ["v8.6.0", "v9.0.1", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-04-05T11:00:00Z",
+          "releasedAt": "2025-04-07T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v8.5.5",
+            "v8.6.0",
+            "v9.0.0",
+            "v9.0.6"
+          ]
+        }
+      ],
+      "installCount": 252,
+      "reviews": [
+        {
+          "authorEmail": "a.picard@msn.com",
+          "rating": 5,
+          "comment": "Automated lead scoring based on enriched data saves our qualification team hours every day. Machine learning improves with each lead processed systematically."
+        },
+        {
+          "authorEmail": "info@apollo.fr",
+          "rating": 4,
+          "comment": "Good enrichment capability with solid accuracy overall. API integration was clean and straightforward for our needs."
+        },
+        {
+          "authorEmail": "p.meyer@yahoo.com",
+          "rating": 5,
+          "comment": "Lead quality improved dramatically after implementing this tool. The enrichment data is accurate and comes from reputable sources. Sales team closes more deals with better context."
+        }
+      ]
+    },
+    {
+      "name": "IoT Device Connector",
+      "description": "Connect your manufacturing machines and sensors directly to Axelor.",
+      "longDescription": "<p>Track machine uptime, temperature, and performance in real-time. Trigger maintenance alerts automatically.</p>",
+      "type": "app",
+      "coverStyle": "gradient-7",
+      "categoryCode": "LOGISTICS",
+      "price": 299,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-11-15T10:00:00Z",
+          "releasedAt": "2024-11-20T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-12-15T14:00:00Z",
+          "releasedAt": "2024-12-20T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.5.5",
+            "v9.0.1",
+            "v9.0.2",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-01-03T14:00:00Z",
+          "releasedAt": "2025-01-08T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.1",
+            "v9.0.2",
+            "v9.0.7",
+            "v9.0.8",
+            "v9.0.9"
+          ]
+        }
+      ],
+      "installCount": 389,
+      "reviews": [
+        {
+          "authorEmail": "contact@dekimpe-eng.com",
+          "rating": 4,
+          "comment": "Handles MQTT and RESTful devices well. Documentation on custom payload formats could be more thorough overall."
+        },
+        {
+          "authorEmail": "y.li@silverelec.com",
+          "rating": 5,
+          "comment": "Maintenance scheduling improved after implementation significantly. Device anomalies trigger automated alerts and work orders now."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/iot-connector",
+      "supportIssuesUrl": "https://issues.example.com/iot-connector",
+      "supportContactUrl": "https://support.example.com/iot-connector"
+    },
+    {
+      "name": "Mobile Expense Scanner",
+      "description": "Scan receipts with your phone and auto-create expense claims.",
+      "longDescription": "<p>The perfect companion for business travelers. OCR technology extracts amount, date, and merchant automatically.</p>",
+      "type": "app",
+      "coverStyle": "gradient-8",
+      "categoryCode": "FINANCE",
+      "price": 9.99,
+      "versions": [
+        {
+          "versionNumber": "2.0.1",
+          "status": "published",
+          "submittedAt": "2025-04-01T09:00:00Z",
+          "releasedAt": "2025-04-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.0.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-04-26T11:00:00Z",
+          "releasedAt": "2025-04-27T11:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.4", "v9.0.6"]
+        },
+        {
+          "versionNumber": "2.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-04-30T11:00:00Z",
+          "releasedAt": "2025-05-04T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.5.0",
+            "v9.0.5",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "2.2.0",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-05-28T11:00:00Z",
+          "releasedAt": "2025-05-31T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.5",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "2.2.1",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-06-01T11:00:00Z",
+          "releasedAt": "2025-06-06T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.9"
+          ]
+        }
+      ],
+      "installCount": 526,
+      "reviews": [
+        {
+          "authorEmail": "b.blanc@blueberry-telecom.fr",
+          "rating": 5,
+          "comment": "Mobile app is beautiful and intuitive. Even our least tech-savvy staff members submit expenses without issues at all now."
+        },
+        {
+          "authorEmail": "c.wilson@wm-cinetics.com",
+          "rating": 5,
+          "comment": "Expense reporting went from painful to frictionless. Employees snap photos of receipts and the OCR captures everything automatically and accurately."
+        },
+        {
+          "authorEmail": "info@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good mobile-first approach to expense management overall. Integration with accounting system works reliably without problems."
+        }
+      ]
+    },
+    {
+      "name": "Smart Timesheet Reminders",
+      "description": "Automatically nudge employees who haven't filled their timesheets.",
+      "longDescription": "<p>Reduce the monthly struggle of chasing timesheets. Sends personalized emails or Slack messages.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-9",
+      "categoryCode": "HR",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-02-10T10:00:00Z",
+          "releasedAt": "2024-02-15T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-02-19T14:00:00Z",
+          "releasedAt": "2024-02-23T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.5",
+            "v8.6.0",
+            "v9.0.1",
+            "v9.0.5",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-02-27T14:00:00Z",
+          "releasedAt": "2024-02-29T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v9.0.0",
+            "v9.0.5",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-03-25T14:00:00Z",
+          "releasedAt": "2024-03-29T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.0"]
+        },
+        {
+          "versionNumber": "1.2.2",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-04-17T14:00:00Z",
+          "releasedAt": "2024-04-19T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.5.5", "v9.0.4", "v9.0.5"]
+        }
+      ],
+      "installCount": 663,
+      "reviews": [
+        {
+          "authorEmail": "info@bourgeois-industries.fr",
+          "rating": 5,
+          "comment": "Resolves our biggest compliance pain point. All hours are accurately recorded with full audit trail always maintained."
+        },
+        {
+          "authorEmail": "j.charles@bourgeois-industries.fr",
+          "rating": 4,
+          "comment": "Does exactly what it promises. Customizable reminder schedules and escalation paths work great once configured properly."
+        },
+        {
+          "authorEmail": "l.bourgeois@bourgeois-industries.fr",
+          "rating": 5,
+          "comment": "Timesheet submission rates improved from 60% to 98% after deploying this tool. Smart reminders escalate through channels rather than just nagging constantly."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/timesheet-reminder",
+      "supportIssuesUrl": "https://issues.example.com/timesheet-reminder",
+      "supportContactUrl": "https://support.example.com/timesheet-reminder"
+    },
+    {
+      "name": "GDPR Data Anonymizer",
+      "description": "Anonymize sensitive customer data for testing or staging environments.",
+      "longDescription": "<p>Protect your customers' privacy. Replace real names, emails, and phone numbers with realistic dummy data.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-10",
+      "categoryCode": "DEVELOPER",
+      "price": 99,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2025-05-15T10:00:00Z",
+          "releasedAt": "2025-05-18T14:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-05-24T14:00:00Z",
+          "releasedAt": "2025-05-29T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.2", "v9.0.4", "v9.0.5"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-06-23T14:00:00Z",
+          "releasedAt": "2025-06-28T14:00:00Z",
+          "compatibilityVersions": ["v8.6.0", "v9.0.6"]
+        }
+      ],
+      "installCount": 800,
+      "reviews": [
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 4,
+          "comment": "Solid privacy solution. Performance on large datasets is acceptable for our scale."
+        },
+        {
+          "authorEmail": "k.guillot@esl-banking.fr",
+          "rating": 5,
+          "comment": "GDPR compliance became manageable with this tool. Data masking, pseudonymization, and deletion workflows are all automated and fully audited."
+        },
+        {
+          "authorEmail": "p.meunier@esl-banking.fr",
+          "rating": 5,
+          "comment": "Handles complex data relationships elegantly. Deleting a customer cascades through the system correctly and automatically."
+        }
+      ]
+    },
+    {
+      "name": "Coming Soon App",
+      "description": "This product is still in development and only visible to the supplier.",
+      "longDescription": "<p>Exciting features are coming soon. This is a placeholder for a future high-value application.</p>",
+      "type": "app",
+      "coverStyle": "gradient-1",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 499,
+      "versions": [
+        {
+          "versionNumber": "0.1.0",
+          "status": "draft",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        }
+      ],
+      "installCount": 937,
+      "reviews": [
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/draft-product",
+      "supportIssuesUrl": "https://issues.example.com/draft-product",
+      "supportContactUrl": "https://support.example.com/draft-product"
+    },
+    {
+      "name": "Agile Planner",
+      "description": "Manage your projects with Kanban boards and Sprint planning.",
+      "longDescription": "<p>A full-featured project management tool integrated with Axelor Tasks and Projects.</p>",
+      "type": "app",
+      "coverStyle": "gradient-2",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-08-01T09:00:00Z",
+          "releasedAt": "2024-08-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "submittedAt": "2025-01-10T10:00:00Z",
+          "releasedAt": "2025-01-15T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "draft",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-02-08T15:00:00Z",
+          "releasedAt": "2025-02-12T15:00:00Z",
+          "compatibilityVersions": ["v9.0.4", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-03-10T15:00:00Z",
+          "releasedAt": "2025-03-14T15:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.1"]
+        }
+      ],
+      "installCount": 124,
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ]
+    },
+    {
+      "name": "Predictive Sales Forecast",
+      "description": "Use machine learning to predict future sales based on historical trends.",
+      "longDescription": "<p>Gain insights into your future revenue. This skill analyzes your CRM history to provide accurate forecasts.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-3",
+      "categoryCode": "ANALYTICS",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2025-03-10T09:00:00Z",
+          "releasedAt": "2025-03-15T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-04-06T11:00:00Z",
+          "releasedAt": "2025-04-10T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.7", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-05-05T11:00:00Z",
+          "releasedAt": "2025-05-09T11:00:00Z",
+          "compatibilityVersions": ["v8.6.0", "v9.0.1"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-05-14T11:00:00Z",
+          "releasedAt": "2025-05-16T11:00:00Z",
+          "compatibilityVersions": ["v8.6.0", "v9.0.5", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-05-31T11:00:00Z",
+          "releasedAt": "2025-06-04T11:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.6.0"]
+        }
+      ],
+      "installCount": 261,
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Solid forecasting engine with good visualization capabilities. Would benefit from more flexible ensemble model options for advanced cases."
+        },
+        {
+          "authorEmail": "info@apollo.fr",
+          "rating": 5,
+          "comment": "Revenue forecasting accuracy improved to 92% with this tool. Machine learning models adjust to market changes quickly and accurately always."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Drill-down by segment, product, and rep shows exactly where risks and opportunities exist clearly."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/sales-forecast",
+      "supportIssuesUrl": "https://issues.example.com/sales-forecast",
+      "supportContactUrl": "https://support.example.com/sales-forecast"
+    },
+    {
+      "name": "Integrated Email Marketing",
+      "description": "Design and send beautiful email campaigns directly from your CRM.",
+      "longDescription": "<p>No need for external tools. Build your lists, design templates, and track open rates within Axelor.</p>",
+      "type": "app",
+      "coverStyle": "gradient-4",
+      "categoryCode": "CRM",
+      "price": 49,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-07-01T10:00:00Z",
+          "releasedAt": "2024-07-05T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-08-02T14:00:00Z",
+          "releasedAt": "2024-08-04T14:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v9.0.0", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-08-17T14:00:00Z",
+          "releasedAt": "2024-08-18T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.6.0", "v9.0.5"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-09-12T14:00:00Z",
+          "releasedAt": "2024-09-16T14:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.1", "v9.0.6", "v9.0.8"]
+        }
+      ],
+      "installCount": 398,
+      "reviews": [
+        {
+          "authorEmail": "contact@gerard-solutions.fr",
+          "rating": 4,
+          "comment": "Good all-in-one solution. Automation workflows work well. API documentation could be more detailed for advanced integrations required."
+        },
+        {
+          "authorEmail": "f.gerard@gerard-solutions.fr",
+          "rating": 5,
+          "comment": "Template designer is drag-and-drop but does not limit customization. Integration with our CRM is seamless."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ]
+    },
+    {
+      "name": "Global Quick Search",
+      "description": "A lightning-fast search bar that finds anything in your ERP.",
+      "longDescription": "<p>Hit Cmd+K and start typing. Finds products, partners, invoices, and tasks instantly.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-5",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "submittedAt": "2024-12-01T09:00:00Z",
+          "releasedAt": "2024-12-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-12-19T11:00:00Z",
+          "releasedAt": "2024-12-23T11:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.4", "v9.0.7", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-01-08T11:00:00Z",
+          "releasedAt": "2025-01-13T11:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.5"]
+        }
+      ],
+      "installCount": 535,
+      "reviews": [
+        {
+          "authorEmail": "c.democrm@axelor.com",
+          "rating": 4,
+          "comment": "Works reliably and fast. Results relevance is good. Custom index configuration is a bit complex."
+        },
+        {
+          "authorEmail": "info@axelor.com",
+          "rating": 5,
+          "comment": "Finding anything in Axelor is instant now. Global search speeds up daily workflows considerably. Fuzzy matching catches typos perfectly."
+        },
+        {
+          "authorEmail": "k.demoerp@axelor.com",
+          "rating": 5,
+          "comment": "Users love not having to remember exact names anymore. Search suggestions are smart and contextual always."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/quick-search",
+      "supportIssuesUrl": "https://issues.example.com/quick-search",
+      "supportContactUrl": "https://support.example.com/quick-search"
+    },
+    {
+      "name": "Password Policy Manager",
+      "description": "Enforce custom complexity and rotation rules for your Axelor users.",
+      "longDescription": "<p>Enhance your instance security by defining strict password requirements. Set expiry dates, history limits, and mandatory special character counts.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-1",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-03-10T09:00:00Z",
+          "releasedAt": "2024-03-15T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-04-07T11:00:00Z",
+          "releasedAt": "2024-04-08T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-04-30T11:00:00Z",
+          "releasedAt": "2024-05-01T11:00:00Z",
+          "compatibilityVersions": ["v9.0.0", "v9.0.4", "v9.0.5", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-05-28T11:00:00Z",
+          "releasedAt": "2024-05-31T11:00:00Z",
+          "compatibilityVersions": ["v9.0.4", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-06-16T11:00:00Z",
+          "releasedAt": "2024-06-20T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.4",
+            "v9.0.7"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "a.david@axelor.com",
+          "rating": 5,
+          "comment": "Simple and effective for compliance."
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 672
+    },
+    {
+      "name": "PDF Watermarker",
+      "description": "Automatically add 'Draft' or 'Confidential' watermarks to generated reports.",
+      "longDescription": "<p>Protect your documents by overlaying text or image watermarks on any PDF generated by the system. Supports opacity and rotation settings.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-2",
+      "categoryCode": "DEVELOPER",
+      "price": 15,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "First release.",
+          "submittedAt": "2024-05-20T10:00:00Z",
+          "releasedAt": "2024-05-25T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Added support for image watermarks.",
+          "submittedAt": "2025-01-05T09:00:00Z",
+          "releasedAt": "2025-01-10T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-02-06T11:00:00Z",
+          "releasedAt": "2025-02-08T11:00:00Z",
+          "compatibilityVersions": ["v9.0.0", "v9.0.4", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2025-02-25T11:00:00Z",
+          "releasedAt": "2025-03-01T11:00:00Z",
+          "compatibilityVersions": ["v9.0.4", "v9.0.9"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "k.guillot@esl-banking.fr",
+          "rating": 5,
+          "comment": "Exactly what we needed for our internal audit reports."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 809,
+      "documentationUrl": "https://docs.example.com/pdf-watermarker",
+      "supportIssuesUrl": "https://issues.example.com/pdf-watermarker",
+      "supportContactUrl": "https://support.example.com/pdf-watermarker"
+    },
+    {
+      "name": "Live Currency Sync",
+      "description": "Automatically update your exchange rates daily from ECB or OpenExchange.",
+      "longDescription": "<p>Keep your multicurrency accounting accurate without manual data entry. Fetches the latest mid-market rates every night.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-3",
+      "categoryCode": "FINANCE",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "ECB provider support.",
+          "submittedAt": "2024-01-20T09:00:00Z",
+          "releasedAt": "2024-01-25T12:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-02-16T12:00:00Z",
+          "releasedAt": "2024-02-18T12:00:00Z",
+          "compatibilityVersions": ["v9.0.4", "v9.0.6", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-03-08T12:00:00Z",
+          "releasedAt": "2024-03-13T12:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.0", "v9.0.2", "v9.0.5"]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-03-27T12:00:00Z",
+          "releasedAt": "2024-04-01T12:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v9.0.1",
+            "v9.0.6",
+            "v9.0.7",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.1.3",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-04-14T12:00:00Z",
+          "releasedAt": "2024-04-16T12:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v9.0.0"]
+        }
+      ],
+      "installCount": 946,
+      "reviews": [
+        {
+          "authorEmail": "c.sanchez@masson.fr",
+          "rating": 5,
+          "comment": "Multiple currency source support gives us confidence in rate accuracy. Historical data is preserved for audit purposes completely."
+        },
+        {
+          "authorEmail": "contact@masson.fr",
+          "rating": 5,
+          "comment": "Foreign exchange rates now update automatically with zero manual intervention required. Pricing is accurate across all currencies in real-time always."
+        },
+        {
+          "authorEmail": "x.masson@masson.fr",
+          "rating": 4,
+          "comment": "Solid currency management solution. Rate update frequency is configurable for our needs."
+        }
+      ]
+    },
+    {
+      "name": "LinkedIn Contact Sync",
+      "description": "Enrich CRM leads with public LinkedIn data and profile links.",
+      "longDescription": "<p>Save time on prospect research. This skill attempts to find LinkedIn profiles based on email addresses and company domains during lead creation.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-4",
+      "categoryCode": "CRM",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial integration.",
+          "submittedAt": "2024-09-15T10:00:00Z",
+          "releasedAt": "2024-09-20T14:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-10-04T14:00:00Z",
+          "releasedAt": "2024-10-08T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.5",
+            "v9.0.2",
+            "v9.0.5",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-10-20T14:00:00Z",
+          "releasedAt": "2024-10-24T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.6.0",
+            "v9.0.1",
+            "v9.0.2",
+            "v9.0.8"
+          ]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-10-29T14:00:00Z",
+          "releasedAt": "2024-11-01T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.5.5"]
+        },
+        {
+          "versionNumber": "1.1.3",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-11-15T14:00:00Z",
+          "releasedAt": "2024-11-16T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.5", "v9.0.1", "v9.0.8"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "r.colin@axelor.com",
+          "rating": 5
+        },
+        {
+          "authorEmail": "s.garcia@tgm-consulting.com",
+          "rating": 4,
+          "comment": "Works well for 80% of leads."
+        }
+      ],
+      "installCount": 133,
+      "documentationUrl": "https://docs.example.com/linkedin-auto-connector",
+      "supportIssuesUrl": "https://issues.example.com/linkedin-auto-connector",
+      "supportContactUrl": "https://support.example.com/linkedin-auto-connector"
+    },
+    {
+      "name": "Batch Barcode Generator",
+      "description": "Generate and print standard barcodes (EAN-13, QR) for your products.",
+      "longDescription": "<p>A simple tool to generate barcodes directly from the product view. Supports mass generation for inventory labels.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-5",
+      "categoryCode": "LOGISTICS",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Supports EAN-13 and QR Codes.",
+          "submittedAt": "2024-06-01T09:00:00Z",
+          "releasedAt": "2024-06-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-06-06T11:00:00Z",
+          "releasedAt": "2024-06-11T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.4.5",
+            "v8.5.0",
+            "v9.0.2",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-07-02T11:00:00Z",
+          "releasedAt": "2024-07-05T11:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v8.6.0", "v9.0.0", "v9.0.1"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-07-30T11:00:00Z",
+          "releasedAt": "2024-08-04T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.0", "v9.0.5", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2024-08-25T11:00:00Z",
+          "releasedAt": "2024-08-29T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v8.6.0",
+            "v9.0.1",
+            "v9.0.4",
+            "v9.0.6"
+          ]
+        }
+      ],
+      "installCount": 270,
+      "reviews": [
+        {
+          "authorEmail": "contact@123-services.fr",
+          "rating": 5,
+          "comment": "Generating thousands of barcodes used to be a nightmare. Now it is just upload a CSV and download the formatted output. Scanning accuracy is 100%."
+        },
+        {
+          "authorEmail": "t.roy@123-services.fr",
+          "rating": 4,
+          "comment": "Good barcode solution. Supports all formats we need. Documentation is adequate for our purposes."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ]
+    },
+    {
+      "name": "Public Holiday Importer",
+      "description": "Import global public holidays into your HR calendar automatically.",
+      "longDescription": "<p>Supports over 100 countries. Automatically marks holidays as non-working days in the resource planner.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-6",
+      "categoryCode": "HR",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-02-15T10:00:00Z",
+          "releasedAt": "2024-02-20T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-03-14T15:00:00Z",
+          "releasedAt": "2024-03-19T15:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.0", "v9.0.1", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-04-06T15:00:00Z",
+          "releasedAt": "2024-04-07T15:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.6",
+            "v9.0.7"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "e.martinez@tgm-consulting.com",
+          "rating": 5,
+          "comment": "A massive time saver during yearly planning."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 407,
+      "documentationUrl": "https://docs.example.com/holiday-calendar-importer",
+      "supportIssuesUrl": "https://issues.example.com/holiday-calendar-importer",
+      "supportContactUrl": "https://support.example.com/holiday-calendar-importer"
+    },
+    {
+      "name": "Database Health Monitor",
+      "description": "Schedule database maintenance tasks and monitor table bloat.",
+      "longDescription": "<p>A developer utility to keep your PostgreSQL instance performing at its best. Automates VACUUM and ANALYZE tasks during off-peak hours.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-7",
+      "categoryCode": "DEVELOPER",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-11-05T09:00:00Z",
+          "releasedAt": "2024-11-10T12:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-12-03T12:00:00Z",
+          "releasedAt": "2024-12-05T12:00:00Z",
+          "compatibilityVersions": [
+            "v8.6.0",
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.6"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-12-19T12:00:00Z",
+          "releasedAt": "2024-12-24T12:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.5", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-12-28T12:00:00Z",
+          "releasedAt": "2025-01-01T12:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.2", "v9.0.8"]
+        }
+      ],
+      "installCount": 544,
+      "reviews": [
+        {
+          "authorEmail": "d.silva@axelor.com",
+          "rating": 5,
+          "comment": "Database maintenance is now hands-off completely. Scheduled vacuums run automatically and optimize indexes proactively always."
+        },
+        {
+          "authorEmail": "l.richard@axelor.com",
+          "rating": 5,
+          "comment": "Prevents bloat and fragmentation without any manual effort required. Monitoring dashboards show exactly what the scheduler is doing."
+        },
+        {
+          "authorEmail": "r.costa@axelor.com",
+          "rating": 4,
+          "comment": "Reliable maintenance tool. Performance impact during maintenance is minimal always."
+        }
+      ]
+    },
+    {
+      "name": "Jira Ticket Sync",
+      "description": "Link Axelor tasks with Jira issues for seamless engineering coordination.",
+      "longDescription": "<p>Bidirectional sync between Axelor project tasks and Jira issues. Sync status, comments, and time logs automatically.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-8",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 29,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "First stable version.",
+          "submittedAt": "2024-12-10T10:00:00Z",
+          "releasedAt": "2024-12-15T15:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Added time-log sync support.",
+          "submittedAt": "2025-03-20T11:00:00Z",
+          "releasedAt": "2025-03-25T16:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-03-29T16:00:00Z",
+          "releasedAt": "2025-03-31T16:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v8.5.0", "v9.0.1"]
+        },
+        {
+          "versionNumber": "1.2.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-04-28T16:00:00Z",
+          "releasedAt": "2025-04-29T16:00:00Z",
+          "compatibilityVersions": ["v9.0.0", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.2.3",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-05-13T16:00:00Z",
+          "releasedAt": "2025-05-14T16:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v9.0.7"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "f.gerard@gerard-solutions.fr",
+          "rating": 5
+        },
+        {
+          "authorEmail": "j.charles@bourgeois-industries.fr",
+          "rating": 4
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "y.li@silverelec.com",
+          "rating": 5,
+          "comment": "Perfect for bridging the gap between business and dev."
+        }
+      ],
+      "installCount": 681,
+      "documentationUrl": "https://docs.example.com/jira-bridge",
+      "supportIssuesUrl": "https://issues.example.com/jira-bridge",
+      "supportContactUrl": "https://support.example.com/jira-bridge"
+    },
+    {
+      "name": "Geo-CRM Maps",
+      "description": "Visualize your customers and leads on an interactive map.",
+      "longDescription": "<p>See where your customers are concentrated. Filter by turnover, industry, or lead status. Includes basic route optimization for sales reps.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-9",
+      "categoryCode": "CRM",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-04-10T09:00:00Z",
+          "releasedAt": "2024-04-15T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-04-18T11:00:00Z",
+          "releasedAt": "2024-04-23T11:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v8.5.5", "v9.0.0", "v9.0.1"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-05-01T11:00:00Z",
+          "releasedAt": "2024-05-03T11:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.7"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "c.sanchez@masson.fr",
+          "rating": 5,
+          "comment": "Helping our sales team optimize their travel."
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 818
+    },
+    {
+      "name": "Mobile Inventory Assistant",
+      "description": "Simplify your yearly stock take with mobile-friendly forms.",
+      "longDescription": "<p>Optimized for handheld scanners. Allows warehouse staff to quickly update quantities and note discrepancies on the fly.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-10",
+      "categoryCode": "LOGISTICS",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Stable build.",
+          "submittedAt": "2024-10-05T10:00:00Z",
+          "releasedAt": "2024-10-10T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-10-23T14:00:00Z",
+          "releasedAt": "2024-10-25T14:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v8.5.0", "v9.0.6", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-11-08T14:00:00Z",
+          "releasedAt": "2024-11-11T14:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v8.5.5", "v9.0.0", "v9.0.1"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-12-06T14:00:00Z",
+          "releasedAt": "2024-12-07T14:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v9.0.7"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "z.arafi@bourgeois-industries.fr",
+          "rating": 3,
+          "comment": "UI could be a bit cleaner on older devices."
+        }
+      ],
+      "installCount": 955,
+      "documentationUrl": "https://docs.example.com/stock-taking-helper",
+      "supportIssuesUrl": "https://issues.example.com/stock-taking-helper",
+      "supportContactUrl": "https://support.example.com/stock-taking-helper"
+    },
+    {
+      "name": "Review Template Library",
+      "description": "Pre-built templates for annual and quarterly performance reviews.",
+      "longDescription": "<p>Stop starting from scratch. Includes standard templates for engineering, sales, and management roles. Fully customizable.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-1",
+      "categoryCode": "HR",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2025-01-10T09:00:00Z",
+          "releasedAt": "2025-01-15T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-01-25T11:00:00Z",
+          "releasedAt": "2025-01-29T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.0", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-02-21T11:00:00Z",
+          "releasedAt": "2025-02-25T11:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.5", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-03-05T11:00:00Z",
+          "releasedAt": "2025-03-07T11:00:00Z",
+          "compatibilityVersions": ["v9.0.0", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.0.4",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-04-02T11:00:00Z",
+          "releasedAt": "2025-04-05T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.0", "v8.6.0"]
+        }
+      ],
+      "installCount": 142,
+      "reviews": [
+        {
+          "authorEmail": "a.david@axelor.com",
+          "rating": 4,
+          "comment": "Good framework for consistent reviews. Integration with our HRIS was straightforward."
+        },
+        {
+          "authorEmail": "c.democrm@axelor.com",
+          "rating": 5,
+          "comment": "Template customization is simple and intuitive. Workflow automation tracks reviews through approval and feedback cycles."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ]
+    },
+    {
+      "name": "Global Tax Calculator",
+      "description": "Automatically determine correct tax rates based on customer location.",
+      "longDescription": "<p>Handles complex rules for cross-border B2B and B2C transactions. Ensures compliance with regional tax laws automatically.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-2",
+      "categoryCode": "FINANCE",
+      "price": 49,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-03-25T10:00:00Z",
+          "releasedAt": "2024-03-30T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-04-06T14:00:00Z",
+          "releasedAt": "2024-04-07T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-04-18T14:00:00Z",
+          "releasedAt": "2024-04-23T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.7",
+            "v9.0.8"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-05-12T14:00:00Z",
+          "releasedAt": "2024-05-16T14:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.4", "v9.0.8"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "p.meunier@esl-banking.fr",
+          "rating": 5,
+          "comment": "Saved us from several manual calculation errors."
+        }
+      ],
+      "installCount": 279,
+      "documentationUrl": "https://docs.example.com/sales-tax-auto-calc",
+      "supportIssuesUrl": "https://issues.example.com/sales-tax-auto-calc",
+      "supportContactUrl": "https://support.example.com/sales-tax-auto-calc"
+    },
+    {
+      "name": "Advanced JSON Exporter",
+      "description": "Export any record set as a nested JSON for external API consumption.",
+      "longDescription": "<p>Go beyond CSV. Define complex export maps to generate perfectly structured JSON files from your Axelor data.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-3",
+      "categoryCode": "DEVELOPER",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-07-15T09:00:00Z",
+          "releasedAt": "2024-07-20T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-08-03T11:00:00Z",
+          "releasedAt": "2024-08-06T11:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.6.0", "v9.0.2", "v9.0.4"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-09-03T11:00:00Z",
+          "releasedAt": "2024-09-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.6.0",
+            "v9.0.2",
+            "v9.0.5",
+            "v9.0.8"
+          ]
+        }
+      ],
+      "installCount": 416,
+      "reviews": [
+        {
+          "authorEmail": "d.geoffroy@axelor.com",
+          "rating": 5,
+          "comment": "Works with nested relationships perfectly. Bulk exports are fast. Streaming support for large datasets is excellent."
+        },
+        {
+          "authorEmail": "d.maurin@axelor.com",
+          "rating": 4,
+          "comment": "Solid JSON export tool. Transformation language is powerful for advanced needs."
+        },
+        {
+          "authorEmail": "k.demoerp@axelor.com",
+          "rating": 5,
+          "comment": "Exporting complex data structures to JSON is now trivial. Customizable mappings handle our exact schema perfectly."
+        }
+      ]
+    },
+    {
+      "name": "Cloud Image Resizer",
+      "description": "Automatically compress and resize product images upon upload.",
+      "longDescription": "<p>Keep your database lean and your UI fast. Automatically generates thumbnails and optimized WebP versions of all uploaded images.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-4",
+      "categoryCode": "DEVELOPER",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-08-10T10:00:00Z",
+          "releasedAt": "2024-08-15T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-08-19T14:00:00Z",
+          "releasedAt": "2024-08-21T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5", "v9.0.7", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-08-23T14:00:00Z",
+          "releasedAt": "2024-08-28T14:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.2", "v9.0.4", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-09-13T14:00:00Z",
+          "releasedAt": "2024-09-14T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.6.0",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.5"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-10-01T14:00:00Z",
+          "releasedAt": "2024-10-04T14:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v9.0.0"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "a.girault@axelor.com",
+          "rating": 5,
+          "comment": "Reduced our storage costs significantly."
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 553,
+      "documentationUrl": "https://docs.example.com/image-optimizer",
+      "supportIssuesUrl": "https://issues.example.com/image-optimizer",
+      "supportContactUrl": "https://support.example.com/image-optimizer"
+    },
+    {
+      "name": "Ticket Sentiment Tagger",
+      "description": "Lightweight AI to tag support tickets based on tone.",
+      "longDescription": "<p>A simple skill that runs a sentiment analysis on incoming support ticket descriptions. Flags 'Frustrated' or 'Angry' customers for immediate attention.</p>",
+      "type": "skill",
+      "coverStyle": "gradient-5",
+      "categoryCode": "AI-ML",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2025-04-05T09:00:00Z",
+          "releasedAt": "2025-04-10T11:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-05-05T11:00:00Z",
+          "releasedAt": "2025-05-07T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.4.5", "v8.5.0", "v9.0.4"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-05-17T11:00:00Z",
+          "releasedAt": "2025-05-22T11:00:00Z",
+          "compatibilityVersions": ["v8.4.5", "v9.0.0", "v9.0.6", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-06-08T11:00:00Z",
+          "releasedAt": "2025-06-12T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-06-15T11:00:00Z",
+          "releasedAt": "2025-06-20T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.0", "v9.0.4"]
+        }
+      ],
+      "installCount": 690,
+      "reviews": [
+        {
+          "authorEmail": "e.martinez@tgm-consulting.com",
+          "rating": 5,
+          "comment": "Natural language understanding is remarkably accurate. Sarcasm and context are handled well."
+        },
+        {
+          "authorEmail": "k.thompson@tgm-consulting.com",
+          "rating": 4,
+          "comment": "Good sentiment analysis overall. Integration with our ticketing system works correctly."
+        },
+        {
+          "authorEmail": "s.garcia@tgm-consulting.com",
+          "rating": 5,
+          "comment": "Customer feedback analysis became systematic with sentiment tagging. We can track mood trends over time and respond immediately."
+        }
+      ]
+    },
+    {
+      "name": "AI Maintenance Hub",
+      "description": "Predict machine failures before they happen using IoT data.",
+      "longDescription": "<p>Advanced machine learning models analyze sensor data (vibration, temperature, noise) to predict the 'Remaining Useful Life' of your manufacturing assets.</p>",
+      "type": "app",
+      "coverStyle": "gradient-6",
+      "categoryCode": "AI-ML",
+      "price": 199,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "First enterprise release.",
+          "submittedAt": "2024-11-20T10:00:00Z",
+          "releasedAt": "2024-11-25T15:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Added support for multi-sensor correlation.",
+          "submittedAt": "2025-03-05T09:00:00Z",
+          "releasedAt": "2025-03-10T12:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-03-16T12:00:00Z",
+          "releasedAt": "2025-03-17T12:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0"]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-03-20T12:00:00Z",
+          "releasedAt": "2025-03-22T12:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.5"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "b.blanc@blueberry-telecom.fr",
+          "rating": 5
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "j.roger@123-services.fr",
+          "rating": 5,
+          "comment": "Saved us two major breakdowns in the first month."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 827,
+      "documentationUrl": "https://docs.example.com/predictive-maintenance",
+      "supportIssuesUrl": "https://issues.example.com/predictive-maintenance",
+      "supportContactUrl": "https://support.example.com/predictive-maintenance"
+    },
+    {
+      "name": "Smart Asset Tracker",
+      "description": "Real-time location and status tracking for high-value mobile assets.",
+      "longDescription": "<p>Track tools, vehicles, or containers using GPS, BLE, or RFID. Includes geofencing alerts and maintenance scheduling.</p>",
+      "type": "app",
+      "coverStyle": "gradient-7",
+      "categoryCode": "LOGISTICS",
+      "price": 89,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-05-10T09:00:00Z",
+          "releasedAt": "2024-05-15T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-06-12T11:00:00Z",
+          "releasedAt": "2024-06-13T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.5",
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.4",
+            "v9.0.7"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-06-22T11:00:00Z",
+          "releasedAt": "2024-06-24T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.4.5",
+            "v8.5.0",
+            "v9.0.2",
+            "v9.0.5"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "c.marchal@axelor.com",
+          "rating": 4,
+          "comment": "Battery tracking is a great feature."
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 964
+    },
+    {
+      "name": "Payroll Pro Elite",
+      "description": "A comprehensive payroll engine for complex organizational structures.",
+      "longDescription": "<p>Automate calculation of salaries, benefits, and deductions across multiple jurisdictions. Generates pay stubs and tax filings with one click.</p>",
+      "type": "app",
+      "coverStyle": "gradient-8",
+      "categoryCode": "HR",
+      "price": 299,
+      "versions": [
+        {
+          "versionNumber": "2.0.0",
+          "status": "published",
+          "changelog": "Major update for 2025 tax compliance.",
+          "submittedAt": "2024-12-15T10:00:00Z",
+          "releasedAt": "2024-12-20T14:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "2.0.1",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-01-01T14:00:00Z",
+          "releasedAt": "2025-01-06T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.4.5",
+            "v8.5.0",
+            "v9.0.1",
+            "v9.0.6"
+          ]
+        },
+        {
+          "versionNumber": "2.0.2",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-01-28T14:00:00Z",
+          "releasedAt": "2025-01-30T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.5.5", "v9.0.5"]
+        },
+        {
+          "versionNumber": "2.0.3",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-02-19T14:00:00Z",
+          "releasedAt": "2025-02-23T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.5.5",
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.2"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "k.guillot@esl-banking.fr",
+          "rating": 5,
+          "comment": "The most robust payroll app we have used."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 151,
+      "documentationUrl": "https://docs.example.com/automated-payroll-pro",
+      "supportIssuesUrl": "https://issues.example.com/automated-payroll-pro",
+      "supportContactUrl": "https://support.example.com/automated-payroll-pro"
+    },
+    {
+      "name": "Group Consolidation Studio",
+      "description": "Consolidate financial statements across multiple legal entities.",
+      "longDescription": "<p>Handles inter-company eliminations, currency translations, and minority interest calculations. Real-time consolidated reporting for multi-entity groups.</p>",
+      "type": "app",
+      "coverStyle": "gradient-9",
+      "categoryCode": "FINANCE",
+      "price": 499,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-08-01T09:00:00Z",
+          "releasedAt": "2024-08-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-08-21T11:00:00Z",
+          "releasedAt": "2024-08-24T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.5",
+            "v8.5.0",
+            "v8.6.0",
+            "v9.0.7",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-09-15T11:00:00Z",
+          "releasedAt": "2024-09-19T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v9.0.0",
+            "v9.0.2",
+            "v9.0.7",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-10-10T11:00:00Z",
+          "releasedAt": "2024-10-12T11:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v9.0.1", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.3",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-11-05T11:00:00Z",
+          "releasedAt": "2024-11-06T11:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.5.5", "v9.0.1", "v9.0.6"]
+        }
+      ],
+      "installCount": 288,
+      "reviews": [
+        {
+          "authorEmail": "c.martin@axelor.com",
+          "rating": 5,
+          "comment": "Multi-currency consolidation is flawless. Exchange gain or loss calculations are exact. Compliance with IFRS requirements is built in."
+        },
+        {
+          "authorEmail": "info@axelor.com",
+          "rating": 5,
+          "comment": "Group-level financial consolidation used to require external consultants. Now it is fully automated with complete audit trails always maintained."
+        },
+        {
+          "authorEmail": "r.colin@axelor.com",
+          "rating": 4,
+          "comment": "Enterprise consolidation solution that delivers. Performance on large consolidations is respectable."
+        }
+      ]
+    },
+    {
+      "name": "Omnichannel Support Desk",
+      "description": "Manage Email, WhatsApp, and Slack support from a single unified view.",
+      "longDescription": "<p>Don't switch tabs to help your customers. Unified inbox for all communication channels. Includes canned responses and SLA tracking.</p>",
+      "type": "app",
+      "coverStyle": "gradient-10",
+      "categoryCode": "CRM",
+      "price": 79,
+      "versions": [
+        {
+          "versionNumber": "1.5.0",
+          "status": "published",
+          "changelog": "WhatsApp integration added.",
+          "submittedAt": "2025-02-10T10:00:00Z",
+          "releasedAt": "2025-02-15T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.5.1",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2025-03-14T14:00:00Z",
+          "releasedAt": "2025-03-15T14:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v9.0.1", "v9.0.4", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.6.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-04-10T14:00:00Z",
+          "releasedAt": "2025-04-11T14:00:00Z",
+          "compatibilityVersions": [
+            "v8.4.0",
+            "v8.5.0",
+            "v8.6.0",
+            "v9.0.0",
+            "v9.0.1"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.charles@bourgeois-industries.fr",
+          "rating": 5
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 425,
+      "documentationUrl": "https://docs.example.com/omnichannel-support-desk",
+      "supportIssuesUrl": "https://issues.example.com/omnichannel-support-desk",
+      "supportContactUrl": "https://support.example.com/omnichannel-support-desk"
+    },
+    {
+      "name": "Interactive BI Designer",
+      "description": "Drag-and-drop dashboard builder with real-time data streaming.",
+      "longDescription": "<p>Empower your business users to create their own dashboards. Connect to any Axelor model and visualize data with 20+ chart types.</p>",
+      "type": "app",
+      "coverStyle": "gradient-1",
+      "categoryCode": "ANALYTICS",
+      "price": 149,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-03-05T09:00:00Z",
+          "releasedAt": "2024-03-10T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "2.0.0",
+          "status": "published",
+          "changelog": "Added drill-down and filter synchronization.",
+          "submittedAt": "2025-01-20T10:00:00Z",
+          "releasedAt": "2025-01-25T15:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "2.0.1",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2025-02-22T15:00:00Z",
+          "releasedAt": "2025-02-23T15:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.5", "v9.0.6", "v9.0.8"]
+        },
+        {
+          "versionNumber": "2.0.2",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-03-14T15:00:00Z",
+          "releasedAt": "2025-03-16T15:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.5"]
+        },
+        {
+          "versionNumber": "2.0.3",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-04-03T15:00:00Z",
+          "releasedAt": "2025-04-08T15:00:00Z",
+          "compatibilityVersions": ["v8.5.0", "v8.6.0", "v9.0.1", "v9.0.9"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "y.li@silverelec.com",
+          "rating": 5,
+          "comment": "The best BI tool for Axelor by far."
+        }
+      ],
+      "installCount": 562
+    },
+    {
+      "name": "Enterprise Fleet Manager",
+      "description": "Manage vehicle maintenance, fuel logs, and driver assignments.",
+      "longDescription": "<p>Track total cost of ownership for your entire fleet. Automated alerts for insurance renewals and scheduled maintenance.</p>",
+      "type": "app",
+      "coverStyle": "gradient-2",
+      "categoryCode": "LOGISTICS",
+      "price": 129,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-06-15T09:00:00Z",
+          "releasedAt": "2024-06-20T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-07-01T11:00:00Z",
+          "releasedAt": "2024-07-04T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.5",
+            "v9.0.2",
+            "v9.0.4",
+            "v9.0.6",
+            "v9.0.8"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-07-28T11:00:00Z",
+          "releasedAt": "2024-07-31T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2024-08-04T11:00:00Z",
+          "releasedAt": "2024-08-06T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.5", "v9.0.4", "v9.0.6"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "s.garcia@tgm-consulting.com",
+          "rating": 4
+        }
+      ],
+      "installCount": 699,
+      "documentationUrl": "https://docs.example.com/fleet-management-system",
+      "supportIssuesUrl": "https://issues.example.com/fleet-management-system",
+      "supportContactUrl": "https://support.example.com/fleet-management-system"
+    },
+    {
+      "name": "Talent Portal Pro",
+      "description": "A branded career site and ATS integrated directly with Axelor HR.",
+      "longDescription": "<p>Publish job openings with one click. Manage applicants, schedule interviews, and track the hiring pipeline in a single view.</p>",
+      "type": "app",
+      "coverStyle": "gradient-3",
+      "categoryCode": "HR",
+      "price": 0,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-09-01T10:00:00Z",
+          "releasedAt": "2024-09-05T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-09-08T14:00:00Z",
+          "releasedAt": "2024-09-11T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.0",
+            "v9.0.1",
+            "v9.0.4",
+            "v9.0.7",
+            "v9.0.8"
+          ]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-09-28T14:00:00Z",
+          "releasedAt": "2024-10-03T14:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.4", "v9.0.6"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "e.martinez@tgm-consulting.com",
+          "rating": 5,
+          "comment": "Free and powerful. Helped us hire 10 people this month."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 836
+    },
+    {
+      "name": "Property Management Suite",
+      "description": "Manage leases, maintenance requests, and rent collection.",
+      "longDescription": "<p>Ideal for commercial and residential property managers. Integrated with accounting to automate rent invoicing and expense tracking.</p>",
+      "type": "app",
+      "coverStyle": "gradient-4",
+      "categoryCode": "FINANCE",
+      "price": 199,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-11-10T09:00:00Z",
+          "releasedAt": "2024-11-15T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v9.0.1",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2024-11-20T11:00:00Z",
+          "releasedAt": "2024-11-24T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.0",
+            "v9.0.6",
+            "v9.0.7",
+            "v9.0.8",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.1.1",
+          "status": "published",
+          "changelog": "Bug fixes and performance improvements.",
+          "submittedAt": "2024-12-06T11:00:00Z",
+          "releasedAt": "2024-12-09T11:00:00Z",
+          "compatibilityVersions": ["v8.6.0", "v9.0.4", "v9.0.9"]
+        },
+        {
+          "versionNumber": "1.1.2",
+          "status": "published",
+          "changelog": "Enhanced compatibility with latest Axelor versions.",
+          "submittedAt": "2024-12-14T11:00:00Z",
+          "releasedAt": "2024-12-18T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.0",
+            "v8.5.5",
+            "v9.0.1",
+            "v9.0.7",
+            "v9.0.8"
+          ]
+        }
+      ],
+      "installCount": 973,
+      "reviews": [
+        {
+          "authorEmail": "contact@silverelec.com",
+          "rating": 5,
+          "comment": "Managing our multi-location real estate portfolio became centralized and transparent. Lease tracking, maintenance, and occupancy rates are all visible always."
+        },
+        {
+          "authorEmail": "y.li@silverelec.com",
+          "rating": 5,
+          "comment": "Tenant management workflows are smooth. Automated rent collection reminders reduced late payments significantly."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool. Reliable and intuitive interface. Integration was straightforward and support was responsive."
+        },
+        {
+          "authorEmail": "e.rousseau@blueberry-telecom.fr",
+          "rating": 4,
+          "comment": "Good solution. Easy to configure and works well with existing systems."
+        }
+      ],
+      "documentationUrl": "https://docs.example.com/real-estate-manager",
+      "supportIssuesUrl": "https://issues.example.com/real-estate-manager",
+      "supportContactUrl": "https://support.example.com/real-estate-manager"
+    },
+    {
+      "name": "API Gateway Studio",
+      "description": "Build, secure, and monitor custom REST/GraphQL APIs for your Axelor data.",
+      "longDescription": "<p>Visual API designer for developers. Add rate limiting, API key management, and custom transformations to any internal model.</p>",
+      "type": "app",
+      "coverStyle": "gradient-5",
+      "categoryCode": "DEVELOPER",
+      "price": 99,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2025-04-15T10:00:00Z",
+          "releasedAt": "2025-04-20T14:00:00Z",
+          "compatibilityVersions": ["v9.0.9", "v9.0.8", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-04-27T14:00:00Z",
+          "releasedAt": "2025-05-02T14:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.1", "v9.0.2", "v9.0.6"]
+        },
+        {
+          "versionNumber": "1.0.2",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-05-08T14:00:00Z",
+          "releasedAt": "2025-05-13T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.0", "v9.0.2"]
+        },
+        {
+          "versionNumber": "1.0.3",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-05-26T14:00:00Z",
+          "releasedAt": "2025-05-30T14:00:00Z",
+          "compatibilityVersions": ["v9.0.1", "v9.0.6"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "a.girault@axelor.com",
+          "rating": 5,
+          "comment": "Essential tool for modern integrations."
+        },
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        }
+      ],
+      "installCount": 160
+    },
+    {
+      "name": "Voice2Notes AI",
+      "description": "Convert voice memos from sales reps into structured CRM notes.",
+      "longDescription": "<p>Sales reps can dictate their meeting notes on the go. Our AI transcribes and summarizes the audio, tagging relevant contacts and deals automatically.</p>",
+      "type": "app",
+      "coverStyle": "gradient-6",
+      "categoryCode": "AI-ML",
+      "price": 19.99,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2025-05-01T09:00:00Z",
+          "releasedAt": "2025-05-05T11:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v8.5.5"
+          ]
+        },
+        {
+          "versionNumber": "1.0.1",
+          "status": "published",
+          "changelog": "Added new features and enhancements.",
+          "submittedAt": "2025-05-13T11:00:00Z",
+          "releasedAt": "2025-05-17T11:00:00Z",
+          "compatibilityVersions": ["v8.5.5", "v9.0.0", "v9.0.1", "v9.0.8"]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Security patches and minor improvements.",
+          "submittedAt": "2025-05-20T11:00:00Z",
+          "releasedAt": "2025-05-22T11:00:00Z",
+          "compatibilityVersions": ["v9.0.2", "v9.0.5"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2025-06-17T11:00:00Z",
+          "releasedAt": "2025-06-18T11:00:00Z",
+          "compatibilityVersions": [
+            "v8.5.5",
+            "v9.0.2",
+            "v9.0.7",
+            "v9.0.8",
+            "v9.0.9"
+          ]
+        },
+        {
+          "versionNumber": "1.2.1",
+          "status": "published",
+          "changelog": "Added support for new use cases.",
+          "submittedAt": "2025-06-29T11:00:00Z",
+          "releasedAt": "2025-07-03T11:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.6.0", "v9.0.5", "v9.0.9"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "r.colin@axelor.com",
+          "rating": 5,
+          "comment": "Our sales team is actually logging notes now!"
+        }
+      ],
+      "installCount": 297,
+      "documentationUrl": "https://docs.example.com/voice-to-crm-notes",
+      "supportIssuesUrl": "https://issues.example.com/voice-to-crm-notes",
+      "supportContactUrl": "https://support.example.com/voice-to-crm-notes"
+    },
+    {
+      "name": "Portfolio Optimizer",
+      "description": "Manage project resource allocation across your entire company.",
+      "longDescription": "<p>Visualize resource bottlenecks across all active projects. 'What-if' scenarios help you decide which projects to start next based on capacity.</p>",
+      "type": "app",
+      "coverStyle": "gradient-7",
+      "categoryCode": "PRODUCTIVITY",
+      "price": 159,
+      "versions": [
+        {
+          "versionNumber": "1.0.0",
+          "status": "published",
+          "changelog": "Initial release.",
+          "submittedAt": "2024-07-05T10:00:00Z",
+          "releasedAt": "2024-07-10T14:00:00Z",
+          "compatibilityVersions": [
+            "v9.0.9",
+            "v9.0.8",
+            "v9.0.7",
+            "v9.0.6",
+            "v9.0.5",
+            "v9.0.4",
+            "v9.0.2",
+            "v8.6.0"
+          ]
+        },
+        {
+          "versionNumber": "1.1.0",
+          "status": "published",
+          "changelog": "Fixed critical issues and optimized performance.",
+          "submittedAt": "2024-07-28T14:00:00Z",
+          "releasedAt": "2024-07-30T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v8.5.0", "v9.0.1", "v9.0.7"]
+        },
+        {
+          "versionNumber": "1.2.0",
+          "status": "published",
+          "changelog": "Improved stability and user experience.",
+          "submittedAt": "2024-08-15T14:00:00Z",
+          "releasedAt": "2024-08-20T14:00:00Z",
+          "compatibilityVersions": ["v8.4.0", "v9.0.5", "v9.0.7", "v9.0.9"]
+        }
+      ],
+      "reviews": [
+        {
+          "authorEmail": "d.garcia@apollo.fr",
+          "rating": 4,
+          "comment": "Does what it promises perfectly. Good value for the functionality provided. Team adopted it quickly without much training needed."
+        },
+        {
+          "authorEmail": "j.noel@esl-banking.fr",
+          "rating": 5,
+          "comment": "Improved our workflows significantly. Easy to configure and works well with existing systems."
+        },
+        {
+          "authorEmail": "l.michel@apollo.fr",
+          "rating": 5,
+          "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
+        },
+        {
+          "authorEmail": "p.meunier@esl-banking.fr",
+          "rating": 4
+        }
+      ],
+      "installCount": 434
+    }
+  ]
+}

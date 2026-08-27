@@ -6,7 +6,7 @@ import {Link} from '@/ui/components/link';
 import {MdAddShoppingCart, MdCheck} from 'react-icons/md';
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useToast} from '@/ui/hooks';
 import {getProductImageURL} from '@/utils/files';
 import {i18n} from '@/locale';
@@ -50,7 +50,7 @@ export function ShopProductCard({
   displayPrices?: boolean;
 }) {
   const {tenant, workspaceURI} = useWorkspace();
-  const {updateQuantity, getProductQuantity} = useCart();
+  const {loaded: cartLoaded, updateQuantity, getProductQuantity} = useCart();
   const {toast} = useToast();
 
   const p = product?.product ?? product;
@@ -84,7 +84,9 @@ export function ShopProductCard({
     // product detail when the user hits the add-to-cart button.
     e.preventDefault();
     e.stopPropagation();
-    if (hidePriceAndPurchase || !canBuy || adding) return;
+    /* Adding before the stored cart has been read would build the new cart from
+     * an empty one and persist that over what is in storage. */
+    if (hidePriceAndPurchase || !canBuy || adding || !cartLoaded) return;
     setAdding(true);
     try {
       const existing = await getProductQuantity(p.id);
@@ -175,7 +177,7 @@ export function ShopProductCard({
               <button
                 type="button"
                 onClick={handleAdd}
-                disabled={!canBuy || adding}
+                disabled={!canBuy || adding || !cartLoaded}
                 aria-label={justAdded ? addedLabel : addToCartLabel}
                 title={justAdded ? addedLabel : addToCartLabel}
                 className={cn(
@@ -185,7 +187,9 @@ export function ShopProductCard({
                     : justAdded
                       ? 'bg-mint-50 text-mint-700'
                       : 'bg-royal text-white hover:bg-royal-dark',
-                  canBuy && adding && 'opacity-70 cursor-not-allowed',
+                  canBuy &&
+                    (adding || !cartLoaded) &&
+                    'opacity-70 cursor-not-allowed',
                 )}>
                 {justAdded ? (
                   <MdCheck className="text-base" />

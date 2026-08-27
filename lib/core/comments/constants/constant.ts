@@ -1,4 +1,4 @@
-export const MAX_FILE_SIZE = 20000000; // 20 MB
+export const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 /* Maximum number of attachments allowed on a single comment. */
 export const MAX_ATTACHMENTS = 5;

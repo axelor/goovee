@@ -2,5 +2,12 @@
   "name": "AOSFiscalPosition",
   "table": "account_fiscal_position",
   "synchronize": false,
-  "fields": []
+  "fields": [
+    {
+      "type": "OneToMany",
+      "name": "taxEquivList",
+      "target": "AOSTaxEquiv",
+      "mappedBy": "fiscalPosition"
+    }
+  ]
 }

@@ -11,6 +11,12 @@
       "type": "ManyToOne",
       "name": "activeTaxLine",
       "target": "AOSTaxLine"
+    },
+    {
+      "type": "OneToMany",
+      "name": "taxLineList",
+      "target": "AOSTaxLine",
+      "mappedBy": "tax"
     }
   ]
 }

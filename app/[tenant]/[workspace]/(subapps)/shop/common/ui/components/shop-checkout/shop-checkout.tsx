@@ -8,7 +8,7 @@ import {MdAdd, MdArrowBack, MdCheck, MdPlace} from 'react-icons/md';
 
 import {SUBAPP_CODES, ADDRESS_TYPE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
@@ -75,7 +75,7 @@ export function ShopCheckout({
   labels: ShopCheckoutLabels;
 }) {
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
-  const {cart} = useCart();
+  const {cart, loaded: cartLoaded} = useCart();
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
   );
@@ -88,7 +88,14 @@ export function ShopCheckout({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!cart) return;
+      /* Hold the loading state until the stored cart has been read — an unread
+       * cart is indistinguishable from an empty one. Re-armed rather than just
+       * skipped, because switching workspace puts an already-loaded cart back
+       * into the unread state. */
+      if (!cartLoaded) {
+        if (!cancelled) setLoading(true);
+        return;
+      }
       const items = cart.items ?? [];
       if (!items.length) {
         if (!cancelled) {
@@ -132,7 +139,7 @@ export function ShopCheckout({
     return () => {
       cancelled = true;
     };
-  }, [cart, workspaceURL]);
+  }, [cart, cartLoaded, workspaceURL]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])
@@ -448,7 +455,7 @@ function CheckoutAddressPicker({
   noneTitle: string;
   loadingLabel: string;
 }) {
-  const {cart, updateAddress} = useCart();
+  const {cart, loaded: cartLoaded, updateAddress} = useCart();
   const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
@@ -494,7 +501,7 @@ function CheckoutAddressPicker({
   // Stripe redirect — cart still hydrating — clobbered the chosen delivery
   // address with the default.
   useEffect(() => {
-    if (loading || !cart) return;
+    if (loading || !cartLoaded) return;
     if (cartId) {
       setSelectedId(String(cartId));
       return;
@@ -505,7 +512,7 @@ function CheckoutAddressPicker({
       updateAddress({addressType: type, address: initial.id});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, cart, cartId, addresses, defaultAddress]);
+  }, [loading, cartLoaded, cartId, addresses, defaultAddress]);
 
   const selected =
     addresses.find(a => String(a.id) === selectedId) ?? addresses[0] ?? null;

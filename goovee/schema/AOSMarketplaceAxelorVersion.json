@@ -1,0 +1,25 @@
+{
+  "name": "AOSMarketplaceAxelorVersion",
+  "table": "portal_marketplace_axelor_version",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "name",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "title",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "releaseDateTime"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

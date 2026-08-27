@@ -184,10 +184,22 @@ export interface ByteRange {
  * The file is also closed if the request it was opened for goes away. A
  * response whose client has already left is dropped without ever being read,
  * so nothing else would close it.
+ *
+ * `onWholeFileRead` is called once the last byte has been read out of the file,
+ * and not at all if the read fails, is cancelled, or the request goes away
+ * first. It says the server read the file, not that the client received it.
  */
 export function createStream(
   path: string,
-  {signal, range}: {signal: AbortSignal; range?: ByteRange},
+  {
+    signal,
+    range,
+    onWholeFileRead,
+  }: {
+    signal: AbortSignal;
+    range?: ByteRange;
+    onWholeFileRead?: () => void;
+  },
 ): ReadableStream<Uint8Array> {
   const downloadStream = fs.createReadStream(path, range);
 
@@ -209,7 +221,10 @@ export function createStream(
         controller.enqueue(new Uint8Array(chunk));
         if ((controller.desiredSize ?? 1) <= 0) downloadStream.pause();
       });
-      downloadStream.on('end', () => controller.close());
+      downloadStream.on('end', () => {
+        onWholeFileRead?.();
+        controller.close();
+      });
       downloadStream.on('error', (error: NodeJS.ErrnoException) =>
         controller.error(error),
       );
@@ -352,17 +367,24 @@ function bodyFor(
  * lets a document be shown from its beginning while the rest is still on its
  * way, and lets an interrupted transfer resume. A resized image is not: it is
  * small, already held, and sent in one piece.
+ *
+ * `onWholeFileRead` is called only for the answer that hands over the whole
+ * file, so never for a revalidation, a range, a request for the headers alone,
+ * a resized image, or an error. It reports success only, and says the server
+ * read the file, not that the client received it.
  */
 export async function streamFile({
   fileName,
   filePath,
   fileType,
   request,
+  onWholeFileRead,
 }: {
   fileName: string;
   filePath: string;
   fileType: string;
   request: NextRequest;
+  onWholeFileRead?: () => void;
 }) {
   if (!(fileName && filePath && fileType)) {
     return new NextResponse('Bad request', {status: 400});
@@ -533,7 +555,9 @@ export async function streamFile({
     headers.set('content-length', String(stats.size));
 
     return new NextResponse(
-      bodyFor(request, signal => createStream(filePath, {signal})),
+      bodyFor(request, signal =>
+        createStream(filePath, {signal, onWholeFileRead}),
+      ),
       {
         status: 200,
         headers,

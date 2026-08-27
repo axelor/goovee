@@ -1,0 +1,23 @@
+{
+  "name": "AOSMarketplaceDownload",
+  "table": "portal_marketplace_download",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceProduct",
+      "target": "AOSMarketplaceProduct",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "productVersion",
+      "target": "AOSMarketplaceProductVersion"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "partner",
+      "target": "AOSPartner"
+    }
+  ]
+}

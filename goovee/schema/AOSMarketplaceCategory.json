@@ -1,0 +1,28 @@
+{
+  "name": "AOSMarketplaceCategory",
+  "table": "portal_marketplace_category",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "name",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "code"
+    },
+    {
+      "type": "String",
+      "name": "description"
+    },
+    {
+      "type": "Int",
+      "name": "sequence"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

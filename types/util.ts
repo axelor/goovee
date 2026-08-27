@@ -41,6 +41,10 @@ export type DeepPartial<T> = T extends object
     }
   : T;
 
+export type NullableValues<T> = {
+  [K in keyof T]: T[K] | null;
+};
+
 export type JSONPrimitive = string | number | boolean | null | undefined;
 
 export type JSONValue =

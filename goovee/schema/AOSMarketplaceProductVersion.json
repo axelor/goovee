@@ -1,0 +1,75 @@
+{
+  "name": "AOSMarketplaceProductVersion",
+  "table": "portal_marketplace_product_version",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceProduct",
+      "target": "AOSMarketplaceProduct",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "submissionDateTime"
+    },
+    {
+      "type": "DateTime",
+      "name": "approvalDateTime"
+    },
+    {
+      "type": "DateTime",
+      "name": "publishDateTime"
+    },
+    {
+      "type": "Int",
+      "name": "vMajor",
+      "required": true,
+      "default": 0
+    },
+    {
+      "type": "Int",
+      "name": "vMinor",
+      "default": 0
+    },
+    {
+      "type": "Int",
+      "name": "vPatch",
+      "default": 0
+    },
+    {
+      "type": "String",
+      "name": "vPreRelease"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "bundleFile",
+      "target": "AOSMetaFile",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "changelog"
+    },
+    {
+      "type": "String",
+      "name": "statusSelect",
+      "default": "draft"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "compatibilitySet",
+      "target": "AOSMarketplaceAxelorVersion"
+    },
+    {
+      "type": "OneToMany",
+      "name": "rejectionList",
+      "target": "AOSMarketplaceProductVersionRejection",
+      "mappedBy": "marketplaceProductVersion"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

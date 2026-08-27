@@ -418,6 +418,19 @@
     {
       "type": "String",
       "name": "termsOfUseAcceptanceText"
+    },
+    {
+      "type": "Boolean",
+      "name": "allowToPublish"
+    },
+    {
+      "type": "Boolean",
+      "name": "requiresReview"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "defaultProductForMarketplace",
+      "target": "AOSProduct"
     }
   ]
 }

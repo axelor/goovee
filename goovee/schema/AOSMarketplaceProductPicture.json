@@ -1,0 +1,27 @@
+{
+  "name": "AOSMarketplaceProductPicture",
+  "table": "portal_marketplace_product_picture",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceProduct",
+      "target": "AOSMarketplaceProduct",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "picture",
+      "target": "AOSMetaFile",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "sequence"
+    },
+    {
+      "type": "String",
+      "name": "alt"
+    }
+  ]
+}

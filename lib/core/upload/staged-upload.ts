@@ -39,6 +39,11 @@ import {
   MAX_FILE_SIZE as RESOURCE_MAX_FILE_SIZE,
   RESOURCE_DMS_UPLOAD_PURPOSE,
 } from '@/subapps/resources/common/constants';
+import {MAX_BUNDLE_SIZE} from '@/subapps/marketplace/common/ui/components/versions/version-form/validator';
+import {
+  ACCEPTED_IMAGE_TYPES,
+  MAX_IMAGE_SIZE,
+} from '@/subapps/marketplace/common/constants/uploads';
 
 /**
  * Generic, app-agnostic pre-upload mechanism. A file is *staged* before the
@@ -122,6 +127,31 @@ export const UPLOAD_PURPOSES = {
   [RESOURCE_DMS_UPLOAD_PURPOSE]: {
     maxBytes: RESOURCE_MAX_FILE_SIZE,
     ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+  },
+  /*
+   * A `.zip` filename is accepted alongside the zip mimes because some
+   * browsers send octet-stream for `.zip`. The same rule is spelled out in
+   * `BundleDropzone`'s accept attribute, so a change here needs one there.
+   */
+  'marketplace:bundle': {
+    maxBytes: MAX_BUNDLE_SIZE,
+    file: z
+      .file()
+      .refine(
+        file =>
+          file.type === 'application/zip' ||
+          file.type === 'application/x-zip-compressed' ||
+          file.name.toLowerCase().endsWith('.zip'),
+        {error: 'Bundle must be a .zip file'},
+      ),
+  },
+  /* Raster formats only: SVG can carry embedded scripts and external refs, so
+   * accepting user-supplied SVG here would serve an XSS vector. */
+  'marketplace:screenshot': {
+    maxBytes: MAX_IMAGE_SIZE,
+    file: z.file().mime([...ACCEPTED_IMAGE_TYPES], {
+      error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed',
+    }),
   },
 } satisfies Record<string, UploadPolicy>;
 

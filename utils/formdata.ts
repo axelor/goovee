@@ -1,4 +1,4 @@
-import {ZodSchema} from 'zod';
+import {type ZodType, type ZodSafeParseResult} from 'zod';
 
 export function packIntoFormData(data: unknown): FormData {
   const formData = new FormData();
@@ -41,11 +41,15 @@ export function unpackFromFormData(formData: FormData): unknown {
   }
 }
 
-export function zodParseFormData<T>(
-  formData: FormData,
-  schema: ZodSchema<T>,
-): T {
+export function zodParseFormData<T>(formData: FormData, schema: ZodType<T>): T {
   const data = unpackFromFormData(formData);
   const parsed = schema.parse(data);
   return parsed;
+}
+
+export function zodSafeParseFormData<T>(
+  formData: FormData,
+  schema: ZodType<T>,
+): ZodSafeParseResult<T> {
+  return schema.safeParse(unpackFromFormData(formData));
 }

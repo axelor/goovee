@@ -24,7 +24,7 @@ import type {PartnerAddress, PortalAddress} from '@/types';
 import {ADDRESS_TYPE, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
@@ -84,7 +84,7 @@ function Content({
   const {workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
-  const {cart, updateAddress} = useCart();
+  const {cart, loaded: cartLoaded, updateAddress} = useCart();
 
   const isSubAppActive = fromQuotation || fromCheckout;
 
@@ -240,6 +240,11 @@ function Content({
   };
 
   useEffect(() => {
+    /* Only the checkout path seeds itself from the cart, so only it has to wait
+     * for the stored cart to be read. Acting on an unread cart would settle on
+     * "no address chosen" and drop out of the initiating state too early. */
+    if (fromCheckout && !cartLoaded) return;
+
     let invoicingAddress: PortalAddress | null = null,
       deliveryAddress: PortalAddress | null = null;
 
@@ -256,7 +261,7 @@ function Content({
       delivery: deliveryAddress,
     });
     setInitiating(false);
-  }, [fromCheckout, fromQuotation, cart, quotation]);
+  }, [fromCheckout, fromQuotation, cartLoaded, cart, quotation]);
 
   useEffect(() => {
     router.refresh();
@@ -358,7 +363,7 @@ function Content({
 function getLabel(address: PortalAddress | null | undefined): string {
   return (
     address?.addressl2 ||
-    address?.department ||
+    address?.subDepartment ||
     address?.companyName ||
     [address?.firstName, address?.lastName].filter(Boolean).join(' ') ||
     i18n.t('Address')

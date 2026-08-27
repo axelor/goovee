@@ -7,7 +7,7 @@ import {MdChevronRight, MdShoppingCart} from 'react-icons/md';
 
 import {MAIN_PRICE, SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {InnerHTML} from '@/ui/components';
@@ -72,7 +72,7 @@ export function ShopProductDetail({
   displayPrices = false,
 }: ShopProductDetailProps) {
   const {workspaceURI, tenant} = useWorkspace();
-  const {updateQuantity, getProductQuantity} = useCart();
+  const {loaded: cartLoaded, updateQuantity, getProductQuantity} = useCart();
   const {toast} = useToast();
 
   const product = computedProduct?.product;
@@ -144,7 +144,9 @@ export function ShopProductDetail({
   }, [product]);
 
   const handleAdd = async () => {
-    if (!canBuy) return;
+    /* Adding before the stored cart has been read would build the new cart from
+     * an empty one and persist that over what is in storage. */
+    if (!canBuy || !cartLoaded) return;
     if (qty < 1) {
       toast({
         variant: 'destructive',
@@ -370,7 +372,7 @@ export function ShopProductDetail({
                     <button
                       type="button"
                       onClick={handleAdd}
-                      disabled={!canBuy || adding}
+                      disabled={!canBuy || adding || !cartLoaded}
                       className={cn(
                         'flex-1 inline-flex items-center justify-center gap-2 px-[18px] py-3.5 rounded-[11px] text-sm font-bold text-white transition-colors',
                         canBuy

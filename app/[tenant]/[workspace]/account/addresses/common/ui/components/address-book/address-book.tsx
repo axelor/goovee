@@ -39,7 +39,9 @@ type Editing = {
 } | null;
 
 function getLabel(a: PartnerAddress): string {
-  return a?.address?.addressl2 || a?.address?.department || i18n.t('Address');
+  return (
+    a?.address?.addressl2 || a?.address?.subDepartment || i18n.t('Address')
+  );
 }
 
 function getContact(a: PartnerAddress): string {

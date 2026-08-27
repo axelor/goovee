@@ -7,7 +7,7 @@ import {MdOutlineRefresh} from 'react-icons/md';
 // ---- CORE IMPORTS ---- //
 import {Button} from '@/ui/components/button';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
@@ -73,8 +73,17 @@ export default function Content({
   return (
     <>
       <Dialog open>
-        <DialogTitle></DialogTitle>
-        <DialogContent className="space-y-2" hideClose>
+        {/*
+          The address picker carries its own heading, so the dialog title is
+          only there to name the dialog itself.
+        */}
+        <DialogContent
+          className="space-y-2"
+          hideClose
+          aria-describedby={undefined}>
+          <DialogTitle className="sr-only">
+            {i18n.t('Request Quotation')}
+          </DialogTitle>
           {!requestingQuotation ? (
             <>
               <AddressSelection

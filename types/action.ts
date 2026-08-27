@@ -1,7 +1,7 @@
 export type SuccessResponse<T = unknown> = {
   success: true;
   data: T;
-  message?: never;
+  message?: string;
   error?: never;
 };
 

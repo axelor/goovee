@@ -24,6 +24,10 @@
       "type": "ManyToOne",
       "name": "address",
       "target": "AOSAddress"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
     }
   ]
 }

@@ -89,7 +89,8 @@ export default function RootLayout({
   /* The root shell is tenant-agnostic: per-tenant theme and browser variables
    * (Environment) are injected by app/[tenant]/layout.tsx, and the tenant-less
    * auth pages set up their own (app/auth/layout.tsx + per-page Environment).
-   * Locale degrades to a same-origin relative locale fetch when no host is set. */
+   * Translations are always requested from the origin the browser used, so they
+   * need no tenant host here. */
   return (
     <html lang="en">
       <head>

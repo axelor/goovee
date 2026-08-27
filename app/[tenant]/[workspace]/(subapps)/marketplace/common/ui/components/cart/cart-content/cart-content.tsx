@@ -1,0 +1,101 @@
+'use client';
+
+import {Button} from '@/ui/components';
+import {Link} from '@/ui/components/link';
+import {useMarketplaceCart} from '../../../../hooks/use-marketplace-cart';
+import {CartItemCard} from '../cart-item-card';
+
+type Props = {
+  /** Root URL of the marketplace subapp — used to build product links. */
+  marketplaceBase: string;
+  emptyLabel: string;
+  browseLabel: string;
+  subtotalLabel: string;
+  proceedLabel: string;
+  removeLabel: string;
+  /** Where the empty-cart "Browse marketplace" button links to (the
+   *  default listing under the marketplace root). */
+  browseHref: string;
+  checkoutHref: string;
+};
+
+/* Formats at the scale the row was priced with; the symbol trails the
+ * amount. */
+function formatPrice(
+  value: number,
+  scale = 2,
+  currencySymbol: string | null = null,
+) {
+  const amount = value.toLocaleString(undefined, {
+    minimumFractionDigits: scale,
+    maximumFractionDigits: scale,
+  });
+  return currencySymbol ? `${amount} ${currencySymbol}` : amount;
+}
+
+export function CartContent({
+  marketplaceBase,
+  emptyLabel,
+  browseLabel,
+  subtotalLabel,
+  proceedLabel,
+  removeLabel,
+  browseHref,
+  checkoutHref,
+}: Props) {
+  const {cart, loaded, removeItem} = useMarketplaceCart();
+
+  if (!loaded) {
+    return <div className="h-32 rounded-lg bg-ink-50/40 animate-pulse" />;
+  }
+
+  if (cart.items.length === 0) {
+    return (
+      <div className="rounded-lg border border-ink-100 bg-white p-8 text-center">
+        <p className="text-ink-500 mb-4">{emptyLabel}</p>
+        <Button variant="royal" asChild>
+          <Link href={browseHref}>{browseLabel}</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  /* Mixed-currency carts are rejected at checkout, so the first item's
+   * currency is a safe stand-in for the subtotal. */
+  const firstSymbol = cart.items[0]?.currencySymbol ?? undefined;
+  const firstScale = cart.items[0]?.scale ?? 2;
+  const subtotal = cart.items.reduce((sum, item) => sum + item.priceAti, 0);
+
+  return (
+    <div className="space-y-4">
+      <ul className="space-y-3">
+        {cart.items.map(item => {
+          const productHref = `${marketplaceBase}/products/${item.productSlug}`;
+          return (
+            <li key={item.productId}>
+              <CartItemCard
+                item={item}
+                productHref={productHref}
+                formatPrice={formatPrice}
+                onRemove={removeItem}
+                removeLabel={removeLabel}
+              />
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="rounded-lg border border-ink-100 bg-white p-4 flex items-center justify-between">
+        <div className="flex items-baseline gap-3">
+          <span className="text-sm text-ink-500">{subtotalLabel}</span>
+          <span className="text-lg font-semibold">
+            {formatPrice(subtotal, firstScale, firstSymbol)}
+          </span>
+        </div>
+        <Button variant="royal" asChild>
+          <Link href={checkoutHref}>{proceedLabel}</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
