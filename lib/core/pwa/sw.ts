@@ -59,12 +59,12 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     /* Locale translations: served from cache instantly, revalidated in the
-     * background on every load. The API route sets ETag + Cache-Control:
+     * background on every load. The API routes set ETag + Cache-Control:
      * no-cache, so the background fetch is a bodyless 304 via the browser
      * HTTP cache unless translations actually changed. Must be listed before
      * defaultCache to override the default NetworkFirst rule for /api/**. */
     {
-      matcher: /\/api\/tenant\/[^/]+\/locales\//,
+      matcher: /\/api\/(tenant\/[^/]+\/)?locales\//,
       handler: new StaleWhileRevalidate({
         cacheName: 'locale-translations',
       }),
