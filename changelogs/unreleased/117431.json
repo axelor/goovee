@@ -1,0 +1,6 @@
+{
+  "title": "Lighter images, and accessibility improvements",
+  "type": "fix",
+  "description": "The default banner is 25 times smaller. Vector images are requested once rather than at several widths. The footer logo appears with the rest of the page instead of after it. The Keycloak sign-in icon keeps its proportions, whatever icon is configured. Several dialogs are more accessible to a screen reader.",
+  "scope": ["core"]
+}
