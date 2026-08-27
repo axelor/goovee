@@ -23,14 +23,14 @@
     "directory:seed": "node -r @swc-node/register $npm_package_scripts_directory_common_dir/scripts/seed/run.ts",
     "directory:reset": "node -r @swc-node/register $npm_package_scripts_directory_common_dir/scripts/seed/reset.ts",
     "addresses:geocode": "node -r @swc-node/register ./scripts/addresses/geocode.ts",
-    "changelogs:validate": "node ./changelogs/validate",
-    "changelogs:generate": "node ./changelogs/generate",
-    "prepare:bump": "node ./scripts/prepare-bump.js",
-    "prepare:release": "node ./scripts/prepare-release.js",
+    "changelogs:validate": "node -r @swc-node/register ./changelogs/validate.ts",
+    "changelogs:generate": "node -r @swc-node/register ./changelogs/generate.ts",
+    "release:bump": "node -r @swc-node/register ./scripts/prepare-bump.ts",
+    "release:prepare": "node -r @swc-node/register ./scripts/prepare-release.ts",
     "analyze": "next experimental-analyze",
     "missing-tr": "node scripts/missing-translation.mjs",
     "sort-tr": "node scripts/sort-translations.mjs",
-    "release": "node scripts/release.js"
+    "release": "node -r @swc-node/register ./scripts/release.ts"
   },
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.17.1",
