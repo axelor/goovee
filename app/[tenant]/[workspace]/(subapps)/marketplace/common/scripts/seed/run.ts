@@ -3,10 +3,10 @@ import '@/load-swc-env';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {findWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import * as out from '@/scripts/lib/output';
+import {runTenantScript, type TenantHandle} from '@/scripts/lib/tenant-script';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {parseArgs} from 'node:util';
 import {getMarketplaceConfig, resolveNewListingCurrency} from '../../orm';
 import {slugify} from '../../utils/slugify';
 import {hash} from '../../utils/string';
@@ -29,70 +29,59 @@ import {
   type WorkspaceContext,
 } from './upsert';
 import {validateCrossFieldRules} from './validate';
-import {SeedSchema} from './validators';
+import {SeedSchema, type SeedData} from './validators';
 
-/* `pnpm <script> -- --flag` forwards a bare `--` as its own argv token,
- * which `parseArgs` then treats as the positional separator. Strip it
- * so both `pnpm marketplace:seed --help` and the pnpm-conventional
- * `pnpm marketplace:seed -- --help` work the same way. */
-const args = process.argv.slice(2).filter(arg => arg !== '--');
+type Values = {
+  workspace?: string;
+  suppliers?: string;
+  file?: string;
+  validate?: boolean;
+};
 
-const {values} = parseArgs({
-  args,
-  options: {
-    tenant: {type: 'string'},
-    workspace: {type: 'string'},
-    suppliers: {type: 'string'},
-    file: {type: 'string'},
-    validate: {type: 'boolean'},
-    help: {type: 'boolean'},
-  },
-  strict: true,
-  allowPositionals: false,
-});
+/* What the seed needs beyond the tenant: the file it was given, already read
+ * and checked, and the two arguments it cannot run without. */
+type MarketplaceSeed = TenantHandle & {
+  data: SeedData;
+  workspaceURL: string;
+  suppliersInput: string;
+};
 
-if (values.help) {
-  console.log(`
-Marketplace Seeder
+const DEFAULT_SEED_FILE = path.resolve(__dirname, 'seed.json');
 
-Usage:
-  pnpm marketplace:seed [options]
+const MISSING_WORKSPACE = '--workspace=<url> is required.';
+const MISSING_SUPPLIERS = '--suppliers=<email1,email2,...> is required.';
 
-Options:
-  --tenant <id>         Tenant ID (defaults to 'd' unless MULTI_TENANCY=true)
-  --workspace <url>     Workspace URL (required for seeding)
-  --suppliers <emails>  Comma-separated supplier emails; each must be a
-                        customer partner (required for seeding). Re-running
-                        with the same list in the same order keeps every
-                        product's owner; a product's own supplierEmail wins
-                        over the assignment.
-  --file <path>         Path to seed.json (defaults to local seed.json)
-  --validate            Run only validation (schema + cross-field rules);
-                        makes no database connection
-  --help                Show this help message
+async function loadSeed(file: string | undefined): Promise<SeedData> {
+  const seedFile = file ?? DEFAULT_SEED_FILE;
 
-Example:
-  pnpm marketplace:seed \\
-    --tenant d \\
-    --workspace http://localhost:3000/d/atlas-clients \\
-    --suppliers info@apollo.fr,info@blueberry-telecom.fr
-`);
-  process.exit(0);
+  let raw: unknown;
+  try {
+    raw = JSON.parse(await fs.readFile(seedFile, 'utf8'));
+  } catch (error) {
+    out.fail(
+      `Could not read seed file '${seedFile}': ${out.describeFailure(error)}`,
+    );
+  }
+
+  const parsed = SeedSchema.safeParse(raw);
+  if (!parsed.success) {
+    console.error(parsed.error.issues);
+    out.fail(`Seed file '${seedFile}' failed schema validation.`);
+  }
+
+  /* A rule violation is a problem with the file, not a fault to report with a
+   * stack trace. */
+  try {
+    validateCrossFieldRules(parsed.data);
+  } catch (error) {
+    out.fail(out.describeFailure(error));
+  }
+
+  return parsed.data;
 }
 
-const tenantId =
-  values.tenant ?? (process.env.MULTI_TENANCY === 'true' ? undefined : 'd');
-const workspaceURL = values.workspace;
-const suppliersInput = values.suppliers;
-const seedFile = values.file ?? path.resolve(__dirname, 'seed.json');
-
-function fail(message: string): never {
-  console.error(`\x1b[31m✖ ${message}\x1b[0m`);
-  process.exit(1);
-}
-
-const GREEN = (text: string) => `\x1b[32m${text}\x1b[0m`;
-const YELLOW = (text: string) => `\x1b[33m${text}\x1b[0m`;
+const TICK = `${out.GREEN}✓${out.RESET}`;
+const ALERT = `${out.YELLOW}!${out.RESET}`;
 
 function grantOutcomeLine(
   label: string,
@@ -100,17 +89,17 @@ function grantOutcomeLine(
 ): string {
   switch (outcome) {
     case 'granted':
-      return `${GREEN('✓')} publisher access ${label}`;
+      return `${TICK} publisher access ${label}`;
     case 'already-granted':
-      return `${GREEN('✓')} publisher access ${label} (already granted)`;
+      return `${TICK} publisher access ${label} (already granted)`;
     case 're-approved':
-      return `${GREEN('✓')} publisher access ${label} (re-approved a seeded request that had been declined)`;
+      return `${TICK} publisher access ${label} (re-approved a seeded request that had been declined)`;
     case 'left-banned':
-      return `${YELLOW('!')} ${label} is banned from publishing here — left banned, so these listings stay unmanageable`;
+      return `${ALERT} ${label} is banned from publishing here — left banned, so these listings stay unmanageable`;
     case 'left-approved':
-      return `${GREEN('✓')} publisher access ${label} (granted outside the seeder, left untouched)`;
+      return `${TICK} publisher access ${label} (granted outside the seeder, left untouched)`;
     case 'left-blocked':
-      return `${YELLOW('!')} ${label} has a publisher request nobody seeded that does not grant access — left untouched, so these listings stay unmanageable`;
+      return `${ALERT} ${label} has a publisher request nobody seeded that does not grant access — left untouched, so these listings stay unmanageable`;
   }
 }
 
@@ -149,7 +138,7 @@ async function reportPublisherReachability({
     );
     if (!workspace || !subapp) {
       console.log(
-        `  ${YELLOW('!')} ${label} cannot reach the marketplace in this workspace — they will not see these listings until they are a member with the app enabled`,
+        `  ${ALERT} ${label} cannot reach the marketplace in this workspace — they will not see these listings until they are a member with the app enabled`,
       );
       continue;
     }
@@ -157,53 +146,28 @@ async function reportPublisherReachability({
     const config = await getMarketplaceConfig(workspace.config.id, client);
     if (config?.allowToPublish !== true) {
       console.log(
-        `  ${YELLOW('!')} publishing is switched off for ${label} here — their grant cannot be used until "allow to publish" is on for their workspace membership`,
+        `  ${ALERT} publishing is switched off for ${label} here — their grant cannot be used until "allow to publish" is on for their workspace membership`,
       );
     }
   }
 }
 
-if (!values.validate) {
-  if (!tenantId) fail('--tenant is required (or set MULTI_TENANCY=false).');
-  if (!workspaceURL) fail('--workspace=<url> is required.');
-  if (!suppliersInput) fail('--suppliers=<email1,email2,...> is required.');
-}
-
-async function main() {
-  let raw: unknown;
-  try {
-    raw = JSON.parse(await fs.readFile(seedFile, 'utf8'));
-  } catch (err) {
-    fail(`Could not read seed file '${seedFile}': ${(err as Error).message}`);
-  }
-
-  const parsed = SeedSchema.safeParse(raw);
-  if (!parsed.success) {
-    console.error('\x1b[31m✖ Seed file failed schema validation:\x1b[0m');
-    console.error(parsed.error.issues);
-    process.exit(1);
-  }
-  const data = parsed.data;
-  validateCrossFieldRules(data);
-
-  if (values.validate) {
-    console.log(
-      '\x1b[32m✔ Seed file is valid (schema + cross-field rules).\x1b[0m',
-    );
-    process.exit(0);
-  }
-
-  const tenant = await manager.getTenant(tenantId!);
-  if (!tenant) fail(`Tenant '${tenantId}' not found.`);
-  const {client, config} = tenant;
+async function seedMarketplace({
+  client,
+  config,
+  tenantId,
+  data,
+  workspaceURL,
+  suppliersInput,
+}: MarketplaceSeed) {
   const storage = config.aos.storage;
   const publicRoot = path.resolve(process.cwd(), 'public');
 
-  console.log(
-    `\x1b[36m→ Tenant=${tenantId} workspace=${workspaceURL} suppliers=${suppliersInput}\x1b[0m`,
+  out.note(
+    `Tenant=${tenantId} workspace=${workspaceURL} suppliers=${suppliersInput}`,
   );
-  console.log(
-    `\x1b[36m→ ${data.categories?.length ?? 0} categories, ${data.compatibilityVersions?.length ?? 0} compat versions, ${data.products.length} products\x1b[0m`,
+  out.note(
+    `${data.categories?.length ?? 0} categories, ${data.compatibilityVersions?.length ?? 0} compat versions, ${data.products.length} products`,
   );
 
   /* Every publisher the run gave a listing to, by the label to report them
@@ -211,16 +175,16 @@ async function main() {
   const seededPublishers = new Map<string, string>();
 
   await client.$transaction(async txClient => {
-    const workspace = await findWorkspaceByUrl(txClient, workspaceURL!);
+    const workspace = await findWorkspaceByUrl(txClient, workspaceURL);
 
     /* Parse and validate all suppliers */
-    const supplierEmails = suppliersInput!.split(',').map(s => s.trim());
+    const supplierEmails = suppliersInput.split(',').map(s => s.trim());
     const suppliers = await Promise.all(
       supplierEmails.map(email => findCustomerPartnerByEmail(txClient, email)),
     );
 
-    console.log(
-      `\x1b[36m→ ${suppliers.length} suppliers: ${suppliers.map(s => s.name).join(', ')}\x1b[0m`,
+    out.note(
+      `${suppliers.length} suppliers: ${suppliers.map(s => s.name).join(', ')}`,
     );
 
     /* Price each seeded listing in the currency the app would give a listing
@@ -274,17 +238,17 @@ async function main() {
 
     for (const category of data.categories ?? []) {
       const row = await upsertCategory(txClient, category, ctx.workspaceId);
-      console.log(`  \x1b[32m✓\x1b[0m category ${row.code}`);
+      console.log(`  ${TICK} category ${row.code}`);
     }
 
     for (const version of data.compatibilityVersions ?? []) {
       const row = await upsertCompatibilityVersion(txClient, version);
-      console.log(`  \x1b[32m✓\x1b[0m compatibility ${row.name}`);
+      console.log(`  ${TICK} compatibility ${row.name}`);
     }
 
     for (const license of data.licenses ?? []) {
       const row = await upsertLicense(txClient, license);
-      console.log(`  \x1b[32m✓\x1b[0m license ${row.code}`);
+      console.log(`  ${TICK} license ${row.code}`);
     }
 
     /* The shared screenshot files are written to storage once. Each product
@@ -381,7 +345,7 @@ async function main() {
 
       const ownerLabel = seededPublishers.get(supplierPartnerId);
       console.log(
-        `  ${GREEN('✓')} product ${demoKey(slugify(product.name))} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${ownerLabel}`,
+        `  ${TICK} product ${demoKey(slugify(product.name))} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${ownerLabel}`,
       );
     }
 
@@ -405,23 +369,69 @@ async function main() {
   try {
     await reportPublisherReachability({
       client,
-      workspaceURL: workspaceURL!,
+      workspaceURL,
       publishers: seededPublishers,
     });
   } catch (err) {
     console.log(
-      `  ${YELLOW('!')} could not check what these publishers will reach: ${(err as Error).message}`,
+      `  ${ALERT} could not check what these publishers will reach: ${out.describeFailure(err)}`,
     );
   }
 
-  console.log('\x1b[32m🔥 Success — marketplace seed applied.\x1b[0m');
+  out.ok('Marketplace seed applied.');
 }
 
-main().catch(err => {
-  if (err?.name === 'SeedLookupError' || err?.name === 'SeedValidationError') {
-    console.error(`\x1b[31m✖ ${err.message}\x1b[0m`);
-  } else {
-    console.error(err);
-  }
-  process.exit(1);
+runTenantScript<Values>({
+  command: 'pnpm marketplace:seed',
+  title: 'Marketplace seeder',
+  summary: `Seeds marketplace categories, licences, compatibility versions and
+listings, assigning the listings to the given suppliers and granting each of
+them the publisher access the storefront checks.
+
+Example:
+  pnpm marketplace:seed --tenant=d \\
+    --workspace=http://localhost:3000/d/atlas-clients \\
+    --suppliers=info@apollo.fr,info@blueberry-telecom.fr`,
+  options: command =>
+    command
+      .option('--workspace <url>', 'Workspace URL (required for seeding)')
+      .option(
+        '--suppliers <emails>',
+        "Comma-separated supplier emails; each must be a customer partner (required for seeding). Re-running with the same list in the same order keeps every product's owner; a product's own supplierEmail wins over the assignment",
+      )
+      .option(
+        '--file <path>',
+        'Path to seed.json (defaults to the one beside this script)',
+      )
+      .option(
+        '--validate',
+        'Validate the seed file and stop, without opening a database connection',
+      ),
+  /* A partner or workspace the seed file names but the tenant does not have is
+   * a problem with the inputs, not a fault to report with a stack trace. */
+  explain: error =>
+    error instanceof Error &&
+    (error.name === 'SeedLookupError' || error.name === 'SeedValidationError')
+      ? error.message
+      : undefined,
+  run: async ({values, openTenant}) => {
+    const data = await loadSeed(values.file);
+
+    if (values.validate) {
+      out.ok('Seed file is valid (schema + cross-field rules).');
+      return;
+    }
+
+    /* Checked before anything is opened, so a missing argument costs nothing:
+     * the seed writes files as well as rows. */
+    const workspaceURL = values.workspace ?? out.fail(MISSING_WORKSPACE);
+    const suppliersInput = values.suppliers ?? out.fail(MISSING_SUPPLIERS);
+
+    await seedMarketplace({
+      ...(await openTenant()),
+      data,
+      workspaceURL,
+      suppliersInput,
+    });
+  },
 });

@@ -44,16 +44,17 @@
  * dimension (product, company, partner, currency, unit, quantity, basis, config)
  * is a CLI flag; with none it sweeps sensible defaults.
  *
- * Run:  pnpm test-price -- --help
+ * Run:  pnpm pricing:compare --help
  */
 import '@/load-swc-env';
 
 import axios from 'axios';
-import {parseArgs} from 'node:util';
+import {explainHttpFailure} from '@/scripts/lib/http';
+import * as out from '@/scripts/lib/output';
+import {runTenantScript, type TenantHandle} from '@/scripts/lib/tenant-script';
 import {BigDecimal} from '@goovee/orm';
+import {InvalidArgumentError} from 'commander';
 
-import {DEFAULT_TENANT} from '@/constants';
-import {manager} from '@/tenant';
 import {getAOSAuthHeaders} from '@/tenant/auth';
 
 import {
@@ -83,12 +84,9 @@ import {
   type PriceProduct,
 } from './orm';
 
-const GREEN = '\x1b[32m';
-const RED = '\x1b[31m';
-const DIM = '\x1b[90m';
-const CYAN = '\x1b[36m';
-const BOLD = '\x1b[1m';
-const RESET = '\x1b[0m';
+/* Named locally because the tables below interpolate them a line at a time;
+ * everything else in this script goes through `out`. */
+const {BOLD, CYAN, DIM, GREEN, RED, RESET, YELLOW} = out;
 
 /* The default target currencies (ISO codes) the sweep prices into. A spread
  * that exercises conversion and the error path: EUR (base, rate 1), GBP/CHF
@@ -104,32 +102,23 @@ type AosPriceEntry = {
   errorMessage?: string;
 };
 
-const {values} = parseArgs({
-  args: process.argv.slice(2).filter(a => a !== '--'),
-  options: {
-    tenant: {type: 'string'},
-    product: {type: 'string', multiple: true},
-    partner: {type: 'string', multiple: true},
-    company: {type: 'string', multiple: true},
-    currency: {type: 'string', multiple: true},
-    unit: {type: 'string', multiple: true},
-    qty: {type: 'string', multiple: true},
-    limit: {type: 'string'},
-    'all-products': {type: 'boolean'},
-    'all-partners': {type: 'boolean'},
-    'sweep-config': {type: 'boolean'},
-    'ati-primary': {type: 'boolean'},
-    'wt-primary': {type: 'boolean'},
-    verbose: {type: 'boolean'},
-    help: {type: 'boolean'},
-  },
-  strict: true,
-  allowPositionals: false,
-});
+type Values = {
+  product?: string[];
+  partner?: string[];
+  company?: string[];
+  currency?: string[];
+  unit?: string[];
+  qty?: BigDecimal[];
+  limit?: number;
+  allProducts?: boolean;
+  allPartners?: boolean;
+  sweepConfig?: boolean;
+  atiPrimary?: boolean;
+  wtPrimary?: boolean;
+  verbose?: boolean;
+};
 
-if (values.help) {
-  console.log(`
-Product price-parity test — scores each product across three prices:
+const SUMMARY = `Product price-parity test — scores each product across three prices:
   gv  goovee invoice price (quoteProductPrice)
   so  the TRUE AOS sale-order / invoice line price (product onchange action,
       computed on a transient line — NO order is persisted)
@@ -145,41 +134,7 @@ exchange rate (to show the error path): ${DEFAULT_CURRENCIES.join(', ')} — and
 BOTH tax-basis orientations, since a line rounds its primary basis and derives
 the other, so the two are separate code paths with separate answers. Quantity 1,
 the product's own unit, and the pricing config as it stands, unless asked
-otherwise.
-
-Usage:
-  pnpm test-price [-- <options>]
-
-Options:
-  --product <id>     Product id (repeatable). Default: all sellable products.
-  --company <id>     Selling company id (repeatable). Default: all companies.
-  --partner <id>     Buyer partner id (repeatable). Default: one per
-                     (fiscalPosition, currency, priceList) + none.
-  --currency <c>     Target currency code or id (repeatable). Override the
-                     default curated set above.
-  --unit <id>        ALSO quote every product in this unit id (repeatable). The
-                     product's own sale unit is always swept, so each --unit adds
-                     a pass rather than replacing the plain one.
-  --qty <n>          Quantity to price at (repeatable, default 1). Each value is
-                     its own pass; above 1 it starts reaching the price list's
-                     minQty thresholds.
-  --limit <n>        Cap the number of products (quick runs).
-  --all-products     Include non-sellable / all products, not just sellable.
-  --all-partners     Use every partner instead of the sampled set.
-  --sweep-config     Also sweep the two AppBase settings that change the answer:
-                     discount compute method (separate / include-replace-only /
-                     include) x unit-price scale (2 / 4). Each combination is
-                     WRITTEN to AppBase over REST before its pass and the
-                     original values restored at the end — six times the passes,
-                     so pair it with a product subset.
-  --ati-primary      Sweep ONLY the ATI-oriented basis (round ATI, derive WT).
-  --wt-primary       Sweep ONLY the WT-oriented basis (round WT, derive ATI).
-                     Default with neither: both, reported separately.
-  --tenant <id>      Tenant id (default: ${DEFAULT_TENANT}).
-  --verbose          Print every row, not only mismatches.
-`);
-  process.exit(0);
-}
+otherwise.`;
 
 type GooveePrice =
   | {
@@ -199,14 +154,43 @@ type GooveePrice =
  * can select a DIFFERENT discount line, so qty 1 only ever reaches the lowest
  * tier. Within a pass the relationship stays explicit — the line total divided
  * by the quantity is the discounted unit price (relied on by eqTotalToUnit). */
-const QTY_OPTIONS: BigDecimal[] = (
-  values.qty && values.qty.length > 0 ? values.qty : ['1']
-).map(value => BigDecimal.valueOf(value));
+const qtyOptions = (values: Values): BigDecimal[] =>
+  values.qty && values.qty.length > 0 ? values.qty : [ONE];
+
+/* Checked as it is read, then kept as the text it arrived as: a quantity goes
+ * to BigDecimal, which a detour through a float would round first. Commander
+ * hands a parser the values gathered so far, so a repeated flag accumulates
+ * here rather than in the option. */
+function readQuantity(
+  value: string,
+  gathered: BigDecimal[] = [],
+): BigDecimal[] {
+  const quantity = Number(value);
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    throw new InvalidArgumentError('must be a positive number.');
+  }
+
+  return [...gathered, BigDecimal.valueOf(value)];
+}
+
+function readCount(value: string): number {
+  const count = Number(value);
+
+  if (!Number.isInteger(count) || count <= 0) {
+    throw new InvalidArgumentError('must be a positive integer.');
+  }
+
+  return count;
+}
 
 /* The units to quote in, one pass each. `null` is the product's own sale unit
  * and is always swept, so `--unit` widens the run instead of narrowing it to
  * the converted case (which `so` cannot validate — see the header). */
-const UNIT_OPTIONS: (string | null)[] = [null, ...(values.unit ?? [])];
+const unitOptions = (values: Values): (string | null)[] => [
+  null,
+  ...(values.unit ?? []),
+];
 
 /* The AppBase settings `--sweep-config` walks. The discount compute method
  * decides whether a price-list discount is folded into the unit price or left
@@ -635,7 +619,6 @@ function compare3(
   };
 }
 
-const YELLOW = '\x1b[33m';
 const STATUS_ICON: Record<RowStatus, string> = {
   success: `${GREEN}✔`,
   partial: `${YELLOW}◐`,
@@ -676,10 +659,9 @@ async function assertAosReachable(config: {aos: {url: string}}): Promise<void> {
         ? `HTTP ${err.response.status}`
         : (err.code ?? 'no response')
       : String(err);
-    console.error(
-      `${RED}AOS back end is not accessible at ${url} (${why}). Is it running?${RESET}`,
+    out.fail(
+      `AOS back end is not accessible at ${url} (${why}). Is it running?`,
     );
-    process.exit(1);
   }
 }
 
@@ -780,11 +762,14 @@ function printTally(title: string, map: Map<string, Tally>): void {
   }
 }
 
-async function main() {
-  const tenantId = values.tenant ?? DEFAULT_TENANT;
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) throw new Error(`Tenant ${tenantId} not found.`);
-  const {client, config} = tenant;
+async function testPrices({
+  client,
+  config,
+  tenantId,
+  values,
+}: TenantHandle & {values: Values}) {
+  const QTY_OPTIONS = qtyOptions(values);
+  const UNIT_OPTIONS = unitOptions(values);
   const verbose = Boolean(values.verbose);
 
   await assertAosReachable(config);
@@ -797,8 +782,8 @@ async function main() {
   const [products, companies, currencies, partners] = await Promise.all([
     loadProducts(client, {
       ids: values.product,
-      allProducts: values['all-products'],
-      limit: values.limit ? Number(values.limit) : undefined,
+      allProducts: values.allProducts,
+      limit: values.limit,
     }),
     loadCompanies(client, values.company),
     loadCurrencies(
@@ -809,7 +794,7 @@ async function main() {
     ),
     loadPartnerSamples(client, {
       ids: values.partner,
-      allPartners: values['all-partners'],
+      allPartners: values.allPartners,
     }),
   ]);
 
@@ -819,8 +804,8 @@ async function main() {
   /* A line rounds its primary basis and derives the other from the rounded
    * figure, so the two orientations are separate paths that can disagree with
    * AOS independently. Sweep both unless one is asked for. */
-  const onlyAti = Boolean(values['ati-primary']);
-  const onlyWt = Boolean(values['wt-primary']);
+  const onlyAti = Boolean(values.atiPrimary);
+  const onlyWt = Boolean(values.wtPrimary);
   const orientations: boolean[] =
     onlyAti === onlyWt ? [false, true] : onlyAti ? [true] : [false];
   if (currencies.length === 0)
@@ -855,7 +840,7 @@ async function main() {
 
   /* Without --sweep-config there is exactly one pass, on whatever AppBase
    * already holds — nothing is written. */
-  const sweepConfig = Boolean(values['sweep-config']);
+  const sweepConfig = Boolean(values.sweepConfig);
   const original = sweepConfig ? await readAppBase(config) : null;
   let appBaseVersion = original?.version ?? 0;
   const configPasses: (AppBaseSettings | null)[] = sweepConfig
@@ -1073,12 +1058,14 @@ async function main() {
                     );
                   });
 
-                  const fail = rows.filter(r => r.status === 'failure').length;
+                  const failures = rows.filter(
+                    r => r.status === 'failure',
+                  ).length;
                   const part = rows.filter(r => r.status === 'partial').length;
-                  const succ = rows.length - fail - part;
+                  const succ = rows.length - failures - part;
                   totSuccess += succ;
                   totPartial += part;
-                  totFailure += fail;
+                  totFailure += failures;
                   totUnpriced += rows.filter(r => r.unpriced).length;
                   totEpExcluded += rows.filter(r => r.epExcluded).length;
                   totUnreferenced += rows.filter(r => r.unreferenced).length;
@@ -1086,23 +1073,23 @@ async function main() {
                   const basis = basisLabel(atiPrimary);
                   const qtyLabel = lineQty.toString();
                   const unitLabel = unitId ?? 'own';
-                  bump(perBasis, basis, succ, part, fail);
-                  bump(perQty, qtyLabel, succ, part, fail);
-                  bump(perUnit, unitLabel, succ, part, fail);
-                  bump(perConfig, configLabel, succ, part, fail);
+                  bump(perBasis, basis, succ, part, failures);
+                  bump(perQty, qtyLabel, succ, part, failures);
+                  bump(perUnit, unitLabel, succ, part, failures);
+                  bump(perConfig, configLabel, succ, part, failures);
 
                   const label =
                     `company=${company.name ?? companyId} buyer=${partnerSample.label} ` +
                     `cur=${currencyOverride.code} basis=${basis} qty=${qtyLabel} unit=${unitLabel}` +
                     (priceList ? ` [priceList ${priceList.id}]` : '');
-                  const icon = fail
+                  const icon = failures
                     ? `${RED}✖`
                     : part
                       ? `${YELLOW}◐`
                       : `${GREEN}✔`;
                   console.log(
                     `\n${icon}${RESET} ${BOLD}${label}${RESET}  ` +
-                      `${succ} ok / ${part} partial / ${fail} fail (of ${rows.length})`,
+                      `${succ} ok / ${part} partial / ${failures} fail (of ${rows.length})`,
                   );
                   const visible = verbose
                     ? rows
@@ -1187,19 +1174,61 @@ async function main() {
     );
   }
   console.log('');
-  process.exit(totFailure === 0 ? 0 : 1);
+
+  if (totFailure > 0) {
+    out.fail(`${totFailure} product(s) priced differently from AOS.`);
+  }
 }
 
-main().catch(err => {
-  /* Keep AOS connection failures readable instead of dumping the whole
-   * axios request object — the usual cause is the back end not running. */
-  if (axios.isAxiosError(err) && !err.response) {
-    console.error(
-      `${RED}Could not reach AOS at ${err.config?.baseURL ?? ''}${err.config?.url ?? ''}` +
-        ` (${err.code ?? 'request failed'}). Is the back end running?${RESET}`,
-    );
-  } else {
-    console.error(err);
-  }
-  process.exit(1);
+runTenantScript<Values>({
+  command: 'pnpm pricing:compare',
+  title: 'Product price-parity test',
+  explain: explainHttpFailure,
+  summary: SUMMARY,
+  options: command =>
+    command
+      .option(
+        '--product <id...>',
+        'Product id (repeatable). Default: all sellable products',
+      )
+      .option(
+        '--company <id...>',
+        'Selling company id (repeatable). Default: all companies',
+      )
+      .option(
+        '--partner <id...>',
+        'Buyer partner id (repeatable). Default: a sampled set',
+      )
+      .option('--currency <code...>', 'Target currency code or id (repeatable)')
+      .option(
+        '--unit <id...>',
+        'ALSO quote every product in this unit id (repeatable)',
+      )
+      .option(
+        '--qty <n...>',
+        "Quantity to price at (repeatable, default 1). Each value is its own pass; above 1 it starts reaching the price list's minQty thresholds",
+        readQuantity,
+      )
+      .option(
+        '--limit <n>',
+        'Cap the number of products (quick runs)',
+        readCount,
+      )
+      .option('--all-products', 'Include non-sellable / all products')
+      .option('--all-partners', 'Use every partner instead of the sampled set')
+      .option(
+        '--sweep-config',
+        'Also sweep the two AppBase settings that change the answer: discount compute method (separate / include-replace-only / include) x unit-price scale (2 / 4). Each combination is WRITTEN to AppBase over REST before its pass and the original values restored at the end — six times the passes, so pair it with a product subset',
+      )
+      .option(
+        '--ati-primary',
+        'Sweep ONLY the ATI-oriented basis (round ATI, derive WT). Default with neither: both, reported separately',
+      )
+      .option(
+        '--wt-primary',
+        'Sweep ONLY the WT-oriented basis (round WT, derive ATI)',
+      )
+      .option('--verbose', 'Print every row, not only mismatches'),
+  run: async ({values, openTenant}) =>
+    testPrices({...(await openTenant()), values}),
 });
