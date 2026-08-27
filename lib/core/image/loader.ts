@@ -1,6 +1,7 @@
 'use client';
 
 import {DEFAULT_IMAGE_QUALITY} from './constants';
+import {isVectorImage} from './vector';
 
 /**
  * Addresses every image the image component renders.
@@ -34,8 +35,11 @@ export default function gooveeImageLoader({
    * width would only produce a set of candidates that are all the same file, and
    * make the browser preload several of them. The framework leaves these alone
    * too, but only when it is addressing images itself.
+   *
+   * The loader is what decides the address, so it gives the same answer whether
+   * or not a caller asked for the image to be left unoptimized.
    */
-  if (pathname.toLowerCase().endsWith('.svg')) return src;
+  if (isVectorImage(src)) return src;
 
   const params = new URLSearchParams(search);
 
