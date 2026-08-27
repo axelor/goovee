@@ -28,14 +28,14 @@
     "marketplace:seed": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/run.ts",
     "marketplace:reset": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/reset.ts",
     "test-price": "node -r @swc-node/register lib/core/product/scripts/test-price/run.ts",
-    "changelogs:validate": "node ./changelogs/validate",
-    "changelogs:generate": "node ./changelogs/generate",
-    "prepare:bump": "node ./scripts/prepare-bump.js",
-    "prepare:release": "node ./scripts/prepare-release.js",
+    "changelogs:validate": "node -r @swc-node/register ./changelogs/validate.ts",
+    "changelogs:generate": "node -r @swc-node/register ./changelogs/generate.ts",
+    "release:bump": "node -r @swc-node/register ./scripts/prepare-bump.ts",
+    "release:prepare": "node -r @swc-node/register ./scripts/prepare-release.ts",
     "analyze": "next experimental-analyze",
     "missing-tr": "node scripts/missing-translation.mjs",
     "sort-tr": "node scripts/sort-translations.mjs",
-    "release": "node scripts/release.js"
+    "release": "node -r @swc-node/register ./scripts/release.ts"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.1",
