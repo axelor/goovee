@@ -99,6 +99,14 @@ function normalizeTenantConfig(
     );
   }
 
+  /* A Keycloak entry names the realm it trusts by its issuer, and every address
+   * the sign-in uses is discovered through it. Named here rather than left to
+   * the derivation below, which would otherwise fail on the missing value with
+   * no mention of the tenant or the field. */
+  if (input.oauth?.keycloak && !input.oauth.keycloak.issuer) {
+    throw new Error(`Tenant "${id}": oauth.keycloak.issuer is required`);
+  }
+
   validatePublicEnvKeys(`Tenant "${id}"`, input.publicEnv);
 
   /* The host is what workspace URLs are stored against and what every absolute
@@ -128,12 +136,34 @@ function normalizeTenantConfig(
       ? path.join(input.aos.storage, aosTenantId)
       : input.aos.storage;
 
+  /* The Keycloak issuer is the base a realm's discovery address is built on,
+   * and it is operator-supplied, where a trailing slash and no trailing slash
+   * are two spellings of the same issuer and both correct. Settled to one of
+   * them here so the address built from it is well-formed either way: the
+   * doubled slash the other spelling produces resolves to no discovery
+   * document, which is read as a sign-in starts, so the tenant's Keycloak
+   * sign-in fails before the visitor reaches the realm at all. A value that is
+   * not another spelling of the same issuer but a mistake — no scheme, or an
+   * issuer already ending in the discovery path — is left to fail rather than
+   * repaired. */
+  const oauth = input.oauth?.keycloak
+    ? {
+        ...input.oauth,
+        keycloak: {
+          ...input.oauth.keycloak,
+          issuer: input.oauth.keycloak.issuer.replace(/\/+$/, ''),
+        },
+      }
+    : input.oauth;
+
   /* No env merge — the entry is the config, verbatim (aside from the storage
-   * root derived above). The publicEnv default only satisfies the return type;
-   * the validation above has already rejected an entry without one. */
+   * root and the issuer settled above). The publicEnv default only satisfies
+   * the return type; the validation above has already rejected an entry without
+   * one. */
   return {
     ...input,
     aos: {...input.aos, storage},
+    oauth,
     publicEnv: input.publicEnv ?? {},
   };
 }

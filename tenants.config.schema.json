@@ -325,7 +325,7 @@
                 },
                 "issuer": {
                   "type": "string",
-                  "description": "Keycloak realm issuer URL. Each tenant uses its own realm."
+                  "description": "Keycloak realm issuer URL, with or without a trailing slash. Each tenant uses its own realm."
                 }
               }
             }
