@@ -4,6 +4,7 @@ import {NextResponse, after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/tenant';
+import {tenantConfigProvider} from '@/tenant/config-provider';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
@@ -96,15 +97,17 @@ export async function GET(
   }
 
   /* The tenant is authoritative from the path (the webhook URL is registered
-   * per tenant). Resolve it before parsing the ref so even a legacy IPN we
-   * cannot attribute to a context can still be forwarded to this tenant's
-   * legacy ERP. */
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
+   * per tenant). Its configuration is read here, before the ref is parsed, so
+   * that an IPN this deployment cannot attribute to a payment of its own is
+   * still forwarded to the tenant's legacy ERP. Read from the document rather
+   * than by resolving the tenant, which would connect its database: the forward
+   * exists for payments that are not ours, and is the one answer that should
+   * survive our database being down. */
+  const config = await tenantConfigProvider.get(tenantId);
+  if (!config) {
     console.error('[UP2PAY][WEBHOOK] Tenant not found', {tenantId});
     return new NextResponse('Bad Request', {status: 400});
   }
-  const {client, config} = tenant;
   const legacyForwardUrl = config.payments?.up2pay?.legacyForwardUrl;
 
   // Goovee refs are formatted as: name-reference~contextId~tenantId
@@ -135,6 +138,21 @@ export async function GET(
       status: forwarded ? 200 : 400,
     });
   }
+
+  /* The ref names a payment of ours, so from here the tenant's database is
+   * needed and connecting it is what this answer depends on. A connection that
+   * fails leaves the request to Up2Pay's retry rather than the legacy forward:
+   * the payment is this deployment's to settle, and handing it to the legacy ERP
+   * would have it invoiced twice once the retry lands. */
+  const tenant = await manager.getTenant(tenantId);
+
+  /* Unreachable: the read above already refused a tenant the document does not
+   * name, and one it does name either resolves here or throws. */
+  if (!tenant) {
+    console.error('[UP2PAY][WEBHOOK] Tenant resolved to nothing', {tenantId});
+    return new NextResponse('Bad Request', {status: 400});
+  }
+  const {client} = tenant;
 
   const paymentContext = await findPaymentContext({
     id: contextId,
