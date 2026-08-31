@@ -16,9 +16,12 @@ Single-tenant is one entry, keyed `"d"`.
 | Field                | Required | From env                |
 | -------------------- | -------- | ----------------------- |
 | `betterAuthSecret`   | yes      | `BETTER_AUTH_SECRET`    |
-| `betterAuthUrl`      | no       | `BETTER_AUTH_URL`       |
+| `betterAuthUrl`      | yes      | `BETTER_AUTH_URL`       |
 | `pushMaxConnections` | no       | `PUSH_MAX_CONNECTIONS`  |
 | `imageCacheMaxBytes` | no       | `IMAGE_CACHE_MAX_BYTES` |
+
+Write `betterAuthUrl` as the origin the deployment is served on — scheme and
+host, with no path, query or fragment.
 
 Each tenant entry — declare every capability the tenant uses; nothing is
 inherited from another tenant or the environment:

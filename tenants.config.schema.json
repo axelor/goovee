@@ -13,7 +13,9 @@
         },
         "betterAuthUrl": {
           "type": "string",
-          "description": "Better Auth base URL (the BETTER_AUTH_URL equivalent)."
+          "minLength": 1,
+          "description": "Origin the deployment is served on, e.g. https://portal.example.com — scheme and host only, with no path: the base path is appended in code, and a path here answers every auth request with a 404. Required: left out, Better Auth resolves it from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
+          "pattern": "^https?://[^/?#]+/?$"
         },
         "pushMaxConnections": {
           "type": "integer",
@@ -28,7 +30,7 @@
           "description": "Bytes the resized-image cache may occupy. One cache directory serves every tenant, so the budget is the deployment's."
         }
       },
-      "required": ["betterAuthSecret"],
+      "required": ["betterAuthSecret", "betterAuthUrl"],
       "additionalProperties": false,
       "description": "Deployment-wide settings, shared by every tenant because they are bound to the single origin / process."
     }

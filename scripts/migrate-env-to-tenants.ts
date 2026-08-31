@@ -220,7 +220,7 @@ function oauthFromEnv(): TenantConfigInput['oauth'] {
 function buildGlobal(): GlobalConfigInput {
   return {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
-    betterAuthUrl: process.env.BETTER_AUTH_URL || undefined,
+    betterAuthUrl: process.env.BETTER_AUTH_URL ?? '',
     pushMaxConnections: count(process.env.PUSH_MAX_CONNECTIONS),
     imageCacheMaxBytes: count(process.env.IMAGE_CACHE_MAX_BYTES),
   };

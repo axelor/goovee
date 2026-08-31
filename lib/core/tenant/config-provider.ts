@@ -119,7 +119,14 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
        * this throws instead. */
       if (process.env.NEXT_PHASE === 'phase-production-build') {
         return {
-          global: {betterAuthSecret: 'build-time-placeholder'},
+          global: {
+            betterAuthSecret: 'build-time-placeholder',
+            /* An origin, because the auth instance parses this one as it is
+             * constructed. `.invalid` is reserved and resolves nowhere, so a
+             * build that reached the network with it would fail rather than
+             * talk to a host somebody owns. */
+            betterAuthUrl: 'http://build-time-placeholder.invalid',
+          },
           tenants: tenantMap(),
         };
       }

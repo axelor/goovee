@@ -50,8 +50,38 @@ export const globalConfigSchema = z
       ),
     betterAuthUrl: z
       .string()
-      .describe('Better Auth base URL (the BETTER_AUTH_URL equivalent).')
-      .optional(),
+      .min(1)
+      /* Checked here because this is the one malformed spelling that fails in
+       * silence: a base URL already carrying a path makes the auth library drop
+       * the configured base path, mount its routes on that path instead, and
+       * answer every auth request with a 404 — no startup error, nothing
+       * logged. A value with no scheme, or one that is not a URL at all, throws
+       * as the auth instance is built and names itself. */
+      .refine(
+        value => {
+          try {
+            const url = new URL(value);
+            return (
+              (url.protocol === 'http:' || url.protocol === 'https:') &&
+              url.pathname === '/' &&
+              url.search === '' &&
+              url.hash === ''
+            );
+          } catch {
+            return false;
+          }
+        },
+        {
+          error:
+            'must be an origin — scheme and host with no path, e.g. ' +
+            'https://portal.example.com',
+        },
+      )
+      .meta({
+        description:
+          "Origin the deployment is served on, e.g. https://portal.example.com — scheme and host only, with no path: the base path is appended in code, and a path here answers every auth request with a 404. Required: left out, Better Auth resolves it from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
+        pattern: '^https?://[^/?#]+/?$',
+      }),
     pushMaxConnections: positiveInteger()
       .describe(
         'Push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Defaults to 10.',
