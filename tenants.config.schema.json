@@ -304,6 +304,6 @@
     "additionalProperties": false
   },
   "title": "Goovee configuration",
-  "description": "The single configuration document for Goovee — a reserved \"$global\" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment, letters only). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed \"d\". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.",
-  "propertyNames": {"pattern": "^(\\$schema|\\$global|[a-zA-Z]+)$"}
+  "description": "The single configuration document for Goovee — a reserved \"$global\" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment: letters only, at most 15 of them, because a Hub PISP payment reference carries the id after a payment context id of up to 19 digits in a field of 35). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed \"d\". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.",
+  "propertyNames": {"pattern": "^(\\$schema|\\$global|[a-zA-Z]{1,15})$"}
 }

@@ -31,6 +31,11 @@ const RESERVED_DOCUMENT_KEYS = ['$schema', '$global'];
  * reach. Widening this obliges widening that pattern too. */
 const TENANT_ID_PATTERN = /^[a-zA-Z]+$/;
 
+/* Reserving the whole width a payment context id can reach: a Hub PISP payment
+ * carries `${contextId}-${tenantId}` in a field of 35 characters, and a context
+ * id is a bigint sequence, so its 19 digits and the separator leave 15. */
+const TENANT_ID_MAX_LENGTH = 15;
+
 /*
  * A positive whole number.
  *
@@ -506,14 +511,34 @@ function checkMailCeilings(tenants: TenantEntry[]): ConfigIssue[] {
 }
 
 function checkTenantIds(ids: string[]): ConfigIssue[] {
-  return ids
-    .filter(id => !TENANT_ID_PATTERN.test(id))
-    .map(id => ({
-      path: [id],
-      message:
-        `"${id}" is not a usable tenant id. A tenant id is the URL path ` +
-        `segment it is served under, so it may hold letters only.`,
-    }));
+  const issues: ConfigIssue[] = [];
+
+  for (const id of ids) {
+    if (!TENANT_ID_PATTERN.test(id)) {
+      issues.push({
+        path: [id],
+        message:
+          `"${id}" is not a usable tenant id. A tenant id is the URL path ` +
+          `segment it is served under, so it may hold letters only.`,
+      });
+      continue;
+    }
+
+    if (id.length > TENANT_ID_MAX_LENGTH) {
+      issues.push({
+        path: [id],
+        message:
+          `"${id}" is ${id.length} characters, and a tenant id may hold at ` +
+          `most ${TENANT_ID_MAX_LENGTH}. A Hub PISP payment carries its ` +
+          `reference as "<paymentContextId>-<tenantId>" in a field of 35 ` +
+          `characters, and a context id can reach 19 digits, so a longer id ` +
+          `works until this tenant's context ids grow and then fails every Hub ` +
+          `PISP payment it attempts.`,
+      });
+    }
+  }
+
+  return issues;
 }
 
 function tenantEntries(document: Record<string, unknown>): TenantEntry[] {
@@ -541,8 +566,10 @@ export const configDocumentSchema = z
   .meta({
     title: 'Goovee configuration',
     description:
-      'The single configuration document for Goovee — a reserved "$global" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment, letters only). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed "d". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.',
-    propertyNames: {pattern: '^(\\$schema|\\$global|[a-zA-Z]+)$'},
+      'The single configuration document for Goovee — a reserved "$global" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment: letters only, at most 15 of them, because a Hub PISP payment reference carries the id after a payment context id of up to 19 digits in a field of 35). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed "d". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.',
+    propertyNames: {
+      pattern: `^(\\$schema|\\$global|[a-zA-Z]{1,${TENANT_ID_MAX_LENGTH}})$`,
+    },
   })
   /* Only reached once every entry is individually valid, so these see a whole
    * document and nothing half-parsed. */

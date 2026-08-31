@@ -8,7 +8,8 @@ steps in order.
 ## 1. Create the configuration document
 
 All configuration is one JSON document: a reserved `"$global"` section plus one
-entry per tenant, keyed by the tenant id (the URL path segment, letters only).
+entry per tenant, keyed by the tenant id (the URL path segment: letters only,
+at most 15 of them).
 Single-tenant is one entry, keyed `"d"`.
 
 `$global`:
