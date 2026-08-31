@@ -1,288 +1,18 @@
 import fs from 'fs';
-import path from 'path';
+
+import {z} from 'zod';
 
 import {DEFAULT_TENANT} from '@/constants';
-import {
-  getMaxConnections,
-  mailAccountKey,
-} from '@/lib/core/notification/mail-account';
 import {taintSecret} from '@/lib/core/security/taint';
-import {
-  PUBLIC_ENV_KEYS,
-  type GlobalConfig,
-  type PublicEnv,
-  type PublicEnvKey,
-  type TenantConfig,
-} from './types';
+import {isMultiTenancy, tenantsConfigFile, tenantsConfigInline} from './env';
+import {configDocumentSchema} from './schema';
+import type {GlobalConfig, TenantConfig} from './types';
 
-/* Which entries of the document are servable is decided here, since the tenant
- * manager is built from what this module reads. */
-export const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
+export {isMultiTenancy};
 
 export interface TenantConfigProvider {
   get(id: string): Promise<TenantConfig | null>;
   list(): Promise<string[]>;
-}
-
-/* Document shapes. A tenant entry is a full TenantConfig; publicEnv is optional
- * on the way in only so a missing one is reported as a validation error rather
- * than a type error. Nothing is filled in — there is no env fallback, so every
- * value a tenant uses must be present in its entry. */
-type TenantConfigInput = Omit<TenantConfig, 'publicEnv'> & {
-  publicEnv?: PublicEnv;
-};
-
-type GlobalConfigInput = {
-  betterAuthSecret?: string;
-  betterAuthUrl?: string;
-  pushMaxConnections?: number;
-  imageCacheMaxBytes?: number;
-};
-
-/**
- * A positive whole number, or nothing.
- *
- * Reported by name at load rather than corrected at the point of use: a setting
- * silently replaced by a default is how a deployment ends up believing it set
- * three and running at ten, and reporting it here names every offender once
- * instead of only whichever one is exercised first.
- */
-function validateCount(context: string, value: number | undefined) {
-  if (value === undefined) return;
-
-  if (!Number.isInteger(value) || value < 1) {
-    throw new Error(
-      `${context} must be a whole number of at least 1, got ${JSON.stringify(value)}`,
-    );
-  }
-}
-
-function validatePublicEnvKeys(
-  context: string,
-  publicEnv: PublicEnv | undefined,
-) {
-  for (const key of Object.keys(publicEnv ?? {})) {
-    if (!PUBLIC_ENV_KEYS.includes(key as PublicEnvKey)) {
-      throw new Error(
-        `${context}: unsupported publicEnv key "${key}" — supported keys: ${PUBLIC_ENV_KEYS.join(', ')}`,
-      );
-    }
-  }
-}
-
-function normalizeTenantConfig(
-  id: string,
-  input: TenantConfigInput,
-): TenantConfig {
-  if (!input?.db?.url) {
-    throw new Error(`Tenant "${id}": db.url is required`);
-  }
-  if (!input?.aos?.url) {
-    throw new Error(`Tenant "${id}": aos.url is required`);
-  }
-  if (!input?.aos?.storage) {
-    throw new Error(`Tenant "${id}": aos.storage is required`);
-  }
-
-  const auth = input.aos.auth;
-  if (!auth?.apiKey && !(auth?.username && auth?.password)) {
-    throw new Error(
-      `Tenant "${id}": aos.auth requires apiKey or username/password`,
-    );
-  }
-
-  /* A HUB PISP tenant loads its mTLS client certificate (client.crt + private-key.pem) from certsDir — that certificate is the tenant's enrolled bank identity, so there is no sensible shared default. Require it explicitly rather than falling back to a directory another tenant might also use. */
-  if (input.payments?.hubpisp && !input.payments.hubpisp.certsDir) {
-    throw new Error(
-      `Tenant "${id}": payments.hubpisp.certsDir is required (path to this ` +
-        `tenant's mTLS client.crt and private-key.pem)`,
-    );
-  }
-
-  /* A Keycloak entry names the realm it trusts by its issuer, and every address
-   * the sign-in uses is discovered through it. Named here rather than left to
-   * the derivation below, which would otherwise fail on the missing value with
-   * no mention of the tenant or the field. */
-  if (input.oauth?.keycloak && !input.oauth.keycloak.issuer) {
-    throw new Error(`Tenant "${id}": oauth.keycloak.issuer is required`);
-  }
-
-  validatePublicEnvKeys(`Tenant "${id}"`, input.publicEnv);
-
-  /* The host is what workspace URLs are stored against and what every absolute
-   * link is built from, so a tenant without one resolves no workspace at all.
-   * Guaranteeing it for a configured tenant lets the pages that resolve one
-   * rely on it, rather than discovering an undefined host at request time. A
-   * tenant-less context (the auth pages) still has to handle its absence. */
-  if (!input.publicEnv?.GOOVEE_PUBLIC_HOST) {
-    throw new Error(`Tenant "${id}": publicEnv.GOOVEE_PUBLIC_HOST is required`);
-  }
-
-  validateCount(
-    `Tenant "${id}": mail.maxConnections`,
-    input.mail?.maxConnections,
-  );
-
-  /* Bake the per-tenant storage root once, mirroring AOP's
-   * FileSystemStore.getRootPath(): a tenant on a shared multi-tenant AOS keeps
-   * its files under <data.upload.dir>/<aosTenantId>, while a dedicated instance
-   * (or the AOP "default" tenant) uses <data.upload.dir> as-is. aos.storage in
-   * the document is therefore the AOS data.upload.dir base; goovee reads and
-   * writes the AOS filesystem directly, so every storage consumer can use
-   * config.aos.storage verbatim without re-deriving the tenant subdirectory. */
-  const {aosTenantId} = input.aos;
-  const storage =
-    aosTenantId && aosTenantId !== 'default'
-      ? path.join(input.aos.storage, aosTenantId)
-      : input.aos.storage;
-
-  /* The Keycloak issuer is the base a realm's discovery address is built on,
-   * and it is operator-supplied, where a trailing slash and no trailing slash
-   * are two spellings of the same issuer and both correct. Settled to one of
-   * them here so the address built from it is well-formed either way: the
-   * doubled slash the other spelling produces resolves to no discovery
-   * document, which is read as a sign-in starts, so the tenant's Keycloak
-   * sign-in fails before the visitor reaches the realm at all. A value that is
-   * not another spelling of the same issuer but a mistake — no scheme, or an
-   * issuer already ending in the discovery path — is left to fail rather than
-   * repaired. */
-  const oauth = input.oauth?.keycloak
-    ? {
-        ...input.oauth,
-        keycloak: {
-          ...input.oauth.keycloak,
-          issuer: input.oauth.keycloak.issuer.replace(/\/+$/, ''),
-        },
-      }
-    : input.oauth;
-
-  /* No env merge — the entry is the config, verbatim (aside from the storage
-   * root and the issuer settled above). The publicEnv default only satisfies
-   * the return type; the validation above has already rejected an entry without
-   * one. */
-  return {
-    ...input,
-    aos: {...input.aos, storage},
-    oauth,
-    publicEnv: input.publicEnv ?? {},
-  };
-}
-
-/* Cross-tenant invariant. A HUB PISP tenant authenticates to BPCE with an mTLS
- * client certificate loaded from its certsDir (client.crt + private-key.pem) —
- * that certificate IS the tenant's enrolled bank identity, so two tenants must
- * never resolve to the same certsDir or they would transact as the same bank
- * client. certsDir is required per tenant (see normalizeTenantConfig), so this
- * only has to reject two tenants that point at the same directory. Paths are
- * resolved to absolute so equivalent specs (relative vs absolute, trailing
- * slash) compare equal. Runs across the whole tenant set, so it lives here
- * rather than in the per-tenant normalizeTenantConfig. */
-function validateHubPispCertIsolation(tenants: Record<string, TenantConfig>) {
-  const byCertsDir = new Map<string, string>(); // resolved certsDir -> tenant id
-  for (const [id, config] of Object.entries(tenants)) {
-    const configured = config.payments?.hubpisp?.certsDir;
-    if (!configured) continue;
-    const certsDir = path.resolve(configured);
-    const owner = byCertsDir.get(certsDir);
-    if (owner) {
-      throw new Error(
-        `Tenants "${owner}" and "${id}" share the same HUB PISP certsDir ` +
-          `("${certsDir}"). Each HUB PISP tenant needs its own mTLS client ` +
-          `certificate — set a distinct payments.hubpisp.certsDir per tenant.`,
-      );
-    }
-    byCertsDir.set(certsDir, id);
-  }
-}
-
-/* Cross-tenant invariant. Uploads are recorded as a path relative to the tenant's
- * storage root, so two tenants resolving to the same root share one namespace:
- * each would resolve the other's recorded paths, and the retention sweep would
- * delete from a directory holding another tenant's blobs. The roots compared here
- * are the resolved ones — a tenant on a shared AOS already has its aosTenantId
- * subdirectory baked in — so tenants sharing one AOS legitimately pass. */
-function validateStorageIsolation(tenants: Record<string, TenantConfig>) {
-  const roots: Array<[string, string]> = []; // [tenant id, resolved storage root]
-
-  for (const [id, config] of Object.entries(tenants)) {
-    const storage = path.resolve(config.aos.storage);
-
-    for (const [owner, existing] of roots) {
-      /* Containment, not just equality: a tenant that keeps the base path (no
-       * aosTenantId) while another sits in a subdirectory of it would otherwise
-       * pass, and the outer tenant's root then contains the inner one's — its
-       * recorded paths resolve into the inner tenant's files and its retention
-       * sweep deletes from them. */
-      const nested =
-        storage === existing ||
-        storage.startsWith(existing + path.sep) ||
-        existing.startsWith(storage + path.sep);
-
-      if (nested) {
-        throw new Error(
-          `Tenants "${owner}" ("${existing}") and "${id}" ("${storage}") share ` +
-            `a storage root — one contains the other. Give each tenant a ` +
-            `directory of its own, or set aos.aosTenantId on every tenant that ` +
-            `shares one AOS instance.`,
-        );
-      }
-    }
-
-    roots.push([id, storage]);
-  }
-}
-
-/* Cross-tenant invariant. Tenants sharing one mail account share one connection
- * pool, so they must agree on how many connections that account allows: the pool
- * is built by whichever tenant sends first, and a disagreement would make the
- * ceiling depend on send order — intermittently exceeding the limit the lower
- * value was set to respect. */
-function validateMailCeilings(tenants: Record<string, TenantConfig>) {
-  const byAccount = new Map<string, {id: string; maxConnections: number}>();
-
-  for (const [id, config] of Object.entries(tenants)) {
-    const mail = config.mail;
-    if (!mail?.host) continue;
-
-    const account = mailAccountKey(mail);
-    const existing = byAccount.get(account);
-
-    /* Compared as they are applied, not as they are written: leaving the setting
-     * out means the default, so a tenant that omits it agrees with one that
-     * spells that same number out. Refusing those would make an operator edit a
-     * file to state what the two configurations already mean. */
-    const maxConnections = getMaxConnections(mail);
-
-    if (existing && existing.maxConnections !== maxConnections) {
-      throw new Error(
-        `Tenants "${existing.id}" and "${id}" share the mail account ` +
-          `"${mail.user}" on ${mail.host} but allow it a different number of ` +
-          `connections (${existing.maxConnections} and ${maxConnections}). ` +
-          `They share one connection pool, so the ceiling must match — set ` +
-          `mail.maxConnections to the same value for both.`,
-      );
-    }
-
-    if (!existing) {
-      byAccount.set(account, {id, maxConnections});
-    }
-  }
-}
-
-function normalizeGlobalConfig(input: GlobalConfigInput): GlobalConfig {
-  if (!input?.betterAuthSecret) {
-    throw new Error('"$global".betterAuthSecret is required');
-  }
-
-  validateCount('"$global".pushMaxConnections', input.pushMaxConnections);
-  validateCount('"$global".imageCacheMaxBytes', input.imageCacheMaxBytes);
-
-  return {
-    betterAuthSecret: input.betterAuthSecret,
-    betterAuthUrl: input.betterAuthUrl,
-    pushMaxConnections: input.pushMaxConnections,
-    imageCacheMaxBytes: input.imageCacheMaxBytes,
-  };
 }
 
 function taintTenantConfig(config: TenantConfig) {
@@ -328,6 +58,24 @@ type LoadedConfig = {
   tenants: Record<string, TenantConfig>;
 };
 
+/*
+ * Prototype-less, because a tenant id is a URL path segment and the segments
+ * naming a member of Object.prototype — "toString", "constructor", "valueOf" —
+ * hold letters only, so they reach a lookup here like any other id. On an
+ * ordinary object each resolves to an inherited function, which passes for a
+ * tenant's configuration until something reads a database url that is not
+ * there: a request for a tenant that does not exist is then answered with a
+ * server error rather than not-found.
+ */
+function tenantMap(
+  entries?: Record<string, TenantConfig>,
+): Record<string, TenantConfig> {
+  return Object.assign(
+    Object.create(null) as Record<string, TenantConfig>,
+    entries,
+  );
+}
+
 /* Sources all configuration from a single JSON document — TENANTS_CONFIG_FILE
  * (path) or TENANTS_CONFIG (inline). Shape:
  *
@@ -339,6 +87,10 @@ type LoadedConfig = {
  * (no fallback) — every value a tenant uses lives in its own entry, and the
  * deployment-wide values live in "$global". A registry-DB provider can replace
  * this behind the same interface later.
+ *
+ * What a valid document holds is declared in ./schema, and from that same
+ * declaration `pnpm config:schema` generates the JSON Schema an operator's
+ * editor checks the document against.
  *
  * Loading is synchronous (readFileSync at first access) so config is also
  * available to module-init consumers — the better-auth instance needs the
@@ -354,10 +106,9 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
   }
 
   private read(): LoadedConfig {
-    const file = process.env.TENANTS_CONFIG_FILE;
-    const source = file
-      ? fs.readFileSync(file, 'utf8')
-      : process.env.TENANTS_CONFIG;
+    const source = tenantsConfigFile
+      ? fs.readFileSync(tenantsConfigFile, 'utf8')
+      : tenantsConfigInline;
 
     if (!source) {
       /* `next build` evaluates module-init code (the better-auth instance, the
@@ -369,7 +120,7 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
       if (process.env.NEXT_PHASE === 'phase-production-build') {
         return {
           global: {betterAuthSecret: 'build-time-placeholder'},
-          tenants: {},
+          tenants: tenantMap(),
         };
       }
       throw new Error(
@@ -379,33 +130,35 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
       );
     }
 
-    let parsed: Record<string, unknown>;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(source);
     } catch (err) {
       throw new Error('Tenant configuration is not valid JSON', {cause: err});
     }
 
-    const globalInput = parsed['$global'] as GlobalConfigInput | undefined;
-    if (!globalInput) {
+    const result = configDocumentSchema.safeParse(parsed);
+
+    if (!result.success) {
+      /* Every fault in the shape at once, each against the tenant and field it
+       * belongs to, because an operator filling in a new entry has several and
+       * one at a time means one restart each. The invariants that span tenants
+       * are not among them: those are reached only once the whole shape is
+       * valid, so a document with both reports the shape first and the
+       * collisions on the next attempt. */
       throw new Error(
-        'Tenant configuration is missing the required "$global" section',
+        `Tenant configuration is invalid (${tenantsConfigFile || 'TENANTS_CONFIG'}):\n` +
+          z.prettifyError(result.error),
       );
     }
-    const global = normalizeGlobalConfig(globalInput);
+
+    const {$schema: _schema, $global: global, ...entries} = result.data;
+
+    const tenants = tenantMap(entries);
+
     taintGlobalConfig(global);
-
-    const tenants: Record<string, TenantConfig> = {};
-    for (const [id, input] of Object.entries(parsed)) {
-      // Reserved keys: $schema (editor hint) and $global (handled above).
-      if (id === '$schema' || id === '$global') continue;
-      const config = normalizeTenantConfig(id, input as TenantConfigInput);
+    for (const config of Object.values(tenants)) {
       taintTenantConfig(config);
-      tenants[id] = config;
-    }
-
-    if (Object.keys(tenants).length === 0) {
-      throw new Error('Tenant configuration has no tenant entries');
     }
 
     /* With multi-tenancy off only the default entry is ever served, whatever
@@ -419,10 +172,6 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
           `to serve every entry in the document.`,
       );
     }
-
-    validateHubPispCertIsolation(tenants);
-    validateStorageIsolation(tenants);
-    validateMailCeilings(tenants);
 
     return {global, tenants};
   }

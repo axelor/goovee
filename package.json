@@ -28,6 +28,7 @@
     "marketplace:reset": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/reset.ts",
     "pricing:compare": "node -r @swc-node/register lib/core/product/scripts/test-price/run.ts",
     "tenants:migrate": "node -r @swc-node/register ./scripts/migrate-env-to-tenants.ts",
+    "config:schema": "node -r @swc-node/register ./scripts/generate-config-schema.ts",
     "changelogs:validate": "node -r @swc-node/register ./changelogs/validate.ts",
     "changelogs:generate": "node -r @swc-node/register ./changelogs/generate.ts",
     "release:bump": "node -r @swc-node/register ./scripts/prepare-bump.ts",

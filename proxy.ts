@@ -3,6 +3,7 @@ import {NextRequest, NextResponse} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {getSessionTenantId} from '@/lib/auth';
 import {getBasePath} from '@/lib/core/path/base-path';
+import {isMultiTenancy} from '@/tenant/env';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
@@ -53,8 +54,6 @@ function notFound(req: NextRequest, {message = ''}: {message?: string} = {}) {
     new URL(`/_not-found${searchParams ? `?${searchParams}` : ''}`, req.url),
   );
 }
-
-const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
 
 export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;

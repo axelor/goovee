@@ -10,9 +10,9 @@ import {runScript} from '@/scripts/lib/script';
 import {DEFAULT_TENANT} from '@/constants';
 import {
   PUBLIC_ENV_KEYS,
-  type GlobalConfig,
+  type GlobalConfigInput,
   type PublicEnv,
-  type TenantConfig,
+  type TenantConfigInput,
 } from '@/tenant/types';
 
 /* Load .env files with Next.js precedence for the chosen mode (more-specific
@@ -41,7 +41,7 @@ function count(value: string | undefined): number | undefined {
   return Number.isInteger(parsed) && parsed >= 1 ? parsed : undefined;
 }
 
-function publicEnvFromEnv(): PublicEnv {
+function publicEnvFromEnv(): TenantConfigInput['publicEnv'] {
   const publicEnv: PublicEnv = {};
   for (const key of PUBLIC_ENV_KEYS) {
     const value = process.env[key];
@@ -49,14 +49,17 @@ function publicEnvFromEnv(): PublicEnv {
       publicEnv[key] = value;
     }
   }
-  /* Required per tenant, so always emit it — a blank to fill in is reviewable,
-   * whereas an omitted key just fails at boot with nothing to point at. */
-  publicEnv.GOOVEE_PUBLIC_HOST = process.env.GOOVEE_PUBLIC_HOST ?? '';
-  return publicEnv;
+
+  return {
+    ...publicEnv,
+    /* Required per tenant, so always emit it — a blank to fill in is reviewable,
+     * whereas an omitted key just fails at boot with nothing to point at. */
+    GOOVEE_PUBLIC_HOST: process.env.GOOVEE_PUBLIC_HOST ?? '',
+  };
 }
 
-function paymentsFromEnv(): TenantConfig['payments'] {
-  const payments: NonNullable<TenantConfig['payments']> = {};
+function paymentsFromEnv(): TenantConfigInput['payments'] {
+  const payments: NonNullable<TenantConfigInput['payments']> = {};
 
   if (process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) {
     payments.paypal = {
@@ -136,7 +139,7 @@ function paymentsFromEnv(): TenantConfig['payments'] {
   return Object.keys(payments).length ? payments : undefined;
 }
 
-function mailFromEnv(): TenantConfig['mail'] {
+function mailFromEnv(): TenantConfigInput['mail'] {
   if (
     !(
       process.env.MAIL_HOST &&
@@ -159,7 +162,7 @@ function mailFromEnv(): TenantConfig['mail'] {
   };
 }
 
-function mattermostFromEnv(): TenantConfig['mattermost'] {
+function mattermostFromEnv(): TenantConfigInput['mattermost'] {
   if (
     !process.env.MATTERMOST_TOKEN &&
     process.env.CREATE_MATTERMOST_USERS !== 'true'
@@ -173,7 +176,7 @@ function mattermostFromEnv(): TenantConfig['mattermost'] {
   };
 }
 
-function webPushFromEnv(): TenantConfig['webPush'] {
+function webPushFromEnv(): TenantConfigInput['webPush'] {
   if (!(process.env.VAPID_PRIVATE_KEY && process.env.VAPID_SUBJECT)) {
     return undefined;
   }
@@ -184,8 +187,8 @@ function webPushFromEnv(): TenantConfig['webPush'] {
   };
 }
 
-function oauthFromEnv(): TenantConfig['oauth'] {
-  const oauth: NonNullable<TenantConfig['oauth']> = {};
+function oauthFromEnv(): TenantConfigInput['oauth'] {
+  const oauth: NonNullable<TenantConfigInput['oauth']> = {};
 
   if (
     process.env.SHOW_GOOGLE_OAUTH === 'true' &&
@@ -214,7 +217,7 @@ function oauthFromEnv(): TenantConfig['oauth'] {
   return Object.keys(oauth).length ? oauth : undefined;
 }
 
-function buildGlobal(): GlobalConfig {
+function buildGlobal(): GlobalConfigInput {
   return {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
     betterAuthUrl: process.env.BETTER_AUTH_URL || undefined,
@@ -223,7 +226,7 @@ function buildGlobal(): GlobalConfig {
   };
 }
 
-function buildDefaultTenant(): TenantConfig {
+function buildDefaultTenant(): TenantConfigInput {
   return {
     db: {url: process.env.DATABASE_URL ?? ''},
     aos: {
@@ -285,7 +288,10 @@ without its settings being retyped. Prompts before overwriting an existing file.
 
     /* Built after loadEnv so the *FromEnv builders read the loaded values.
      * JSON.stringify drops `undefined` keys, so omitted sections disappear. */
-    const document: Record<string, string | GlobalConfig | TenantConfig> = {
+    const document: Record<
+      string,
+      string | GlobalConfigInput | TenantConfigInput
+    > = {
       $schema: './tenants.config.schema.json',
       $global: buildGlobal(),
       [DEFAULT_TENANT]: buildDefaultTenant(),
