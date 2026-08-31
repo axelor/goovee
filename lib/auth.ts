@@ -27,6 +27,7 @@ const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
   PROVIDER_NOT_REGISTERED: 'Unknown sign-in provider',
   TENANT_NOT_FOUND: 'Tenant not found',
+  TENANT_ID_IMMUTABLE: 'A session cannot change tenant',
   EMAIL_REQUIRED: 'Email is required',
   PARTNER_NOT_FOUND: 'Partner not found',
   REGISTRATION_FAILED: 'Registration failed',
@@ -229,6 +230,19 @@ const options = {
           return {data: session};
         },
       },
+      update: {
+        before: async (session: Record<string, unknown>) => {
+          /* The tenant belongs to the sign-in that established the session, so
+           * an update carrying one would move an authenticated session to a
+           * tenant nothing checked the credential against. Refused here as well
+           * as in the field declaration, because a session row can also be
+           * updated directly rather than through the API. */
+          if ('tenantId' in session) {
+            throw new APIError('BAD_REQUEST', ERROR_CODES.TENANT_ID_IMMUTABLE);
+          }
+          return {data: session};
+        },
+      },
     },
   },
   session: {
@@ -242,6 +256,13 @@ const options = {
       tenantId: {
         type: 'string',
         required: false,
+        /* Create-only: a session's tenant is settled by the sign-in that
+         * authenticated the user against that tenant. Any session field
+         * better-auth accepts as input can be rewritten through
+         * POST /api/auth/update-session, which is gated on nothing but a valid
+         * session — so a signed-in user could move their session to another
+         * tenant and be resolved there as whoever holds their email. */
+        input: false,
       },
     },
   },
