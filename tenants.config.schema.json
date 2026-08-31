@@ -164,7 +164,12 @@
               "clientId": {"type": "string", "minLength": 1},
               "clientSecret": {"type": "string", "minLength": 1},
               "certFingerprint": {"type": "string", "minLength": 1},
-              "beneficiaryName": {"type": "string", "minLength": 1},
+              "beneficiaryName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 70,
+                "description": "Name of the account a payment is credited to, at most 70 characters — the ISO 20022 limit for a creditor name. The value is sent as it stands, with nothing truncating it on the way out."
+              },
               "iban": {"type": "string", "minLength": 1},
               "bic": {"type": "string"},
               "certsDir": {

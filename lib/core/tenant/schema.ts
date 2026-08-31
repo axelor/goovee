@@ -250,7 +250,13 @@ const paymentsSchema = z
         clientId: z.string().min(1),
         clientSecret: z.string().min(1),
         certFingerprint: z.string().min(1),
-        beneficiaryName: z.string().min(1),
+        beneficiaryName: z
+          .string()
+          .min(1)
+          .max(70)
+          .describe(
+            'Name of the account a payment is credited to, at most 70 characters — the ISO 20022 limit for a creditor name. The value is sent as it stands, with nothing truncating it on the way out.',
+          ),
         iban: z.string().min(1),
         bic: z.string().optional(),
         certsDir: z
