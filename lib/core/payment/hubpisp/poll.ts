@@ -8,7 +8,12 @@ import type {HubPispLocalInstrument} from './constants';
 import {applyTransactionStatus} from './process';
 import {manager} from '@/tenant';
 
-// Tracks active payment request polls to prevent duplicate sessions.
+/* Tracks active payment request polls to prevent duplicate sessions. Keyed per
+ * tenant: each tenant initiates against its own Hub PISP account, and whether
+ * two accounts can issue the same resource id is the bank's business, not
+ * something this process can assume. Sharing a key would leave the second
+ * tenant's payment with no poll at all, so it would never learn the transfer
+ * settled. */
 const activePolls = new Set<string>();
 
 // Polling intervals in milliseconds
@@ -51,7 +56,9 @@ export async function pollPaymentRequestStatus({
   tenantId: string;
   localInstrument?: HubPispLocalInstrument;
 }): Promise<void> {
-  if (activePolls.has(paymentRequestResourceId)) {
+  const pollKey = `${tenantId}:${paymentRequestResourceId}`;
+
+  if (activePolls.has(pollKey)) {
     console.log('[HUBPISP][POLL] Poll already active, skipping', {
       paymentRequestResourceId,
       contextId,
@@ -59,7 +66,7 @@ export async function pollPaymentRequestStatus({
     return;
   }
 
-  activePolls.add(paymentRequestResourceId);
+  activePolls.add(pollKey);
 
   const {interval, maxDuration} = getPollConfig(localInstrument);
   const deadline = Date.now() + maxDuration;
@@ -126,7 +133,7 @@ export async function pollPaymentRequestStatus({
       try {
         const paymentRequest = await fetchPaymentRequestStatus(
           paymentRequestResourceId,
-          tenantId,
+          config,
         );
         transactionStatus =
           paymentRequest?.creditTransferTransaction?.[0]?.transactionStatus ||
@@ -181,6 +188,6 @@ export async function pollPaymentRequestStatus({
       {contextId, paymentRequestResourceId},
     );
   } finally {
-    activePolls.delete(paymentRequestResourceId);
+    activePolls.delete(pollKey);
   }
 }

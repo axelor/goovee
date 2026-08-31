@@ -1,5 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
+import {manager} from '@/tenant';
 import {formatNumber} from '@/locale/server/formatters';
 import {
   CONTEXT_STATUS,
@@ -69,7 +70,16 @@ export async function findPendingHubPispPayments({
     if (!resourceId || !amount) continue;
 
     try {
-      const linkStatus = await fetchPaymentLinkStatus(resourceId, tenantId);
+      /* Inside the attempt, so that a tenant this cannot be resolved for costs
+       * the link's live status and nothing more: the entry below is still shown
+       * from what the database holds. */
+      const config = await manager.getConfig(tenantId);
+
+      if (!config) {
+        throw new Error(`Tenant "${tenantId}" is not configured`);
+      }
+
+      const linkStatus = await fetchPaymentLinkStatus(resourceId, config);
       const consentStatus = linkStatus?.consentStatus;
 
       if (consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {

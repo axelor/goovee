@@ -4,7 +4,8 @@ import {
   buildPispHeaders,
   pispFetch,
 } from './crypto';
-import {resolveHubPispSettings} from './settings';
+import {getHubPispSettings} from './settings';
+import type {TenantConfig} from '@/tenant';
 import {
   generateRequestId,
   getDateHeader,
@@ -26,7 +27,7 @@ import type {
 
 export async function createPaymentLink(
   params: CreatePaymentLinkParams,
-  tenantId?: string,
+  config: TenantConfig,
 ): Promise<CreatePaymentLinkResult> {
   const {
     currency,
@@ -42,7 +43,7 @@ export async function createPaymentLink(
     pageConsentInfo: pci,
   } = params;
 
-  const settings = await resolveHubPispSettings(tenantId);
+  const settings = getHubPispSettings(config);
   const {
     apiUrl: baseUrl,
     certFingerprint: keyId,
@@ -150,9 +151,9 @@ export async function createPaymentLink(
 
 export async function fetchPaymentLinkStatus(
   resourceId: string,
-  tenantId?: string,
+  config: TenantConfig,
 ): Promise<PaymentLinkStatusResult> {
-  const settings = await resolveHubPispSettings(tenantId);
+  const settings = getHubPispSettings(config);
   const {apiUrl: baseUrl, certFingerprint: keyId} = settings;
 
   if (!(baseUrl && keyId && settings.certsDir)) {
@@ -216,9 +217,9 @@ export async function fetchPaymentLinkStatus(
  */
 export async function getPaymentLinkStatus(
   resourceId: string,
-  tenantId?: string,
+  config: TenantConfig,
 ): Promise<GetPaymentLinkStatusResult> {
-  const data = await fetchPaymentLinkStatus(resourceId, tenantId);
+  const data = await fetchPaymentLinkStatus(resourceId, config);
   const consentStatus = data.consentStatus;
 
   if (consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {

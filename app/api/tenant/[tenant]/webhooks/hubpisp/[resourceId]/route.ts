@@ -22,6 +22,7 @@ import type {
 import {PaymentOption} from '@/types';
 import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 import {manager} from '@/tenant';
+import type {TenantConfig} from '@/tenant';
 import {HubPispApiError} from '@/lib/core/payment/hubpisp/utils';
 
 /**
@@ -34,12 +35,12 @@ const LINK_FETCH_MAX_ATTEMPTS = 3;
 
 async function fetchPaymentLinkStatusWithRetry(
   resourceId: string,
-  tenantId: string,
+  config: TenantConfig,
 ): Promise<PaymentLinkStatusResult> {
   for (let attempt = 1; ; attempt++) {
     await new Promise(resolve => setTimeout(resolve, LINK_FETCH_DELAY_MS));
     try {
-      return await fetchPaymentLinkStatus(resourceId, tenantId);
+      return await fetchPaymentLinkStatus(resourceId, config);
     } catch (err) {
       if (
         !(err instanceof HubPispApiError) ||
@@ -86,7 +87,7 @@ export async function POST(
   /* The tenant's Hub PISP credentials drive every fetch attempt. */
   let linkData: PaymentLinkStatusResult;
   try {
-    linkData = await fetchPaymentLinkStatusWithRetry(resourceId, tenantId);
+    linkData = await fetchPaymentLinkStatusWithRetry(resourceId, config);
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
       console.warn(
@@ -123,8 +124,10 @@ export async function POST(
    * identity by comparing their certificate directories, which the same
    * certificate copied into two of them passes — and two such tenants can each
    * read the other's payment links, where a context id, being a per-tenant
-   * sequence, can name a pending context here. Matched case-insensitively: the
-   * value comes back through BPCE rather than from this deployment. */
+   * sequence, can name a pending context here. Every value read here was sent
+   * by this deployment when the payment was created, so one naming no tenant is
+   * refused as well; matched case-insensitively, since what arrives is BPCE's
+   * copy of it rather than ours. */
   const contextId = endToEnd.slice(0, separatorIndex);
   const paymentTenantId = endToEnd.slice(separatorIndex + 1);
 
@@ -133,10 +136,7 @@ export async function POST(
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  if (
-    paymentTenantId &&
-    paymentTenantId.toLowerCase() !== tenantId.toLowerCase()
-  ) {
+  if (paymentTenantId.toLowerCase() !== tenantId.toLowerCase()) {
     console.error('[HUBPISP][WEBHOOK] Payment belongs to another tenant', {
       paymentTenantId,
       tenantId,
@@ -213,7 +213,7 @@ export async function POST(
   try {
     paymentRequest = await fetchPaymentRequestStatus(
       paymentRequestResourceId,
-      tenantId,
+      config,
     );
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {

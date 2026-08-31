@@ -4,7 +4,8 @@ import {
   buildPispHeaders,
   pispFetch,
 } from './crypto';
-import {resolveHubPispSettings} from './settings';
+import {getHubPispSettings} from './settings';
+import type {TenantConfig} from '@/tenant';
 import {
   generateRequestId,
   getDateHeader,
@@ -19,9 +20,9 @@ import type {PaymentRequestStatusResult} from './types';
  */
 export async function fetchPaymentRequestStatus(
   resourceId: string,
-  tenantId?: string,
+  config: TenantConfig,
 ): Promise<PaymentRequestStatusResult> {
-  const settings = await resolveHubPispSettings(tenantId);
+  const settings = getHubPispSettings(config);
   const {apiUrl: baseUrl, certFingerprint: keyId} = settings;
 
   if (!(baseUrl && keyId && settings.certsDir)) {
