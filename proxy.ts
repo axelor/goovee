@@ -44,11 +44,14 @@ export function extractTenant(url: string, basePath: string = '') {
   return matches ? matches[1] : null;
 }
 
+/* Renders the not-found page for a request the proxy refuses, keeping the address
+ * the visitor asked for. `/_not-found` is where the framework serves that page
+ * from; every single-segment address belongs to the tenant segment. */
 function notFound(req: NextRequest, {message = ''}: {message?: string} = {}) {
   const searchParams = message ? `message=${encodeURIComponent(message)}` : '';
 
   return NextResponse.rewrite(
-    new URL(`/not-found${searchParams ? `?${searchParams}` : ''}`, req.url),
+    new URL(`/_not-found${searchParams ? `?${searchParams}` : ''}`, req.url),
   );
 }
 

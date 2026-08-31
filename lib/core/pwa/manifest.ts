@@ -4,19 +4,35 @@ import type {MetadataRoute} from 'next';
 import {APP_DESCRIPTION, APP_TITLE, DEFAULT_APP_TITLE} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
-/* Builds the web app manifest anchored at `scope` (already base-path-prefixed):
- * id, start_url and scope all point there, so the installed PWA launches inside
- * that scope and installs as a distinct app. For a tenant that scope is
- * `/<tenant>/` — the service-worker-backed area — so the installed app is
- * offline-capable at its entry point. Icons and screenshots are origin-level
- * assets shared by every tenant. */
-export function buildManifest(scope: string): MetadataRoute.Manifest {
+type ManifestAddresses = {
+  /* Identity of the installed app, resolved against the origin. Distinct per
+   * tenant, so installing a second tenant adds an app rather than replacing the
+   * first one. Never navigated to. */
+  id: string;
+  /* What the icon launches, so it has to be an address that resolves. */
+  startUrl: string;
+  /* The area that stays inside the app window — anything outside it opens in a
+   * browser tab with a URL bar. Bounded above by the scope of the service worker
+   * registered on the pages the app is installed from: a browser installs an app
+   * only where that registration encloses both this and `startUrl`, and scopes
+   * match by path prefix. */
+  scope: string;
+};
+
+/* Builds the web app manifest for one installed app. All three addresses are
+ * already base-path-prefixed. Icons and screenshots are origin-level assets
+ * shared by every tenant. */
+export function buildManifest({
+  id,
+  startUrl,
+  scope,
+}: ManifestAddresses): MetadataRoute.Manifest {
   return {
-    id: scope,
+    id,
     name: DEFAULT_APP_TITLE,
     short_name: APP_TITLE,
     description: APP_DESCRIPTION,
-    start_url: scope,
+    start_url: startUrl,
     scope,
     display: 'standalone',
     background_color: '#ffffff',

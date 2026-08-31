@@ -4,9 +4,13 @@ import type {MetadataRoute} from 'next';
 import {buildManifest} from '@/lib/core/pwa/manifest';
 import {withBasePath} from '@/lib/core/path/base-path';
 
-/* The origin-level manifest for tenant-less pages. Tenant pages link their own
- * `/<tenant>/manifest.webmanifest` (see app/[tenant]/manifest.webmanifest), so
- * an installed PWA launches inside that tenant's service-worker scope. */
+/* The deployment-level manifest, linked from the pages that name no tenant (`/`
+ * and `/auth/*`). Tenant pages link their own `/<tenant>/manifest.webmanifest`,
+ * which installs as a separate app. Installing from here launches `/`, which
+ * resolves a landing workspace only where the deployment has a single tenant;
+ * with several, `/` names no tenant and so resolves nothing. */
 export default function manifest(): MetadataRoute.Manifest {
-  return buildManifest(withBasePath('/'));
+  const root = withBasePath('/');
+
+  return buildManifest({id: root, startUrl: root, scope: root});
 }

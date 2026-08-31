@@ -10,17 +10,26 @@ import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
 import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
+import {manager} from '@/tenant';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
 
-/* Point the manifest link at this tenant's manifest so an installed PWA starts
- * inside the tenant's service-worker scope; overrides the root manifest. */
+/* Point the manifest link at this tenant's manifest, so installing from one of
+ * its pages installs an app that launches into this tenant; overrides the root
+ * manifest. A segment naming no configured tenant keeps the root manifest, since
+ * the per-tenant address answers 404: metadata is resolved from the segments an
+ * address matched, so `/<segment>/<workspace>` resolves this one whatever it ends
+ * up rendering. */
 export async function generateMetadata(props: {
   params: Promise<{tenant: string}>;
 }): Promise<Metadata> {
   const {tenant} = await props.params;
+  const knownTenantIds = await manager.listTenantIds();
+
+  if (!knownTenantIds.includes(tenant)) return {};
+
   return {manifest: withBasePath(`/${tenant}/manifest.webmanifest`)};
 }
 
