@@ -42,14 +42,25 @@ async function connectTenant(
     throw new Error('Invalid configuration');
   }
 
-  await client.$connect();
-  await client.$sync();
-  // Create unaccent extension for PostgreSQL if it doesn't exist
-  await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
+  try {
+    await client.$connect();
+    await client.$sync();
+    // Create unaccent extension for PostgreSQL if it doesn't exist
+    await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
 
-  /* Storage is per-tenant config; make sure the directory exists before any
-   * upload writes to it. */
-  ensureStorageDir(config.aos.storage);
+    /* Storage is per-tenant config; make sure the directory exists before any
+     * upload writes to it. */
+    ensureStorageDir(config.aos.storage);
+  } catch (err) {
+    await client.$disconnect().catch((disconnectError: unknown) => {
+      console.error(
+        `Failed to release tenant "${id}" after a failed connection:`,
+        disconnectError,
+      );
+    });
+
+    throw err;
+  }
 
   return {id, config, client};
 }
