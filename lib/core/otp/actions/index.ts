@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import {after} from 'next/server';
-import {DEFAULT_TENANT} from '@/constants';
 import {getTranslation} from '@/locale/server';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 import NotificationManager, {NotificationType} from '@/notification';
@@ -103,7 +102,7 @@ export async function generateOTP({
 }: {
   email: string;
   scope?: string;
-  tenantId?: string;
+  tenantId: string;
   client: Client;
   mailConfig?: MailConfig;
 }): Promise<{error: boolean; message: string} | undefined> {
@@ -121,7 +120,7 @@ export async function generateOTP({
 
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      await tenantConfigProvider.get(tenantId ?? DEFAULT_TENANT),
+      await tenantConfigProvider.get(tenantId),
     );
     if (!result?.otp) return;
 
