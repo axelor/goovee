@@ -171,20 +171,17 @@ export default function SignUp({
   };
 
   const handleSubscription = async () => {
-    if (!workspace || !tenantId) return;
+    if (!workspace) return;
 
     try {
-      const res: any = await subscribe({
-        workspace,
-        tenantId,
-      });
+      const res = await subscribe({workspace});
 
       if (res.error) {
         toast({
           variant: 'destructive',
           title: res.message,
         });
-      } else if (res.success) {
+      } else {
         toast({
           variant: 'success',
           title: res.message,
