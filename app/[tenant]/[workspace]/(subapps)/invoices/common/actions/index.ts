@@ -46,6 +46,7 @@ import {
   STRIPE_CANCELLATION_REASONS,
 } from '@/lib/core/payment/stripe/constants';
 import type {CountryCode} from '@/lib/core/payment/stripe/types';
+import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
 import {scale} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {ensureLeadingSlash} from '@/utils/url';
@@ -664,6 +665,14 @@ export async function createStripeBankTransferIntent({
   }
   const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
+
+  /* Not offered to a payer whose tenant cannot settle a transfer, so reaching
+   * this is a stale page or a direct call. Refused rather than served, because
+   * what follows hands back the account details to wire real money to, and
+   * nothing would confirm the money arriving. */
+  if (!canSettleStripeBankTransfer(tenant.config)) {
+    return {error: true, message: await t('Bank transfer is not available.')};
+  }
 
   const validationResult = await validatePaymentData({
     config,

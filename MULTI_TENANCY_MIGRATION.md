@@ -54,6 +54,9 @@ inherited from another tenant or the environment:
 `certsDir`. Migrating writes `certs/hubpisp`, the path the previous release
 read; a tenant added by hand needs its own.
 
+Set `payments.stripe.webhookSecret` for every tenant that takes bank transfer.
+Card payments do not need it.
+
 Browser variables (`publicEnv`) keys: `GOOVEE_PUBLIC_HOST`,
 `GOOVEE_PUBLIC_PAYPAL_CLIENT_ID`, `GOOVEE_PUBLIC_LINKEDIN_URL`,
 `GOOVEE_PUBLIC_TWITTER_URL`, `GOOVEE_PUBLIC_INSTAGRAM_URL`,

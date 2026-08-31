@@ -40,6 +40,7 @@ export function InvoicePayments({
   resetForm,
   token,
   onPaymentUpdate,
+  allowStripeBankTransfer,
 }: {
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoice: Cloned<Invoice>;
@@ -49,6 +50,7 @@ export function InvoicePayments({
   resetForm: () => void;
   token?: string;
   onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
+  allowStripeBankTransfer: boolean;
 }) {
   const {workspaceURI, workspaceURL} = useWorkspace();
 
@@ -172,14 +174,22 @@ export function InvoicePayments({
         });
       }}
       onStripeValidateSession={handleStripeValidations}
-      onCreateBankTransferIntent={async () => {
-        return await createStripeBankTransferIntent({
-          invoice: {id: invoice.id},
-          amount,
-          workspaceURL,
-          token,
-        });
-      }}
+      /* Left off entirely for a tenant that cannot settle a transfer: the
+       * option is offered on the strength of this handler existing, and a
+       * transfer nothing confirms leaves the payer out of pocket against an
+       * invoice that stays unpaid. */
+      onCreateBankTransferIntent={
+        allowStripeBankTransfer
+          ? async () => {
+              return await createStripeBankTransferIntent({
+                invoice: {id: invoice.id},
+                amount,
+                workspaceURL,
+                token,
+              });
+            }
+          : undefined
+      }
       onPayboxCreateOrder={async ({uri}) => {
         return await payboxCreateOrder({
           invoice: {id: invoice.id},

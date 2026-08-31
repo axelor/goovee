@@ -193,4 +193,5 @@ export type TotalProps = {
   workspaceURI: string;
   token?: string;
   onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
+  allowStripeBankTransfer: boolean;
 };

@@ -12,6 +12,7 @@ import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
+import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -67,6 +68,9 @@ async function Invoice({
         config={clone(config)}
         workspaceURI={workspaceURI}
         token={access.token}
+        allowStripeBankTransfer={canSettleStripeBankTransfer(
+          access.tenant.config,
+        )}
       />
     );
   }
@@ -126,6 +130,9 @@ async function Invoice({
       invoice={clone(invoice)}
       config={clone(config)}
       workspaceURI={workspaceURI}
+      allowStripeBankTransfer={canSettleStripeBankTransfer(
+        access.tenant.config,
+      )}
     />
   );
 }

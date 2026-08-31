@@ -35,6 +35,7 @@ interface ContentProps {
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   workspaceURI: string;
   token?: string;
+  allowStripeBankTransfer: boolean;
 }
 
 function getInvoiceStatusKey(invoice: Cloned<InvoiceType>): StatusKey {
@@ -72,6 +73,7 @@ export default function Content({
   config,
   workspaceURI,
   token,
+  allowStripeBankTransfer,
 }: ContentProps) {
   const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
 
@@ -184,6 +186,7 @@ export default function Content({
               workspaceURI={workspaceURI}
               token={token}
               onPaymentUpdate={handlePaymentUpdate}
+              allowStripeBankTransfer={allowStripeBankTransfer}
             />
           </div>
         </div>
