@@ -118,13 +118,30 @@ export async function POST(
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  /* Only the context id is taken from endToEnd; the tenant comes from the
-   * authoritative path param. A mismatch surfaces as "context not found" when
-   * the id is looked up in the path tenant's database. */
+  /* The path names the tenant; the tenant the payment was created for is read
+   * only to refuse one belonging to another. Tenants are kept off a single bank
+   * identity by comparing their certificate directories, which the same
+   * certificate copied into two of them passes — and two such tenants can each
+   * read the other's payment links, where a context id, being a per-tenant
+   * sequence, can name a pending context here. Matched case-insensitively: the
+   * value comes back through BPCE rather than from this deployment. */
   const contextId = endToEnd.slice(0, separatorIndex);
+  const paymentTenantId = endToEnd.slice(separatorIndex + 1);
 
   if (!contextId) {
     console.error('[HUBPISP][WEBHOOK] Failed to parse endToEnd', {endToEnd});
+    return new NextResponse('Bad Request', {status: 400});
+  }
+
+  if (
+    paymentTenantId &&
+    paymentTenantId.toLowerCase() !== tenantId.toLowerCase()
+  ) {
+    console.error('[HUBPISP][WEBHOOK] Payment belongs to another tenant', {
+      paymentTenantId,
+      tenantId,
+      resourceId,
+    });
     return new NextResponse('Bad Request', {status: 400});
   }
 

@@ -57,6 +57,39 @@ async function handleWebhookPaymentFailure({
   });
 }
 
+/* A Stripe account delivers every event to every endpoint enabled on it, and
+ * each endpoint's signing secret verifies its own delivery — so a verified
+ * event proves which account sent it, never which tenant it was created for,
+ * and two tenants configured against one account each receive the other's
+ * events. Payment context ids are per-tenant sequences that both start at 1,
+ * so a foreign intent can name a pending context here: its amount would be
+ * credited to this tenant's invoice, and the context a payment still on its way
+ * needs would be spent.
+ *
+ * A missing tenant is not a mismatch: no intent this application creates
+ * carries a context id without one. A producer added later must set both, or
+ * this check silently stops covering its intents. */
+function belongsToTenant(
+  paymentIntent: Stripe.PaymentIntent,
+  tenantId: string,
+  eventId: string,
+) {
+  const intentTenantId = paymentIntent.metadata.tenant_id;
+
+  if (intentTenantId && intentTenantId !== tenantId) {
+    console.error('Stripe event belongs to another tenant', {
+      eventId,
+      intentTenantId,
+      tenantId,
+      paymentIntentId: paymentIntent.id,
+    });
+
+    return false;
+  }
+
+  return true;
+}
+
 export async function POST(
   req: Request,
   props: {params: Promise<{tenant: string}>},
@@ -121,6 +154,11 @@ export async function POST(
             metadata: paymentIntent.metadata,
           });
           // Permanent error — retrying won't fix missing metadata. Return 200 to stop Stripe retries.
+          break;
+        }
+
+        if (!belongsToTenant(paymentIntent, tenantId, event.id)) {
+          // Permanent — the intent names another tenant. Return 200 to stop Stripe retries.
           break;
         }
 
@@ -304,6 +342,10 @@ export async function POST(
             eventId: event.id,
             metadata: paymentIntent.metadata,
           });
+          break;
+        }
+
+        if (!belongsToTenant(paymentIntent, tenantId, event.id)) {
           break;
         }
 
