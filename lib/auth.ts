@@ -9,6 +9,11 @@ import {
   defineErrorCodes,
 } from 'better-auth';
 import {APIError, getOAuthState} from 'better-auth/api';
+import {
+  SECURE_COOKIE_PREFIX,
+  getCookieCache,
+  parseCookies,
+} from 'better-auth/cookies';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
 import oauthProviders, {
@@ -338,3 +343,65 @@ export const auth = betterAuth({
 });
 
 export type Auth = typeof auth;
+
+let cookieReadFailureReported = false;
+
+/* The tenant a session belongs to. Read from the encrypted (JWE) session-data
+ * cookie rather than through `auth.api.getSession()`, which runs the
+ * customSession enrichment — a partner lookup in the session's tenant — on
+ * every call, including every <Link> prefetch, while the tenant id is already
+ * in the cookie and cannot change for the life of a session.
+ *
+ * The secret, the token cookie's name and the session-data cookie's `__Secure-`
+ * prefix all come from the auth instance, since a cookie reader left to itself
+ * resolves them from things that do not describe this deployment: the secret
+ * from BETTER_AUTH_SECRET, which is not where this deployment keeps it — the
+ * configuration document is — and the prefix from the build mode, while the
+ * cookie is written with it or without it according to the configured base URL,
+ * agreeing with the build mode only when no base URL is set. Both mistakes are
+ * invisible: a cookie looked for under the wrong name reads as absent, and
+ * every request then takes the expensive path in silence. Giving better-auth a
+ * `cookiePrefix` or a custom cookie name under `advanced` obliges an update
+ * here — the read below still assumes its default names. */
+export async function getSessionTenantId(
+  headers: Headers,
+): Promise<string | undefined> {
+  const {secret, authCookies} = await auth.$context;
+
+  /* Nothing to read for a visitor holding no session token. Matched by the
+   * instance's own name for it: a name this failed to recognise would make
+   * every request look anonymous, and a caller checking a session against the
+   * tenant it is reaching would let all of them through. */
+  const cookies = parseCookies(headers.get('cookie') ?? '');
+
+  if (!cookies.has(authCookies.sessionToken.name)) {
+    return undefined;
+  }
+
+  try {
+    const cached = await getCookieCache(headers, {
+      secret,
+      strategy: options.session.cookieCache.strategy,
+      isSecure: authCookies.sessionData.name.startsWith(SECURE_COOKIE_PREFIX),
+    });
+
+    const cachedTenantId: unknown = cached?.session.tenantId;
+
+    if (typeof cachedTenantId === 'string') {
+      return cachedTenantId;
+    }
+  } catch (err) {
+    /* Not expected: no cookie makes the read throw, since an undecodable one,
+     * or one written under another secret, reads as absent. Caught so that a
+     * library that starts throwing costs a full session lookup rather than the
+     * request, and reported once — it would be the same failure every time. */
+    if (!cookieReadFailureReported) {
+      cookieReadFailureReported = true;
+      console.error('Failed to read the tenant from the session cookie:', err);
+    }
+  }
+
+  const session = await auth.api.getSession({headers});
+
+  return session?.user.tenantId ?? undefined;
+}

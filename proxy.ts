@@ -1,8 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {auth} from '@/lib/auth';
-import {getCookieCache, getSessionCookie} from 'better-auth/cookies';
+import {getSessionTenantId} from '@/lib/auth';
 import {getBasePath} from '@/lib/core/path/base-path';
 
 export const TENANT_HEADER = 'x-tenant-id';
@@ -57,32 +56,6 @@ function notFound(req: NextRequest, {message = ''}: {message?: string} = {}) {
 
 const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
 
-async function getActiveSessionTenant(
-  req: NextRequest,
-): Promise<string | undefined> {
-  if (!getSessionCookie(req)) return undefined;
-
-  /* Read the tenant id from the encrypted (JWE) session-data cookie instead
-   * of auth.api.getSession(): getSession runs the customSession enrichment
-   * query on every matched request — including every <Link> prefetch — while
-   * the proxy only needs the tenant id, which is immutable for a session and
-   * already in the cookie. `strategy` must match session.cookieCache.strategy
-   * in lib/auth.ts. Fall back to getSession when the cache is absent, expired,
-   * or undecodable. */
-  try {
-    const cached = await getCookieCache(req, {strategy: 'jwe'});
-    const cachedTenantId: unknown = cached?.session.tenantId;
-    if (typeof cachedTenantId === 'string') {
-      return cachedTenantId;
-    }
-  } catch {
-    // fall through to a full session lookup
-  }
-
-  const session = await auth.api.getSession({headers: req.headers});
-  return session?.user.tenantId ?? undefined;
-}
-
 export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;
   const pathname = url.pathname;
@@ -100,7 +73,7 @@ export default async function proxy(req: NextRequest) {
      * is never silently dropped. Reaching a different tenant is refused with a
      * prompt to log out first — the cookie is left intact, so the user keeps
      * their session and logs out explicitly before switching. */
-    const activeTenant = await getActiveSessionTenant(req);
+    const activeTenant = await getSessionTenantId(req.headers);
     if (activeTenant && activeTenant !== tenant) {
       return notFound(req, {
         message:
