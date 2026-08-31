@@ -13,8 +13,13 @@ export type OAuthRegistration = {
 
 const registrations = new Map<string, OAuthRegistration>();
 
-function buildConfigs(): GenericOAuthConfig[] {
-  const configs: GenericOAuthConfig[] = [];
+/* A generic provider sends a code challenge only when it is asked to, where a
+ * built-in one always does. Carrying pkce in the type is what keeps the next
+ * provider added here from being registered without one. */
+type TenantOAuthConfig = GenericOAuthConfig & {pkce: true};
+
+function buildConfigs(): TenantOAuthConfig[] {
+  const configs: TenantOAuthConfig[] = [];
 
   /* One pass fills both the list returned here and the lookup it is paired
    * with, and the plugin keeps the list it is handed, so which providers are
@@ -39,6 +44,7 @@ function buildConfigs(): GenericOAuthConfig[] {
         clientId: oauth.google.clientId,
         clientSecret: oauth.google.clientSecret,
         scopes: ['openid', 'email', 'profile'],
+        pkce: true,
         authorizationUrlParams: {prompt: 'select_account'},
       });
       registrations.set(providerId, {provider: 'google', tenantId});
@@ -52,6 +58,7 @@ function buildConfigs(): GenericOAuthConfig[] {
         clientId: oauth.keycloak.clientId,
         clientSecret: oauth.keycloak.clientSecret,
         scopes: ['openid', 'email', 'profile'],
+        pkce: true,
       });
       registrations.set(providerId, {provider: 'keycloak', tenantId});
     }
