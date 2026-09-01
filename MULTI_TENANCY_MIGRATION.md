@@ -291,7 +291,7 @@ process's working directory, so write them as absolute paths.
 
    It applies the checks start-up applies and names every fault against the
    field holding it; a document with no fault is reported as accepted, listing
-   the tenants and the origin each is served on. It ends non-zero on a document
+   the tenants and the address each is reached at. It ends non-zero on a document
    that would be refused, so a deployment can be gated on it. Nothing is
    connected to, so an unreachable database, AOS instance or mail host is not
    reported here. Where no checkout is available, step 3 below is the same
@@ -309,3 +309,113 @@ process's working directory, so write them as absolute paths.
    registrations point at the new addresses.
 5. Watch gateway and notification delivery logs for 404s and signature failures,
    and re-point any registration that failed.
+
+## 8. Serve a tenant on its own domain
+
+Optional, and done once the deployment above works. A tenant reached this way
+carries no tenant segment: `https://acme.example.com/sales` rather than
+`https://portal.example.com/acme/sales`.
+
+Take the tenant out of service for the duration. Each step below invalidates the
+addresses the one before it used.
+
+### Change the document
+
+Set `routing` on the tenant and point it at the new origin:
+
+```json
+"acme": {
+  "routing": "host",
+  "publicEnv": { "GOOVEE_PUBLIC_HOST": "https://acme.example.com" }
+}
+```
+
+That host must serve no other tenant. Where `$global.defaultTenant` names the
+tenant being moved and `$global.betterAuthUrl`'s own host still has to answer
+`/`, point `defaultTenant` at a tenant that is still reached by path.
+
+### Configure the proxy
+
+Pass the visitor's host through:
+
+<!-- prettier-ignore -->
+```nginx
+proxy_set_header Host             $host;
+proxy_set_header X-Forwarded-Host $host;
+```
+
+nginx sends its own upstream address as `Host` by default and sets no
+`X-Forwarded-*` header at all. Left that way the deployment resolves no tenant
+and refuses every form submission. Set `X-Forwarded-Host` explicitly rather than
+relying on `Host`: an unset one is passed through from the client, and whoever
+sets it chooses which tenant answers.
+
+Serve the new host over HTTPS. Notifications, offline caching and installing the
+app all need it.
+
+A page request arriving on a host no tenant declares answers not-found. Point
+liveness and readiness probes at `/api/info`, which answers on any host.
+
+### Move the stored workspace URLs
+
+In that tenant's own database:
+
+```
+<oldOrigin><basePath>/<tenantId>/<workspace>  ->  <newOrigin><basePath>/<workspace>
+```
+
+With no base path, `<tenantId>` as `acme` and the origins above:
+
+```sql
+UPDATE portal_portal_workspace
+SET
+  url = replace(
+    url,
+    'https://portal.example.com/acme',
+    'https://acme.example.com'
+  );
+```
+
+### Re-register the addresses
+
+Every address from sections 3, 4 and 5 keeps its path and changes its host.
+
+| Registration                    | Was                                             | Now                                           |
+| ------------------------------- | ----------------------------------------------- | --------------------------------------------- |
+| Gateway webhooks (section 3)    | `portal.example.com/api/tenant/acme/…`          | `acme.example.com/api/tenant/acme/…`          |
+| AOS notifications (section 4)   | `portal.example.com/api/tenant/acme/…`          | `acme.example.com/api/tenant/acme/…`          |
+| OAuth redirect URIs (section 5) | `portal.example.com/api/auth/oauth2/callback/…` | `acme.example.com/api/auth/oauth2/callback/…` |
+
+The tenant stays in the path of the `/api/tenant/…` addresses; only the host
+changes.
+
+### Restart and verify
+
+1. `pnpm config:check /etc/goovee/tenants.config.json` — the tenant is listed
+   with its new address and `[routed by host]`.
+2. Restart the portal.
+3. Open `https://acme.example.com/` and confirm it lands on a workspace.
+4. Open `https://portal.example.com/acme` and confirm it answers 308 to
+   `https://acme.example.com/`.
+5. Sign in on the new host, then confirm a notification arrives and the app can
+   be installed.
+
+### What the move costs
+
+- Everyone signs in again. A session cookie belongs to the host it was written
+  for and does not follow the tenant.
+- An installed app keeps launching at the old address. It has to be removed and
+  re-installed from the new one.
+- Push subscriptions stop being delivered. They belong to the old origin's
+  service worker, so every row in `portal_push_subscription` for this tenant is
+  dead and can be deleted; visitors re-grant notifications on the new host.
+- Old addresses answer 308 to the new ones for as long as the previous origin
+  still reaches the deployment.
+
+### Workspace names to avoid
+
+On its own domain the first path segment is the workspace name, so a workspace
+whose slug is one the deployment answers itself is unreachable: `auth`, `api`,
+`images`, `locales`, `pdfjs`, `pwa`, `website`, `sign-out` and
+`manifest.webmanifest`. AOS accepts those names, and nothing reports the clash —
+rename the workspace.
