@@ -112,12 +112,13 @@ const serwist = new Serwist({
      * HTTP cache unless translations actually changed. Must be listed before
      * defaultCache to override the default NetworkFirst rule for /api/**.
      *
-     * The tenant-less address is matched for completeness rather than effect.
-     * This worker is registered for one tenant's path, so it controls only the
-     * pages under it, and those always name their tenant in the address they
-     * ask for. The entry, sign-in and error pages are the ones asking without a
-     * tenant, and no registration covers them — their translations revalidate
-     * through the browser's own cache instead of from here. */
+     * Both addresses are matched because which one is asked for follows the scope
+     * this worker was registered at. Registered under a tenant's path it controls
+     * only the pages beneath it, and those always name their tenant; the entry,
+     * sign-in and error pages ask without one and no registration covers them, so
+     * their translations revalidate through the browser's own cache. Registered at
+     * the root of an origin a single tenant holds, it controls those pages too,
+     * and the tenant-less address is the one they ask for. */
     {
       matcher: /\/api\/(tenant\/[^/]+\/)?locales\//,
       handler: new StaleWhileRevalidate({

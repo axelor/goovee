@@ -4,12 +4,16 @@ import {NextResponse} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {resolveLanding} from '@/app/landing';
 
-/* The tenant's entry address. The installed app's `start_url` is `/<tenant>/`
- * (see manifest.webmanifest/route.ts), which arrives here once the trailing
- * slash is normalised away. A route handler rather than a page so that the
- * answer is a redirect and no document is ever created here: `/<tenant>` lies
- * outside the service worker's `/<tenant>/` scope — scope matching is a string
- * prefix, so the trailing slash excludes the bare segment — and a document is
+/* The tenant's entry address, under the tenant path segment. A tenant reached by
+ * host is entered at the root of its origin instead, which the proxy rewrites to
+ * this address, so both shapes arrive here.
+ *
+ * The installed app's `start_url` is that entry with a trailing slash (see
+ * manifest.webmanifest/route.ts), which arrives here once the slash is normalised
+ * away. A route handler rather than a page so that the answer is a redirect and no
+ * document is ever created here: under a shared origin `/<tenant>` lies outside
+ * the service worker's `/<tenant>/` scope — scope matching is a string prefix, so
+ * the trailing slash excludes the bare segment — and a document is
  * matched to a worker by the URL it was created at, for its whole life. A page
  * here would therefore hand the visitor an uncontrolled document that no later
  * navigation can repair: no offline cache, and a push subscription that waits on
