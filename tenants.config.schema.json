@@ -277,12 +277,12 @@
         },
         "required": ["privateKey", "subject"],
         "additionalProperties": false,
-        "description": "Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. The service worker registers per tenant (scope /<tenant>/), so each tenant holds its own push subscription and its own key pair takes effect even on a shared origin."
+        "description": "Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. The service worker registers once per tenant — under the tenant path segment where several tenants share an origin, and at the root of the origin where the tenant has one to itself — so each tenant holds its own push subscription and its own key pair takes effect either way."
       },
       "routing": {
         "type": "string",
         "enum": ["path", "host"],
-        "description": "How this tenant's addresses are shaped. \"path\" (the default) carries the tenant id as the first path segment, e.g. https://portal.example.com/acme/sales, and the origin may be shared with other tenants. \"host\" drops that segment and lets publicEnv.GOOVEE_PUBLIC_HOST name the tenant instead, e.g. https://acme.example.com/sales — which needs a proxy that passes the host on (see the migration guide), and an origin no other tenant is served on. Changing this changes every address the tenant is reached at: the stored workspace URLs, the registered OAuth redirect URIs and the links already sent out all carry the old shape."
+        "description": "How this tenant's addresses are shaped. \"path\" (the default) carries the tenant id as the first path segment, e.g. https://portal.example.com/acme/sales, and the origin may be shared with other tenants. \"host\" drops that segment and lets publicEnv.GOOVEE_PUBLIC_HOST name the tenant instead, e.g. https://acme.example.com/sales. \"host\" needs a host no other tenant is served on, and a proxy that sets X-Forwarded-Host (or Host) to the address the visitor used rather than the address of the server behind it — nginx sends its own upstream address by default, and a deployment left that way resolves no tenant and refuses every form submission. Changing this changes every address the tenant is reached at: the stored workspace URLs, the registered OAuth redirect URIs and the links already sent out all carry the old shape."
       },
       "includeLanguage": {
         "type": "boolean",
