@@ -3,6 +3,7 @@ import {NextRequest, NextResponse} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {getSessionTenantId} from '@/lib/auth';
 import {isReservedSegment} from '@/lib/core/path/reserved-segments';
+import {getTenantConfig} from '@/tenant/config-provider';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
@@ -45,12 +46,36 @@ export function extractTenant(url: string) {
 /* Renders the not-found page for a request the proxy refuses, keeping the address
  * the visitor asked for. `/_not-found` is where the framework serves that page
  * from; every single-segment address belongs to the tenant segment. */
-function notFound(req: NextRequest, {message = ''}: {message?: string} = {}) {
-  const searchParams = message ? `message=${encodeURIComponent(message)}` : '';
+function notFound(req: NextRequest) {
+  const url = req.nextUrl.clone();
 
-  return NextResponse.rewrite(
-    new URL(`/_not-found${searchParams ? `?${searchParams}` : ''}`, req.url),
-  );
+  url.pathname = '/_not-found';
+  url.search = '';
+
+  return NextResponse.rewrite(url);
+}
+
+/* Sends a session that cannot reach an address to the sign-out screen of the
+ * tenant it belongs to, carrying that address to return to.
+ *
+ * A redirect rather than a rewrite, because the screen has to be reached under
+ * `/<tenant>/`: the document is bound to the service worker whose scope covers
+ * the address it was created at, and only the worker of the tenant being left
+ * holds the push subscription to revoke. Rendering the screen at the refused
+ * address would leave that subscription in place.
+ *
+ * 303, so a request that is not a GET arrives at the screen as one. */
+function signOutFirst(
+  req: NextRequest,
+  {activeTenant}: {activeTenant: string},
+) {
+  const url = req.nextUrl.clone();
+  const callbackurl = url.pathname + url.search;
+
+  url.pathname = `/${activeTenant}/sign-out`;
+  url.search = new URLSearchParams({callbackurl}).toString();
+
+  return NextResponse.redirect(url, 303);
 }
 
 export default async function proxy(req: NextRequest) {
@@ -74,15 +99,16 @@ export default async function proxy(req: NextRequest) {
   }
 
   /* One tenant session per browser: a session belongs to a single tenant and
-   * is never silently dropped. Reaching a different tenant is refused with a
-   * prompt to log out first — the cookie is left intact, so the user keeps
-   * their session and logs out explicitly before switching. */
+   * is never silently dropped. Reaching a different tenant is refused, and the
+   * cookie left intact, so the visitor keeps their session and signs out
+   * explicitly on the screen they are sent to instead.
+   *
+   * Only a tenant the document names gets that screen, since the screen sends
+   * the visitor on to it. A name the document does not hold carries on to the
+   * not-found a visitor with no session gets for it. */
   const activeTenant = await getSessionTenantId(req.headers);
-  if (activeTenant && activeTenant !== tenant) {
-    return notFound(req, {
-      message:
-        'You are already loggedin to a tenant. For accessing different tenant, you need to logout first.',
-    });
+  if (activeTenant && activeTenant !== tenant && getTenantConfig(tenant)) {
+    return signOutFirst(req, {activeTenant});
   }
 
   const headers = new Headers(req.headers);
