@@ -332,12 +332,9 @@ Set `routing` on the tenant and point it at the new origin:
 
 That host must serve no other tenant.
 
-Giving the tenant a host of its own needs no change to `$global.defaultTenant`:
-`/` on the deployment origin resolves the default tenant and is answered with
-that tenant's own absolute address, so it lands on the new host by itself. The
-one setup that does need a change is moving a tenant onto the host
-`$global.betterAuthUrl` itself names, which makes that tenant the answer to `/`
-there — `defaultTenant` then has to name it, or be removed.
+Leave `$global.defaultTenant` as it is, unless the new host is the one
+`$global.betterAuthUrl` names. Then `defaultTenant` has to name this tenant, or
+be removed; the document is refused otherwise.
 
 ### Configure the proxy
 
@@ -349,22 +346,18 @@ proxy_set_header Host             $http_host;
 proxy_set_header X-Forwarded-Host $http_host;
 ```
 
-nginx sends its own upstream address as `Host` by default and sets no
-`X-Forwarded-*` header at all. Left that way the deployment resolves no tenant
-and refuses every form submission. Set `X-Forwarded-Host` explicitly rather than
-relying on `Host`: an unset one is passed through from the client, and whoever
-sets it chooses which tenant answers.
+Set both headers, and set them explicitly. nginx sends its own upstream address
+as `Host` by default and sets no `X-Forwarded-*` header at all; left that way the
+deployment resolves no tenant and refuses every form submission.
 
-`$http_host` rather than `$host`, which drops the port. A tenant served on a port
-the scheme does not imply declares it in `GOOVEE_PUBLIC_HOST`, and the host is
-matched against that in full — so `$host` would resolve no tenant for it and
-answer not-found on every page.
+Use `$http_host`, not `$host`. `$host` drops the port, and a tenant served on a
+port its scheme does not imply is then never resolved.
 
 Serve the new host over HTTPS. Notifications, offline caching and installing the
 app all need it.
 
-A page request arriving on a host no tenant declares answers not-found. Point
-liveness and readiness probes at `/api/info`, which answers on any host.
+Point liveness and readiness probes at `/api/info`. Page addresses answer
+not-found on a host no tenant declares; `/api/info` answers on any host.
 
 ### Move the stored workspace URLs
 
@@ -385,6 +378,17 @@ SET
     'https://acme.example.com'
   );
 ```
+
+### Delete the old push subscriptions
+
+Before the tenant goes back into service, in that tenant's own database:
+
+```sql
+DELETE FROM portal_push_subscription;
+```
+
+They keep being delivered otherwise, and every notification arrives twice once
+visitors re-grant them on the new host.
 
 ### Re-register the addresses
 
@@ -412,34 +416,19 @@ changes.
 
 ### What the move costs
 
-- Everyone signs in again. A session cookie belongs to the host it was written
-  for and does not follow the tenant.
-- An installed app keeps launching at the old address. It has to be removed and
-  re-installed from the new one.
-- Every row in `portal_push_subscription` for this tenant has to be deleted, and
-  before the tenant goes back into service. Those subscriptions keep working: a
-  subscription is addressed to the push service rather than to the origin, the
-  worker that receives it survives on the old origin, and the signing key is
-  unchanged — so leaving the rows in place delivers every notification twice once
-  visitors re-grant them on the new host. Nothing on the old origin unregisters
-  that worker.
+- Everyone signs in again.
+- Everyone re-grants notifications.
+- An installed app has to be removed and re-installed from the new address.
 - Page addresses under the old origin answer 308 to the new ones for as long as
-  it still reaches the deployment. Its sign-in screens answer 307 instead, its
-  route handlers and static files answer in place, and the tenant's manifest
-  stays where it is — so an installed app keeps launching at the old address
-  until it is replaced.
+  it still reaches the deployment. Its sign-in screens answer 307, and its route
+  handlers, static files and the tenant's manifest answer in place.
 
 ### Workspace names to avoid
 
-On its own domain the first path segment is the workspace name, so a workspace
-whose slug is one the deployment answers itself is unreachable: `auth`, `api`,
-`images`, `locales`, `pdfjs`, `pwa`, `website`, `sign-out` and
-`manifest.webmanifest`.
+On its own domain the first path segment is the workspace name, so rename any
+workspace of this tenant whose slug is `auth`, `api`, `images`, `locales`,
+`pdfjs`, `pwa`, `website`, `sign-out` or `manifest.webmanifest`, or whose slug
+carries a dot (`sales.v2`). Those addresses are answered by the deployment itself
+and never reach the workspace.
 
-A slug carrying a dot — `sales.v2` — is unreachable for the same reason: a first
-segment that looks like a filename is served from the static directories rather
-than routed. Under a tenant path segment neither restriction applies, because the
-tenant id sits in first position and the document already refuses these names for
-it.
-
-AOS accepts all of them and nothing reports the clash — rename the workspace.
+AOS accepts all of them and nothing reports the clash, so check before the move.

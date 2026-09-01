@@ -175,10 +175,10 @@ export function PushProvider({
        * The device would go silent for good. Discarding the subscription lets the
        * auto-heal below make one for the key this tenant now publishes.
        *
-       * This is what a tenant carries across a change of key pair, and across
-       * being given an origin of its own on the same host, where the worker
-       * registered by an earlier build is updated rather than replaced and its
-       * subscription outlives the key it was made with. */
+       * A subscription outlives the key it was made with wherever the worker
+       * holding it is updated rather than replaced, which is what happens when a
+       * registration keeps its scope: a tenant changing its key pair, or one given
+       * an origin of its own on a host it was already served on. */
       if (
         sub &&
         currentPermission === 'granted' &&

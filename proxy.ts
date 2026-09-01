@@ -77,10 +77,10 @@ function notFound(req: NextRequest) {
  *
  * On the origin the request arrived at, always. That is the origin that just sent
  * the session cookie, so it is the only one where the screen can clear it, and
- * the only one whose worker holds the subscription — whatever origin the document
- * now declares for the tenant. A session made before the tenant was given an
- * origin of its own is the case that makes the difference: it sits on the origin
- * it was made on, and a screen placed on the new one would find nothing to end.
+ * the only one whose worker holds the subscription — whichever origin the
+ * document declares for the tenant. Those two part company for a session made
+ * while the tenant was served somewhere else: it stays on the origin it was made
+ * on, and a screen placed on the declared one would find nothing to end.
  *
  * 303, so a request that is not a GET arrives at the screen as one. */
 function signOutFirst(

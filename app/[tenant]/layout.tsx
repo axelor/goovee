@@ -57,9 +57,9 @@ export default async function TenantLayout(props: {
    * address, and scopes match by path prefix, so this has to be no narrower than
    * the manifest asks for.
    *
-   * The tenant is named in the worker's own address because its scope no longer
-   * always carries it, and the worker needs it to keep its caches and its
-   * notification channel to itself. */
+   * The tenant is named in the worker's own address, since a scope of `/` names
+   * none, and the worker needs it to keep its caches and its notification channel
+   * to itself. */
   const scope = withBasePath(
     config && isHostRouted(config) ? '/' : `/${tenant}/`,
   );

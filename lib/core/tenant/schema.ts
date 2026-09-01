@@ -669,7 +669,7 @@ function checkOriginSchemes(
  *   particular;
  * - a path-routed tenant, whose own segment stops resolving;
  * - the addresses naming no tenant, where $global.defaultTenant says "/" leads
- *   somewhere other than the tenant now holding that host.
+ *   somewhere other than the tenant holding that host.
  *
  * The last of those is refused only when the two disagree. A host-routed tenant
  * on $global.betterAuthUrl's own host is the ordinary single-tenant deployment —

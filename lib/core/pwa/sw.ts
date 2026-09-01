@@ -56,10 +56,10 @@ function withDeploymentBasePath(path: string) {
  * registration to itself.
  *
  * Not the registration scope, which is the whole origin for a tenant reached by
- * host and would name no tenant at all. `/` where the address names none, which
- * is a worker registered by something that does not know its tenant; the page
- * then listens on a channel this one never posts to, so notifications do not
- * reach an open tab, and nothing else is affected.
+ * host and would name no tenant at all. `/` where the address names none: the
+ * caches and the channel then carry no tenant, so a notification is announced on
+ * a channel no page is listening to and does not reach an open tab. Nothing else
+ * is affected, and the next registration from a page replaces this one.
  *
  * A path segment rather than a bare id, because the cache names below are this
  * value appended to a prefix and a browser keeps whatever a previous worker
