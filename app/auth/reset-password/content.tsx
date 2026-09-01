@@ -1,5 +1,6 @@
 'use client';
 
+import {useMemo} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
@@ -15,12 +16,12 @@ import {
   FormItem,
   FormMessage,
 } from '@/ui/components/form';
-import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {authClient} from '@/lib/auth-client';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
+import {withTenantParam} from '../common/tenant-param';
 import {
   AuthShell,
   AuthField,
@@ -33,13 +34,18 @@ const formSchema = z.object({
 });
 
 export default function Content({
+  tenantId,
   workspaceName,
 }: {
+  /* Empty only where the document declares no default tenant. */
+  tenantId: string;
   workspaceName: string | null;
 }) {
   const searchParams = useSearchParams();
-  const searchQuery = new URLSearchParams(searchParams).toString();
-  const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
+  const searchQuery = useMemo(
+    () => withTenantParam(searchParams, tenantId),
+    [searchParams, tenantId],
+  );
 
   const {toast} = useToast();
   const router = useRouter();

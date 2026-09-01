@@ -98,6 +98,7 @@ export default async function Page(props: {
   return (
     <Environment value={getPublicEnvironment(tenantConfig)}>
       <Content
+        tenantId={tenantId}
         canRegister={canRegister}
         showGoogleOauth={showGoogleOauth}
         showKeycloakOauth={showKeycloakOauth}

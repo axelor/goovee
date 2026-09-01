@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 
 // ---- LOCAL IMPORTS ---- //
+import {resolveAuthTenantId} from '../../common/tenant';
 import {
   generateAuthMetadata,
   resolveAuthWorkspaceName,
@@ -22,6 +23,7 @@ export default async function Page(props: {
   return (
     <Content
       params={props.params}
+      tenantId={resolveAuthTenantId(await props.searchParams)}
       workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
     />
   );

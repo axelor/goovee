@@ -3,6 +3,7 @@ import {getSession} from '@/lib/core/auth';
 import Content from './content';
 import {t} from '@/locale/server';
 
+import {resolveAuthTenantId} from '../common/tenant';
 import {
   generateAuthMetadata,
   resolveAuthWorkspaceName,
@@ -34,6 +35,7 @@ export default async function Page(props: {
   }
   return (
     <Content
+      tenantId={resolveAuthTenantId(await props.searchParams)}
       workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
     />
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
@@ -9,7 +9,6 @@ import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
 
 // ---- CORE IMPORTS ---- //
 import {i18n, l10n} from '@/locale';
-import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {Link} from '@/ui/components/link';
 
@@ -18,6 +17,7 @@ import {useEnvironment} from '@/lib/core/environment';
 import {isSameOrigin} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {isVectorImage} from '@/lib/core/image/vector';
+import {withTenantParam} from '../common/tenant-param';
 import {
   AuthShell,
   AuthField,
@@ -27,6 +27,7 @@ import {
 } from '../common/ui/auth-shell';
 
 export default function Content({
+  tenantId,
   canRegister,
   showGoogleOauth = true,
   showKeycloakOauth = true,
@@ -34,6 +35,8 @@ export default function Content({
   keycloakProviderId,
   workspaceName,
 }: {
+  /* Empty only where the document declares no default tenant. */
+  tenantId: string;
   canRegister?: boolean;
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
@@ -49,9 +52,12 @@ export default function Content({
   const [submitting, setSubmitting] = useState(false);
   const {toast} = useToast();
   const searchParams = useSearchParams();
-  const searchQuery = new URLSearchParams(searchParams).toString();
-  const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
   const workspaceURI = searchParams.get('workspaceURI');
+
+  const searchQuery = useMemo(
+    () => withTenantParam(searchParams, tenantId),
+    [searchParams, tenantId],
+  );
   const {isPending} = authClient.useSession();
   const env = useEnvironment();
 
