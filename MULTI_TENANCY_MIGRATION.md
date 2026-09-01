@@ -1,176 +1,293 @@
-# Multi-tenancy migration runbook (#113733)
+# Multi-tenancy migration runbook
 
-Migrate a Goovee deployment to the multi-tenant configuration model. Perform the
-steps in order.
+Move a Goovee deployment off its environment variables and onto the configuration
+document that replaces them. Perform the steps in order, on the updated AOS and
+portal builds, before they serve traffic.
 
 ---
 
-## 1. Create the configuration document
+## 1. Write the configuration document
 
-All configuration is one JSON document: a reserved `"$global"` section plus one
-entry per tenant, keyed by the tenant id (the URL path segment: a letter, then
-letters, digits or hyphens, at most 15 characters).
+All configuration is one JSON document: a reserved `"$global"` section and one
+entry keyed by the tenant id — the segment every address of the deployment
+carries. Keep that id `d`, the segment the previous release served, and every
+workspace address stays as it is.
 
-Serve one tenant by naming one entry, under any id — that id is the segment
-every address of the deployment carries.
+### Run the migration script
 
-`$global`:
+In a checkout of the portal source, beside the deployment's current `.env`:
 
-| Field                | Required | From env                |
-| -------------------- | -------- | ----------------------- |
-| `betterAuthSecret`   | yes      | `BETTER_AUTH_SECRET`    |
-| `betterAuthUrl`      | yes      | `BETTER_AUTH_URL`       |
-| `defaultTenant`      | no       | —                       |
-| `pushMaxConnections` | no       | `PUSH_MAX_CONNECTIONS`  |
-| `imageCacheMaxBytes` | no       | `IMAGE_CACHE_MAX_BYTES` |
+```
+pnpm tenants:migrate
+```
 
-Write `betterAuthUrl` as the origin the deployment is served on — scheme and
-host, with no path, query or fragment.
+It writes `tenants.config.json`: one entry keyed `"d"`, `$global.defaultTenant`
+set to it, and every value the environment carried moved into place. Review the
+file, fill any required field it left blank, and carry it to the server.
 
-Set `defaultTenant` to the id of the tenant serving `/` and the sign-in screens,
-which carry no tenant in their address. Leave it out and those addresses require
-a tenant in the URL, and every script requires `--tenant`.
+### If running the script is not feasible
 
-Each tenant entry — declare every capability the tenant uses; nothing is
-inherited from another tenant or the environment:
+The script needs a source checkout and the deployment's `.env`; it is not part of
+the built portal. Write the document instead. Every key is below, against the
+variable it replaces — the comments are annotation, so strip them: the document
+is plain JSON.
 
-| Field                                     | Required | From env                                                                                                                                                                    |
-| ----------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db.url`                                  | yes      | `DATABASE_URL`                                                                                                                                                              |
-| `aos.url`                                 | yes      | `AOS_URL`                                                                                                                                                                   |
-| `aos.storage`                             | yes      | `DATA_STORAGE` (the AOS `data.upload.dir` base)                                                                                                                             |
-| `aos.auth.apiKey`                         | one of   | `AOS_API_KEY`                                                                                                                                                               |
-| `aos.auth.username` + `aos.auth.password` | one of   | `BASIC_AUTH_USERNAME`, `BASIC_AUTH_PASSWORD`                                                                                                                                |
-| `aos.aosTenantId`                         | no       | `AOS_TENANT_ID`                                                                                                                                                             |
-| `aos.webhookSecret`                       | no       | `NOTIFICATION_WEBHOOK_SECRET`                                                                                                                                               |
-| `publicEnv`                               | yes      | the `GOOVEE_PUBLIC_*` vars                                                                                                                                                  |
-| `payments.paypal`                         | no       | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_LIVE`                                                                                                                   |
-| `payments.stripe`                         | no       | `STRIPE_CLIENT_SECRET`, `STRIPE_WEBHOOK_SECRET`                                                                                                                             |
-| `payments.paybox`                         | no       | `PBX_SITE`, `PBX_RANG`, `PBX_IDENTIFIANT`, `PBX_SECRET`, `PBX_PAYBOX`, `PBX_BACKUP1`, `PBX_BACKUP2`                                                                         |
-| `payments.up2pay`                         | no       | `UP2PAY_SITE`, `UP2PAY_RANG`, `UP2PAY_IDENTIFIANT`, `UP2PAY_SECRET`, `UP2PAY_PAYBOX`, `UP2PAY_LEGACY_FORWARD_URL`                                                           |
-| `payments.hubpisp`                        | no       | `HUBPISP_TOKEN_URL`, `HUBPISP_API_URL`, `HUBPISP_CLIENT_ID`, `HUBPISP_CLIENT_SECRET`, `HUBPISP_CERT_FINGERPRINT`, `HUBPISP_BENEFICIARY_NAME`, `HUBPISP_IBAN`, `HUBPISP_BIC` |
-| `mail`                                    | no       | `MAIL_HOST`, `MAIL_PORT`, `MAIL_SECURE`, `MAIL_USER`, `MAIL_PASSWORD`, `MAIL_EMAIL`, `MAIL_MAX_CONNECTIONS`                                                                 |
-| `mattermost`                              | no       | `MATTERMOST_TOKEN`, `CREATE_MATTERMOST_USERS`                                                                                                                               |
-| `webPush`                                 | no       | `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`                                                                                                                                        |
-| `oauth.google`                            | no       | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                                                                                                                  |
-| `oauth.keycloak`                          | no       | `KEYCLOAK_ID`, `KEYCLOAK_SECRET`, `KEYCLOAK_ISSUER`                                                                                                                         |
-| `includeLanguage`                         | no       | `INCLUDE_LANGUAGE`                                                                                                                                                          |
-| `uploadRecordRetentionHours`              | no       | `UPLOAD_RECORD_RETENTION_HOURS`                                                                                                                                             |
+<!-- prettier-ignore -->
+```jsonc
+{
+  "$global": {
+    "betterAuthSecret": "<secret>",                               // BETTER_AUTH_SECRET
+    "betterAuthUrl": "https://portal.example.com",                // BETTER_AUTH_URL, origin only
+    "defaultTenant": "d",                                         // the entry below
+    "pushMaxConnections": 10,                                     // optional, PUSH_MAX_CONNECTIONS
+    "imageCacheMaxBytes": 2147483648                              // optional, IMAGE_CACHE_MAX_BYTES
+  },
 
-`payments.hubpisp` needs one more field that no environment variable carried:
-`certsDir`. Migrating writes `certs/hubpisp`, the path the previous release
-read; a tenant added by hand needs its own.
+  // The tenant id: the segment every address of the deployment carries.
+  "d": {
+    "db": {
+      "url": "postgres://user:pass@host:5432/goovee"              // DATABASE_URL
+    },
 
-Set `payments.stripe.webhookSecret` for every tenant that takes bank transfer.
-Card payments do not need it.
+    "aos": {
+      "url": "https://erp.example.com/axelor-erp",                // AOS_URL
+      "storage": "/storage/goovee",                               // DATA_STORAGE, the data.upload.dir base
+      "auth": {
+        "apiKey": "<api-key>"                                     // AOS_API_KEY. Or, instead of apiKey:
+        // "username": "<user>",                                  // BASIC_AUTH_USERNAME
+        // "password": "<password>"                               // BASIC_AUTH_PASSWORD
+      },
+      "webhookSecret": "<secret>",                                // optional, NOTIFICATION_WEBHOOK_SECRET
+      "aosTenantId": "<aos-tenant-id>"                            // optional, AOS_TENANT_ID (step 6)
+    },
 
-Browser variables (`publicEnv`) keys: `GOOVEE_PUBLIC_HOST`,
-`GOOVEE_PUBLIC_PAYPAL_CLIENT_ID`, `GOOVEE_PUBLIC_LINKEDIN_URL`,
-`GOOVEE_PUBLIC_TWITTER_URL`, `GOOVEE_PUBLIC_INSTAGRAM_URL`,
-`GOOVEE_PUBLIC_WHATSAPP_URL`, `GOOVEE_PUBLIC_MATTERMOST_HOST`,
-`GOOVEE_PUBLIC_VAPID_PUBLIC_KEY`, `GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL`,
-`GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE`.
+    // Given to the browser. These ten keys and no others.
+    "publicEnv": {
+      "GOOVEE_PUBLIC_HOST": "https://portal.example.com",         // the origin served on
+      "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": "<paypal-client-id>",     // optional
+      "GOOVEE_PUBLIC_LINKEDIN_URL": "https://linkedin.com/company/x", // optional, news sharing
+      "GOOVEE_PUBLIC_TWITTER_URL": "https://x.com/x",             // optional, news sharing
+      "GOOVEE_PUBLIC_INSTAGRAM_URL": "https://instagram.com/x",   // optional, news sharing
+      "GOOVEE_PUBLIC_WHATSAPP_URL": "https://wa.me/33000000000",  // optional, news sharing
+      "GOOVEE_PUBLIC_MATTERMOST_HOST": "https://chat.example.com", // optional, chat links
+      "GOOVEE_PUBLIC_VAPID_PUBLIC_KEY": "<vapid-public-key>",     // optional, push subscription
+      "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL": "Log In with SSO", // optional
+      "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE": "/images/sso.svg" // optional
+    },
 
-Write `GOOVEE_PUBLIC_HOST` as the same origin in every tenant's entry, matching
-`$global.betterAuthUrl`. Tenants are reached at `<origin>/<tenant id>/<workspace>`.
+    // Keep the gateways in use, drop the rest.
+    "payments": {
+      "paypal": {
+        "clientId": "<paypal-client-id>",                         // PAYPAL_CLIENT_ID
+        "clientSecret": "<paypal-secret>",                        // PAYPAL_CLIENT_SECRET
+        "live": false                                             // optional, PAYPAL_LIVE
+      },
+      "stripe": {
+        "clientSecret": "<stripe-secret-key>",                    // STRIPE_CLIENT_SECRET
+        "webhookSecret": "<stripe-webhook-secret>"                // optional, STRIPE_WEBHOOK_SECRET
+      },
+      "paybox": {
+        "site": "<site>",                                         // PBX_SITE
+        "rang": "<rang>",                                         // PBX_RANG
+        "identifiant": "<identifiant>",                           // PBX_IDENTIFIANT
+        "secret": "<secret>",                                     // PBX_SECRET
+        "paybox": "<payment-page-url>",                           // PBX_PAYBOX
+        "backup1": "<backup1-url>",                               // optional, PBX_BACKUP1
+        "backup2": "<backup2-url>"                                // optional, PBX_BACKUP2
+      },
+      "up2pay": {
+        "site": "<site>",                                         // UP2PAY_SITE
+        "rang": "<rang>",                                         // UP2PAY_RANG
+        "identifiant": "<identifiant>",                           // UP2PAY_IDENTIFIANT
+        "secret": "<secret>",                                     // UP2PAY_SECRET
+        "paybox": "<up2pay-host>",                                // UP2PAY_PAYBOX
+        "legacyForwardUrl": "https://legacy-erp.example.com/ipn"  // optional, UP2PAY_LEGACY_FORWARD_URL
+      },
+      "hubpisp": {
+        "tokenUrl": "https://oauth.bpce.example.com/token",       // HUBPISP_TOKEN_URL
+        "apiUrl": "https://api.bpce.example.com",                 // HUBPISP_API_URL
+        "clientId": "<hubpisp-client-id>",                        // HUBPISP_CLIENT_ID
+        "clientSecret": "<hubpisp-secret>",                       // HUBPISP_CLIENT_SECRET
+        "certFingerprint": "<sha256-fingerprint>",                // HUBPISP_CERT_FINGERPRINT
+        "beneficiaryName": "<beneficiary>",                       // HUBPISP_BENEFICIARY_NAME
+        "iban": "<iban>",                                         // HUBPISP_IBAN
+        "bic": "<bic>",                                           // optional, HUBPISP_BIC
+        "certsDir": "/certs/hubpisp"                              // no variable carried this (step 6)
+      }
+    },
 
-Procedure:
+    "mail": {                                                     // the section as a whole is optional
+      "host": "smtp.example.com",                                 // MAIL_HOST
+      "port": 587,                                                // MAIL_PORT
+      "secure": false,                                            // optional, MAIL_SECURE
+      "user": "noreply@example.com",                              // MAIL_USER
+      "password": "<smtp-password>",                              // MAIL_PASSWORD
+      "email": "noreply@example.com",                             // optional, MAIL_EMAIL
+      "maxConnections": 10                                        // optional, MAIL_MAX_CONNECTIONS
+    },
 
-- Single-tenant: run `pnpm tenants:migrate` to write `tenants.config.json` from
-  the current `.env`. It writes one tenant keyed `"d"` and sets
-  `$global.defaultTenant` to it. Review it and fill any blank required fields.
-- Multi-tenant: copy `tenants.config.example.json`, add one entry per tenant,
-  set `"$schema": "./tenants.config.schema.json"` for editor validation.
+    "mattermost": {                                               // the section as a whole is optional
+      "token": "<mattermost-token>",                              // optional, MATTERMOST_TOKEN
+      "createUsers": true                                         // optional, CREATE_MATTERMOST_USERS
+    },
 
-Renaming a tenant means renaming `$global.defaultTenant` with it, and the
-addresses that tenant is served under. Do not rename a tenant with Up2Pay or Hub
-PISP payments in flight — those payments can no longer be settled.
+    "webPush": {                                                  // the section as a whole is optional
+      "privateKey": "<vapid-private-key>",                        // VAPID_PRIVATE_KEY
+      "subject": "mailto:admin@example.com"                       // VAPID_SUBJECT
+    },
+
+    "oauth": {                                                    // the section as a whole is optional
+      "google": {
+        "clientId": "<google-client-id>",                         // GOOGLE_CLIENT_ID
+        "clientSecret": "<google-secret>"                         // GOOGLE_CLIENT_SECRET
+      },
+      "keycloak": {
+        "clientId": "<keycloak-client-id>",                       // KEYCLOAK_ID
+        "clientSecret": "<keycloak-secret>",                      // KEYCLOAK_SECRET
+        "issuer": "https://sso.example.com/realms/x"              // KEYCLOAK_ISSUER
+      }
+    },
+
+    "includeLanguage": true,                                      // optional, INCLUDE_LANGUAGE
+    "uploadRecordRetentionHours": 168                             // optional, UPLOAD_RECORD_RETENTION_HOURS
+  }
+}
+```
+
+A key with no `optional` note is required once the section holding it is present.
+Drop a section the deployment does not use, and every key under it goes too.
+
+Write `betterAuthUrl` and `GOOVEE_PUBLIC_HOST` as the same origin, the one the
+portal answers on: workspace addresses are stored against it, so a value that
+does not match resolves no workspace.
+
+Set `defaultTenant` to the tenant id. `/` and the sign-in screens carry no tenant
+in their address, and this is what tells them which one to serve; leave it out and
+they require a tenant in the URL.
+
+Set `payments.stripe.webhookSecret` to take bank transfer: without it, bank
+transfer is not offered at checkout. Card payments do not need it.
+
+Serving the deployment under an id other than `d` means renaming the entry and
+`$global.defaultTenant` together, and re-pointing every workspace address in AOS.
+The id must be a letter followed by letters, digits or hyphens, at most 15
+characters, and not one of `api`, `auth`, `images`, `locales`, `pdfjs`, `pwa`,
+`website` — the deployment answers those itself. Do not change it while Up2Pay or
+Hub PISP payments are in flight: those payments can no longer be settled.
 
 ## 2. Set the environment
 
-Runtime:
+The whole of it, once the document holds the rest:
 
-- `TENANTS_CONFIG_FILE=<path to the document>` — mount as a secret. Or
-  `TENANTS_CONFIG=<inline JSON>` when not using a file.
+<!-- prettier-ignore -->
+```dotenv
+# Path to the document. It holds the database, AOS, payment and auth secrets.
+TENANTS_CONFIG_FILE=/etc/goovee/tenants.config.json
 
-No setting replaces it: serve one tenant by naming one entry.
+# ...or the same JSON inline, read only when TENANTS_CONFIG_FILE is unset.
+# TENANTS_CONFIG=
 
-Build:
+# Inlined into the browser bundle when the portal is built, so a change to it
+# needs a rebuild. Empty for a root deployment, or a subpath like '/portal'.
+NEXT_PUBLIC_BASE_PATH=
+```
 
-- `NEXT_PUBLIC_BASE_PATH` — pass as a build arg. Empty for a root deployment, or
-  a subpath such as `/portal`.
-
-Remove every other env var (`DATABASE_URL`, `AOS_*`, `BASIC_AUTH_*`,
+Remove every other variable: `DATABASE_URL`, `AOS_*`, `BASIC_AUTH_*`,
 `DATA_STORAGE`, `PAYPAL_*`, `STRIPE_*`, `PBX_*`, `UP2PAY_*`, `HUBPISP_*`,
 `MAIL_*`, `MATTERMOST_*`, `VAPID_*`, `GOOGLE_*`, `KEYCLOAK_*`, `SHOW_*`,
 `GOOVEE_PUBLIC_*`, `BETTER_AUTH_*`, `INCLUDE_LANGUAGE`,
-`UPLOAD_RECORD_RETENTION_HOURS`, `PUSH_MAX_CONNECTIONS`,
-`IMAGE_CACHE_MAX_BYTES`, `MULTI_TENANCY`).
+`UPLOAD_RECORD_RETENTION_HOURS`, `PUSH_MAX_CONNECTIONS`, `IMAGE_CACHE_MAX_BYTES`
+and `MULTI_TENANCY`. Nothing replaces `MULTI_TENANCY`: the document decides.
 
-## 3. Register webhook and payment URLs (per tenant)
+On a build carrying a base path, put that subpath before every `/api/…` address
+below. `$global.betterAuthUrl` stays a bare origin.
 
-| Gateway         | New URL (per tenant)                                 | Where to change                                               |
-| --------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
-| Stripe          | `/api/tenant/<tenant>/webhooks/stripe`               | Stripe dashboard → Webhooks — one endpoint per tenant account |
-| Up2Pay          | `/api/tenant/<tenant>/webhooks/up2pay`               | Up2Pay merchant back-office (IPN URL)                         |
-| Hub PISP / BPCE | `/api/tenant/<tenant>/webhooks/hubpisp/<resourceId>` | BPCE webhook registration — drop any `?tenant=` query         |
-| Paybox          | `/api/tenant/<tenant>/payment/paybox/validate`       | None — sent per request                                       |
+## 3. Re-point the gateway webhook URLs
 
-Point each tenant's gateway account at its own tenant path.
+Every webhook address takes the tenant after `/api`:
 
-## 4. AOS notifications connector (per-tenant webhook)
+```
+https://<host>/api/<path>   ->   https://<host>/api/tenant/<tenantId>/<path>
+```
 
-Ship the `axelor-portal` change (branch `RM-113733-multi-tenancy`) with go-live.
-The connector now reads its target URL and signing secret per tenant from each
-tenant's own `AppGooveePortal` record (multi-DB AOS ⇒ the record is per-tenant),
-POSTs to the URL verbatim, signs the body with that tenant's secret, and no
-longer sends `tenantId` in the body. Per tenant, on `AppGooveePortal`:
+With `<tenantId>` as `d`, that is:
 
-- `notificationWebhookUrl` = `https://<goovee-host>/api/tenant/<goovee-tenant>/webhooks/notifications`
-  (the full tenant-scoped URL — the Goovee tenant is in the path).
-- `webhookSecret` = that Goovee tenant's `aos.webhookSecret` (stored encrypted).
+| Gateway         | Was                                  | Now                                           |
+| --------------- | ------------------------------------ | --------------------------------------------- |
+| Stripe          | `/api/webhooks/stripe`               | `/api/tenant/d/webhooks/stripe`               |
+| Up2Pay          | `/api/webhooks/up2pay`               | `/api/tenant/d/webhooks/up2pay`               |
+| Hub PISP / BPCE | `/api/webhooks/hubpisp/<resourceId>` | `/api/tenant/d/webhooks/hubpisp/<resourceId>` |
+| Paybox          | `/api/payment/paybox/validate`       | `/api/tenant/d/payment/paybox/validate`       |
 
-The global `portal.ws.secret` / `portal.ws.tenantId` settings are no longer used.
+Change Stripe in the dashboard under Webhooks, Up2Pay in the merchant
+back-office as the IPN URL, and Hub PISP in the BPCE webhook registration —
+dropping any `?tenant=` query it carries. Paybox sends its address with each
+request, so there is nothing to register.
 
-## 5. Register OAuth redirect URIs (per tenant)
+## 4. AOS notifications connector
 
-For each tenant with `oauth.google` or `oauth.keycloak`, register with the IdP:
+The signing secret moves out of `axelor-config.properties` into the AOS
+configuration, beside the address it posts to.
+
+In AOS open the Goovee Portal app configuration and set:
+
+- **Notification webhook url** =
+  `https://<host>/api/tenant/d/webhooks/notifications` — the tenant is now in the
+  path, so the previous `https://<host>/api/webhooks/notifications` no longer
+  answers
+- **Webhook secret** = the document's `aos.webhookSecret`
+
+Set `encryption.password` in the AOS `axelor-config.properties` first: it is what
+encrypts the field. Without it the secret is written to the database in cleartext
+and nothing reports that, and setting the password afterwards leaves the value
+cleartext until it is entered again. Keep the secret to 132 bytes or shorter, the
+most an encrypted value fits in the column.
+
+Until the secret is set, AOS sends notifications unsigned and the portal refuses
+every one of them.
+
+Then delete `portal.ws.secret` and `portal.ws.tenantId` from
+`axelor-config.properties`.
+
+## 5. Re-register the OAuth redirect URIs
+
+Every redirect URI now carries the tenant in the provider id, and Google answers
+on the same `oauth2` path as Keycloak:
 
 ```
 https://<host>/api/auth/oauth2/callback/<provider>-<tenantId>
 ```
 
-where `<provider>` is `google` or `keycloak`. Each Keycloak tenant uses its own
-realm/issuer and client.
+Register that with each provider and remove the old one. With `<tenantId>` as
+`d`, that is:
 
-## 6. Provision storage and certificate mounts (per tenant)
+| Provider | Was                                  | Now                                    |
+| -------- | ------------------------------------ | -------------------------------------- |
+| Google   | `/api/auth/callback/google`          | `/api/auth/oauth2/callback/google-d`   |
+| Keycloak | `/api/auth/oauth2/callback/keycloak` | `/api/auth/oauth2/callback/keycloak-d` |
 
-Every path in the document (`aos.storage`, `certsDir`) is read against the
-server process's working directory. Give mounted volumes absolute paths.
+## 6. Provision storage and certificate mounts
 
-- Set `aos.storage` to the AOS instance's `data.upload.dir` base and back it
-  with a mounted volume. For a tenant on a shared AOS (`aosTenantId` set,
-  topology B), goovee reads and writes under `<aos.storage>/<aosTenantId>` to
-  match AOP's per-tenant subdirectory; a dedicated AOS (topology A) uses the
-  path as-is. Tenants sharing one AOS therefore share the same `aos.storage`
-  base value.
-- For Hub PISP, place `client.crt` and `private-key.pem` in each tenant's
-  `certsDir`. Every tenant declaring `payments.hubpisp` needs one, and no two
-  may share a directory.
+Every path in the document (`aos.storage`, `certsDir`) is read against the server
+process's working directory, so write them as absolute paths.
 
-## 7. Build and deploy
+- Set `aos.storage` to the AOS instance's `data.upload.dir` base.
+- Set `aos.aosTenantId` only where that AOS serves several tenants of its own.
+  Files then sit under `<aos.storage>/<aosTenantId>`, which is where AOS keeps
+  that tenant's files.
+- For Hub PISP, place `client.crt` and `private-key.pem` in `certsDir`.
 
-- Build the `goovee-ce` image once; inject the document at runtime.
-- `NEXT_PUBLIC_BASE_PATH` is the only build-time value.
-- After any `goovee/schema/*.json` change, run `pnpm generate` before building.
+## 7. Start and verify
 
-## 8. Cut over and verify
-
-1. Deploy the application with the matching AOS connector change (step 4) live.
-2. Register OAuth redirect URIs (step 5) and gateway webhook URLs (step 3).
-3. Confirm the document was accepted: it was rejected if the boot log carries
-   `could not read the configuration`. The server starts either way, so that
-   line is what to check.
-4. Flip traffic.
-5. Watch gateway and notification delivery logs for 404s and signature
-   failures, and re-point any registration that failed.
+1. Start AOS and the portal with everything above in place.
+2. Check the boot log. A rejected document is named there, after a
+   `could not read the configuration:` line, as one of
+   `No tenant configuration found`, `Tenant configuration is not valid JSON` or
+   `Tenant configuration is invalid` — the last of these lists the fields at
+   fault. None of the three means it was accepted. The server starts and answers
+   its port either way, and a rejected document fails every request, so check
+   before flipping traffic.
+3. Flip traffic once the gateway (step 3) and provider (step 5) registrations
+   point at the new addresses.
+4. Watch gateway and notification delivery logs for 404s and signature failures,
+   and re-point any registration that failed.
