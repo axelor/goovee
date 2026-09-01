@@ -70,54 +70,28 @@ function notFound(req: NextRequest) {
  * tenant it belongs to, carrying that address to return to.
  *
  * A redirect rather than a rewrite, because the screen has to be reached under
- * the tenant's own addresses: the document is bound to the service worker whose
- * scope covers the address it was created at, and only the worker of the tenant
- * being left holds the push subscription to revoke. Rendering the screen at the
- * refused address would leave that subscription in place.
+ * the tenant's own path: the document is bound to the service worker whose scope
+ * covers the address it was created at, and only the worker of the tenant being
+ * left holds the push subscription to revoke. Rendering the screen at the refused
+ * address would leave that subscription in place.
  *
- * Where the origin the request arrived on does not serve that tenant, the screen
- * is asked for on the origin the document declares for it, which is also the
- * origin holding the session cookie the screen has to clear. The address to
- * return to is then dropped: a return address that crosses origins would have to
- * be absolute, and an absolute return address taken from the URL is a redirect to
- * anywhere.
+ * On the origin the request arrived at, always. That is the origin that just sent
+ * the session cookie, so it is the only one where the screen can clear it, and
+ * the only one whose worker holds the subscription — whatever origin the document
+ * now declares for the tenant. A session made before the tenant was given an
+ * origin of its own is the case that makes the difference: it sits on the origin
+ * it was made on, and a screen placed on the new one would find nothing to end.
  *
  * 303, so a request that is not a GET arrives at the screen as one. */
 function signOutFirst(
   req: NextRequest,
-  {activeTenant, routesByHost}: {activeTenant: string; routesByHost: boolean},
+  {activeTenant}: {activeTenant: string},
 ) {
   const url = req.nextUrl.clone();
   const callbackurl = url.pathname + url.search;
 
-  const config = getTenantConfig(activeTenant);
-
-  /* The screen goes on the origin the document declares for that tenant, which
-   * is the origin holding the session cookie it has to clear. Only where some
-   * tenant has an origin of its own: with every tenant under a path segment one
-   * origin serves them all, and moving the screen to the declared one would send
-   * a visitor off whatever alias the deployment answers on. A session naming a
-   * tenant the document no longer holds has no declared origin either, and gets
-   * the screen here — the caller only sends one where this origin can serve it. */
-  const origin =
-    routesByHost && config
-      ? new URL(config.publicEnv.GOOVEE_PUBLIC_HOST)
-      : undefined;
-
-  const sameOrigin = !origin || origin.host === addressedHost(req.headers);
-
-  url.pathname =
-    config && isHostRouted(config) ? '/sign-out' : `/${activeTenant}/sign-out`;
-
-  /* Carried only where the screen is on the origin the request arrived at: a
-   * return address crossing origins would have to be absolute, and an absolute
-   * return address taken from the URL is a redirect to anywhere. */
-  url.search = sameOrigin ? new URLSearchParams({callbackurl}).toString() : '';
-
-  if (origin) {
-    url.protocol = origin.protocol;
-    url.host = origin.host;
-  }
+  url.pathname = `/${activeTenant}/sign-out`;
+  url.search = new URLSearchParams({callbackurl}).toString();
 
   return NextResponse.redirect(url, 303);
 }
@@ -268,7 +242,13 @@ export default async function proxy(req: NextRequest) {
    * because the tenant is resolved from the host there rather than the path. */
   const pathTenantConfig = hostTenant ? null : getTenantConfig(tenant);
 
-  if (pathTenantConfig && isHostRouted(pathTenantConfig)) {
+  /* Its sign-out screen is the exception, and stays where it is asked for. A
+   * session made before the tenant moved sits on this origin, and this is the
+   * only address here that can end it — sent on to the new origin it would arrive
+   * where that cookie is never sent, leaving no way to reach the screen at all. */
+  const isSignOutScreen = pathname === `/${tenant}/sign-out`;
+
+  if (pathTenantConfig && isHostRouted(pathTenantConfig) && !isSignOutScreen) {
     const canonical = url.clone();
     const origin = new URL(pathTenantConfig.publicEnv.GOOVEE_PUBLIC_HOST);
 
@@ -293,24 +273,24 @@ export default async function proxy(req: NextRequest) {
    * reaches this on a host-routed address is a session created against another
    * tenant on this origin — signing in for one tenant while addressing another.
    *
-   * A session naming a tenant the document no longer holds is sent to the screen
-   * under that name, which only an origin no tenant holds to itself can serve:
-   * the host names the tenant on one that does, so the name in the path is read
-   * as a workspace there and the screen sends the visitor back to it. Where this
-   * origin cannot serve it the request carries on instead: the session names no
-   * tenant the document holds, so reading it resolves no tenant and the request
-   * is answered as a guest. */
+   * The screen names the session's tenant in the path, so only an origin no
+   * tenant holds to itself can address it: on one that does, the host puts its
+   * own tenant back in front and the name is read as a workspace. An origin held
+   * by a tenant therefore refuses the request instead of sending it somewhere
+   * that cannot serve it — except where the session names no tenant the document
+   * holds, which resolves to no session at all, so the request carries on and is
+   * answered as a guest. Signing in on that origin replaces the session either
+   * way. */
   const activeTenant = await getSessionTenantId(req.headers);
-  const reachableScreen =
-    !hostTenant || Boolean(activeTenant && getTenantConfig(activeTenant));
 
-  if (
-    activeTenant &&
-    activeTenant !== tenant &&
-    getTenantConfig(tenant) &&
-    reachableScreen
-  ) {
-    return signOutFirst(req, {activeTenant, routesByHost});
+  if (activeTenant && activeTenant !== tenant && getTenantConfig(tenant)) {
+    if (!hostTenant) {
+      return signOutFirst(req, {activeTenant});
+    }
+
+    if (getTenantConfig(activeTenant)) {
+      return notFound(req);
+    }
   }
 
   const headers = new Headers(req.headers);
