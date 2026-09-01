@@ -29,6 +29,7 @@
     "pricing:compare": "node -r @swc-node/register lib/core/product/scripts/test-price/run.ts",
     "tenants:migrate": "node -r @swc-node/register ./scripts/migrate-env-to-tenants.ts",
     "config:schema": "node -r @swc-node/register ./scripts/generate-config-schema.ts",
+    "config:check": "node -r @swc-node/register ./scripts/check-config.ts",
     "changelogs:validate": "node -r @swc-node/register ./changelogs/validate.ts",
     "changelogs:generate": "node -r @swc-node/register ./changelogs/generate.ts",
     "release:bump": "node -r @swc-node/register ./scripts/prepare-bump.ts",

@@ -283,15 +283,29 @@ process's working directory, so write them as absolute paths.
 
 ## 7. Start and verify
 
-1. Start AOS and the portal with everything above in place.
-2. Check the boot log. A rejected document is named there, after a
+1. Validate the document before starting anything, from a source checkout:
+
+   ```bash
+   pnpm config:check /etc/goovee/tenants.config.json
+   ```
+
+   It applies the checks start-up applies and names every fault against the
+   field holding it; a document with no fault is reported as accepted, listing
+   the tenants and the origin each is served on. It ends non-zero on a document
+   that would be refused, so a deployment can be gated on it. Nothing is
+   connected to, so an unreachable database, AOS instance or mail host is not
+   reported here. Where no checkout is available, step 3 below is the same
+   verdict read from the boot log.
+
+2. Start AOS and the portal with everything above in place.
+3. Check the boot log. A rejected document is named there, after a
    `could not read the configuration:` line, as one of
    `No tenant configuration found`, `Tenant configuration is not valid JSON` or
    `Tenant configuration is invalid` — the last of these lists the fields at
    fault. None of the three means it was accepted. The server starts and answers
    its port either way, and a rejected document fails every request, so check
    before flipping traffic.
-3. Flip traffic once the gateway (step 3) and provider (step 5) registrations
-   point at the new addresses.
-4. Watch gateway and notification delivery logs for 404s and signature failures,
+4. Flip traffic once the gateway (section 3) and provider (section 5)
+   registrations point at the new addresses.
+5. Watch gateway and notification delivery logs for 404s and signature failures,
    and re-point any registration that failed.
