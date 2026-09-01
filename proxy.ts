@@ -142,6 +142,14 @@ function authOriginRedirect(req: NextRequest, hostTenant: string | null) {
   target.protocol = origin.protocol;
   target.host = origin.host;
 
+  /* The address to return to after signing in does not survive the move: it was
+   * written for the addresses of the origin the request came from, so on this one
+   * it names something else — a tenant segment there is a workspace name here.
+   * Dropped rather than translated, because the screen sends a visitor to their
+   * tenant's own landing address when it carries none. */
+  target.searchParams.delete('callbackurl');
+  target.searchParams.delete('workspaceURI');
+
   /* On its own origin the tenant is named by the host, and a parameter naming it
    * again is one more thing that can disagree. Everywhere else it is named
    * explicitly, including where this resolved it from the document's default. */
