@@ -2,7 +2,6 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getSessionTenantId} from '@/lib/auth';
-import {getBasePath} from '@/lib/core/path/base-path';
 import {isMultiTenancy} from '@/tenant/env';
 
 export const TENANT_HEADER = 'x-tenant-id';
@@ -29,16 +28,13 @@ export const config = {
   ],
 };
 
-export function extractTenant(url: string, basePath: string = '') {
-  const normalizedBasePath = basePath.replace(/\/$/, '');
-
-  if (normalizedBasePath && url.startsWith(normalizedBasePath)) {
-    url = url.slice(normalizedBasePath.length);
-  }
-
+/* The path given here already has the base path removed. next.config.mjs sets
+ * `basePath` from the same variable, and Next strips it before `pathname` can be
+ * read. Stripping it again would cut those characters off the tenant name. */
+export function extractTenant(url: string) {
   url = url.startsWith('/') ? url : '/' + url;
 
-  const pattern = /^\/([a-zA-Z]+)(?:\/.*)?$/;
+  const pattern = /^\/([a-zA-Z][a-zA-Z0-9-]*)(?:\/.*)?$/;
   const matches = url.match(pattern);
 
   return matches ? matches[1] : null;
@@ -63,7 +59,7 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const tenant = extractTenant(pathname, getBasePath());
+  const tenant = extractTenant(pathname);
 
   if (isMultiTenancy) {
     if (!tenant) return notFound(req);
