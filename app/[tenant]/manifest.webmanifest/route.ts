@@ -2,16 +2,16 @@ import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/tenant';
-import {getTenantConfig} from '@/tenant/config-provider';
-import {isHostRouted} from '@/lib/core/tenant/routing';
+import {listTenantConfigs} from '@/tenant/config-provider';
+import {addressedHost, ownsAddressedHost} from '@/lib/core/tenant/routing';
 import {buildManifest} from '@/lib/core/pwa/manifest';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
  * app is identified by it, launches on the tenant's landing workspace there, and
- * keeps navigation inside it. That entry is `/<tenant>/` where an origin carries
- * several tenants, and the root of the origin where the tenant is reached by host
- * and holds it alone.
+ * keeps navigation inside it. That entry is the root of the origin the manifest
+ * was asked on where the tenant holds that origin, and `/<tenant>/` anywhere
+ * else.
  *
  * The scope cannot be widened past the service worker registered in
  * app/[tenant]/layout.tsx, which is per-tenant so that each tenant carries its
@@ -29,7 +29,7 @@ import {withBasePath} from '@/lib/core/path/base-path';
  * Public — fetched by the browser without credentials; validate the tenant
  * cheaply via listTenantIds. */
 export async function GET(
-  _request: Request,
+  request: Request,
   {params}: {params: Promise<{tenant: string}>},
 ) {
   const {tenant} = await params;
@@ -39,10 +39,19 @@ export async function GET(
     return new NextResponse('Not found', {status: 404});
   }
 
-  const config = getTenantConfig(tenant);
-
+  /* The entry follows the origin this was asked on, not the tenant's own routing:
+   * a tenant holding an origin of its own is still served under its path segment
+   * on an origin it shares, and an app installed from there launches at that
+   * segment. The service worker registered in app/[tenant]/layout.tsx is scoped
+   * the same way, which is what lets a browser install either. */
   const entry = withBasePath(
-    config && isHostRouted(config) ? '/' : `/${tenant}/`,
+    ownsAddressedHost(
+      tenant,
+      addressedHost(request.headers),
+      listTenantConfigs(),
+    )
+      ? '/'
+      : `/${tenant}/`,
   );
 
   return NextResponse.json(

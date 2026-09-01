@@ -84,6 +84,24 @@ export function hostRoutedTenantId(
 }
 
 /**
+ * Whether `host` is an origin `tenant` holds to itself.
+ *
+ * Not the same question as whether the tenant is routed by host, and it is this
+ * one that a service worker's scope and an installed app's entry turn on. A tenant
+ * given an origin of its own is still reached under its path segment on the origin
+ * it used to share — that is where the screen ending a session made before the
+ * move is served — and its addresses there begin with the segment rather than at
+ * the root.
+ */
+export function ownsAddressedHost(
+  tenant: string,
+  host: string | null,
+  tenants: Array<[string, TenantConfig]>,
+): boolean {
+  return Boolean(host && hostRoutedTenantId(host, tenants) === tenant);
+}
+
+/**
  * Every origin this deployment answers on: the one addresses naming no tenant
  * are served on, plus each tenant's own.
  *

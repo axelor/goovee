@@ -5,14 +5,18 @@ export const dynamic = 'force-dynamic';
 
 import React from 'react';
 import type {Metadata} from 'next';
+import {headers} from 'next/headers';
 
 import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
 import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
 import {manager} from '@/tenant';
-import {tenantConfigProvider} from '@/tenant/config-provider';
-import {isHostRouted} from '@/lib/core/tenant/routing';
+import {
+  tenantConfigProvider,
+  listTenantConfigs,
+} from '@/tenant/config-provider';
+import {addressedHost, ownsAddressedHost} from '@/lib/core/tenant/routing';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
@@ -50,18 +54,31 @@ export default async function TenantLayout(props: {
    * before PushProvider subscribes). Environment wraps both, since PushProvider
    * reads the VAPID public key from it.
    *
-   * The scope is the narrowest one covering the tenant's addresses: the tenant
-   * path segment where an origin carries several tenants, and the root of the
-   * origin where the tenant is reached by host and holds it alone. A browser
-   * installs an app only where the page's worker encloses its scope and start
-   * address, and scopes match by path prefix, so this has to be no narrower than
-   * the manifest asks for.
+   * The scope is the narrowest one covering the tenant's addresses on the origin
+   * this page was asked for: the root where the tenant holds that origin, and the
+   * tenant path segment anywhere else. A browser installs an app only where the
+   * page's worker encloses its scope and start address, and scopes match by path
+   * prefix, so this has to be no narrower than the manifest asks for — the
+   * manifest route decides it the same way.
+   *
+   * Read from the address rather than from the tenant's own routing, because a
+   * tenant holding an origin of its own is still served under its path segment on
+   * an origin it shares, where the screen ending a session made before the move
+   * lives. Scoping to the root there would register a worker covering the whole
+   * shared origin, which the upgrade cleanup in the root layout unregisters on
+   * sight — leaving a registration made and dropped on every visit.
    *
    * The tenant is named in the worker's own address, since a scope of `/` names
    * none, and the worker needs it to keep its caches and its notification channel
    * to itself. */
   const scope = withBasePath(
-    config && isHostRouted(config) ? '/' : `/${tenant}/`,
+    ownsAddressedHost(
+      tenant,
+      addressedHost(await headers()),
+      listTenantConfigs(),
+    )
+      ? '/'
+      : `/${tenant}/`,
   );
 
   return (
