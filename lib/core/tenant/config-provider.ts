@@ -80,8 +80,8 @@ function tenantMap(
  * deployment-wide values live in "$global".
  *
  * What a valid document holds is declared in ./schema, and from that same
- * declaration `pnpm config:schema` generates the JSON Schema an operator's
- * editor checks the document against.
+ * declaration `pnpm config:schema:generate` generates the JSON Schema an
+ * operator's editor checks the document against.
  *
  * Loading is synchronous (readFileSync at first access) so config is also
  * available to module-init consumers — the better-auth instance needs the

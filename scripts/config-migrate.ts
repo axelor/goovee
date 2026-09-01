@@ -280,7 +280,7 @@ function confirmOverwrite(filePath: string): Promise<boolean> {
 type Values = {dev?: boolean};
 
 runScript<Values, [string | null]>({
-  command: 'pnpm tenants:migrate',
+  command: 'pnpm config:migrate',
   title: 'Environment to tenant document',
   summary: `Writes a configuration document — a "$global" section plus one
 "${TENANT_ID}" tenant — from the .env files the application would read, so a

@@ -1,7 +1,7 @@
 import {GooveeClient} from '@/goovee/.generated/client';
 
 /* The document's shape lives in ./schema — one declaration that validates a
- * document, types it, and that `pnpm config:schema` turns into
+ * document, types it, and that `pnpm config:schema:generate` turns into
  * tenants.config.schema.json. Re-exported here so the rest of the app keeps
  * reading its configuration types from one place. */
 export {PUBLIC_ENV_KEYS} from './schema';

@@ -24,7 +24,7 @@ jobs:
       - name: Run format check
         run: pnpm format:check
       - name: Check the generated configuration schema
-        run: pnpm config:schema --check
+        run: pnpm config:schema:generate --check
 
   tag:
     needs: format

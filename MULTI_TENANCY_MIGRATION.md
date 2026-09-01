@@ -18,7 +18,7 @@ workspace address stays as it is.
 In a checkout of the portal source, beside the deployment's current `.env`:
 
 ```
-pnpm tenants:migrate
+pnpm config:migrate
 ```
 
 It writes `tenants.config.json`: one entry keyed `"d"`, `$global.defaultTenant`

@@ -47,7 +47,7 @@ async function render(): Promise<string> {
 }
 
 runScript({
-  command: 'pnpm config:schema',
+  command: 'pnpm config:schema:generate',
   title: 'Configuration schema generation',
   summary: `Writes ${RELATIVE_PATH} from the zod schema the loader validates
 against, so an operator's editor and the running server agree on what a valid
@@ -70,7 +70,7 @@ job on CI runs so that the committed file cannot drift from the schema.`,
       if (committed !== generated) {
         out.fail(
           `${RELATIVE_PATH} does not match lib/core/tenant/schema.ts. ` +
-            `Run \`pnpm config:schema\` and commit the result.`,
+            `Run \`pnpm config:schema:generate\` and commit the result.`,
         );
       }
 
