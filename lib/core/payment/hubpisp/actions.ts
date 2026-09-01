@@ -64,7 +64,7 @@ export async function createHubPispPaymentLink({
   let resourceId: string;
   let consentHref: string;
   try {
-    const config = await manager.getConfig(tenantId);
+    const config = manager.getConfig(tenantId);
 
     if (!config) {
       throw new Error(`Tenant "${tenantId}" is not configured`);

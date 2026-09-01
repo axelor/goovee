@@ -8,9 +8,11 @@ steps in order.
 ## 1. Create the configuration document
 
 All configuration is one JSON document: a reserved `"$global"` section plus one
-entry per tenant, keyed by the tenant id (the URL path segment: letters only,
-at most 15 of them).
-Single-tenant is one entry, keyed `"d"`.
+entry per tenant, keyed by the tenant id (the URL path segment: a letter, then
+letters, digits or hyphens, at most 15 characters).
+
+Serve one tenant by naming one entry, under any id — that id is the segment
+every address of the deployment carries.
 
 `$global`:
 
@@ -18,11 +20,16 @@ Single-tenant is one entry, keyed `"d"`.
 | -------------------- | -------- | ----------------------- |
 | `betterAuthSecret`   | yes      | `BETTER_AUTH_SECRET`    |
 | `betterAuthUrl`      | yes      | `BETTER_AUTH_URL`       |
+| `defaultTenant`      | no       | —                       |
 | `pushMaxConnections` | no       | `PUSH_MAX_CONNECTIONS`  |
 | `imageCacheMaxBytes` | no       | `IMAGE_CACHE_MAX_BYTES` |
 
 Write `betterAuthUrl` as the origin the deployment is served on — scheme and
 host, with no path, query or fragment.
+
+Set `defaultTenant` to the id of the tenant serving `/` and the sign-in screens,
+which carry no tenant in their address. Leave it out and those addresses require
+a tenant in the URL, and every script requires `--tenant`.
 
 Each tenant entry — declare every capability the tenant uses; nothing is
 inherited from another tenant or the environment:
@@ -64,20 +71,29 @@ Browser variables (`publicEnv`) keys: `GOOVEE_PUBLIC_HOST`,
 `GOOVEE_PUBLIC_VAPID_PUBLIC_KEY`, `GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL`,
 `GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE`.
 
+Write `GOOVEE_PUBLIC_HOST` as the same origin in every tenant's entry, matching
+`$global.betterAuthUrl`. Tenants are reached at `<origin>/<tenant id>/<workspace>`.
+
 Procedure:
 
 - Single-tenant: run `pnpm tenants:migrate` to write `tenants.config.json` from
-  the current `.env`. Review it and fill any blank required fields.
+  the current `.env`. It writes one tenant keyed `"d"` and sets
+  `$global.defaultTenant` to it. Review it and fill any blank required fields.
 - Multi-tenant: copy `tenants.config.example.json`, add one entry per tenant,
   set `"$schema": "./tenants.config.schema.json"` for editor validation.
+
+Renaming a tenant means renaming `$global.defaultTenant` with it, and the
+addresses that tenant is served under. Do not rename a tenant with Up2Pay or Hub
+PISP payments in flight — those payments can no longer be settled.
 
 ## 2. Set the environment
 
 Runtime:
 
-- `MULTI_TENANCY=true` (multi-tenant) — omit or `false` for single-tenant.
 - `TENANTS_CONFIG_FILE=<path to the document>` — mount as a secret. Or
   `TENANTS_CONFIG=<inline JSON>` when not using a file.
+
+No setting replaces it: serve one tenant by naming one entry.
 
 Build:
 
@@ -89,7 +105,7 @@ Remove every other env var (`DATABASE_URL`, `AOS_*`, `BASIC_AUTH_*`,
 `MAIL_*`, `MATTERMOST_*`, `VAPID_*`, `GOOGLE_*`, `KEYCLOAK_*`, `SHOW_*`,
 `GOOVEE_PUBLIC_*`, `BETTER_AUTH_*`, `INCLUDE_LANGUAGE`,
 `UPLOAD_RECORD_RETENTION_HOURS`, `PUSH_MAX_CONNECTIONS`,
-`IMAGE_CACHE_MAX_BYTES`).
+`IMAGE_CACHE_MAX_BYTES`, `MULTI_TENANCY`).
 
 ## 3. Register webhook and payment URLs (per tenant)
 

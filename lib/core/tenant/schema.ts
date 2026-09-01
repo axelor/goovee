@@ -20,16 +20,28 @@ import {
   getMaxConnections,
   mailAccountKey,
 } from '@/lib/core/notification/mail-account';
+import {
+  isReservedSegment,
+  reservedSegments,
+} from '@/lib/core/path/reserved-segments';
 
 /* $schema is an editor hint and $global holds the deployment-wide settings.
  * Every other key in the document names a tenant. */
 const RESERVED_DOCUMENT_KEYS = ['$schema', '$global'];
 
-/* A tenant id is the URL path segment the tenant is served under, and the proxy
- * reads that segment with a letters-only pattern of its own (`extractTenant` in
- * proxy.ts), so an id holding anything else names an entry that no request can
- * reach. Widening this obliges widening that pattern too. */
-const TENANT_ID_PATTERN = /^[a-zA-Z]+$/;
+/*
+ * A tenant id is the URL path segment the tenant is served under. `extractTenant`
+ * in proxy.ts matches that segment with its own copy of this pattern, so widen
+ * both together: an id only one of them accepts names an entry no request
+ * reaches.
+ *
+ * The first character must be a letter. The proxy reads the first segment of an
+ * address as a tenant name, so `_next`, `_not-found`, a digit or a dot must not
+ * look like one. After the first character only `~` has to stay out: an Up2Pay
+ * notification carries `<reference>~<contextId>~<tenantId>` and is attributed
+ * by splitting on it.
+ */
+const TENANT_ID_PATTERN = /^[a-zA-Z][a-zA-Z0-9-]*$/;
 
 /* Reserving the whole width a payment context id can reach: a Hub PISP payment
  * carries `${contextId}-${tenantId}` in a field of 35 characters, and a context
@@ -87,6 +99,13 @@ export const globalConfigSchema = z
           "Origin the deployment is served on, e.g. https://portal.example.com — scheme and host only, with no path: the base path is appended in code, and a path here answers every auth request with a 404. Required: left out, Better Auth resolves it from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
         pattern: '^https?://[^/?#]+/?$',
       }),
+    defaultTenant: z
+      .string()
+      .min(1)
+      .describe(
+        'Tenant serving the addresses that name none of their own: "/" and the sign-in screens, which sit outside the tenant path segment, and a script run with no --tenant. Must name an entry of this document. Left out, those addresses resolve no tenant: "/" answers not-found, and a visitor reaches the sign-in screen by naming a tenant in the URL.',
+      )
+      .optional(),
     pushMaxConnections: positiveInteger()
       .describe(
         'Push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Defaults to 10.',
@@ -516,6 +535,28 @@ function checkMailCeilings(tenants: TenantEntry[]): ConfigIssue[] {
   return issues;
 }
 
+/* Checked against the tenants, because the two halves of the document are
+ * edited separately. Rename or drop a tenant and this can be left pointing at
+ * an entry that is not there, and the addresses it serves answer not-found with
+ * no explanation. */
+function checkDefaultTenant(
+  defaultTenant: string | undefined,
+  ids: string[],
+): ConfigIssue[] {
+  if (!defaultTenant || ids.includes(defaultTenant)) {
+    return [];
+  }
+
+  return [
+    {
+      path: ['$global', 'defaultTenant'],
+      message:
+        `"${defaultTenant}" names no tenant in this document, which names ` +
+        `${ids.join(', ')}.`,
+    },
+  ];
+}
+
 function checkTenantIds(ids: string[]): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
 
@@ -525,7 +566,19 @@ function checkTenantIds(ids: string[]): ConfigIssue[] {
         path: [id],
         message:
           `"${id}" is not a usable tenant id. A tenant id is the URL path ` +
-          `segment it is served under, so it may hold letters only.`,
+          `segment it is served under: a letter, then letters, digits or ` +
+          `hyphens.`,
+      });
+      continue;
+    }
+
+    if (isReservedSegment(id)) {
+      issues.push({
+        path: [id],
+        message:
+          `"${id}" cannot be a tenant id: the deployment answers /${id} ` +
+          `itself, so no request would reach a tenant named this. Reserved: ` +
+          `${reservedSegments().join(', ')}.`,
       });
       continue;
     }
@@ -572,9 +625,9 @@ export const configDocumentSchema = z
   .meta({
     title: 'Goovee configuration',
     description:
-      'The single configuration document for Goovee — a reserved "$global" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment: letters only, at most 15 of them, because a Hub PISP payment reference carries the id after a payment context id of up to 19 digits in a field of 35). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed "d". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.',
+      'The single configuration document for Goovee — a reserved "$global" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment: a letter, then letters, digits or hyphens, at most 15 characters, because a Hub PISP payment reference carries the id after a payment context id of up to 19 digits in a field of 35). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is a one-entry document under any id, and that id is the segment every address of the deployment carries. Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.',
     propertyNames: {
-      pattern: `^(\\$schema|\\$global|[a-zA-Z]{1,${TENANT_ID_MAX_LENGTH}})$`,
+      pattern: `^(\\$schema|\\$global|[a-zA-Z][a-zA-Z0-9-]{0,${TENANT_ID_MAX_LENGTH - 1}})$`,
     },
   })
   /* Only reached once every entry is individually valid, so these see a whole
@@ -582,10 +635,13 @@ export const configDocumentSchema = z
   .check(ctx => {
     const tenants = tenantEntries(ctx.value);
 
+    const ids = tenants.map(([id]) => id);
+
     const issues = [
-      ...checkTenantIds(tenants.map(([id]) => id)),
+      ...checkTenantIds(ids),
       ...(tenants.length
         ? [
+            ...checkDefaultTenant(ctx.value.$global?.defaultTenant, ids),
             ...checkHubPispCertIsolation(tenants),
             ...checkStorageIsolation(tenants),
             ...checkMailCeilings(tenants),

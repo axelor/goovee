@@ -3,8 +3,7 @@ export const dynamic = 'force-dynamic';
 import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {DEFAULT_TENANT} from '@/constants';
-import {TenancyType, manager} from '@/tenant';
+import {manager} from '@/tenant';
 
 import {resolveLanding} from './landing';
 
@@ -15,8 +14,8 @@ export default async function Page(props: {
 
   let tenantId = decodeURIComponent(searchParams.tenant || '');
 
-  if (!tenantId && manager.getType() === TenancyType.single) {
-    tenantId = DEFAULT_TENANT;
+  if (!tenantId) {
+    tenantId = manager.getDefaultTenantId() ?? '';
   }
 
   const destination = await resolveLanding({

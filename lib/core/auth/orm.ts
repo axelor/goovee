@@ -33,7 +33,7 @@ import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {hash} from './utils';
 import {getPublicEnvironment} from '../environment/utils';
-import {getTenantConfigSync} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config-provider';
 import {withMattermostSync} from '../mattermost/user-api';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -642,7 +642,7 @@ export async function registerByKeycloak({
   workspaceURI: string;
   client: Client;
 }): Promise<void> {
-  const config = getTenantConfigSync(tenantId);
+  const config = getTenantConfig(tenantId);
 
   /* Built through `getPortalRoot` rather than by interpolating the host, which
    * is absent for a tenant that is not served. This url is persisted and later

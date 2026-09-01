@@ -135,7 +135,7 @@ const credentials = {
       async ctx => {
         const {email, password, tenantId, rememberMe} = ctx.body;
 
-        const knownTenantIds = await manager.listTenantIds();
+        const knownTenantIds = manager.listTenantIds();
         if (!knownTenantIds.includes(tenantId)) {
           throw new APIError('UNAUTHORIZED', {
             ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,

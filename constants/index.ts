@@ -43,15 +43,9 @@ export const ORDER_BY = {
 };
 
 /**
- * TENANT
- */
-export const DEFAULT_TENANT = 'd';
-
-/**
  * WORKSPACE
  */
 export const DEFAULT_WORKSPACE = 'w';
-export const DEFAULT_WORKSPACE_URI = `/${DEFAULT_TENANT}/${DEFAULT_WORKSPACE}`;
 
 /**
  * CUSTOMER ROLE

@@ -1,11 +1,7 @@
 'use client';
 
 import React, {useContext, useEffect, useMemo, useRef} from 'react';
-import {
-  DEFAULT_TENANT,
-  DEFAULT_WORKSPACE,
-  DEFAULT_WORKSPACE_URI,
-} from '@/constants';
+import {DEFAULT_WORKSPACE} from '@/constants';
 
 // ---- CORE IMPORTS ---- //
 import {useTheme} from '@/app/theme';
@@ -21,9 +17,9 @@ export const WorkspaceContext = React.createContext<{
   workspaceURL: string;
   workspaceID: Workspace['id'];
 }>({
-  tenant: DEFAULT_TENANT,
+  tenant: '',
   workspace: DEFAULT_WORKSPACE,
-  workspaceURI: DEFAULT_WORKSPACE_URI,
+  workspaceURI: '',
   workspaceURL: '',
   workspaceID: '',
 });

@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getSessionTenantId} from '@/lib/auth';
-import {isMultiTenancy} from '@/tenant/env';
+import {isReservedSegment} from '@/lib/core/path/reserved-segments';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
@@ -15,14 +15,16 @@ export const config = {
      * 1. /api routes
      * 2. /_next (Next.js internals)
      * 3. /_static (inside /public)
-     * 4. all root files inside /public (e.g. /favicon.ico)
-     * 5. all files inside /public/images website locales pwa and pdfjs
-     * 6. the per-tenant web manifest (public, but fetched with same-origin
+     * 4. /_vercel (platform endpoints, e.g. /_vercel/insights)
+     * 5. all root files inside /public (e.g. /favicon.ico)
+     * 6. all files inside /public/images website locales pwa and pdfjs
+     * 7. the per-tenant web manifest (public, but fetched with same-origin
      *    cookies, so it must not run the session logic)
      *
-     * Anything left out of this list is read as a tenant name, so a directory
-     * of static files added under /public has to be named here too or it
-     * resolves to a tenant that does not exist.
+     * `isReservedSegment` decides which names a tenant may not use. Add any
+     * directory excluded here to it as well. This value cannot be generated
+     * from that list: Next reads it from the source at build time and ignores
+     * computed values.
      */
     '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|[\\w-]+/manifest\\.webmanifest|images/|website/|pwa/|locales/|pdfjs/).*)',
   ],
@@ -55,26 +57,32 @@ export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;
   const pathname = url.pathname;
 
-  if (pathname.startsWith('/auth') || pathname === '/') {
+  if (pathname === '/') {
     return NextResponse.next();
   }
 
   const tenant = extractTenant(pathname);
 
-  if (isMultiTenancy) {
-    if (!tenant) return notFound(req);
+  if (!tenant) return notFound(req);
 
-    /* One tenant session per browser: a session belongs to a single tenant and
-     * is never silently dropped. Reaching a different tenant is refused with a
-     * prompt to log out first — the cookie is left intact, so the user keeps
-     * their session and logs out explicitly before switching. */
-    const activeTenant = await getSessionTenantId(req.headers);
-    if (activeTenant && activeTenant !== tenant) {
-      return notFound(req, {
-        message:
-          'You are already loggedin to a tenant. For accessing different tenant, you need to logout first.',
-      });
-    }
+  /* The deployment answers these itself: the sign-in screens, the route
+   * handlers, the static directories. The whole segment is compared, so a
+   * tenant named `authcorp` is not mistaken for `auth`. The configuration
+   * document refuses tenant ids from this same list. */
+  if (isReservedSegment(tenant)) {
+    return NextResponse.next();
+  }
+
+  /* One tenant session per browser: a session belongs to a single tenant and
+   * is never silently dropped. Reaching a different tenant is refused with a
+   * prompt to log out first — the cookie is left intact, so the user keeps
+   * their session and logs out explicitly before switching. */
+  const activeTenant = await getSessionTenantId(req.headers);
+  if (activeTenant && activeTenant !== tenant) {
+    return notFound(req, {
+      message:
+        'You are already loggedin to a tenant. For accessing different tenant, you need to logout first.',
+    });
   }
 
   const headers = new Headers(req.headers);
@@ -83,9 +91,7 @@ export default async function proxy(req: NextRequest) {
      can send a denied guest back to exactly where they were after login. */
   headers.set(CURRENT_PATH_HEADER, url.pathname + url.search);
 
-  if (tenant) {
-    headers.set(TENANT_HEADER, tenant);
-  }
+  headers.set(TENANT_HEADER, tenant);
 
   return NextResponse.next({
     request: {

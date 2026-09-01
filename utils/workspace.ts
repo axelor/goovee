@@ -1,6 +1,6 @@
 import 'server-only';
 
-import {getTenantConfigSync} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config-provider';
 import {getPublicEnvironment} from '@/environment/utils';
 import {getPortalRoot} from './workspace-url';
 
@@ -28,9 +28,7 @@ export function workspacePathname(params: {
 } {
   const {tenant, workspace} = params;
 
-  const host = getPublicEnvironment(
-    getTenantConfigSync(tenant),
-  ).GOOVEE_PUBLIC_HOST;
+  const host = getPublicEnvironment(getTenantConfig(tenant)).GOOVEE_PUBLIC_HOST;
 
   const workspaceURI = `/${tenant}/${workspace}`;
   const workspaceURL = `${getPortalRoot(host)}${workspaceURI}`;

@@ -2,11 +2,13 @@ import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
 import {findWorkspace} from '@/orm/workspace';
-import {TenancyType, manager} from '@/tenant';
+import {manager} from '@/tenant';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 import {getPublicEnvironment} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {DEFAULT_TENANT, SEARCH_PARAMS} from '@/constants';
+
+// ---- LOCAL IMPORTS ---- //
+import {firstValue, resolveAuthTenantId} from './tenant';
 
 /**
  * The auth screens sit outside the `[tenant]/[workspace]` segment, so the
@@ -22,24 +24,20 @@ async function findAuthWorkspaceName({
   tenantId,
 }: {
   workspaceURI?: string | null;
-  tenantId?: string | null;
+  /* Resolved by the caller, so the tab is named after the same tenant the
+   * screen itself acts for. */
+  tenantId: string;
 }): Promise<string | null> {
-  /* In single-tenant mode the tenant is implicit, so resolve it the same way the
-   * auth pages do rather than requiring the param. */
-  const resolvedTenantId =
-    tenantId ||
-    (manager.getType() === TenancyType.single ? DEFAULT_TENANT : '');
-
-  if (!(workspaceURI && resolvedTenantId)) return null;
+  if (!(workspaceURI && tenantId)) return null;
 
   /* Read the host from the config alone: it is a per-tenant browser variable, and
    * resolving it first means an unknown or unconfigured tenant returns null here
    * instead of connecting a database just to build a title. */
-  const config = await tenantConfigProvider.get(resolvedTenantId);
+  const config = tenantConfigProvider.get(tenantId);
   const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
   if (!host) return null;
 
-  const tenant = await manager.getTenant(resolvedTenantId);
+  const tenant = await manager.getTenant(tenantId);
   if (!tenant) return null;
 
   const url = `${host}${withBasePath(workspaceURI)}`;
@@ -57,13 +55,10 @@ export async function resolveAuthWorkspaceName(
   searchParams: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<string | null> {
   const params = await searchParams;
-  const first = (value: string | string[] | undefined) =>
-    Array.isArray(value) ? value[0] : value;
 
   return findAuthWorkspaceName({
-    workspaceURI: first(params.workspaceURI),
-    // `/auth/error` spells the tenant param `tenantId`, the others use `tenant`.
-    tenantId: first(params[SEARCH_PARAMS.TENANT_ID]) ?? first(params.tenantId),
+    workspaceURI: firstValue(params.workspaceURI),
+    tenantId: resolveAuthTenantId(params),
   });
 }
 

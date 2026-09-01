@@ -57,7 +57,7 @@ export const sendEmailNotifications = async ({
 
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      await manager.getConfig(tenantId),
+      manager.getConfig(tenantId),
     );
     if (!mailService) {
       console.error('[MAIL] Mail service is not available.');

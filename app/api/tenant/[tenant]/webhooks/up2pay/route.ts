@@ -103,7 +103,7 @@ export async function GET(
    * than by resolving the tenant, which would connect its database: the forward
    * exists for payments that are not ours, and is the one answer that should
    * survive our database being down. */
-  const config = await tenantConfigProvider.get(tenantId);
+  const config = tenantConfigProvider.get(tenantId);
   if (!config) {
     console.error('[UP2PAY][WEBHOOK] Tenant not found', {tenantId});
     return new NextResponse('Bad Request', {status: 400});

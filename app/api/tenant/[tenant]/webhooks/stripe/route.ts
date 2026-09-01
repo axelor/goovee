@@ -104,7 +104,7 @@ export async function POST(
    * so its webhook secret is selected without reading the untrusted payload.
    * The event is still trusted only after constructEvent verifies the signature
    * against that secret. */
-  const tenantConfig = await tenantConfigProvider.get(tenantId);
+  const tenantConfig = tenantConfigProvider.get(tenantId);
 
   const webhookSecret = getStripeWebhookSecret(tenantConfig);
 

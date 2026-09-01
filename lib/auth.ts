@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
-import {getGlobalConfigSync} from '@/tenant/config-provider';
+import {getGlobalConfig} from '@/tenant/config-provider';
 import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
@@ -276,7 +276,7 @@ const options = {
 
 /* Deployment-wide auth settings come from the document's "$global" section
  * (the provider loads synchronously and marks the secret at load). */
-const globalConfig = getGlobalConfigSync();
+const globalConfig = getGlobalConfig();
 
 export const auth = betterAuth({
   ...options,

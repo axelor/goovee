@@ -8,12 +8,13 @@ import {Environment, getPublicEnvironment} from '@/environment';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {canRegisterForWorkspace} from '@/orm/workspace';
-import {DEFAULT_TENANT, SEARCH_PARAMS} from '@/constants';
-import {TenancyType, manager} from '@/tenant';
+import {SEARCH_PARAMS} from '@/constants';
+import {manager} from '@/tenant';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 import {isSameOrigin} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
 
+import {resolveAuthTenantId} from '../common/tenant';
 import {
   generateAuthMetadata,
   resolveAuthWorkspaceName,
@@ -42,19 +43,9 @@ export default async function Page(props: {
     ? decodeURIComponent(callbackurlSearchParam)
     : '';
 
-  const tenantIdSearchParam = searchParams?.[SEARCH_PARAMS.TENANT_ID];
+  const tenantId = resolveAuthTenantId(searchParams);
 
-  let tenantId = tenantIdSearchParam
-    ? decodeURIComponent(tenantIdSearchParam)
-    : '';
-
-  if (!tenantId && manager.getType() === TenancyType.single) {
-    tenantId = DEFAULT_TENANT;
-  }
-
-  const tenantConfig = tenantId
-    ? await tenantConfigProvider.get(tenantId)
-    : null;
+  const tenantConfig = tenantId ? tenantConfigProvider.get(tenantId) : null;
 
   const host = getPublicEnvironment(tenantConfig).GOOVEE_PUBLIC_HOST!;
 
@@ -79,7 +70,7 @@ export default async function Page(props: {
   let canRegister;
 
   if (workspaceURL && tenantId) {
-    const knownTenantIds = await manager.listTenantIds();
+    const knownTenantIds = manager.listTenantIds();
     if (!knownTenantIds.includes(tenantId)) {
       return notFound();
     }

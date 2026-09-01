@@ -21,7 +21,9 @@ export default function Unauthorized() {
           </p>
         </div>
         <div>
-          <Link href={workspaceURI}>
+          {/* Empty when the layout answered before it rendered the workspace
+              provider, and an empty href reloads this page. */}
+          <Link href={workspaceURI || '/'}>
             <Button>{i18n.t('Return Home')}</Button>
           </Link>
         </div>

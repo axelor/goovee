@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {listTenantConfigsSync} from '@/tenant/config-provider';
+import {listTenantConfigs} from '@/tenant/config-provider';
 
 // ---- LOCAL IMPORTS ---- //
 import {getMaxConnections, getVapidDetails} from './utils';
@@ -25,7 +25,7 @@ export function checkPushConfig(): void {
 }
 
 function report(): void {
-  const tenants = listTenantConfigsSync();
+  const tenants = listTenantConfigs();
 
   /* getVapidDetails reports per tenant why a configuration is unusable, so this
    * only has to count what came back. */

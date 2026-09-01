@@ -35,7 +35,7 @@ export async function notifyInvoicePaymentSuccess({
     if (!invoice?.portalWorkspace?.url) return;
 
     const workspaceURL = invoice.portalWorkspace.url;
-    const config = await tenantConfigProvider.get(tenantId);
+    const config = tenantConfigProvider.get(tenantId);
     const workspaceURI = toWorkspaceURI(
       workspaceURL,
       getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,

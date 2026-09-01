@@ -73,7 +73,7 @@ export async function findPendingHubPispPayments({
       /* Inside the attempt, so that a tenant this cannot be resolved for costs
        * the link's live status and nothing more: the entry below is still shown
        * from what the database holds. */
-      const config = await manager.getConfig(tenantId);
+      const config = manager.getConfig(tenantId);
 
       if (!config) {
         throw new Error(`Tenant "${tenantId}" is not configured`);

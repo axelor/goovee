@@ -31,7 +31,7 @@ export async function register() {
 
     let tenantIds: string[];
     try {
-      tenantIds = await manager.listTenantIds();
+      tenantIds = manager.listTenantIds();
     } catch (err) {
       console.error('[HUBPISP][STARTUP] Could not list tenants:', err);
       return;

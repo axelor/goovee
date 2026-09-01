@@ -44,7 +44,9 @@ export default function NotFound() {
           </p>
           <div className="mt-7 flex gap-2.5">
             <Link
-              href={workspaceURI}
+              /* Empty when the layout answered not-found before it rendered
+               * the workspace provider, and an empty href reloads this page. */
+              href={workspaceURI || '/'}
               className="inline-flex items-center gap-2 rounded-[11px] bg-royal px-6 py-[13px] text-[14.5px] font-bold text-white shadow-[0_2px_10px_rgba(21,84,181,0.28)] transition-colors hover:bg-royal-dark">
               <MdHome className="size-[18px]" />
               {i18n.t('Return Home')}

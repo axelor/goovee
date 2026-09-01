@@ -61,7 +61,7 @@ export async function resolveLanding({
   tenantId: string;
   workspaceURI?: string;
 }): Promise<string | null> {
-  const knownTenantIds = await manager.listTenantIds();
+  const knownTenantIds = manager.listTenantIds();
 
   if (!tenantId || !knownTenantIds.includes(tenantId)) {
     return null;

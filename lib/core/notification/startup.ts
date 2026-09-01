@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {listTenantConfigsSync} from '@/tenant/config-provider';
+import {listTenantConfigs} from '@/tenant/config-provider';
 import type {TenantConfig} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
@@ -33,7 +33,7 @@ async function report(): Promise<void> {
   const seen = new Set<string>();
   const accounts: Array<[string, TenantConfig]> = [];
 
-  for (const [tenantId, config] of listTenantConfigsSync()) {
+  for (const [tenantId, config] of listTenantConfigs()) {
     const mail = config.mail;
     if (!mail?.host) continue;
 

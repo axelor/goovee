@@ -44,7 +44,7 @@ export async function GET(
 
   /* The stream is in-memory pub/sub keyed by tenant, so no tenant client is
    * needed here — just reject subscriptions for an unknown tenant path. */
-  const tenantIds = await manager.listTenantIds();
+  const tenantIds = manager.listTenantIds();
   if (!tenantIds.includes(tenantId)) {
     return new NextResponse('Bad Request', {status: 400});
   }

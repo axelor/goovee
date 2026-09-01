@@ -17,6 +17,11 @@
           "description": "Origin the deployment is served on, e.g. https://portal.example.com — scheme and host only, with no path: the base path is appended in code, and a path here answers every auth request with a 404. Required: left out, Better Auth resolves it from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
           "pattern": "^https?://[^/?#]+/?$"
         },
+        "defaultTenant": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tenant serving the addresses that name none of their own: \"/\" and the sign-in screens, which sit outside the tenant path segment, and a script run with no --tenant. Must name an entry of this document. Left out, those addresses resolve no tenant: \"/\" answers not-found, and a visitor reaches the sign-in screen by naming a tenant in the URL."
+        },
         "pushMaxConnections": {
           "type": "integer",
           "minimum": 1,
@@ -309,6 +314,8 @@
     "additionalProperties": false
   },
   "title": "Goovee configuration",
-  "description": "The single configuration document for Goovee — a reserved \"$global\" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment: letters only, at most 15 of them, because a Hub PISP payment reference carries the id after a payment context id of up to 19 digits in a field of 35). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed \"d\". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.",
-  "propertyNames": {"pattern": "^(\\$schema|\\$global|[a-zA-Z]{1,15})$"}
+  "description": "The single configuration document for Goovee — a reserved \"$global\" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment: a letter, then letters, digits or hyphens, at most 15 characters, because a Hub PISP payment reference carries the id after a payment context id of up to 19 digits in a field of 35). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is a one-entry document under any id, and that id is the segment every address of the deployment carries. Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.",
+  "propertyNames": {
+    "pattern": "^(\\$schema|\\$global|[a-zA-Z][a-zA-Z0-9-]{0,14})$"
+  }
 }

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // ---- CORE IMPORTS ---- //
-import {getGlobalConfigSync} from '@/tenant/config-provider';
+import {getGlobalConfig} from '@/tenant/config-provider';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -38,7 +38,7 @@ import {
  * another's — a relative path here would make them collide.
  */
 function maxBytes(): number {
-  return getGlobalConfigSync().imageCacheMaxBytes ?? DEFAULT_CACHE_MAX_BYTES;
+  return getGlobalConfig().imageCacheMaxBytes ?? DEFAULT_CACHE_MAX_BYTES;
 }
 
 /**

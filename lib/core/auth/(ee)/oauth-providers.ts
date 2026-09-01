@@ -1,7 +1,7 @@
 import {genericOAuth} from 'better-auth/plugins';
 import type {GenericOAuthConfig} from 'better-auth/plugins';
 
-import {listTenantConfigsSync} from '@/tenant/config-provider';
+import {listTenantConfigs} from '@/tenant/config-provider';
 
 const GOOGLE_DISCOVERY_URL =
   'https://accounts.google.com/.well-known/openid-configuration';
@@ -32,7 +32,7 @@ function buildConfigs(): TenantOAuthConfig[] {
    * provider id <provider>-<tenantId>, and the matching redirect URI
    * (/api/auth/oauth2/callback/<provider>-<tenantId>) must be registered
    * with the identity provider. */
-  for (const [tenantId, config] of listTenantConfigsSync()) {
+  for (const [tenantId, config] of listTenantConfigs()) {
     const oauth = config.oauth;
     if (!oauth) continue;
 

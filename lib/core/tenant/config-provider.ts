@@ -2,18 +2,10 @@ import fs from 'fs';
 
 import {z} from 'zod';
 
-import {DEFAULT_TENANT} from '@/constants';
 import {taintSecret} from '@/lib/core/security/taint';
-import {isMultiTenancy, tenantsConfigFile, tenantsConfigInline} from './env';
+import {tenantsConfigFile, tenantsConfigInline} from './env';
 import {configDocumentSchema} from './schema';
 import type {GlobalConfig, TenantConfig} from './types';
-
-export {isMultiTenancy};
-
-export interface TenantConfigProvider {
-  get(id: string): Promise<TenantConfig | null>;
-  list(): Promise<string[]>;
-}
 
 function taintTenantConfig(config: TenantConfig) {
   const secrets: Array<[string, string | undefined]> = [
@@ -85,8 +77,7 @@ function tenantMap(
  * one-entry document. Nothing is read from the process env for tenant- or
  * deployment-scoped settings, and no value is inherited between sections
  * (no fallback) — every value a tenant uses lives in its own entry, and the
- * deployment-wide values live in "$global". A registry-DB provider can replace
- * this behind the same interface later.
+ * deployment-wide values live in "$global".
  *
  * What a valid document holds is declared in ./schema, and from that same
  * declaration `pnpm config:schema` generates the JSON Schema an operator's
@@ -95,7 +86,7 @@ function tenantMap(
  * Loading is synchronous (readFileSync at first access) so config is also
  * available to module-init consumers — the better-auth instance needs the
  * "$global" secret and the per-tenant OAuth entries before any request. */
-class DocumentTenantConfigProvider implements TenantConfigProvider {
+class DocumentTenantConfigProvider {
   private loaded: LoadedConfig | undefined;
 
   private load(): LoadedConfig {
@@ -168,80 +159,48 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
       taintTenantConfig(config);
     }
 
-    /* With multi-tenancy off only the default entry is ever served, whatever
-     * else the document holds. Said at load because the alternative is silence:
-     * the server would start, report no mail and no push because there is
-     * nothing it considers servable, and only then fail every request. */
-    if (!isMultiTenancy && !tenants[DEFAULT_TENANT]) {
-      throw new Error(
-        `Tenant configuration has no "${DEFAULT_TENANT}" entry, which is the only one served ` +
-          `while multi-tenancy is off. Rename the entry to serve, or set MULTI_TENANCY=true ` +
-          `to serve every entry in the document.`,
-      );
-    }
-
     return {global, tenants};
   }
 
   /**
-   * Null for an id that is not served, which with multi-tenancy off is every id
-   * but the default: the manager hands back the default tenant's client for any
-   * of them, so resolving one here would pair another tenant's configuration —
-   * its signing keys, its browser variables — with the default tenant's data.
-   *
-   * Every other accessor is built on this one so that all of them refuse alike.
+   * Null for an id the document does not name. This is what refuses a tenant
+   * segment taken from a URL; nothing else validates it.
    */
-  getSync(id: string): TenantConfig | null {
-    if (!isMultiTenancy && id !== DEFAULT_TENANT) {
-      return null;
-    }
-
+  get(id: string): TenantConfig | null {
     return this.load().tenants[id] ?? null;
   }
 
-  /* What is listed is what can be served. A document holding entries that are
-   * not would otherwise have sign-in providers registered under names no login
-   * can reach, and the startup reports describing mail and push for them. */
-  listConfigsSync(): Array<[string, TenantConfig]> {
-    if (isMultiTenancy) {
-      return Object.entries(this.load().tenants);
-    }
-
-    const config = this.getSync(DEFAULT_TENANT);
-
-    return config ? [[DEFAULT_TENANT, config]] : [];
+  /* Every entry the document names is served. The document alone decides how
+   * many tenants a deployment has. */
+  listConfigs(): Array<[string, TenantConfig]> {
+    return Object.entries(this.load().tenants);
   }
 
-  getGlobalSync(): GlobalConfig {
+  list(): string[] {
+    return this.listConfigs().map(([id]) => id);
+  }
+
+  getGlobal(): GlobalConfig {
     return this.load().global;
-  }
-
-  async get(id: string): Promise<TenantConfig | null> {
-    return this.getSync(id);
-  }
-
-  async list(): Promise<string[]> {
-    return this.listConfigsSync().map(([id]) => id);
   }
 }
 
 const provider = new DocumentTenantConfigProvider();
 
-export const tenantConfigProvider: TenantConfigProvider = provider;
+export const tenantConfigProvider = provider;
 
-/**
- * Synchronous access for module-init consumers (the better-auth instance reads
- * the "$global" secret and the per-tenant OAuth entries at construction). A
- * future async registry provider would need init-time prefetching instead.
- */
-export function listTenantConfigsSync(): Array<[string, TenantConfig]> {
-  return provider.listConfigsSync();
+/* The document is read from disk once and kept, so every accessor here answers
+ * without waiting. Module setup depends on that: the better-auth instance reads
+ * the "$global" secret and the per-tenant OAuth entries while it is being
+ * constructed, where there is nowhere to await. */
+export function listTenantConfigs(): Array<[string, TenantConfig]> {
+  return provider.listConfigs();
 }
 
-export function getTenantConfigSync(id: string): TenantConfig | null {
-  return provider.getSync(id);
+export function getTenantConfig(id: string): TenantConfig | null {
+  return provider.get(id);
 }
 
-export function getGlobalConfigSync(): GlobalConfig {
-  return provider.getGlobalSync();
+export function getGlobalConfig(): GlobalConfig {
+  return provider.getGlobal();
 }

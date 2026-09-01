@@ -120,7 +120,7 @@ export async function generateOTP({
 
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      await tenantConfigProvider.get(tenantId),
+      tenantConfigProvider.get(tenantId),
     );
     if (!result?.otp) return;
 

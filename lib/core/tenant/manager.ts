@@ -1,28 +1,12 @@
 'server only';
 
-import {DEFAULT_TENANT} from '@/constants';
 import {createClient} from '@/goovee/.generated/client';
 import {ensureStorageDir} from '@/storage/index';
 import {LRUCache} from './lru';
-import {isMultiTenancy, tenantConfigProvider} from './config-provider';
+import {getGlobalConfig, tenantConfigProvider} from './config-provider';
 import type {Tenant, TenantConfig} from './types';
 
 const CACHE_CAPACITY = 20;
-
-export enum TenancyType {
-  single = 'single',
-  multi = 'multi',
-}
-
-interface TenantManager {
-  getType(): TenancyType;
-  /* Resolves to null for an unknown (or missing) tenant id — callers guard with
-   * `if (!tenant)` and return a 4xx. A genuine connection failure still throws. */
-  getTenant(id?: Tenant['id']): Promise<Tenant | null>;
-  getConfig(id?: Tenant['id']): Promise<Tenant['config'] | undefined>;
-  getClient(id?: Tenant['id']): Promise<Tenant['client'] | undefined>;
-  listTenantIds(): Promise<string[]>;
-}
 
 async function connectTenant(
   id: Tenant['id'],
@@ -65,48 +49,18 @@ async function connectTenant(
   return {id, config, client};
 }
 
-export class SingleTenantManager implements TenantManager {
-  private tenant: Tenant | undefined = undefined;
-
-  getType() {
-    return TenancyType.single;
-  }
-
-  async getTenant() {
-    if (this.tenant) {
-      return this.tenant;
-    }
-
-    const config = await tenantConfigProvider.get(DEFAULT_TENANT);
-
-    if (!config) {
-      throw new Error('Invalid configuration');
-    }
-
-    this.tenant = await connectTenant(DEFAULT_TENANT, config);
-
-    return this.tenant;
-  }
-
-  async getConfig() {
-    return this.getTenant().then(tenant => tenant?.config);
-  }
-
-  async getClient() {
-    return this.getTenant().then(tenant => tenant?.client);
-  }
-
-  /* Only the default tenant is reachable in this mode — `getTenant` ignores the
-   * id it is given and always returns it. Listing the document's other entries
-   * would have every caller that iterates tenants (the upload sweeps, the
-   * payment resumption) do the same work repeatedly against this one, and would
-   * let a sign-in name a tenant that is not the one it would be served. */
-  async listTenantIds() {
-    return [DEFAULT_TENANT];
-  }
-}
-
-export class MultiTenantManager implements TenantManager {
+/*
+ * One manager for every deployment. It serves the tenants the configuration
+ * document names, so a document with one entry fills one cache slot and never
+ * evicts anything.
+ *
+ * The signatures say what each method costs. `getConfig`, `getDefaultTenantId`
+ * and `listTenantIds` are synchronous: they read the configuration document,
+ * which is already in memory. `getTenant` and `getClient` return a promise
+ * because they may open a Postgres pool, and the cache below then evicts
+ * another tenant to make room for it.
+ */
+export class TenantManager {
   private cache: LRUCache<Tenant['id'], Tenant>;
 
   constructor() {
@@ -124,10 +78,8 @@ export class MultiTenantManager implements TenantManager {
     });
   }
 
-  getType() {
-    return TenancyType.multi;
-  }
-
+  /* Resolves to null for an unknown (or missing) tenant id — callers guard with
+   * `if (!tenant)` and return a 4xx. A genuine connection failure still throws. */
   async getTenant(id: Tenant['id']): Promise<Tenant | null> {
     if (!id) {
       return null;
@@ -139,7 +91,7 @@ export class MultiTenantManager implements TenantManager {
       return cached;
     }
 
-    const config = await tenantConfigProvider.get(id);
+    const config = tenantConfigProvider.get(id);
 
     if (!config) {
       /* Unknown tenant is not an error: callers guard with `if (!tenant)` and
@@ -159,23 +111,30 @@ export class MultiTenantManager implements TenantManager {
     }
   }
 
-  async getConfig(id: Tenant['id']) {
-    return this.getTenant(id).then(tenant => tenant?.config);
+  getConfig(id: Tenant['id']) {
+    return tenantConfigProvider.get(id);
   }
 
   async getClient(id: Tenant['id']) {
     return this.getTenant(id).then(tenant => tenant?.client);
   }
 
-  async listTenantIds() {
+  /**
+   * The tenant used by addresses that name none: `/`, the auth screens, and a
+   * script run without `--tenant`. Null unless the document declares one, and
+   * then those addresses have to be told which tenant they are for.
+   *
+   * The document is checked at load, so any name returned here is one it names.
+   */
+  getDefaultTenantId(): string | null {
+    return getGlobalConfig().defaultTenant ?? null;
+  }
+
+  listTenantIds() {
     return tenantConfigProvider.list();
   }
 }
 
-export {isMultiTenancy};
-
-export const manager: TenantManager = isMultiTenancy
-  ? new MultiTenantManager()
-  : new SingleTenantManager();
+export const manager = new TenantManager();
 
 export default manager;

@@ -40,7 +40,7 @@ async function forEachTenant(
 ): Promise<void> {
   let tenantIds: string[];
   try {
-    tenantIds = await manager.listTenantIds();
+    tenantIds = manager.listTenantIds();
   } catch (error) {
     console.error(`[UPLOAD][${label}] could not list tenants:`, error);
     return;

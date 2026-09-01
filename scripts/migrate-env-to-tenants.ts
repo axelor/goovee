@@ -7,13 +7,17 @@ import {config as loadDotenv} from 'dotenv';
 import * as out from '@/scripts/lib/output';
 import {runScript} from '@/scripts/lib/script';
 
-import {DEFAULT_TENANT} from '@/constants';
 import {
   PUBLIC_ENV_KEYS,
   type GlobalConfigInput,
   type PublicEnv,
   type TenantConfigInput,
 } from '@/tenant/types';
+
+/* The id keying the one tenant this writes. It becomes the segment every
+ * address of the deployment carries, and changing it is renaming this key —
+ * nothing else reads the name. */
+const TENANT_ID = 'd';
 
 /* Load .env files with Next.js precedence for the chosen mode (more-specific
  * files win — loaded first, never overridden). This matches the set Next loads
@@ -221,6 +225,9 @@ function buildGlobal(): GlobalConfigInput {
   return {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
     betterAuthUrl: process.env.BETTER_AUTH_URL ?? '',
+    /* So that "/" and the sign-in screens keep answering for a deployment that
+     * has never named a tenant in an address. */
+    defaultTenant: TENANT_ID,
     pushMaxConnections: count(process.env.PUSH_MAX_CONNECTIONS),
     imageCacheMaxBytes: count(process.env.IMAGE_CACHE_MAX_BYTES),
   };
@@ -276,9 +283,11 @@ runScript<Values, [string | null]>({
   command: 'pnpm tenants:migrate',
   title: 'Environment to tenant document',
   summary: `Writes a configuration document — a "$global" section plus one
-"${DEFAULT_TENANT}" tenant — from the .env files the application would read, so a
+"${TENANT_ID}" tenant — from the .env files the application would read, so a
 deployment already configured through the environment can move to a document
-without its settings being retyped. Prompts before overwriting an existing file.`,
+without its settings being retyped. Rename the tenant key to serve the
+deployment under another id, and "$global.defaultTenant" with it. Prompts
+before overwriting an existing file.`,
   options: command =>
     command
       .option('--dev', 'Read the development-mode .env files')
@@ -294,7 +303,7 @@ without its settings being retyped. Prompts before overwriting an existing file.
     > = {
       $schema: './tenants.config.schema.json',
       $global: buildGlobal(),
-      [DEFAULT_TENANT]: buildDefaultTenant(),
+      [TENANT_ID]: buildDefaultTenant(),
     };
 
     const outPath = path.resolve(

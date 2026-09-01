@@ -26,7 +26,7 @@ export async function generateMetadata(props: {
   params: Promise<{tenant: string}>;
 }): Promise<Metadata> {
   const {tenant} = await props.params;
-  const knownTenantIds = await manager.listTenantIds();
+  const knownTenantIds = manager.listTenantIds();
 
   if (!knownTenantIds.includes(tenant)) return {};
 
@@ -39,10 +39,8 @@ export default async function TenantLayout(props: {
 }) {
   const {tenant} = await props.params;
 
-  const [config, theme] = await Promise.all([
-    tenantConfigProvider.get(tenant),
-    findTheme(),
-  ]);
+  const config = tenantConfigProvider.get(tenant);
+  const theme = await findTheme();
 
   const env = getPublicEnvironment(config);
 

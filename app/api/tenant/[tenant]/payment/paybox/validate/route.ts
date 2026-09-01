@@ -14,7 +14,7 @@ export async function GET(
 
   /* Paybox signs IPNs with its own (global) key, so this endpoint needs no
    * tenant client — just reject IPNs aimed at an unknown tenant path. */
-  const tenantIds = await manager.listTenantIds();
+  const tenantIds = manager.listTenantIds();
   if (!tenantIds.includes(tenantId)) {
     return new NextResponse('Bad Request', {status: 400});
   }

@@ -3,6 +3,7 @@
   "$global": {
     "betterAuthSecret": "<better-auth-secret>",
     "betterAuthUrl": "https://portal.example.com",
+    "defaultTenant": "acme",
     "pushMaxConnections": 10,
     "imageCacheMaxBytes": 2147483648
   },
@@ -57,7 +58,7 @@
     "includeLanguage": true,
     "uploadRecordRetentionHours": 168,
     "publicEnv": {
-      "GOOVEE_PUBLIC_HOST": "https://acme.example.com",
+      "GOOVEE_PUBLIC_HOST": "https://portal.example.com",
       "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": "<paypal-client-id>"
     }
   },
@@ -105,7 +106,7 @@
       }
     },
     "publicEnv": {
-      "GOOVEE_PUBLIC_HOST": "https://beta.example.com"
+      "GOOVEE_PUBLIC_HOST": "https://portal.example.com"
     }
   }
 }

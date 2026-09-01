@@ -31,7 +31,7 @@ export async function createPaypalOrder({
   }
 
   const ordersController = new OrdersController(
-    PayPalClient(await manager.getConfig(tenantId)),
+    PayPalClient(manager.getConfig(tenantId)),
   );
 
   const {id: contextId} = await createPaymentContext({
@@ -90,7 +90,7 @@ export async function findPaypalOrder({
   }
 
   const ordersController = new OrdersController(
-    PayPalClient(await manager.getConfig(tenantId)),
+    PayPalClient(manager.getConfig(tenantId)),
   );
 
   let result;

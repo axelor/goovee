@@ -60,7 +60,7 @@ export async function createUp2payOrder({
     currency,
     url,
     billingInfo,
-    config: await manager.getConfig(tenantId),
+    config: manager.getConfig(tenantId),
   });
 
   return {

@@ -3,10 +3,7 @@ import https from 'node:https';
 import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
-import {
-  getGlobalConfigSync,
-  tenantConfigProvider,
-} from '@/tenant/config-provider';
+import {getGlobalConfig, tenantConfigProvider} from '@/tenant/config-provider';
 import type {TenantConfig} from '@/tenant';
 import type {
   NotificationPayload,
@@ -69,7 +66,7 @@ const SOCKET_TIMEOUT_MESSAGE = 'Socket timeout';
  * deployment's and comes from "$global". A value it cannot use is refused when
  * the document is read, named there, rather than corrected silently here. */
 export function getMaxConnections(): number {
-  return getGlobalConfigSync().pushMaxConnections ?? DEFAULT_MAX_CONNECTIONS;
+  return getGlobalConfig().pushMaxConnections ?? DEFAULT_MAX_CONNECTIONS;
 }
 
 /* One agent and one set of slots for the process, so devices on the same push
@@ -482,7 +479,7 @@ async function prepare({
    * same tenant's keys as the first attempt. */
   const vapidDetails = getVapidDetails(
     tenantId,
-    await tenantConfigProvider.get(tenantId),
+    tenantConfigProvider.get(tenantId),
   );
 
   if (!vapidDetails) return null;

@@ -32,7 +32,7 @@ export async function sendCommentMail(props: {
   } = props;
   const mailService = NotificationManager.getService(
     NotificationType.mail,
-    await manager.getConfig(tenant),
+    manager.getConfig(tenant),
   );
   if (!mailService) {
     console.error('[MAIL] Mail service is not available.');
@@ -128,7 +128,7 @@ export async function sendTrackMail(props: {
   } = props;
   const mailService = NotificationManager.getService(
     NotificationType.mail,
-    await manager.getConfig(tenant),
+    manager.getConfig(tenant),
   );
   if (!mailService) {
     console.error('[MAIL] Mail service is not available.');

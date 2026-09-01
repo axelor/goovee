@@ -25,7 +25,7 @@ export async function GET(
 ) {
   const {tenant} = await params;
 
-  const knownTenantIds = await manager.listTenantIds();
+  const knownTenantIds = manager.listTenantIds();
   if (!knownTenantIds.includes(tenant)) {
     return new NextResponse('Not found', {status: 404});
   }

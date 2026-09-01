@@ -248,7 +248,7 @@ async function sendNotifications(data: {
 
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      await manager.getConfig(tenantId),
+      manager.getConfig(tenantId),
     );
     const sender = workspace.name || APP_TITLE;
 

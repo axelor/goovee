@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import {createHash} from 'crypto';
 
 import {manager, type TenantClient, type TenantConfig} from '@/tenant';
-import {getTenantConfigSync} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config-provider';
 import {LRUCache} from '@/tenant/lru';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findLocaleLanguage} from '@/locale/utils';
@@ -182,7 +182,7 @@ async function loadTranslationBundle(
  * renders, where an exception would leave the reader an error page instead. */
 function readTenantConfig(tenantId: string): TenantConfig | null {
   try {
-    return getTenantConfigSync(tenantId);
+    return getTenantConfig(tenantId);
   } catch (error) {
     console.error(
       `Could not read the configuration for tenant "${tenantId}":`,
