@@ -621,14 +621,18 @@ function checkOriginSchemes(
 ): ConfigIssue[] {
   const deployment = parseOrigin(betterAuthUrl);
 
-  /* Nothing to compare against, and the field's own check has already reported
-   * why. Every origin below is skipped the same way, so a document with one
-   * malformed origin reports that alone rather than adding a mismatch against a
-   * scheme it could not read. */
+  /* Nothing to compare the tenants against, and the field's own check has
+   * already reported why. Reporting a mismatch against a scheme that could not
+   * be read would add a second fault to a document whose only fault is this
+   * one. The tenants need no such guard: a tenant whose own origin was refused
+   * does not reach here. */
   if (!deployment) return [];
 
   return tenants.flatMap(([id, config]) => {
     const declared = config.publicEnv.GOOVEE_PUBLIC_HOST;
+
+    /* Null only in principle, for the reason above, but the type says it can be
+     * and reading a scheme off it unchecked is what would throw. */
     const origin = parseOrigin(declared);
 
     if (!origin || origin.protocol === deployment.protocol) return [];
@@ -724,25 +728,45 @@ export const configDocumentSchema = z
    * one every field accepted. A failed refinement leaves its value in place and
    * the document still arrives here, so a check can read a field a refinement has
    * just rejected; and a transform behind a failed refinement has not run, so a
-   * value can arrive neither as written nor as the application would use it.
+   * value can arrive neither as written nor as the application would use it. A
+   * tenant on a shared AOS instance whose credentials were refused is the case
+   * that occurs: its storage root arrives as written rather than as the
+   * per-tenant subdirectory of it the application uses, which reads as a tenant
+   * holding the directory its neighbours sit in.
    *
-   * A check reading such a value has to skip it: reporting against it repeats a
-   * fault the field already reported, or invents one, and a throw raised here
-   * escapes the parse to be reported against neither a field nor a tenant. */
+   * So the checks comparing tenants against each other are given only the
+   * tenants whose own entry reported nothing. Comparing against a value that is
+   * not the one the application will use reports a collision against whichever
+   * tenant is configured correctly, sending an operator to change the entry that
+   * is already right. A collision that a skipped tenant is genuinely part of is
+   * reported once its own fault is fixed. */
   .check(ctx => {
     const tenants = tenantEntries(ctx.value);
 
     const ids = tenants.map(([id]) => id);
+
+    /* Every issue raised so far carries the path it belongs to, and a tenant's
+     * entry is the first segment of that path. */
+    const faulted = new Set(
+      ctx.issues
+        .map(issue => issue.path?.[0])
+        .filter((segment): segment is string => typeof segment === 'string'),
+    );
+
+    /* The ids stay whole: what a tenant is named, and whether the default names
+     * one, is answered by the document's keys and holds however the entry under
+     * a key fared. */
+    const settled = tenants.filter(([id]) => !faulted.has(id));
 
     const issues = [
       ...checkTenantIds(ids),
       ...(tenants.length
         ? [
             ...checkDefaultTenant(ctx.value.$global?.defaultTenant, ids),
-            ...checkOriginSchemes(ctx.value.$global?.betterAuthUrl, tenants),
-            ...checkHubPispCertIsolation(tenants),
-            ...checkStorageIsolation(tenants),
-            ...checkMailCeilings(tenants),
+            ...checkOriginSchemes(ctx.value.$global?.betterAuthUrl, settled),
+            ...checkHubPispCertIsolation(settled),
+            ...checkStorageIsolation(settled),
+            ...checkMailCeilings(settled),
           ]
         : [{path: [], message: 'Tenant configuration has no tenant entries'}]),
     ];
