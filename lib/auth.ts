@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
-import {getGlobalConfig} from '@/tenant/config-provider';
+import {getGlobalConfig, listTenantConfigs} from '@/tenant/config-provider';
 import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
@@ -278,10 +278,68 @@ const options = {
  * (the provider loads synchronously and marks the secret at load). */
 const globalConfig = getGlobalConfig();
 
+/* The origin the addresses carrying no tenant of their own are served on. Parsed
+ * once, here, because the document admits only origins and so this cannot throw
+ * — including for the placeholder document an image build holds. */
+const deploymentOrigin = new URL(globalConfig.betterAuthUrl);
+
+/**
+ * The origins this deployment authenticates on.
+ *
+ * Better Auth resolves each request's origin from its host and matches it
+ * against this list; every absolute address it builds and every origin it trusts
+ * follow. So a tenant served on an origin of its own has its OAuth redirect
+ * address built there rather than on the deployment's. Session cookies do not
+ * follow: they carry no domain, so each belongs to the host that answered the
+ * request. A host absent from the list is answered under `betterAuthUrl`.
+ *
+ * Whole origins rather than the bare hosts the field also accepts: a bare host is
+ * trusted at https, and at http only for a loopback name, so a deployment served
+ * over plain http on a name that resolves elsewhere would have its own origin
+ * refused as untrusted.
+ *
+ * Read from what each tenant declares as the origin it is served on, so an origin
+ * the rest of the application builds links to cannot be one authentication
+ * refuses. Taken as written: the document admits an origin only in its canonical
+ * spelling, so there is nothing left to normalise. An image build holds a
+ * placeholder document naming no tenant, and this list is then the deployment
+ * origin on its own.
+ */
+function authOrigins(): string[] {
+  const declared = listTenantConfigs().map(
+    ([, config]) => config.publicEnv.GOOVEE_PUBLIC_HOST,
+  );
+
+  return [...new Set([globalConfig.betterAuthUrl, ...declared])];
+}
+
 export const auth = betterAuth({
   ...options,
   secret: globalConfig.betterAuthSecret,
-  baseURL: globalConfig.betterAuthUrl,
+  baseURL: {
+    allowedHosts: authOrigins(),
+    /* Where a request arriving on a host the list does not hold is answered: the
+     * addresses carrying no tenant of their own are served on this origin. Given
+     * one, because an unmatched host throws when there is none. */
+    fallback: globalConfig.betterAuthUrl,
+    /* Stated rather than derived. Given as "auto" or left out, the `__Secure-`
+     * prefix on the session cookie names follows NODE_ENV rather than the scheme
+     * the deployment is served on, and a production build behind plain http would
+     * then name cookies the browser refuses to store, so nobody could sign in.
+     * Every origin above shares this scheme; the document refuses a tenant whose
+     * does not. */
+    protocol: deploymentOrigin.protocol === 'https:' ? 'https' : 'http',
+  },
+  advanced: {
+    /* Resolving an origin per request reads `x-forwarded-host` ahead of the
+     * `host` header, and the library trusts it unless told otherwise. Stated
+     * here because leaving it implicit hides an obligation on the deployment:
+     * the proxy in front has to overwrite that header rather than pass a
+     * client's own through, since whoever sets it chooses which of the origins
+     * above the request is answered under. `x-forwarded-proto` is never read —
+     * the protocol above is fixed. */
+    trustedProxyHeaders: true,
+  },
   basePath: withBasePath('/api/auth'),
   plugins: [
     ...options.plugins,
@@ -357,12 +415,12 @@ let cookieReadFailureReported = false;
  * resolves them from things that do not describe this deployment: the secret
  * from BETTER_AUTH_SECRET, which is not where this deployment keeps it — the
  * configuration document is — and the prefix from the build mode, while the
- * cookie is written with it or without it according to the configured base URL,
- * agreeing with the build mode only when no base URL is set. Both mistakes are
- * invisible: a cookie looked for under the wrong name reads as absent, and
- * every request then takes the expensive path in silence. Giving better-auth a
- * `cookiePrefix` or a custom cookie name under `advanced` obliges an update
- * here — the read below still assumes its default names. */
+ * cookie is written with it or without it according to the scheme the configured
+ * origins are served on. Both mistakes are invisible: a cookie looked for under
+ * the wrong name reads as absent, and every request then takes the expensive
+ * path in silence. Giving better-auth a `cookiePrefix` or a custom cookie name
+ * under `advanced` obliges an update here — the read below still assumes its
+ * default names. */
 export async function getSessionTenantId(
   headers: Headers,
 ): Promise<string | undefined> {

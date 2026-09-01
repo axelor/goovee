@@ -14,8 +14,8 @@
         "betterAuthUrl": {
           "type": "string",
           "minLength": 1,
-          "description": "Origin the deployment is served on, e.g. https://portal.example.com — scheme and host only, with no path: the base path is appended in code, and a path here answers every auth request with a 404. Required: left out, Better Auth resolves it from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
-          "pattern": "^https?://[^/?#]+/?$"
+          "description": "Origin serving the addresses that name no tenant — \"/\" and the sign-in screens — e.g. https://portal.example.com, scheme and host only with no trailing slash. Every tenant's own origin (publicEnv.GOOVEE_PUBLIC_HOST) is trusted for authentication alongside it, and a request arriving on a host none of them names is answered under this one. Its scheme decides whether the deployment's session cookies are written as __Secure-, so every origin in the document has to share it. Required: left out, Better Auth resolves an origin from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
+          "pattern": "^https?://[^/?#]+$"
         },
         "defaultTenant": {
           "type": "string",
@@ -293,7 +293,8 @@
           "GOOVEE_PUBLIC_HOST": {
             "type": "string",
             "minLength": 1,
-            "description": "Required. Workspace URLs are stored against this host and every absolute link is built from it, so a tenant without one resolves no workspace."
+            "description": "Required. Origin this tenant is served on, e.g. https://portal.example.com — scheme and host only, with no trailing slash. Workspace URLs are stored against it, every absolute link is built from it, and the deployment trusts it as an origin to authenticate on, so a tenant without one resolves no workspace. Tenants sharing an origin is the ordinary case; the scheme must be the one $global.betterAuthUrl carries.",
+            "pattern": "^https?://[^/?#]+$"
           },
           "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": {"type": "string"},
           "GOOVEE_PUBLIC_LINKEDIN_URL": {"type": "string"},

@@ -138,12 +138,14 @@ class DocumentTenantConfigProvider {
     const result = configDocumentSchema.safeParse(parsed);
 
     if (!result.success) {
-      /* Every fault in the shape at once, each against the tenant and field it
-       * belongs to, because an operator filling in a new entry has several and
-       * one at a time means one restart each. The invariants that span tenants
-       * are not among them: those are reached only once the whole shape is
-       * valid, so a document with both reports the shape first and the
-       * collisions on the next attempt. */
+      /* Every fault at once, each against the tenant and field it belongs to,
+       * because an operator filling in a new entry has several and one at a time
+       * means one restart each. The invariants spanning tenants are among them: a
+       * value a field rejected still reaches those checks, so a document that
+       * both mis-spells a value and lets two tenants collide reports both. A
+       * fault the parse stops at costs the checks spanning tenants instead, and
+       * only those: a field of the wrong type, a missing one, or a setting name
+       * no section declares. */
       throw new Error(
         `Tenant configuration is invalid (${tenantsConfigFile || 'TENANTS_CONFIG'}):\n` +
           z.prettifyError(result.error),

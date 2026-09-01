@@ -161,6 +161,10 @@ Write `betterAuthUrl` and `GOOVEE_PUBLIC_HOST` as the same origin, the one the
 portal answers on: workspace addresses are stored against it, so a value that
 does not match resolves no workspace.
 
+Write that origin and nothing more: a scheme and a host, the port only where it
+is not the default, and no path, query, fragment or trailing slash. Anything else
+is refused at start-up, against the field that carries it.
+
 Set `defaultTenant` to the tenant id. `/` and the sign-in screens carry no tenant
 in their address, and this is what tells them which one to serve; leave it out and
 they require a tenant in the URL.

@@ -57,6 +57,79 @@ const TENANT_ID_MAX_LENGTH = 15;
  */
 const positiveInteger = () => z.int().min(1);
 
+/*
+ * The hostnames the auth library's own host check accepts: DNS labels of at
+ * most 63 characters, an IPv4 literal (which those labels already cover), or a
+ * bracketed IPv6 literal. An underscore is the character that occurs in
+ * practice and is not among them.
+ */
+const HOSTNAME_PATTERN =
+  /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*|\[[0-9a-fA-F:]+\])$/;
+
+/*
+ * Whether a value is an origin this deployment can be reached at, spelled the
+ * way an origin is spelled.
+ *
+ * Exactness matters because nothing parses the value again. Absolute addresses
+ * are built by concatenating onto it, so anything trailing the host survives into
+ * them: a lone trailing slash emails `<host>//auth/reset-password/…`, which
+ * matches no tenant and no reserved segment, so the proxy answers not-found.
+ * Stored workspace addresses are matched by string prefix against it, so a
+ * spelling that differs from the canonical one — a default port written out, an
+ * uppercase host — matches none of them and the tenant resolves no workspace.
+ *
+ * Refused rather than corrected to the canonical spelling, because this value is
+ * typed into AOS as well, as the prefix of every workspace address held there.
+ * Repairing only the copy in this document would leave the two disagreeing.
+ *
+ * The host is restricted to what the auth library accepts, because one it
+ * refuses is resolved from the request URL by the request handler and from the
+ * configured origin by a server-side session read. An OAuth redirect address
+ * built under the first is not the one registered under the second, and the
+ * identity provider refuses it.
+ */
+function isDeploymentOrigin(value: string): boolean {
+  return parseOrigin(value) !== null;
+}
+
+/* The parsed form of an origin, or null for a value that is not one. Callers
+ * that need to read a part of it go through this rather than `new URL`, which
+ * throws — and a throw raised while the document is being checked escapes the
+ * parse, so a mistyped origin would be reported as an unhandled TypeError
+ * naming neither the field nor the tenant. */
+function parseOrigin(value: unknown): URL | null {
+  if (typeof value !== 'string') return null;
+
+  let url: URL;
+
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+
+  /* An origin holds a scheme and a host and can hold nothing else, so equality
+   * with the parsed origin settles the trailing characters and the canonical
+   * spelling at once. It settles nothing about the scheme: `ftp://`, `ws://` and
+   * `wss://` each parse to an origin equal to what was written, so the protocol
+   * test beside it is what admits only the two a deployment is served over. */
+  const isOrigin =
+    (url.protocol === 'http:' || url.protocol === 'https:') &&
+    value === url.origin &&
+    HOSTNAME_PATTERN.test(url.hostname);
+
+  return isOrigin ? url : null;
+}
+
+const ORIGIN_ERROR =
+  'must be written as an origin — a scheme and a host, with no path, query, ' +
+  'fragment or trailing slash, e.g. https://portal.example.com';
+
+/* What the generated schema carries. Looser than the load on purpose: spelling
+ * the host rule as a regex leaves an editor showing something unreadable, so an
+ * editor admits a host the load then refuses. */
+const ORIGIN_PATTERN = '^https?://[^/?#]+$';
+
 export const globalConfigSchema = z
   .strictObject({
     betterAuthSecret: z
@@ -68,36 +141,11 @@ export const globalConfigSchema = z
     betterAuthUrl: z
       .string()
       .min(1)
-      /* Checked here because this is the one malformed spelling that fails in
-       * silence: a base URL already carrying a path makes the auth library drop
-       * the configured base path, mount its routes on that path instead, and
-       * answer every auth request with a 404 — no startup error, nothing
-       * logged. A value with no scheme, or one that is not a URL at all, throws
-       * as the auth instance is built and names itself. */
-      .refine(
-        value => {
-          try {
-            const url = new URL(value);
-            return (
-              (url.protocol === 'http:' || url.protocol === 'https:') &&
-              url.pathname === '/' &&
-              url.search === '' &&
-              url.hash === ''
-            );
-          } catch {
-            return false;
-          }
-        },
-        {
-          error:
-            'must be an origin — scheme and host with no path, e.g. ' +
-            'https://portal.example.com',
-        },
-      )
+      .refine(isDeploymentOrigin, {error: ORIGIN_ERROR})
       .meta({
         description:
-          "Origin the deployment is served on, e.g. https://portal.example.com — scheme and host only, with no path: the base path is appended in code, and a path here answers every auth request with a 404. Required: left out, Better Auth resolves it from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
-        pattern: '^https?://[^/?#]+/?$',
+          "Origin serving the addresses that name no tenant — \"/\" and the sign-in screens — e.g. https://portal.example.com, scheme and host only with no trailing slash. Every tenant's own origin (publicEnv.GOOVEE_PUBLIC_HOST) is trusted for authentication alongside it, and a request arriving on a host none of them names is answered under this one. Its scheme decides whether the deployment's session cookies are written as __Secure-, so every origin in the document has to share it. Required: left out, Better Auth resolves an origin from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
+        pattern: ORIGIN_PATTERN,
       }),
     defaultTenant: z
       .string()
@@ -126,9 +174,12 @@ const publicEnvSchema = z
     GOOVEE_PUBLIC_HOST: z
       .string()
       .min(1)
-      .describe(
-        'Required. Workspace URLs are stored against this host and every absolute link is built from it, so a tenant without one resolves no workspace.',
-      ),
+      .refine(isDeploymentOrigin, {error: ORIGIN_ERROR})
+      .meta({
+        description:
+          'Required. Origin this tenant is served on, e.g. https://portal.example.com — scheme and host only, with no trailing slash. Workspace URLs are stored against it, every absolute link is built from it, and the deployment trusts it as an origin to authenticate on, so a tenant without one resolves no workspace. Tenants sharing an origin is the ordinary case; the scheme must be the one $global.betterAuthUrl carries.',
+        pattern: ORIGIN_PATTERN,
+      }),
     GOOVEE_PUBLIC_PAYPAL_CLIENT_ID: z.string().optional(),
     GOOVEE_PUBLIC_LINKEDIN_URL: z.string().optional(),
     GOOVEE_PUBLIC_TWITTER_URL: z.string().optional(),
@@ -557,6 +608,44 @@ function checkDefaultTenant(
   ];
 }
 
+/* Cross-tenant invariant. The auth cookie names are settled once, as the auth
+ * instance is built, from the scheme $global.betterAuthUrl carries, so one naming
+ * serves every origin in the document and the schemes have to agree. Where they
+ * do not: an http tenant under an https deployment is sent `__Secure-` cookies a
+ * browser refuses over http and holds no session at all, and an https tenant
+ * under an http deployment is sent cookies carrying neither the prefix nor the
+ * Secure attribute. Both are refused. */
+function checkOriginSchemes(
+  betterAuthUrl: unknown,
+  tenants: TenantEntry[],
+): ConfigIssue[] {
+  const deployment = parseOrigin(betterAuthUrl);
+
+  /* Nothing to compare against, and the field's own check has already reported
+   * why. Every origin below is skipped the same way, so a document with one
+   * malformed origin reports that alone rather than adding a mismatch against a
+   * scheme it could not read. */
+  if (!deployment) return [];
+
+  return tenants.flatMap(([id, config]) => {
+    const declared = config.publicEnv.GOOVEE_PUBLIC_HOST;
+    const origin = parseOrigin(declared);
+
+    if (!origin || origin.protocol === deployment.protocol) return [];
+
+    return [
+      {
+        path: [id, 'publicEnv', 'GOOVEE_PUBLIC_HOST'],
+        message:
+          `Tenant "${id}" is served on ${declared} while the deployment is ` +
+          `served on ${deployment.origin}. Both have to use the same scheme — ` +
+          `serve every origin over ${deployment.protocol.replace(':', '')}, or ` +
+          `change $global.betterAuthUrl to match.`,
+      },
+    ];
+  });
+}
+
 function checkTenantIds(ids: string[]): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
 
@@ -630,8 +719,16 @@ export const configDocumentSchema = z
       pattern: `^(\\$schema|\\$global|[a-zA-Z][a-zA-Z0-9-]{0,${TENANT_ID_MAX_LENGTH - 1}})$`,
     },
   })
-  /* Only reached once every entry is individually valid, so these see a whole
-   * document and nothing half-parsed. */
+  /* These see a document that parsed — a field of the wrong type, a missing one,
+   * or a setting name no section declares stops the parse before this — but not
+   * one every field accepted. A failed refinement leaves its value in place and
+   * the document still arrives here, so a check can read a field a refinement has
+   * just rejected; and a transform behind a failed refinement has not run, so a
+   * value can arrive neither as written nor as the application would use it.
+   *
+   * A check reading such a value has to skip it: reporting against it repeats a
+   * fault the field already reported, or invents one, and a throw raised here
+   * escapes the parse to be reported against neither a field nor a tenant. */
   .check(ctx => {
     const tenants = tenantEntries(ctx.value);
 
@@ -642,6 +739,7 @@ export const configDocumentSchema = z
       ...(tenants.length
         ? [
             ...checkDefaultTenant(ctx.value.$global?.defaultTenant, ids),
+            ...checkOriginSchemes(ctx.value.$global?.betterAuthUrl, tenants),
             ...checkHubPispCertIsolation(tenants),
             ...checkStorageIsolation(tenants),
             ...checkMailCeilings(tenants),
