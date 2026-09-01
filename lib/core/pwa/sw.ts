@@ -45,31 +45,38 @@ function withDeploymentBasePath(path: string) {
 }
 
 /**
- * The tenant this worker was registered for, taken from its scope.
+ * The tenant this worker was registered for, named in the address it was
+ * registered from (`sw.js?tenant=<id>`).
  *
- * Cache storage is per origin, not per scope, so every tenant's registration of
- * this same script would otherwise share one cache and one entry budget: opening
- * a gallery in one tenant would evict another tenant's held images. Naming the
- * caches after the tenant gives each registration a budget of its own.
+ * Cache storage and BroadcastChannel are both per origin, not per scope, so every
+ * tenant's registration of this same script would otherwise share one cache and
+ * one entry budget — opening a gallery in one tenant would evict another tenant's
+ * held images — and one notification channel, which would carry a notification
+ * into a different tenant's open tab. Naming both after the tenant keeps each
+ * registration to itself.
+ *
+ * Not the registration scope, which is the whole origin for a tenant reached by
+ * host and would name no tenant at all. `/` where the address names none, which
+ * is a worker registered by something that does not know its tenant; the page
+ * then listens on a channel this one never posts to, so notifications do not
+ * reach an open tab, and nothing else is affected.
+ *
+ * A path segment rather than a bare id, because the cache names below are this
+ * value appended to a prefix and a browser keeps whatever a previous worker
+ * wrote: spelling it any other way renames every cache a tenant holds, which
+ * abandons its translations, images and reader assets to be fetched again and
+ * leaves the entries under the old names with nothing to prune them.
+ *
+ * `searchParams` decodes the value, and cannot throw on a malformed escape the
+ * way `decodeURIComponent` does — which matters because nothing evaluated at this
+ * level may throw: it would fail the install and leave the previously installed
+ * worker in place.
  */
-const scopeTenant =
-  decodeSegment(
-    normalizePathPrefix(new URL(self.registration.scope).pathname).slice(
-      basePath.length,
-    ),
-  ) || '/';
+const scopeTenant = ((): string => {
+  const named = new URL(self.location.href).searchParams.get('tenant');
 
-/* A `%` that is not a valid escape survives into the pathname undecoded, and
- * decoding it throws. Nothing evaluated at this level may throw: it would fail
- * the install and leave the previously installed worker in place. Falling back
- * to the raw segment costs this tenant its channel and nothing more. */
-function decodeSegment(segment: string): string {
-  try {
-    return decodeURIComponent(segment);
-  } catch {
-    return segment;
-  }
-}
+  return named ? `/${named}` : '/';
+})();
 
 function tenantCacheName(name: string) {
   return `${name}${scopeTenant}`;

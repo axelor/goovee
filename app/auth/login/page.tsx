@@ -43,7 +43,7 @@ export default async function Page(props: {
     ? decodeURIComponent(callbackurlSearchParam)
     : '';
 
-  const tenantId = resolveAuthTenantId(searchParams);
+  const tenantId = await resolveAuthTenantId(searchParams);
 
   const tenantConfig = tenantId ? tenantConfigProvider.get(tenantId) : null;
 

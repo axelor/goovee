@@ -12,6 +12,7 @@ import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
 import {manager} from '@/tenant';
 import {tenantConfigProvider} from '@/tenant/config-provider';
+import {isHostRouted} from '@/lib/core/tenant/routing';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
@@ -44,17 +45,31 @@ export default async function TenantLayout(props: {
 
   const env = getPublicEnvironment(config);
 
-  /* Register the service worker scoped to this tenant (/{tenant}/) rather than
-   * the whole origin. Each tenant gets its own registration — and therefore its
-   * own push subscription — so per-tenant VAPID keys work on a shared origin
-   * (it registers SerwistProvider before PushProvider subscribes). Environment
-   * wraps both, since PushProvider reads the VAPID public key from it. */
+  /* Register one service worker per tenant, so each holds a push subscription of
+   * its own and a per-tenant VAPID key takes effect (it registers SerwistProvider
+   * before PushProvider subscribes). Environment wraps both, since PushProvider
+   * reads the VAPID public key from it.
+   *
+   * The scope is the narrowest one covering the tenant's addresses: the tenant
+   * path segment where an origin carries several tenants, and the root of the
+   * origin where the tenant is reached by host and holds it alone. A browser
+   * installs an app only where the page's worker encloses its scope and start
+   * address, and scopes match by path prefix, so this has to be no narrower than
+   * the manifest asks for.
+   *
+   * The tenant is named in the worker's own address because its scope no longer
+   * always carries it, and the worker needs it to keep its caches and its
+   * notification channel to itself. */
+  const scope = withBasePath(
+    config && isHostRouted(config) ? '/' : `/${tenant}/`,
+  );
+
   return (
     <Environment value={env}>
       <Theme theme={theme}>
         <SerwistProvider
-          swUrl={withBasePath('/sw.js')}
-          options={{scope: withBasePath(`/${tenant}/`)}}>
+          swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
+          options={{scope}}>
           <PushProvider tenant={tenant}>{props.children}</PushProvider>
         </SerwistProvider>
       </Theme>

@@ -16,9 +16,13 @@ export function getPortalRoot(host?: string) {
 }
 
 /**
- * Converts a stored absolute `workspace.url`
- * (`{host}{basePath}/{tenant}/{workspace}`) into a router-relative path
- * (`/{tenant}/{workspace}`).
+ * Converts a stored absolute `workspace.url` into the path a browser holds for
+ * it, by removing the root the app is served from.
+ *
+ * What is left is `/{tenant}/{workspace}` for a tenant sharing its origin, and
+ * `/{workspace}` for one reached by host — the tenant is named by the host there,
+ * so its stored URL carries no tenant segment. Which of the two a URL is written
+ * as follows from the tenant's own configuration; this only strips the root.
  */
 export function toWorkspaceURI(workspaceURL: string, host?: string) {
   return workspaceURL.replace(getPortalRoot(host), '') || '/';

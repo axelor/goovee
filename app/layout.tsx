@@ -10,8 +10,12 @@ import {
 } from 'next/font/google';
 import type {Metadata} from 'next';
 
+import {headers} from 'next/headers';
+
 // ---- CORE IMPORTS ---- //
 import {LegacyServiceWorkerCleanup} from '@/pwa/legacy-sw-cleanup';
+import {addressedHost, hostRoutedTenantId} from '@/lib/core/tenant/routing';
+import {listTenantConfigs} from '@/tenant/config-provider';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
@@ -81,11 +85,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  /* The upgrade cleanup unregisters a service worker scoped to the root of the
+   * origin, which is exactly where a tenant reached by host registers its own —
+   * so on such an origin it would unregister that tenant's worker on every page
+   * load. Nothing is left behind by leaving it out: a registration is keyed by
+   * its scope, so the tenant's own registration at that scope replaces whatever
+   * an earlier build left there rather than sitting alongside it. */
+  const host = addressedHost(await headers());
+  const servesHostRoutedTenant = Boolean(
+    host && hostRoutedTenantId(host, listTenantConfigs()),
+  );
+
   /* The root shell is tenant-agnostic: per-tenant theme and browser variables
    * (Environment) are injected by app/[tenant]/layout.tsx, and the tenant-less
    * auth pages set up their own (app/auth/layout.tsx + per-page Environment).
@@ -100,7 +115,7 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} ${fontSans.className}`}>
         <Locale>{children}</Locale>
         <Toaster />
-        <LegacyServiceWorkerCleanup />
+        {!servesHostRoutedTenant && <LegacyServiceWorkerCleanup />}
       </body>
     </html>
   );

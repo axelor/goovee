@@ -24,16 +24,21 @@ export const WorkspaceContext = React.createContext<{
   workspaceID: '',
 });
 
+/* `workspaceURI` is given rather than built from the tenant and workspace names:
+ * its shape depends on how the tenant is routed, which is server-side
+ * configuration. `workspacePathname` is where it comes from. */
 export function WorkspaceProvider({
   id,
   tenant,
   workspace,
+  workspaceURI,
   theme,
   children,
 }: {
   id: Workspace['id'];
   tenant: string;
   workspace: string;
+  workspaceURI: string;
   theme?: {id: string; name: string; options: Theme};
   children: React.ReactNode;
 }) {
@@ -41,7 +46,6 @@ export function WorkspaceProvider({
   const prevTheme = useRef<any>(undefined);
   const env = useEnvironment();
 
-  const workspaceURI = `/${tenant}/${workspace}`;
   const workspaceURL = `${env.GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
   const workspaceID = id;
 

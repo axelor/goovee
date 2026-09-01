@@ -50,10 +50,11 @@ function tenantOf(path: string): string {
  *
  * The cost of sitting there is that no workspace can be called `sign-out`: a
  * static route wins over the `[workspace]` segment beside it, so a workspace
- * reached at `/<tenant>/sign-out` would be answered by this screen instead.
- * Workspace addresses are set in AOS, where nothing refuses the name, and every
- * further static route added under `[tenant]` takes one more name out of their
- * reach.
+ * reached at `/<tenant>/sign-out` would be answered by this screen instead — and
+ * on a tenant reached by host, where the tenant segment is put back on by the
+ * proxy, that address is `/sign-out`. Workspace addresses are set in AOS, where
+ * nothing refuses the name, and every further static route added under
+ * `[tenant]` takes one more name out of their reach.
  */
 export default async function Page(props: {
   params: Promise<{tenant: string}>;

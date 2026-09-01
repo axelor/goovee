@@ -9,6 +9,12 @@ import path from 'node:path';
 
 import * as out from '@/scripts/lib/output';
 import {runScript} from '@/scripts/lib/script';
+/* Safe to import here, unlike the document's loader: this module reads nothing,
+ * so importing it cannot settle where the document is read from. */
+import {isHostRouted} from '@/lib/core/tenant/routing';
+/* Reads NEXT_PUBLIC_BASE_PATH as it is evaluated, which the import above of
+ * `@/load-swc-env` has already filled in. */
+import {getBasePath} from '@/lib/core/path/base-path';
 
 /*
  * Answers the question a deployment otherwise answers by starting: is this
@@ -28,7 +34,7 @@ runScript<object, [string | null]>({
   summary: `Reads the document the application would read — the path given here,
 or TENANTS_CONFIG_FILE, or TENANTS_CONFIG — and validates it the way start-up
 does, naming every fault against the tenant and the field holding it. Reports
-the tenants a valid document declares and the origin each is served on. Ends
+the tenants a valid document declares and the address each is reached at. Ends
 non-zero for a document that would be refused, so a deployment can be gated on
 it rather than on a server that starts and then fails every request. Nothing is
 connected to: an unreachable database, AOS instance or mail host is not a fault
@@ -80,13 +86,24 @@ here.`,
 
     out.ok(
       `Accepted — ${tenants.length} ${tenants.length === 1 ? 'tenant' : 'tenants'}. ` +
-        `Addresses naming none are served on ${deployment.betterAuthUrl}.`,
+        `Addresses naming none are served on ` +
+        `${deployment.betterAuthUrl}${getBasePath()}.`,
     );
 
+    /* The address, not just the origin, because a tenant routed by host is
+     * reached without its id and an operator reading this is checking the
+     * addresses their proxy has to serve. The base path comes from the
+     * environment rather than the document, so this is the address as served by
+     * a deployment carrying the NEXT_PUBLIC_BASE_PATH this script was run with. */
     for (const [id, config] of tenants) {
+      const root = `${config.publicEnv.GOOVEE_PUBLIC_HOST}${getBasePath()}`;
+      const hostRouted = isHostRouted(config);
       const isDefault = id === deployment.defaultTenant;
+
       console.log(
-        `  ${id} → ${config.publicEnv.GOOVEE_PUBLIC_HOST}${isDefault ? ' (default)' : ''}`,
+        `  ${id} → ${hostRouted ? root : `${root}/${id}`}` +
+          `${isDefault ? ' (default)' : ''}` +
+          `${hostRouted ? ' [routed by host]' : ''}`,
       );
     }
   },

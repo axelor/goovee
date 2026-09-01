@@ -178,6 +178,7 @@ export default async function Layout(props: {
     <WorkspaceProvider
       id={$workspace.id}
       workspace={workspace}
+      workspaceURI={workspaceURI}
       tenant={tenantId}
       theme={theme}>
       <CartProvider>

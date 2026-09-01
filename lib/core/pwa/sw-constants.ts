@@ -12,7 +12,8 @@ const PUSH_CHANNEL = 'push-notifications';
  * Naming the channel after the tenant keeps each one's traffic to itself.
  *
  * Both ends derive the name from this, so leading and trailing slashes are
- * stripped: the worker has a path segment (`/acme`) and the client a bare id.
+ * stripped: the worker names its tenant as a path segment (`/acme`), which is
+ * what its cache names are built from, and the client as a bare id.
  */
 export function pushChannelName(tenant: string): string {
   return `${PUSH_CHANNEL}/${tenant.replace(/^\/+|\/+$/g, '')}`;

@@ -433,7 +433,13 @@ export const tenantConfigSchema = z.strictObject({
         ),
     })
     .describe(
-      'Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. The service worker registers per tenant (scope /<tenant>/), so each tenant holds its own push subscription and its own key pair takes effect even on a shared origin.',
+      'Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. The service worker registers once per tenant — under the tenant path segment where several tenants share an origin, and at the root of the origin where the tenant has one to itself — so each tenant holds its own push subscription and its own key pair takes effect either way.',
+    )
+    .optional(),
+  routing: z
+    .enum(['path', 'host'])
+    .describe(
+      'How this tenant\'s addresses are shaped. "path" (the default) carries the tenant id as the first path segment, e.g. https://portal.example.com/acme/sales, and the origin may be shared with other tenants. "host" drops that segment and lets publicEnv.GOOVEE_PUBLIC_HOST name the tenant instead, e.g. https://acme.example.com/sales. "host" needs a host no other tenant is served on, and a proxy that sets X-Forwarded-Host (or Host) to the address the visitor used rather than the address of the server behind it — nginx sends its own upstream address by default, and a deployment left that way resolves no tenant and refuses every form submission. Changing this changes every address the tenant is reached at: the stored workspace URLs, the registered OAuth redirect URIs and the links already sent out all carry the old shape.',
     )
     .optional(),
   includeLanguage: z
@@ -651,6 +657,103 @@ function checkOriginSchemes(
   });
 }
 
+/* Cross-tenant invariant. A host-routed tenant is named by the host it is served
+ * on, so nothing else may be served on that host: the tenant segment is put back
+ * on before the path is read, so whatever else was reached there has its own
+ * first segment taken for one of this tenant's workspaces.
+ *
+ * Three claimants can collide on one host, and hosts are compared rather than
+ * whole origins because a request carries no scheme to tell two apart:
+ *
+ * - another host-routed tenant, which leaves the host naming neither in
+ *   particular;
+ * - a path-routed tenant, whose own segment stops resolving;
+ * - the addresses naming no tenant, where $global.defaultTenant says "/" leads
+ *   somewhere other than the tenant now holding that host.
+ *
+ * The last of those is refused only when the two disagree. A host-routed tenant
+ * on $global.betterAuthUrl's own host is the ordinary single-tenant deployment —
+ * one tenant, holding every address of the origin it is served on, reached
+ * without a tenant segment — and "/" leading to it is what an operator asked
+ * for. It becomes a conflict only where `defaultTenant` names a different tenant,
+ * which is two answers to what "/" means on one host.
+ *
+ * Refused rather than resolved by an order of preference: a deployment where
+ * which tenant answers depends on the order entries happen to be written in is
+ * worse than one that will not start. */
+function checkHostRouting(
+  betterAuthUrl: unknown,
+  defaultTenant: string | undefined,
+  tenants: TenantEntry[],
+): ConfigIssue[] {
+  const issues: ConfigIssue[] = [];
+  const byHost = new Map<string, string>(); // host -> host-routed tenant id
+
+  for (const [id, config] of tenants) {
+    if (config.routing !== 'host') continue;
+
+    const origin = parseOrigin(config.publicEnv.GOOVEE_PUBLIC_HOST);
+
+    /* Null only in principle — a tenant whose own origin was refused does not
+     * reach here — but reading a host off it unchecked is what would throw. */
+    if (!origin) continue;
+
+    const owner = byHost.get(origin.host);
+
+    if (owner) {
+      issues.push({
+        path: [id, 'publicEnv', 'GOOVEE_PUBLIC_HOST'],
+        message:
+          `Tenants "${owner}" and "${id}" are both routed by host and both ` +
+          `served on the host ${origin.host}, so a request arriving there names ` +
+          `neither of them. Give each host-routed tenant a host of its own, or ` +
+          `set "routing": "path" on one of them.`,
+      });
+      continue;
+    }
+
+    byHost.set(origin.host, id);
+  }
+
+  for (const [id, config] of tenants) {
+    if (config.routing === 'host') continue;
+
+    const origin = parseOrigin(config.publicEnv.GOOVEE_PUBLIC_HOST);
+
+    if (!origin) continue;
+
+    const owner = byHost.get(origin.host);
+
+    if (owner) {
+      issues.push({
+        path: [id, 'publicEnv', 'GOOVEE_PUBLIC_HOST'],
+        message:
+          `Tenant "${id}" is served on ${origin.origin} under a tenant path ` +
+          `segment, but "${owner}" is routed by host on that same host, so ` +
+          `/${id} there is read as one of "${owner}"'s workspaces. Serve "${id}" ` +
+          `on another host, or set "routing": "host" on it too.`,
+      });
+    }
+  }
+
+  const deployment = parseOrigin(betterAuthUrl);
+  const deploymentOwner = deployment && byHost.get(deployment.host);
+
+  if (deploymentOwner && defaultTenant && defaultTenant !== deploymentOwner) {
+    issues.push({
+      path: ['$global', 'defaultTenant'],
+      message:
+        `"/" on ${deployment.origin} is claimed twice: "${deploymentOwner}" is ` +
+        `routed by host there, so it answers every address of that origin, while ` +
+        `defaultTenant sends "/" to "${defaultTenant}". Name ` +
+        `"${deploymentOwner}" here, drop defaultTenant, or serve ` +
+        `"${deploymentOwner}" on a host of its own.`,
+    });
+  }
+
+  return issues;
+}
+
 function checkTenantIds(ids: string[]): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
 
@@ -765,6 +868,11 @@ export const configDocumentSchema = z
         ? [
             ...checkDefaultTenant(ctx.value.$global?.defaultTenant, ids),
             ...checkOriginSchemes(ctx.value.$global?.betterAuthUrl, settled),
+            ...checkHostRouting(
+              ctx.value.$global?.betterAuthUrl,
+              ctx.value.$global?.defaultTenant,
+              settled,
+            ),
             ...checkHubPispCertIsolation(settled),
             ...checkStorageIsolation(settled),
             ...checkMailCeilings(settled),

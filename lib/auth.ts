@@ -2,6 +2,7 @@ import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
 import {getGlobalConfig, listTenantConfigs} from '@/tenant/config-provider';
+import {declaredOrigins} from '@/lib/core/tenant/routing';
 import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
@@ -300,17 +301,14 @@ const deploymentOrigin = new URL(globalConfig.betterAuthUrl);
  *
  * Read from what each tenant declares as the origin it is served on, so an origin
  * the rest of the application builds links to cannot be one authentication
- * refuses. Taken as written: the document admits an origin only in its canonical
- * spelling, so there is nothing left to normalise. An image build holds a
- * placeholder document naming no tenant, and this list is then the deployment
- * origin on its own.
+ * refuses. The same list the proxy refuses a request outside of, so a host that
+ * resolves no tenant is also one nothing authenticates on. Taken as written: the
+ * document admits an origin only in its canonical spelling, so there is nothing
+ * left to normalise. An image build holds a placeholder document naming no
+ * tenant, and this list is then the deployment origin on its own.
  */
 function authOrigins(): string[] {
-  const declared = listTenantConfigs().map(
-    ([, config]) => config.publicEnv.GOOVEE_PUBLIC_HOST,
-  );
-
-  return [...new Set([globalConfig.betterAuthUrl, ...declared])];
+  return declaredOrigins(globalConfig.betterAuthUrl, listTenantConfigs());
 }
 
 export const auth = betterAuth({

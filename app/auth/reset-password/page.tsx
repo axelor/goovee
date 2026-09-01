@@ -35,7 +35,7 @@ export default async function Page(props: {
   }
   return (
     <Content
-      tenantId={resolveAuthTenantId(await props.searchParams)}
+      tenantId={await resolveAuthTenantId(await props.searchParams)}
       workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
     />
   );

@@ -58,7 +58,7 @@ export async function resolveAuthWorkspaceName(
 
   return findAuthWorkspaceName({
     workspaceURI: firstValue(params.workspaceURI),
-    tenantId: resolveAuthTenantId(params),
+    tenantId: await resolveAuthTenantId(params),
   });
 }
 
