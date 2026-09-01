@@ -29,6 +29,39 @@ interface PushContextType {
 
 const PushContext = createContext<PushContextType | undefined>(undefined);
 
+/**
+ * Whether a subscription was made for `key`, the VAPID public key this tenant
+ * publishes.
+ *
+ * True where there is nothing to compare — a browser that reports no key on the
+ * subscription, or a tenant that publishes none — so a subscription is only ever
+ * discarded on a key that is known to differ.
+ *
+ * The browser holds the key as the bytes it decoded, so the comparison is made in
+ * that direction: base64url out of the bytes, then against the published string
+ * with its padding and its two substituted characters normalised.
+ */
+function subscribedWithKey(
+  subscription: PushSubscription,
+  key: string | undefined,
+): boolean {
+  const subscribed = subscription.options.applicationServerKey;
+
+  if (!subscribed || !key) return true;
+
+  const bytes = new Uint8Array(subscribed);
+  let binary = '';
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  const base64url = (value: string) =>
+    value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  return base64url(btoa(binary)) === base64url(key);
+}
+
 export function PushProvider({
   children,
   tenant,
@@ -135,6 +168,27 @@ export function PushProvider({
       setPermission(currentPermission);
       const registration = await navigator.serviceWorker.ready;
       let sub = await registration.pushManager.getSubscription();
+
+      /* A subscription is signed for one key pair, and the push service refuses a
+       * delivery signed with another — with a 401 or 403, which is neither
+       * temporary nor gone, so nothing retries it and nothing prunes the record.
+       * The device would go silent for good. Discarding the subscription lets the
+       * auto-heal below make one for the key this tenant now publishes.
+       *
+       * This is what a tenant carries across a change of key pair, and across
+       * being given an origin of its own on the same host, where the worker
+       * registered by an earlier build is updated rather than replaced and its
+       * subscription outlives the key it was made with. */
+      if (
+        sub &&
+        currentPermission === 'granted' &&
+        tenant &&
+        userId &&
+        !subscribedWithKey(sub, env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY)
+      ) {
+        await sub.unsubscribe().catch(() => {});
+        sub = null;
+      }
 
       // AUTO-HEAL: If permission is granted but subscription is missing, create it
       if (currentPermission === 'granted' && !sub && tenant && userId) {
