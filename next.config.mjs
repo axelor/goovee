@@ -44,11 +44,10 @@ const nextConfig = {
    *
    * `localtest.me` is a public zone whose every name, wildcards included,
    * resolves to loopback. It earns its place by giving a checkout a second *name*
-   * rather than a second address, which is what testing this needs: a redirect
-   * between two loopback addresses is served as a same-origin path, because Next
-   * rewrites every loopback address to `localhost` while parsing a URL
-   * (`server/web/next-url.js`) and then finds the redirect and the request to be
-   * on one host.
+   * rather than a second address, and a name is what a second tenant host has to
+   * be: Next rewrites every loopback address to `localhost` while parsing a URL
+   * (`server/web/next-url.js`), so a URL built on one of them comes back naming
+   * another host than it was given.
    *
    * Read by `next dev` alone — a built server serves no development resources and
    * ignores this.

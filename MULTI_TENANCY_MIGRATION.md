@@ -330,9 +330,14 @@ Set `routing` on the tenant and point it at the new origin:
 }
 ```
 
-That host must serve no other tenant. Where `$global.defaultTenant` names the
-tenant being moved and `$global.betterAuthUrl`'s own host still has to answer
-`/`, point `defaultTenant` at a tenant that is still reached by path.
+That host must serve no other tenant.
+
+Giving the tenant a host of its own needs no change to `$global.defaultTenant`:
+`/` on the deployment origin resolves the default tenant and is answered with
+that tenant's own absolute address, so it lands on the new host by itself. The
+one setup that does need a change is moving a tenant onto the host
+`$global.betterAuthUrl` itself names, which makes that tenant the answer to `/`
+there — `defaultTenant` then has to name it, or be removed.
 
 ### Configure the proxy
 

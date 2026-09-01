@@ -297,9 +297,9 @@ export default async function proxy(req: NextRequest) {
    * under that name, which only an origin no tenant holds to itself can serve:
    * the host names the tenant on one that does, so the name in the path is read
    * as a workspace there and the screen sends the visitor back to it. Where this
-   * origin cannot serve it the request carries on instead, and the first read of
-   * the session finds no tenant for it, clears its cookies and answers as a
-   * guest. */
+   * origin cannot serve it the request carries on instead: the session names no
+   * tenant the document holds, so reading it resolves no tenant and the request
+   * is answered as a guest. */
   const activeTenant = await getSessionTenantId(req.headers);
   const reachableScreen =
     !hostTenant || Boolean(activeTenant && getTenantConfig(activeTenant));
