@@ -345,8 +345,8 @@ Pass the visitor's host through:
 
 <!-- prettier-ignore -->
 ```nginx
-proxy_set_header Host             $host;
-proxy_set_header X-Forwarded-Host $host;
+proxy_set_header Host             $http_host;
+proxy_set_header X-Forwarded-Host $http_host;
 ```
 
 nginx sends its own upstream address as `Host` by default and sets no
@@ -354,6 +354,11 @@ nginx sends its own upstream address as `Host` by default and sets no
 and refuses every form submission. Set `X-Forwarded-Host` explicitly rather than
 relying on `Host`: an unset one is passed through from the client, and whoever
 sets it chooses which tenant answers.
+
+`$http_host` rather than `$host`, which drops the port. A tenant served on a port
+the scheme does not imply declares it in `GOOVEE_PUBLIC_HOST`, and the host is
+matched against that in full — so `$host` would resolve no tenant for it and
+answer not-found on every page.
 
 Serve the new host over HTTPS. Notifications, offline caching and installing the
 app all need it.
@@ -411,16 +416,30 @@ changes.
   for and does not follow the tenant.
 - An installed app keeps launching at the old address. It has to be removed and
   re-installed from the new one.
-- Push subscriptions stop being delivered. They belong to the old origin's
-  service worker, so every row in `portal_push_subscription` for this tenant is
-  dead and can be deleted; visitors re-grant notifications on the new host.
-- Old addresses answer 308 to the new ones for as long as the previous origin
-  still reaches the deployment.
+- Every row in `portal_push_subscription` for this tenant has to be deleted, and
+  before the tenant goes back into service. Those subscriptions keep working: a
+  subscription is addressed to the push service rather than to the origin, the
+  worker that receives it survives on the old origin, and the signing key is
+  unchanged — so leaving the rows in place delivers every notification twice once
+  visitors re-grant them on the new host. Nothing on the old origin unregisters
+  that worker.
+- Page addresses under the old origin answer 308 to the new ones for as long as
+  it still reaches the deployment. Its sign-in screens answer 307 instead, its
+  route handlers and static files answer in place, and the tenant's manifest
+  stays where it is — so an installed app keeps launching at the old address
+  until it is replaced.
 
 ### Workspace names to avoid
 
 On its own domain the first path segment is the workspace name, so a workspace
 whose slug is one the deployment answers itself is unreachable: `auth`, `api`,
 `images`, `locales`, `pdfjs`, `pwa`, `website`, `sign-out` and
-`manifest.webmanifest`. AOS accepts those names, and nothing reports the clash —
-rename the workspace.
+`manifest.webmanifest`.
+
+A slug carrying a dot — `sales.v2` — is unreachable for the same reason: a first
+segment that looks like a filename is served from the static directories rather
+than routed. Under a tenant path segment neither restriction applies, because the
+tenant id sits in first position and the document already refuses these names for
+it.
+
+AOS accepts all of them and nothing reports the clash — rename the workspace.
