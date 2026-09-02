@@ -237,8 +237,14 @@ export default async function proxy(req: NextRequest) {
    * path segment on an origin it does not hold, its stored workspace URLs match
    * nothing and its session cookie belongs to the other origin. Sent to the
    * address it is served at rather than refused, so an address that predates the
-   * move still arrives; 308 keeps the method, and this cannot bounce back,
-   * because the tenant is resolved from the host there rather than the path. */
+   * move still arrives; this cannot bounce back, because the tenant is resolved
+   * from the host there rather than the path.
+   *
+   * 307 rather than 308, for the reason `authOriginRedirect` gives above, and
+   * it preserves the method either way. A cached permanent redirect here would
+   * outlive the routing that produced it: a tenant set back to `routing:
+   * "path"` would keep receiving nothing, its path addresses answered from the
+   * browser's own cache with the deployment never consulted. */
   const pathTenantConfig = hostTenant ? null : getTenantConfig(tenant);
 
   /* Its sign-out screen is the exception, and stays where it is asked for. A
@@ -255,7 +261,7 @@ export default async function proxy(req: NextRequest) {
     canonical.host = origin.host;
     canonical.pathname = url.pathname.slice(`/${tenant}`.length) || '/';
 
-    return NextResponse.redirect(canonical, 308);
+    return NextResponse.redirect(canonical, 307);
   }
 
   /* One tenant session per browser: a session belongs to a single tenant and

@@ -409,7 +409,7 @@ changes.
    with its new address and `[routed by host]`.
 2. Restart the portal.
 3. Open `https://acme.example.com/` and confirm it lands on a workspace.
-4. Open `https://portal.example.com/acme` and confirm it answers 308 to
+4. Open `https://portal.example.com/acme` and confirm it answers 307 to
    `https://acme.example.com/`.
 5. Sign in on the new host, then confirm a notification arrives and the app can
    be installed.
@@ -419,9 +419,12 @@ changes.
 - Everyone signs in again.
 - Everyone re-grants notifications.
 - An installed app has to be removed and re-installed from the new address.
-- Page addresses under the old origin answer 308 to the new ones for as long as
-  it still reaches the deployment. Its sign-in screens answer 307, and its route
-  handlers, static files and the tenant's manifest answer in place.
+- Page addresses under the old origin answer 307 to the new ones for as long as
+  it still reaches the deployment. Its sign-in screens answer 307 to the new
+  origin as well, but without the address the visitor was heading for — that
+  address was written for the old origin, so the screen sends them to their
+  tenant's landing page instead. Its route handlers, static files and the
+  tenant's manifest answer in place.
 
 ### Workspace names to avoid
 

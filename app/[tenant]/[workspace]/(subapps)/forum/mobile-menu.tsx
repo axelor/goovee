@@ -35,8 +35,11 @@ export default function MobileMenu({items}: {items: MenuItem[]}) {
 
   const filteredItems = session ? items : items.filter(item => item.id === 1);
 
-  const handleMenuClick = (link: string) => {
-    router.push(url.forRouter(`/${SUBAPP_CODES.forum}/${link}`));
+  /* Each `link` is empty for the forum's own page or a sub-path that already
+   * starts with a slash, so a separator here would address
+   * `/forum//manage-notifications`, which matches no route. */
+  const handleMenuClick = (link: MenuItem['link']) => {
+    router.push(url.forRouter(`/${SUBAPP_CODES.forum}${link}`));
     closeSidebar();
   };
 

@@ -24,9 +24,9 @@ export type CartSummary = {
   code: string;
   label: () => string;
   href: (url: WorkspaceURLs) => string;
-  /* Keyed on the stored workspace URL rather than an address: this is a
-   * localStorage namespace, and changing its spelling orphans every cart
-   * already saved under the old one. */
+  /* Keyed on the stored workspace URL rather than an address: this names a
+   * record in the browser's own store, via `@/storage/local`, and changing its
+   * spelling orphans every cart already saved under the old one. */
   storageKey: (workspaceURL: string, userId?: string) => string;
   /* Returns the badge count from the opaque stored blob. */
   getCount: (stored: unknown) => number;

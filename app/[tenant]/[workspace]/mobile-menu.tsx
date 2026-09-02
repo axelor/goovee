@@ -140,9 +140,11 @@ function MobileSidebar({
             {displayContact && (
               <div className="flex flex-col gap-1 mt-4 pt-8 px-6 py-2">
                 <p className="font-medium">{config?.contactName}</p>
-                <p>
-                  <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-                </p>
+                {contactEmail && (
+                  <p>
+                    <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                  </p>
+                )}
                 <p>{config?.contactPhone}</p>
               </div>
             )}

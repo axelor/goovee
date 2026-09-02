@@ -15,7 +15,13 @@ interface Attachment {
 export interface MenuItem {
   id: number;
   name: string;
-  link: string;
+  /**
+   * Where the entry leads, below the forum: empty for the forum's own page, or
+   * a sub-path carrying its own leading slash. Spelled as a union so a value
+   * missing the slash is refused here rather than joined into an address with
+   * one too few or too many separators.
+   */
+  link: '' | `/${string}`;
 }
 
 export interface SearchResult {
