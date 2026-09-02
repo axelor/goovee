@@ -16,7 +16,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
  *
  * Matched against the part of the pathname below the workspace, never the
  * pathname itself: how many segments sit in front of the code depends on how
- * the tenant is routed, and only `workspaceURI` knows that.
+ * the tenant is routed, and only the workspace's own address knows that.
  *
  * Dynamic Parts:
  * - code: dynamic segment passed to the function (e.g., 'events')
@@ -79,7 +79,7 @@ export function useNavigationVisibility() {
 
   const pathname = usePathname();
 
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {data: session} = authClient.useSession();
   const user = session?.user;
   const userId = user?.id;
@@ -89,7 +89,7 @@ export function useNavigationVisibility() {
 
     const handleVisibility = async () => {
       try {
-        const subPath = subPathOf(pathname, workspaceURI);
+        const subPath = subPathOf(pathname, url.forRouter());
 
         let matchedHandler: Handler | undefined;
 
@@ -124,7 +124,7 @@ export function useNavigationVisibility() {
     return () => {
       mounted = false;
     };
-  }, [pathname, userId, workspaceURI]);
+  }, [pathname, userId, url]);
 
   return useMemo(() => ({visible, loading}), [visible, loading]);
 }

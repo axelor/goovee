@@ -16,12 +16,11 @@ import {
 export const WorkspaceContext = React.createContext<{
   tenant: string;
   workspace: string;
-  workspaceURI: string;
   /**
-   * The workspace's stored `url`, kept on the context for the two consumers
-   * that need the value itself rather than an address: the cart's storage key,
-   * and the invoice payment actions, whose capability-token path names the
-   * workspace the token was minted for.
+   * The workspace's stored `url`, for the two consumers that need the value
+   * itself rather than an address: the cart's storage key, and the invoice
+   * payment actions, whose capability-token path names the workspace the token
+   * was minted for. It is a database key — to link somewhere, use `url`.
    */
   workspaceURL: string;
   workspaceID: Workspace['id'];
@@ -30,7 +29,6 @@ export const WorkspaceContext = React.createContext<{
 }>({
   tenant: '',
   workspace: DEFAULT_WORKSPACE,
-  workspaceURI: '',
   workspaceURL: '',
   workspaceID: '',
   url: workspaceURLsFrom({
@@ -41,9 +39,10 @@ export const WorkspaceContext = React.createContext<{
   }),
 });
 
-/* `workspaceURI` is given rather than built from the tenant and workspace names:
- * its shape depends on how the tenant is routed, which is server-side
- * configuration. `workspacePathname` is where it comes from. */
+/* The visitor prefix is given rather than built from the tenant and workspace
+ * names: its shape depends on how the tenant is routed, which is server-side
+ * configuration. `workspacePathname` is where it comes from. It reaches the rest
+ * of the app only through `url` — nothing reads the prefix itself. */
 export function WorkspaceProvider({
   id,
   tenant,
@@ -84,12 +83,11 @@ export function WorkspaceProvider({
     () => ({
       tenant,
       workspace,
-      workspaceURI,
       workspaceURL: url.forExternal(),
       workspaceID,
       url,
     }),
-    [tenant, workspace, workspaceURI, workspaceID, url],
+    [tenant, workspace, workspaceID, url],
   );
 
   useEffect(() => {
