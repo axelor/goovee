@@ -41,7 +41,6 @@ type Column = {
 
 type Props = {
   favorites: Favorite[];
-  workspaceURI: string;
   marketplaceBase: string;
   /** A search / type / price filter is active — swaps the "nothing saved yet"
    *  empty state and its browse call to action for a plain "no results". True
@@ -225,7 +224,6 @@ export function MyFavoritesTable({
                         re-added; the list only shrinks on reload. */}
                     <AddToFavoriteButton
                       productId={favorite.id}
-                      workspaceURI={url.forRouter()}
                       isFavorite
                       variant="bare"
                     />

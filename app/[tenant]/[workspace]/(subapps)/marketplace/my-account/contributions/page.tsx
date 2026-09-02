@@ -162,7 +162,9 @@ export default async function MyContributionsPage(props: {
       Object.keys(params).length > 0
         ? `?${new URLSearchParams(params).toString()}`
         : '';
-    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions${queryStr}`;
+    return access.url.forRouter(
+      `/${SUBAPP_CODES.marketplace}/my-account/contributions${queryStr}`,
+    );
   };
 
   const comingSoonBanner = (
@@ -185,7 +187,8 @@ export default async function MyContributionsPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
-                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                <Link
+                  href={access.url.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
                   {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>
@@ -196,7 +199,9 @@ export default async function MyContributionsPage(props: {
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
                 <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`}>
+                  href={access.url.forRouter(
+                    `/${SUBAPP_CODES.marketplace}/my-account`,
+                  )}>
                   {await t('My account')}
                 </Link>
               </BreadcrumbLink>
@@ -226,7 +231,6 @@ export default async function MyContributionsPage(props: {
           </div>
           {isPublisher && consoleData && (
             <PublishNewButton
-              workspaceURI={workspaceURI}
               categories={clone(consoleData.categories)}
               licenses={clone(consoleData.licenses)}
               compatibilityVersions={clone(consoleData.compatibilityVersions)}
@@ -297,7 +301,7 @@ export default async function MyContributionsPage(props: {
                 client={client}
                 workspace={access.workspace}
                 config={config}
-                workspaceURI={workspaceURI}
+                url={access.url}
                 tenantId={tenantId}
               />
             )}
@@ -308,7 +312,7 @@ export default async function MyContributionsPage(props: {
                 workspace={access.workspace}
                 config={config}
                 newListingCurrency={consoleData.newListingCurrency}
-                workspaceURI={workspaceURI}
+                url={access.url}
                 categories={consoleData.categories}
                 licenses={consoleData.licenses}
                 compatibilityVersions={consoleData.compatibilityVersions}
@@ -319,7 +323,9 @@ export default async function MyContributionsPage(props: {
           </>
         ) : (
           <PublisherAccessRequest
-            applyHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions/apply`}
+            applyHref={access.url.forRouter(
+              `/${SUBAPP_CODES.marketplace}/my-account/contributions/apply`,
+            )}
             status={publisherAccess.request?.statusSelect ?? null}
             cooldownUntil={publisherAccess.request?.cooldownUntil ?? null}
             rejectionReason={publisherAccess.request?.rejectionReason ?? null}

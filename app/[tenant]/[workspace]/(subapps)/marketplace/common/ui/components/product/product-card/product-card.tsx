@@ -1,4 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {t, tattr} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
@@ -14,10 +15,10 @@ import {Rating} from '../../shared/rating';
 
 export interface ProductCardProps {
   product: ListProduct;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
 }
 
-export async function ProductCard({product, workspaceURI}: ProductCardProps) {
+export async function ProductCard({product, url}: ProductCardProps) {
   const freeLabel = await t('Price free');
   const {
     slug,
@@ -46,7 +47,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     GRADIENT_MAP[coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
 
   return (
-    <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${slug}`}>
+    <Link href={url.forRouter(`/${SUBAPP_CODES.marketplace}/products/${slug}`)}>
       <div className="bg-white rounded-lg overflow-hidden border border-ink-100 hover:shadow-md transition-shadow flex flex-col h-full">
         {/* Header with gradient and icon */}
         <div

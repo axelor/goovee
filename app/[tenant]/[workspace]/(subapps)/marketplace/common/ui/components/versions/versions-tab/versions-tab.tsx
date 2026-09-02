@@ -10,7 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
-import {withBasePath} from '@/lib/core/path/base-path';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
@@ -25,7 +25,7 @@ import {VersionCard} from '../version-card/version-card';
 
 interface VersionsTabProps {
   product: SingleProduct;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
   client: Client;
   versionPage: number;
   currentVersionId?: string;
@@ -39,7 +39,7 @@ interface VersionsTabProps {
 
 export async function VersionsTab({
   product,
-  workspaceURI,
+  url,
   client,
   versionPage,
   currentVersionId,
@@ -84,8 +84,8 @@ export async function VersionsTab({
               isLatest={version.id === currentVersionId}
               preview={preview}
               canDownload={canDownload}
-              downloadHref={withBasePath(
-                `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
+              downloadHref={url.forBrowser(
+                `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
               )}
             />
           </div>

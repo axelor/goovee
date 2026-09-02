@@ -1,4 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {t} from '@/locale/server';
 import type {ID} from '@/types';
 import {getSkip, getTotal} from '@/utils/pagination';
@@ -19,7 +20,7 @@ type ProductsTabProps = {
   workspace: Workspace;
   config: MarketplaceConfig;
   newListingCurrency: Currency | null;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
@@ -34,7 +35,7 @@ export async function ProductsTab({
   workspace,
   config,
   newListingCurrency,
-  workspaceURI,
+  url,
   categories,
   licenses,
   compatibilityVersions,
@@ -61,7 +62,7 @@ export async function ProductsTab({
       allowToPublish={config.allowToPublish === true}
       newListingCurrency={newListingCurrency}
       inAti={config.defaultProductForMarketplace?.inAti === true}
-      workspaceURI={workspaceURI}
+      url={url}
       categories={categories}
       licenses={licenses}
       compatibilityVersions={compatibilityVersions}

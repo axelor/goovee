@@ -18,7 +18,6 @@ export function Form(props: {
   categories: Category[];
   priorities: Priority[];
   contacts: ContactPartner[];
-  workspaceURI: string;
   parentId?: string;
   formFields: TicketingConfig['ticketingFormFieldSet'];
 }) {

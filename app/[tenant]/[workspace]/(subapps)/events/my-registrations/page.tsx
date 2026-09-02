@@ -12,6 +12,7 @@ import {
 
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
@@ -153,7 +154,7 @@ export default async function Page(context: {
           workspace={workspace}
           user={user}
           client={client}
-          workspaceURI={workspaceURI}
+          url={access.url}
           filter={filter}
         />
       </Suspense>
@@ -165,14 +166,14 @@ async function MyRegistrations({
   workspace,
   user,
   client,
-  workspaceURI,
+  url,
   filter,
   filters,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
   filter: FilterKey;
   filters: Filters;
 }) {
@@ -224,8 +225,8 @@ async function MyRegistrations({
   const next =
     filter === 'upcoming' && filters.page === 1 ? list[0] : undefined;
 
-  const baseHref = `${workspaceURI}/${SUBAPP_CODES.events}/my-registrations`;
-  const allEventsHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
+  const baseHref = url.forRouter(`/${SUBAPP_CODES.events}/my-registrations`);
+  const allEventsHref = url.forRouter(`/${SUBAPP_CODES.events}`);
 
   /* Links keep whatever the user is filtering by. Switching tab returns to the
    * first page, since a page number only means something within one tab. */
@@ -296,7 +297,7 @@ async function MyRegistrations({
       {next && (
         <NextEventSpotlight
           event={next}
-          detailHref={`${workspaceURI}/${SUBAPP_CODES.events}/${next.slug}`}
+          detailHref={url.forRouter(`/${SUBAPP_CODES.events}/${next.slug}`)}
         />
       )}
 
@@ -372,7 +373,9 @@ async function MyRegistrations({
             <RegistrationCard
               key={event.id}
               event={event}
-              detailHref={`${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`}
+              detailHref={url.forRouter(
+                `/${SUBAPP_CODES.events}/${event.slug}`,
+              )}
               past={filter === 'past'}
             />
           ))}

@@ -67,8 +67,6 @@ export default async function Page(props: {
 
   const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
-  const listingHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
     allowGuest: true,
@@ -91,6 +89,8 @@ export default async function Page(props: {
     }
     unauthorized();
   }
+
+  const listingHref = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const {limit, page, category, sort, priceType, type: rawType} = searchParams;
   const client = access.tenant.client;
@@ -273,7 +273,7 @@ export default async function Page(props: {
               <ProductCard
                 key={product.id}
                 product={product}
-                workspaceURI={workspaceURI}
+                url={access.url}
               />
             ))}
           </div>

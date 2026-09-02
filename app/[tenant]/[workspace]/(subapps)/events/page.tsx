@@ -75,7 +75,6 @@ export default async function Page(props: {
           workspace={workspace}
           user={user}
           client={client}
-          workspaceURI={workspaceURI}
           type={searchParams?.type === 'past' ? 'past' : 'active'}
           category={searchParams?.category || null}
           page={Number(searchParams?.page) || 1}
@@ -89,7 +88,6 @@ async function Magazine({
   workspace,
   user,
   client,
-  workspaceURI,
   type,
   category,
   page,
@@ -97,7 +95,6 @@ async function Magazine({
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
-  workspaceURI: string;
   type: 'active' | 'past';
   category: string | null;
   page: number;
@@ -225,7 +222,6 @@ async function Magazine({
       activeCount={activeTotal}
       pastCount={pastTotal}
       categories={categories ?? []}
-      workspaceURI={workspaceURI}
       labels={labels}
       searchAction={searchEvents}
     />

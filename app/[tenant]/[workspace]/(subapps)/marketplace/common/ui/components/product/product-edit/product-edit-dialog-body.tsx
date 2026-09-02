@@ -20,7 +20,6 @@ import {VersionSection} from './version-section';
 
 export type ProductEditDialogBodyProps = {
   mode: 'create' | 'edit';
-  workspaceURI: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
@@ -57,7 +56,6 @@ export type ProductEditDialogBodyProps = {
  */
 export function ProductEditDialogBody({
   mode,
-  workspaceURI,
   categories,
   licenses,
   compatibilityVersions,
@@ -104,7 +102,6 @@ export function ProductEditDialogBody({
         defaultType={defaultType}
         initialVersions={initialVersions}
         initialTotal={initialTotal}
-        workspaceURI={workspaceURI}
         categories={categories}
         licenses={licenses}
         compatibilityVersions={compatibilityVersions}
@@ -133,7 +130,6 @@ function DialogForm({
   defaultType,
   initialVersions,
   initialTotal,
-  workspaceURI,
   categories,
   licenses,
   compatibilityVersions,
@@ -190,7 +186,6 @@ function DialogForm({
               requiresReview={requiresReview}
               allowToPublish={allowToPublish}
               compatibilityVersions={compatibilityVersions}
-              workspaceURI={workspaceURI}
             />
           </div>
         </div>

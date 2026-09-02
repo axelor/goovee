@@ -52,7 +52,7 @@ export default async function Page(props: {
   if (!config) return notFound();
 
   if (!config?.requestQuotation) {
-    redirect(`${workspaceURI}/shop/cart`);
+    redirect(access.url.forRouter('/shop/cart'));
   }
 
   const quotationSubapp = await findSubappAccess({

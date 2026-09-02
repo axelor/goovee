@@ -10,7 +10,6 @@ import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {NEW_FILE_CUTOFF_MS} from '@/subapps/resources/common/constants';
@@ -86,16 +85,14 @@ export default async function Page(props: {
   const Viewer = findFileViewer(file?.metaFile?.fileType || file?.contentType);
 
   const backHref = parentId
-    ? `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${parentId}`
-    : `${workspaceURI}/${SUBAPP_CODES.resources}`;
+    ? access.url.forRouter(`/${SUBAPP_CODES.resources}/folder/${parentId}`)
+    : access.url.forRouter(`/${SUBAPP_CODES.resources}`);
 
   // The download route resolves a DMS file by its own id (fetchFile), so the
   // URL must carry the DMS file id — not the metaFile id. We still gate on the
   // metaFile existing, since that is what actually gets streamed.
   const downloadHref = file?.metaFile?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${file.id}`,
-      )
+    ? access.url.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${file.id}`)
     : null;
 
   const isNew = computeIsNew(file.createdOn, NEW_FILE_CUTOFF_MS);
@@ -103,7 +100,6 @@ export default async function Page(props: {
   return (
     <DocsViewerShell
       file={file}
-      workspaceURI={workspaceURI}
       backHref={backHref}
       downloadHref={downloadHref}
       siblings={siblings ?? []}

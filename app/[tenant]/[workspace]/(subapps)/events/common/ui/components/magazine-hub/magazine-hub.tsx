@@ -79,10 +79,6 @@ export function MagazineHub({
   activeCount: number;
   pastCount: number;
   categories: MagazineHubCategory[];
-  /* Accepted but unread: every address below comes from the workspace context,
-   * which knows how this tenant is routed. The page that renders this still
-   * passes it. */
-  workspaceURI: string;
   labels: MagazineHubLabels;
   searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {

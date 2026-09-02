@@ -52,7 +52,7 @@ export default async function CheckoutPage(props: {
   );
   if (!config) notFound();
 
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-3xl">

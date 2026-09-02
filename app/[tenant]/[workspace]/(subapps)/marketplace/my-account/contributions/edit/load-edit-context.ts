@@ -92,7 +92,6 @@ export async function loadEditContext(params: {
     ]);
 
   return {
-    workspaceURI,
     tenantId,
     access,
     partnerId,

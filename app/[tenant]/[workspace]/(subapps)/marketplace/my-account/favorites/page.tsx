@@ -95,7 +95,7 @@ export default async function FavoritesPage(props: {
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
   if (!config) notFound();
 
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
   const favoritesHref = `${marketplaceBase}/my-account/favorites`;
 
   const products = await findFavoriteProducts({
@@ -196,7 +196,6 @@ export default async function FavoritesPage(props: {
 
       <MyFavoritesTable
         favorites={clone(products)}
-        workspaceURI={workspaceURI}
         marketplaceBase={marketplaceBase}
         filtered={filtered}
       />

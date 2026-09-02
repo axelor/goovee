@@ -119,7 +119,11 @@ export default async function Page(props: {
   ]);
 
   if (!websitePage) {
-    return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
+    return (
+      <NotFound
+        homePageUrl={access.url.forRouter(`/${SUBAPP_CODES.website}`)}
+      />
+    );
   }
 
   let contentLinesChunk: Promise<ReplacedContentLine[]>[] = [];

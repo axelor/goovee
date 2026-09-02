@@ -5,7 +5,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-import {withBasePath} from '@/lib/core/path/base-path';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {Download, FileText, Heart} from 'lucide-react';
@@ -26,7 +26,7 @@ export interface ProductHeaderCardProps {
   product: SingleProduct;
   client: Client;
   user?: {id: ID; mainPartnerId?: ID};
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
   tenantId: string;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
   preview?: boolean;
@@ -37,7 +37,7 @@ export async function ProductHeaderCard({
   product,
   client,
   user,
-  workspaceURI,
+  url,
   tenantId,
   preview = false,
   canDownloadPromise,
@@ -55,7 +55,7 @@ export async function ProductHeaderCard({
   const categoryNames = await Promise.all(
     categories.map(category => tattr(category.name)),
   );
-  const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceHref = url.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const priceScale = product.price.currency.numberOfDecimals;
   const {ati: priceAti} = product.price;
@@ -99,7 +99,6 @@ export async function ProductHeaderCard({
             }>
             <FavoriteButton
               productId={product.id}
-              workspaceURI={workspaceURI}
               userId={user?.id}
               client={client}
             />
@@ -212,7 +211,7 @@ export async function ProductHeaderCard({
           <CTAButton
             product={product}
             user={user}
-            workspaceURI={workspaceURI}
+            url={url}
             tenantId={tenantId}
             paid={paid}
             priceAti={priceAti}
@@ -237,7 +236,7 @@ export async function ProductHeaderCard({
 async function CTAButton({
   product,
   user,
-  workspaceURI,
+  url,
   tenantId,
   paid,
   priceAti,
@@ -248,7 +247,7 @@ async function CTAButton({
 }: {
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
   tenantId: string;
   paid: boolean;
   priceAti: number;
@@ -305,8 +304,8 @@ async function CTAButton({
         <a
           href={
             product.currentVersion?.id
-              ? withBasePath(
-                  `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`,
+              ? url.forBrowser(
+                  `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`,
                 )
               : '#'
           }
@@ -323,8 +322,10 @@ async function CTAButton({
       <Button variant="royal" size="lg" className="gap-2" asChild>
         <Link
           href={getLoginURL({
-            callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
-            workspaceURI,
+            callbackurl: url.forRouter(
+              `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
+            ),
+            workspaceURI: url.forRouter(),
             tenant: tenantId,
           })}>
           {await t('Sign in to buy')}
@@ -349,7 +350,7 @@ async function CTAButton({
           ? formatVersionNumber(product.currentVersion)
           : null
       }
-      cartHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/cart`}
+      cartHref={url.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}
       addToCartLabel={await t('Add to cart')}
       buyNowLabel={await t('Buy now')}
       inCartLabel={await t('In cart — view cart')}
@@ -370,12 +371,10 @@ function DocumentationButton({url, label}: {url: string; label: string}) {
 
 async function FavoriteButton({
   productId,
-  workspaceURI,
   userId,
   client,
 }: {
   productId: ID;
-  workspaceURI: string;
   userId?: ID;
   client: Client;
 }) {
@@ -387,11 +386,5 @@ async function FavoriteButton({
       })
     : false;
 
-  return (
-    <AddToFavoriteButton
-      productId={productId}
-      workspaceURI={workspaceURI}
-      isFavorite={isFavorited}
-    />
-  );
+  return <AddToFavoriteButton productId={productId} isFavorite={isFavorited} />;
 }

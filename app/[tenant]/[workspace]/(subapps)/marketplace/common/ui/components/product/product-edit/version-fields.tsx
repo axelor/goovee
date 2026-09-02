@@ -1,6 +1,6 @@
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import {withBasePath} from '@/lib/core/path/base-path';
 import type {UseStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import type {Cloned} from '@/types/util';
 import {RichTextEditor} from '@/ui/components';
@@ -46,7 +46,6 @@ type VersionFieldsProps = {
    *  by which point `namePrefix` may name a different row. */
   commitBundleToken: (rowKey: string, token: string | undefined) => void;
   compatibilityVersions: Cloned<CompatibilityVersion>[];
-  workspaceURI: string;
   productId: string;
 };
 
@@ -66,9 +65,9 @@ export function VersionFields({
   bundleItemByRow,
   commitBundleToken,
   compatibilityVersions,
-  workspaceURI,
   productId,
 }: VersionFieldsProps) {
+  const {url} = useWorkspace();
   const {toast} = useToast();
   const {control, getValues, register} = useFormContext<CombinedEditValues>();
 
@@ -91,8 +90,8 @@ export function VersionFields({
 
   const downloadHref =
     rowId && existingBundle
-      ? withBasePath(
-          `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${productId}/versions/${rowId}/download`,
+      ? url.forBrowser(
+          `/${SUBAPP_CODES.marketplace}/api/products/${productId}/versions/${rowId}/download`,
         )
       : undefined;
 

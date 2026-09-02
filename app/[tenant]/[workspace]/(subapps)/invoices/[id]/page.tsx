@@ -66,7 +66,6 @@ async function Invoice({
       <Content
         invoice={clone(invoice)}
         config={clone(config)}
-        workspaceURI={workspaceURI}
         token={access.token}
         allowStripeBankTransfer={canSettleStripeBankTransfer(
           access.tenant.config,
@@ -127,7 +126,6 @@ async function Invoice({
     <Content
       invoice={clone(invoice)}
       config={clone(config)}
-      workspaceURI={workspaceURI}
       allowStripeBankTransfer={canSettleStripeBankTransfer(
         access.tenant.config,
       )}

@@ -176,7 +176,6 @@ export default async function Page(props: {
             contacts={contacts}
             userId={user.id}
             parentId={parentId}
-            workspaceURI={workspaceURI}
             formFields={clone(config.ticketingFormFieldSet)}
           />
         </div>

@@ -1,16 +1,14 @@
-import {redirect} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 
 // ---- LOCAL IMPORTS ---- //
 import {ROUTES} from './common/constants';
 
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  const {workspaceURI} = workspacePathname(params);
+export default async function Page() {
+  const url = await currentWorkspace();
+  if (!url) notFound();
 
-  redirect(`${workspaceURI}/account/${ROUTES.personal}`);
+  redirect(url.forRouter(`/account/${ROUTES.personal}`));
 }

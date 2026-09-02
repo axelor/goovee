@@ -55,7 +55,6 @@ type Column = {
 
 type Props = {
   purchases: Purchase[];
-  workspaceURI: string;
 };
 
 /* Download control for a taken-down purchase: the product is off the storefront,

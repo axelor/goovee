@@ -69,10 +69,11 @@ export default async function Page(props: {
     locale,
   });
 
-  if (!mainWebsites?.length) return <NotFound homePageUrl={workspaceURI} />;
+  if (!mainWebsites?.length)
+    return <NotFound homePageUrl={access.url.forRouter()} />;
 
   const getWebsiteURL = (website: Website) =>
-    `${workspaceURI}/${SUBAPP_CODES.website}/${website.slug}`;
+    access.url.forRouter(`/${SUBAPP_CODES.website}/${website.slug}`);
 
   if (mainWebsites.length === 1) {
     return redirect(getWebsiteURL(mainWebsites?.[0]));

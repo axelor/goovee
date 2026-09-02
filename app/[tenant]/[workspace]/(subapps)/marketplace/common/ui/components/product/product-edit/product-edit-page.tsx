@@ -1,7 +1,6 @@
 'use client';
 
 import {i18n} from '@/locale';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {Cloned} from '@/types/util';
 import {Button} from '@/ui/components/button';
 import {Form} from '@/ui/components/form';
@@ -35,7 +34,6 @@ type ProductEditPageProps = {
   inAti: boolean;
   requiresReview: boolean;
   allowToPublish: boolean;
-  workspaceURI: string;
   /** Where Save and Cancel navigate to. */
   returnHref: string;
 };
@@ -54,7 +52,6 @@ export function ProductEditPage({
   allowToPublish,
   returnHref,
 }: ProductEditPageProps) {
-  const {url} = useWorkspace();
   const router = useRouter();
   const model = useProductEditForm({
     initial,
@@ -85,7 +82,6 @@ export function ProductEditPage({
             requiresReview={requiresReview}
             allowToPublish={allowToPublish}
             compatibilityVersions={compatibilityVersions}
-            workspaceURI={url.forRouter()}
           />
         </div>
 

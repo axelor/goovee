@@ -52,7 +52,6 @@ export function DocsFolderView({
 }: {
   folder: FolderWithParent;
   files: DmsFile[];
-  workspaceURI: string;
   labels: DocsFolderViewLabels;
   // Each present only when the user may perform that action into this folder;
   // opens a modal instead of navigating to a separate create page.

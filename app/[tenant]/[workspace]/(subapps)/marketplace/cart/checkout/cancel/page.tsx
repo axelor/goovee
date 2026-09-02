@@ -1,16 +1,14 @@
 import {SUBAPP_CODES} from '@/constants';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
-import {workspacePathname} from '@/utils/workspace';
 import {XCircle} from 'lucide-react';
 import {Link} from '@/ui/components/link';
+import {notFound} from 'next/navigation';
 
-export default async function CheckoutCancelPage(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  const {workspaceURI} = workspacePathname(params);
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+export default async function CheckoutCancelPage() {
+  const url = await currentWorkspace();
+  if (!url) notFound();
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
@@ -23,7 +21,7 @@ export default async function CheckoutCancelPage(props: {
           {await t('Your cart is still saved. You can resume any time.')}
         </p>
         <Button variant="royal" asChild>
-          <Link href={`${marketplaceBase}/cart`}>
+          <Link href={url.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}>
             {await t('Back to cart')}
           </Link>
         </Button>

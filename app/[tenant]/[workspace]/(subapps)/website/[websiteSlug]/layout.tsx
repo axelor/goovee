@@ -108,7 +108,11 @@ export default async function Layout(props: {
   });
 
   if (!website) {
-    return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
+    return (
+      <NotFound
+        homePageUrl={access.url.forRouter(`/${SUBAPP_CODES.website}`)}
+      />
+    );
   }
 
   const mainWebsiteLanguages = await findAllMainWebsiteLanguages({

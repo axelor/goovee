@@ -3,6 +3,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
@@ -61,7 +62,7 @@ export default async function Page(props: {
         workspaceURL={workspaceURL}
         client={client}
         user={user}
-        workspaceURI={workspaceURI}
+        url={access.url}
       />
     </Suspense>
   );
@@ -71,12 +72,12 @@ async function HomeContent({
   workspaceURL,
   client,
   user,
-  workspaceURI,
+  url,
 }: {
   workspaceURL: string;
   client: Client;
   user?: User;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
 }) {
   const [pinnedFolders, labels] = await Promise.all([
     fetchPinnedFoldersWithMeta({workspaceURL, client, user}).then(clone),
@@ -86,7 +87,7 @@ async function HomeContent({
   return (
     <DocsHomeView
       pinnedFolders={pinnedFolders ?? []}
-      workspaceURI={workspaceURI}
+      url={url}
       labels={labels}
     />
   );

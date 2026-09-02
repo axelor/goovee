@@ -67,7 +67,9 @@ export default async function PublisherApplyPage(props: {
     notFound();
   }
 
-  const contributionsHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`;
+  const contributionsHref = access.url.forRouter(
+    `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+  );
 
   /* Only someone eligible to apply — no request yet, or a declined request
    * whose cooldown has passed — sees the form. An approved, pending, banned or
@@ -93,7 +95,8 @@ export default async function PublisherApplyPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
-                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                <Link
+                  href={access.url.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
                   {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>

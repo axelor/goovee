@@ -26,7 +26,6 @@ export interface DocsSidebarCategory {
 
 export interface DocsSidebarProps {
   categories: DocsSidebarCategory[];
-  workspaceURI: string;
   searchPlaceholder: string;
   homeLabel: string;
   categoriesLabel: string;

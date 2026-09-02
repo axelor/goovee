@@ -2,7 +2,6 @@ import {z} from 'zod';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
-import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse} from 'next/server';
 import {
   findWebsiteBySlug,
@@ -31,7 +30,6 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURI} = workspacePathname(params);
   const {
     'content-id': contentId,
     'file-id': fileId,
@@ -96,7 +94,7 @@ export async function GET(
     const website = await findWebsiteBySlug({
       websiteSlug,
       workspaceURL,
-      workspaceURI,
+      workspaceURI: access.url.forRouter(),
       user,
       client,
       config,

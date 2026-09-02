@@ -126,7 +126,7 @@ export default async function Page(props: {
     replyCount: replyCounts[String(p.id)] ?? 0,
   }));
 
-  const forumBase = `${workspaceURI}/${SUBAPP_CODES.forum}`;
+  const forumBase = access.url.forRouter(`/${SUBAPP_CODES.forum}`);
 
   return (
     <ForumGroup

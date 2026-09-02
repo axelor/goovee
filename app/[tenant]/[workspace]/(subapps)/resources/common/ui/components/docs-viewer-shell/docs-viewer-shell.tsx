@@ -36,7 +36,6 @@ export function DocsViewerShell({
   children,
 }: {
   file: DmsFile;
-  workspaceURI: string;
   backHref: string;
   downloadHref: string | null;
   siblings: DmsFile[];

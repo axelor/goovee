@@ -1,7 +1,6 @@
 'use client';
 
 import {i18n} from '@/locale';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {Cloned} from '@/types/util';
 import {Button} from '@/ui/components/button';
 import {Plus} from 'lucide-react';
@@ -16,7 +15,6 @@ import type {Currency} from '@/product/orm';
 import {ProductFormDialog} from '../product-edit';
 
 type Props = {
-  workspaceURI: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
@@ -37,7 +35,6 @@ export function PublishNewButton({
   inAti,
   defaultType,
 }: Props) {
-  const {url} = useWorkspace();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -53,7 +50,6 @@ export function PublishNewButton({
         open={open}
         onOpenChange={setOpen}
         mode="create"
-        workspaceURI={url.forRouter()}
         categories={categories}
         licenses={licenses}
         compatibilityVersions={compatibilityVersions}

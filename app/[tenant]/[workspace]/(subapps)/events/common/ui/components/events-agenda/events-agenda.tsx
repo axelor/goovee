@@ -34,10 +34,6 @@ export function EventsAgenda({
   searchAction,
 }: {
   initialEvents: ListEvent[];
-  /* Accepted but unread: every address below comes from the workspace context,
-   * which knows how this tenant is routed. The page that renders this still
-   * passes it. */
-  workspaceURI: string;
   magazineHref: string;
   searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {

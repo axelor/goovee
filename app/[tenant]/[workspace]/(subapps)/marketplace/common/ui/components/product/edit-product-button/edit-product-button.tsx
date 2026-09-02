@@ -15,7 +15,6 @@ import type {Currency} from '@/product/orm';
 import {ProductFormDialog} from '../product-edit';
 
 type Props = {
-  workspaceURI: string;
   productId: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
@@ -34,7 +33,6 @@ type Props = {
 };
 
 export function EditProductButton({
-  workspaceURI,
   productId,
   categories,
   licenses,
@@ -98,7 +96,6 @@ export function EditProductButton({
           open={open}
           onOpenChange={setOpen}
           mode="edit"
-          workspaceURI={workspaceURI}
           categories={categories}
           licenses={licenses}
           compatibilityVersions={compatibilityVersions}

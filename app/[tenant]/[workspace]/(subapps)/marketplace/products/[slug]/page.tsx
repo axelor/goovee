@@ -133,7 +133,7 @@ export default async function ProductPage(props: {
 
   if (!product) notFound();
 
-  const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceHref = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const buildQuery = (
     overrides: Partial<NullableValues<ProductSearchParams>> = {},
@@ -161,7 +161,9 @@ export default async function ProductPage(props: {
       Object.keys(params).length > 0
         ? `?${new URLSearchParams(params).toString()}`
         : '';
-    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}${queryStr}`;
+    return access.url.forRouter(
+      `/${SUBAPP_CODES.marketplace}/products/${product.slug}${queryStr}`,
+    );
   };
 
   const tabNavLink = (tabValue: ProductTab) => productUrl({tab: tabValue});
@@ -227,7 +229,7 @@ export default async function ProductPage(props: {
           product={product}
           client={client}
           user={access.user}
-          workspaceURI={workspaceURI}
+          url={access.url}
           tenantId={tenantId}
           preview={preview}
           canDownloadPromise={canDownloadPromise}
@@ -298,12 +300,12 @@ export default async function ProductPage(props: {
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
             {tab === ProductTab.Overview && (
-              <OverviewTab product={product} workspaceURI={workspaceURI} />
+              <OverviewTab product={product} url={access.url} />
             )}
             {tab === ProductTab.Versions && (
               <VersionsTab
                 product={product}
-                workspaceURI={workspaceURI}
+                url={access.url}
                 client={client}
                 versionPage={versionPage}
                 currentVersionId={product.currentVersion?.id}
@@ -490,7 +492,9 @@ export default async function ProductPage(props: {
                     <PartnerProfileLink
                       client={client}
                       partnerId={product.publisher.id}
-                      href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`}
+                      href={access.url.forRouter(
+                        `/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`,
+                      )}
                       label={await t('View profile')}
                       className="w-full"
                     />

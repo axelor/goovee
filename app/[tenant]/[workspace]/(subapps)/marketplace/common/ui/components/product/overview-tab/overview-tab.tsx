@@ -1,3 +1,4 @@
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {t} from '@/locale/server';
 import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
 import type {SingleProduct} from '../../../../orm';
@@ -6,10 +7,10 @@ import {ScreenshotGallery} from '../../shared/screenshot-gallery';
 
 interface OverviewTabProps {
   product: SingleProduct;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
 }
 
-export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
+export async function OverviewTab({product, url}: OverviewTabProps) {
   const images = (product.pictureList || []).filter(img => !!img.picture?.id);
 
   return (
@@ -22,7 +23,7 @@ export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
             .map(img => ({
               id: img.id,
               src: getProductScreenshotURL({
-                workspaceURI,
+                url,
                 productId: product.id,
                 fileId: img.picture!.id,
               }),

@@ -13,7 +13,6 @@ import {addProductToFavorites} from '../../../../actions';
 
 interface AddToFavoriteButtonProps {
   productId: string;
-  workspaceURI: string;
   isFavorite?: boolean;
   /**
    * - `overlay` (default): translucent-white circle with an outline and

@@ -68,7 +68,7 @@ export default async function Page(props: {
         user={user}
         workspace={workspace}
         config={config}
-        workspaceURI={workspaceURI}
+        url={url}
         apps={apps}
       />
     );
@@ -79,5 +79,5 @@ export default async function Page(props: {
   }
 
   const defaultApp = apps[0];
-  return <ClientRedirection url={`${workspaceURI}/${defaultApp.code}`} />;
+  return <ClientRedirection url={url.forRouter(`/${defaultApp.code}`)} />;
 }

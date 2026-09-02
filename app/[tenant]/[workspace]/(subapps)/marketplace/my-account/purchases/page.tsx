@@ -108,7 +108,7 @@ export default async function MyPurchasesPage(props: {
 
   const totalPages = getPages(purchases, limit);
 
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
   const purchasesHref = `${marketplaceBase}/my-account/purchases`;
 
   return (
@@ -169,10 +169,7 @@ export default async function MyPurchasesPage(props: {
         </div>
       ) : (
         <>
-          <MyPurchasesTable
-            purchases={clone(purchases)}
-            workspaceURI={workspaceURI}
-          />
+          <MyPurchasesTable purchases={clone(purchases)} />
 
           {totalPages > 1 && (
             <Pagination className="mt-4">

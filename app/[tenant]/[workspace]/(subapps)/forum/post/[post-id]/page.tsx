@@ -117,7 +117,7 @@ export default async function Page(props: {
       0)
     : 0;
 
-  const forumBase = `${workspaceURI}/${SUBAPP_CODES.forum}`;
+  const forumBase = access.url.forRouter(`/${SUBAPP_CODES.forum}`);
 
   return (
     <ForumDetail

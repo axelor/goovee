@@ -81,16 +81,14 @@ export default async function Page(props: {
 
   const pages = getPages(projects, limit);
   if (pages == 1 && projects.length === 1) {
-    redirect(`${workspaceURI}/ticketing/projects/${projects[0].id}`);
+    redirect(access.url.forRouter(`/ticketing/projects/${projects[0].id}`));
   }
   if (!projects.length) {
     <h3>{await t('No projects found')}</h3>;
   }
 
   const imageURL = config.ticketHeroBgImage?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/hero/background`,
-      )
+    ? access.url.forBrowser(`/${SUBAPP_CODES.ticketing}/api/hero/background`)
     : withBasePath(IMAGE_URL);
 
   return (
@@ -124,7 +122,7 @@ export default async function Page(props: {
           {projects.map(async project => (
             <Link
               key={project.id}
-              href={`${workspaceURI}/ticketing/projects/${project.id}`}>
+              href={access.url.forRouter(`/ticketing/projects/${project.id}`)}>
               <div className="bg-card p-6 rounded-lg">
                 <p className="text-[1rem] font-semibold text-ellipsis whitespace-nowrap overflow-hidden">
                   {project.name}
@@ -149,7 +147,7 @@ export default async function Page(props: {
                     className={cn({['invisible']: +page <= 1})}
                     replace
                     href={{
-                      pathname: `${workspaceURI}/ticketing`,
+                      pathname: access.url.forRouter('/ticketing'),
                       query: {...searchParams, page: +page - 1},
                     }}>
                     <ChevronLeft className="h-4 w-4" />
@@ -175,7 +173,7 @@ export default async function Page(props: {
                         scroll={false}
                         replace
                         href={{
-                          pathname: `${workspaceURI}/ticketing`,
+                          pathname: access.url.forRouter('/ticketing'),
                           query: {...searchParams, page: value},
                         }}>
                         {value}
@@ -191,7 +189,7 @@ export default async function Page(props: {
                     replace
                     className={cn({['invisible']: +page >= pages})}
                     href={{
-                      pathname: `${workspaceURI}/ticketing`,
+                      pathname: access.url.forRouter('/ticketing'),
                       query: {...searchParams, page: +page + 1},
                     }}>
                     <span className="sr-only">Next</span>

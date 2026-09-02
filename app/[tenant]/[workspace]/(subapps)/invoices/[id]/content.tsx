@@ -33,7 +33,6 @@ import {
 interface ContentProps {
   invoice: Cloned<InvoiceType>;
   config: InvoicesConfig | Cloned<InvoicesConfig>;
-  workspaceURI: string;
   token?: string;
   allowStripeBankTransfer: boolean;
 }

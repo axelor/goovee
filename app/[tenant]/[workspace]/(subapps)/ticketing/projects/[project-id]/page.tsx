@@ -119,7 +119,9 @@ export default async function Page(props0: {
 
   if (!project) notFound();
 
-  const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
+  const ticketsURL = access.url.forRouter(
+    `/ticketing/projects/${projectId}/tickets`,
+  );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
   const statusCompleted = statuses.filter(s => s.isCompleted).map(s => s.id);
   const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
@@ -180,7 +182,7 @@ export default async function Page(props0: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate text-sm">
-                <Link href={`${workspaceURI}/ticketing`}>
+                <Link href={access.url.forRouter('/ticketing')}>
                   {await t('Projects')}
                 </Link>
               </BreadcrumbLink>

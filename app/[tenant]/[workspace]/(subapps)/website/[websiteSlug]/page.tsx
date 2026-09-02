@@ -85,9 +85,13 @@ export default async function Layout(props: {
 
   if (websitePageSlug) {
     redirect(
-      `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
+      access.url.forRouter(
+        `/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
+      ),
     );
   }
 
-  return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
+  return (
+    <NotFound homePageUrl={access.url.forRouter(`/${SUBAPP_CODES.website}`)} />
+  );
 }

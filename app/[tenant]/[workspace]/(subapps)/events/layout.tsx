@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/lib/core/locale/server';
@@ -21,11 +20,7 @@ export default async function Layout(props: {
   }>;
   children: React.ReactNode;
 }) {
-  const params = await props.params;
-
   const {children} = props;
-
-  const {workspaceURI} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
@@ -64,8 +59,10 @@ export default async function Layout(props: {
 
   const registeredCount = (registeredResult?.events ?? []).length;
 
-  const allHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
-  const mineHref = `${workspaceURI}/${SUBAPP_CODES.events}/my-registrations`;
+  const allHref = access.url.forRouter(`/${SUBAPP_CODES.events}`);
+  const mineHref = access.url.forRouter(
+    `/${SUBAPP_CODES.events}/my-registrations`,
+  );
 
   return (
     <>

@@ -3,6 +3,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
@@ -65,7 +66,7 @@ export default async function Page(context: {
           workspace={workspace}
           user={user}
           client={client}
-          workspaceURI={workspaceURI}
+          url={access.url}
           workspaceURL={workspaceURL}
         />
       </Suspense>
@@ -77,13 +78,13 @@ async function AgendaData({
   workspace,
   user,
   client,
-  workspaceURI,
+  url,
   workspaceURL,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user: User | null | undefined;
   client: Client;
-  workspaceURI: string;
+  url: ServerWorkspaceURLs;
   workspaceURL: string;
 }) {
   const result = await findEvents({
@@ -99,12 +100,11 @@ async function AgendaData({
 
   const events = (result?.events ?? []).filter(e => e.eventStartDateTime);
 
-  const magazineHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
+  const magazineHref = url.forRouter(`/${SUBAPP_CODES.events}`);
 
   return (
     <EventsAgenda
       initialEvents={events}
-      workspaceURI={workspaceURI}
       magazineHref={magazineHref}
       searchAction={searchEvents}
     />

@@ -23,7 +23,6 @@ import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {encodeFilter, getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
@@ -141,7 +140,9 @@ export default async function Page(props: {
 
   if (!ticket) notFound();
 
-  const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
+  const ticketsURL = access.url.forRouter(
+    `/ticketing/projects/${projectId}/tickets`,
+  );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
   const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
@@ -165,7 +166,7 @@ export default async function Page(props: {
                   <BreadcrumbLink
                     asChild
                     className="text-ink-500 cursor-pointer truncate text-sm">
-                    <Link href={`${workspaceURI}/ticketing`}>
+                    <Link href={access.url.forRouter('/ticketing')}>
                       {await t('Projects')}
                     </Link>
                   </BreadcrumbLink>
@@ -178,7 +179,9 @@ export default async function Page(props: {
                     asChild
                     className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-sm">
                     <Link
-                      href={`${workspaceURI}/ticketing/projects/${projectId}`}>
+                      href={access.url.forRouter(
+                        `/ticketing/projects/${projectId}`,
+                      )}>
                       {ticket.project?.name}
                     </Link>
                   </BreadcrumbLink>
@@ -267,8 +270,8 @@ export default async function Page(props: {
                   commentField="note"
                   createComment={createComment}
                   fetchComments={fetchComments}
-                  attachmentDownloadUrl={withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
+                  attachmentDownloadUrl={access.url.forBrowser(
+                    `/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
                   )}
                 />
               )}

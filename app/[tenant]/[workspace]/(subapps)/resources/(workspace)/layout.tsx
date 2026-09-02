@@ -24,7 +24,7 @@ export default async function Layout({
 }) {
   const params = await paramsPromise;
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const {workspaceURL} = workspacePathname(params);
 
   // The authoritative access gate lives on each page; here we only resolve the
   // scoped client/user to populate the sidebar. When access is denied we render
@@ -82,7 +82,6 @@ export default async function Layout({
     <div className="flex flex-1 min-h-[calc(100vh-var(--goovee-header-height,0px))] bg-ink-25">
       <DocsSidebar
         categories={categories}
-        workspaceURI={workspaceURI}
         searchPlaceholder={searchPlaceholder}
         homeLabel={homeLabel}
         categoriesLabel={categoriesLabel}
@@ -90,7 +89,6 @@ export default async function Layout({
       />
       <MobileMenuFolders
         categories={categories}
-        workspaceURI={workspaceURI}
         searchPlaceholder={searchPlaceholder}
         homeLabel={homeLabel}
         categoriesLabel={categoriesLabel}

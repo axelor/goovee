@@ -81,7 +81,7 @@ export default async function Page(props: {
           config={clone(config)}
           segments={segments}
           client={client}
-          workspaceURI={workspaceURI}
+          url={access.url}
           user={user}
           slug={slug}
         />

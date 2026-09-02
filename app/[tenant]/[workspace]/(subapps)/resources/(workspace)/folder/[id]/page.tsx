@@ -82,7 +82,6 @@ export default async function Page(props: {
     <DocsFolderView
       folder={folder}
       files={files ?? []}
-      workspaceURI={workspaceURI}
       labels={labels}
       uploadParent={canUpload ? parentRef : null}
       folderParent={canCreateFolder ? parentRef : null}

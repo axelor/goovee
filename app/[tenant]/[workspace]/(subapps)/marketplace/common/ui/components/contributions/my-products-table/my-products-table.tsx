@@ -56,7 +56,6 @@ type Column = {
 type Props = {
   products: Product[];
   title: string;
-  workspaceURI: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
@@ -253,7 +252,6 @@ export function MyProductsTable({
                   <div className="flex justify-end gap-1">
                     <EditProductButton
                       productId={product.id}
-                      workspaceURI={url.forRouter()}
                       categories={categories}
                       licenses={licenses}
                       compatibilityVersions={compatibilityVersions}

@@ -45,7 +45,7 @@ export default async function CartPage(props: {
     unauthorized();
   }
 
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   return (
     <div className="container mx-auto px-4 py-6">
