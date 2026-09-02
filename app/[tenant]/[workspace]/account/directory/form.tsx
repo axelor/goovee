@@ -69,7 +69,7 @@ export default function Form({
 }) {
   const {toast} = useToast();
   const router = useRouter();
-  const {workspaceURL, tenant} = useWorkspace();
+  const {tenant} = useWorkspace();
   const {
     uploads,
     upload,
@@ -115,7 +115,7 @@ export default function Form({
 
   const onSubmit = async (values: DirectorySettingsFormValues) => {
     try {
-      const response = await updateDirectorySettings({values, workspaceURL});
+      const response = await updateDirectorySettings({values});
       if (response.error) {
         toast({variant: 'destructive', title: response.message});
       } else {
@@ -217,7 +217,6 @@ export default function Form({
       setUpdatingPicture(true);
       const {error, message} = await updateCompanyProfileImage({
         token: null,
-        workspaceURL,
       });
 
       if (error) {
@@ -297,7 +296,6 @@ export default function Form({
   const applyStagedPicture = async (token: string) => {
     const {error, message, data} = await updateCompanyProfileImage({
       token,
-      workspaceURL,
     });
 
     if (error) {

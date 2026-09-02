@@ -2,7 +2,6 @@
 
 // ---- CORE IMPORTS ---- //
 import {Separator} from '@/ui/components/separator';
-import {useWorkspace} from '../../workspace-context';
 import {useToast} from '@/ui/hooks';
 import type {NotificationAppCode} from '@/utils/validators';
 
@@ -31,7 +30,6 @@ export function Preference({
   code: NotificationAppCode;
   hideSubscription?: boolean;
 }) {
-  const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
 
   /* The switches read from this rather than straight from the prop, so a click
@@ -108,8 +106,6 @@ export function Preference({
 
         try {
           const result = await updatePreference({
-            workspaceURL,
-            workspaceURI,
             code,
             data: change.data,
           });

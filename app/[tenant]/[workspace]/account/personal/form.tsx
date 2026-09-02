@@ -168,7 +168,7 @@ export default function Personal({
 }) {
   const pathname = usePathname();
   const {toast} = useToast();
-  const {tenant, workspaceURL, workspaceURI} = useWorkspace();
+  const {tenant, workspaceURI} = useWorkspace();
   const {
     uploads,
     upload,
@@ -428,7 +428,7 @@ export default function Personal({
 
   const handleGenerateOTP = async () => {
     try {
-      const res = await generateOTPForUpdate({email, workspaceURL});
+      const res = await generateOTPForUpdate({email});
       if (res && 'error' in res) {
         toast({title: i18n.t(res.message), variant: 'destructive'});
       } else {

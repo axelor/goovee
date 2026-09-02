@@ -1,13 +1,10 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
-import {getSession} from '@/auth';
 import {t} from '@/locale/server';
-import {manager} from '@/tenant';
-import {TENANT_HEADER} from '@/proxy';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
 import {updatePreferences} from '@/orm/notification';
-import {tenantURLs} from '@/lib/core/url/scope';
 import {
   UpdateNotificationPreferenceSchema,
   type UpdateNotificationPreference,
@@ -27,26 +24,17 @@ export async function updatePreference(data: UpdateNotificationPreference) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {workspaceURL, code, data: notificationData} = validation.data;
+  const {code, data: notificationData} = validation.data;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
+  const access = await ensureWorkspaceAccess();
 
-  if (!tenantId) {
-    return error(await t('Tenant not found'));
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) {
-    return error(await t('Unauthorized'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return error(await t('Tenant not found'));
-  }
+  const {user, tenant, url} = access;
   const {client} = tenant;
+  const workspaceURL = url.key();
 
   try {
     const result = await updatePreferences({
@@ -62,9 +50,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
       throw new Error();
     }
 
-    tenantURLs(tenantId)
-      .workspaceByKey(workspaceURL)
-      .revalidate('/account/notifications');
+    url.revalidate('/account/notifications');
 
     return {
       success: true,

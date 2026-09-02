@@ -1,15 +1,14 @@
 'use server';
 
-import {headers} from 'next/headers';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
-import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/proxy';
-import {findWorkspace, findWorkspaceMembers} from '@/orm/workspace';
+import type {Client} from '@/goovee/.generated/client';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {findWorkspaceMembers} from '@/orm/workspace';
 import {isAdminContact, isPartner, updatePartner} from '@/orm/partner';
-import {manager} from '@/tenant';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -36,38 +35,18 @@ function error(message: string) {
   };
 }
 
-async function canUpdate({workspaceURL}: {workspaceURL: string}) {
-  if (!workspaceURL) {
-    return false;
-  }
-
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) {
-    return false;
-  }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return false;
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return false;
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    client,
-  });
-
-  if (!workspace) {
-    return false;
-  }
-
+/**
+ * Whether the caller may administer this workspace's members. The workspace
+ * itself has already been authorized by the gate, so this answers only the
+ * member-administration question and works from the pieces the caller holds.
+ */
+async function canUpdate({
+  workspaceURL,
+  client,
+}: {
+  workspaceURL: string;
+  client: Client;
+}) {
   const isPartnerUser = await isPartner();
   const isAdminContactUser = await isAdminContact({
     workspaceURL,
@@ -90,32 +69,29 @@ export async function updateInviteApplication(input: UpdateInviteApplication) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {workspaceURL, workspaceURI, invite, app, value} = validation.data;
+  const {invite, app, value} = validation.data;
 
-  const canUpdateInvite = await canUpdate({workspaceURL});
+  const access = await ensureWorkspaceAccess();
+
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
+  }
+
+  const {user, tenant} = access;
+  const {client} = tenant;
+  const workspaceURL = access.url.key();
+
+  const canUpdateInvite = await canUpdate({workspaceURL, client});
 
   if (!canUpdateInvite) {
     return error(await t('Unauthorized'));
   }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Invalid tenant'));
-  const {client} = tenant;
 
   const $invite = await findInviteById({id: invite.id, client});
 
   if (!$invite) {
     return error(await t('Bad request'));
   }
-
-  const session = await getSession();
-  const user = session?.user!;
 
   const partnerId = user?.isContact ? user.mainPartnerId : user.id;
 
@@ -195,32 +171,29 @@ export async function updateInviteAuthentication(
     return error(z.prettifyError(validation.error));
   }
 
-  const {workspaceURL, workspaceURI, invite, app, value} = validation.data;
+  const {invite, app, value} = validation.data;
 
-  const canUpdateInvite = await canUpdate({workspaceURL});
+  const access = await ensureWorkspaceAccess();
+
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
+  }
+
+  const {user, tenant} = access;
+  const {client} = tenant;
+  const workspaceURL = access.url.key();
+
+  const canUpdateInvite = await canUpdate({workspaceURL, client});
 
   if (!canUpdateInvite) {
     return error(await t('Unauthorized'));
   }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Invalid tenant'));
-  const {client} = tenant;
 
   const $invite = await findInviteById({id: invite.id, client});
 
   if (!$invite) {
     return error(await t('Bad request'));
   }
-
-  const session = await getSession();
-  const user = session?.user!;
 
   const partnerId = user?.isContact ? user.mainPartnerId : user.id;
 
@@ -288,28 +261,25 @@ export async function deleteMember(input: DeleteMember) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {member, workspaceURL, workspaceURI} = validation.data;
+  const {member} = validation.data;
 
-  const canUpdateInvite = await canUpdate({workspaceURL});
+  const access = await ensureWorkspaceAccess();
+
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
+  }
+
+  const {user, tenant} = access;
+  const {client} = tenant;
+  const workspaceURL = access.url.key();
+
+  const canUpdateInvite = await canUpdate({workspaceURL, client});
 
   if (!canUpdateInvite) {
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Invalid tenant'));
-  const {client} = tenant;
-
   const adminContact = await isAdminContact({workspaceURL, client});
-
-  const session = await getSession();
-  const user = session?.user!;
 
   const partnerId = (user?.isContact ? user.mainPartnerId : user.id)!;
 
@@ -359,26 +329,23 @@ export async function updateMemberApplication(input: UpdateMemberApplication) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {workspaceURL, workspaceURI, member, app, value} = validation.data;
+  const {member, app, value} = validation.data;
 
-  const canUpdateInvite = await canUpdate({workspaceURL});
+  const access = await ensureWorkspaceAccess();
+
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
+  }
+
+  const {user, tenant} = access;
+  const {client} = tenant;
+  const workspaceURL = access.url.key();
+
+  const canUpdateInvite = await canUpdate({workspaceURL, client});
 
   if (!canUpdateInvite) {
     return error(await t('Unauthorized'));
   }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Invalid tenant'));
-  const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user!;
 
   const partnerId = (user?.isContact ? user.mainPartnerId : user.id)!;
 
@@ -476,26 +443,23 @@ export async function updateMemberAuthentication(
     return error(z.prettifyError(validation.error));
   }
 
-  const {workspaceURL, workspaceURI, member, app, value} = validation.data;
+  const {member, app, value} = validation.data;
 
-  const canUpdateInvite = await canUpdate({workspaceURL});
+  const access = await ensureWorkspaceAccess();
+
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
+  }
+
+  const {user, tenant} = access;
+  const {client} = tenant;
+  const workspaceURL = access.url.key();
+
+  const canUpdateInvite = await canUpdate({workspaceURL, client});
 
   if (!canUpdateInvite) {
     return error(await t('Unauthorized'));
   }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Invalid tenant'));
-  const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user!;
 
   const partnerId = (user?.isContact ? user.mainPartnerId : user.id)!;
 

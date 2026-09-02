@@ -8,7 +8,9 @@ import {TENANT_HEADER} from '@/proxy';
 import {t} from '@/locale/server';
 import {ADDRESS_TYPE, SUBAPP_CODES} from '@/constants';
 import {getSession} from '@/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {findSubappAccess} from '@/orm/workspace';
 import {clone, getPartnerId} from '@/utils';
 import {
   updateDefaultDeliveryAddress,
@@ -297,44 +299,17 @@ export async function confirmAddresses(data: ConfirmAddresses) {
     };
   }
 
-  const {workspaceURL, record, subAppCode} = validation.data;
+  const {record, subAppCode} = validation.data;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
+  const access = await ensureWorkspaceAccess();
 
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Bad request'),
-    };
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Bad request')};
+  const {user, workspace, tenant, url} = access;
   const {client} = tenant;
-
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  const user = session.user;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return {
-      error: true,
-      message: await t('Invalid workspace'),
-    };
-  }
+  const workspaceURL = url.key();
 
   const subapp = await findSubappAccess({
     code: subAppCode,

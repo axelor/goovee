@@ -137,7 +137,6 @@ export type ResetPassword = z.infer<typeof ResetPasswordSchema>;
 
 export const EmailUpdateOTPSchema = z.object({
   email: z.email(),
-  workspaceURL: WorkspaceURLSchema,
 });
 
 export type EmailUpdateOTP = z.infer<typeof EmailUpdateOTPSchema>;

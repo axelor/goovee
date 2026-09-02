@@ -81,7 +81,7 @@ function Content({
 
   const [isPending, startTransition] = useTransition();
 
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
@@ -191,7 +191,6 @@ function Content({
     startTransition(async () => {
       try {
         const result = await confirmAddresses({
-          workspaceURL,
           subAppCode: SUBAPP_CODES.quotations,
           record: {
             id: quotationId,

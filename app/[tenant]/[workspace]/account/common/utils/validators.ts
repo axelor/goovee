@@ -2,7 +2,6 @@ import {z} from 'zod';
 import {
   IdSchema,
   OTPSchema,
-  WorkspaceURLSchema,
   RoleSelectSchema,
   NotificationAppCodeSchema,
 } from '@/utils/validators';
@@ -41,19 +40,9 @@ export const UpdatePreferenceSchema = z.object({
 
 export type UpdatePreference = z.infer<typeof UpdatePreferenceSchema>;
 
-/* -------- Settings -------- */
-export const RemoveWorkspaceSchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
-  workspaceURI: z.string().min(1),
-});
-
-export type RemoveWorkspace = z.infer<typeof RemoveWorkspaceSchema>;
-
 /* -------- Notifications -------- */
 export const UpdateNotificationPreferenceSchema = z.object({
   code: NotificationAppCodeSchema,
-  workspaceURL: WorkspaceURLSchema,
-  workspaceURI: z.string().min(1),
   data: z.object({
     activateNotification: z.boolean().optional(),
     record: z
@@ -142,7 +131,6 @@ export const UpdateDefaultAddressSchema = z.object({
 export type UpdateDefaultAddress = z.infer<typeof UpdateDefaultAddressSchema>;
 
 export const ConfirmAddressesSchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
   subAppCode: z.string().min(1),
   record: z.object({
     id: IdSchema,
@@ -157,12 +145,8 @@ export type ConfirmAddresses = z.infer<typeof ConfirmAddressesSchema>;
 const InviteRefSchema = z.object({id: IdSchema});
 const AppRefSchema = z.object({id: IdSchema, code: z.string().min(1)});
 const MemberRefSchema = z.object({id: IdSchema});
-const WorkspaceBaseSchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
-  workspaceURI: z.string().min(1),
-});
 
-export const UpdateInviteApplicationSchema = WorkspaceBaseSchema.extend({
+export const UpdateInviteApplicationSchema = z.object({
   invite: InviteRefSchema,
   app: AppRefSchema,
   value: z.enum(['yes', 'no']),
@@ -172,7 +156,7 @@ export type UpdateInviteApplication = z.infer<
   typeof UpdateInviteApplicationSchema
 >;
 
-export const UpdateInviteAuthenticationSchema = WorkspaceBaseSchema.extend({
+export const UpdateInviteAuthenticationSchema = z.object({
   invite: InviteRefSchema,
   app: AppRefSchema,
   value: RoleSelectSchema,
@@ -182,13 +166,13 @@ export type UpdateInviteAuthentication = z.infer<
   typeof UpdateInviteAuthenticationSchema
 >;
 
-export const DeleteMemberSchema = WorkspaceBaseSchema.extend({
+export const DeleteMemberSchema = z.object({
   member: MemberRefSchema,
 });
 
 export type DeleteMember = z.infer<typeof DeleteMemberSchema>;
 
-export const UpdateMemberApplicationSchema = WorkspaceBaseSchema.extend({
+export const UpdateMemberApplicationSchema = z.object({
   member: MemberRefSchema,
   app: AppRefSchema,
   value: z.enum(['yes', 'no']),
@@ -198,7 +182,7 @@ export type UpdateMemberApplication = z.infer<
   typeof UpdateMemberApplicationSchema
 >;
 
-export const UpdateMemberAuthenticationSchema = WorkspaceBaseSchema.extend({
+export const UpdateMemberAuthenticationSchema = z.object({
   member: MemberRefSchema,
   app: AppRefSchema,
   value: RoleSelectSchema,
@@ -223,7 +207,7 @@ const InviteAppConfigSchema = z.object({
  * Only user and admin can be handed out by an invite; owner is not invitable. */
 const MAX_INVITES_PER_REQUEST = 50;
 
-export const SendInvitesSchema = WorkspaceBaseSchema.extend({
+export const SendInvitesSchema = z.object({
   emails: z
     .string()
     .transform(value =>

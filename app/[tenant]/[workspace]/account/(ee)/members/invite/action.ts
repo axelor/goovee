@@ -1,16 +1,13 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
 import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
-import {tenantURLs} from '@/lib/core/url/scope';
-import {manager} from '@/tenant';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
 import {
   findContactByEmail,
   findGooveeUserByEmail,
@@ -18,7 +15,6 @@ import {
   isAdminContact,
   isPartner,
 } from '@/orm/partner';
-import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
 import {APP_TITLE, SEARCH_PARAMS} from '@/constants';
 import {getPartnerId} from '@/utils';
@@ -48,39 +44,20 @@ function error(message: string) {
   };
 }
 
-export async function deleteInvite({
-  id,
-  workspaceURL,
-}: {
-  id: string;
-  workspaceURL: string;
-}) {
-  if (!(id && workspaceURL)) {
+export async function deleteInvite({id}: {id: string}) {
+  if (!id) {
     return error(await t('Bad request'));
   }
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureWorkspaceAccess();
 
-  if (!user) {
-    return error(await t('Unauthorized'));
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
+  const {user, tenant} = access;
   const {client} = tenant;
-
-  const workspace = await findWorkspace({url: workspaceURL, user, client});
-
-  if (!workspace) {
-    return error(await t('Bad request'));
-  }
+  const workspaceURL = access.url.key();
 
   const isPartnerUser = await isPartner();
   const isAdminContactUser = await isAdminContact({workspaceURL, client});
@@ -121,30 +98,17 @@ export async function sendInvites(input: SendInvites) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {workspaceURL, emails: emailAddresses, role, apps} = validation.data;
+  const {emails: emailAddresses, role, apps} = validation.data;
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureWorkspaceAccess();
 
-  if (!user) {
-    return error(await t('Unauthorized'));
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({url: workspaceURL, user, client});
-
-  if (!workspace) {
-    return error(await t('Bad request'));
-  }
+  const {user, tenant, workspace} = access;
+  const {client, id: tenantId} = tenant;
+  const workspaceURL = access.url.key();
 
   const config = await getAccountConfig(workspace.config.id, client);
 
@@ -231,14 +195,10 @@ export async function sendInvites(input: SendInvites) {
     };
   }
 
-  /* Pin the (guarded non-null) tenant config: TS does not carry the earlier
-   * `if (!tenant) return` narrowing into this closure. */
-  const tenantConfig = tenant.config;
-
   function sendMail({email, link, subject}: any) {
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      tenantConfig,
+      tenant.config,
     );
 
     after(async () => {
@@ -357,9 +317,7 @@ export async function sendInvites(input: SendInvites) {
   if (inviteError) {
     return error(await t('Error sending invites, try again.'));
   } else {
-    tenantURLs(tenantId)
-      .workspaceByKey(workspaceURL)
-      .revalidate('/account/members');
+    access.url.revalidate('/account/members');
 
     let message = '';
 

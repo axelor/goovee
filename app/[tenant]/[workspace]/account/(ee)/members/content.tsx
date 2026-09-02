@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from '@/ui/components';
 import {useToast} from '@/ui/hooks';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
@@ -65,7 +64,6 @@ export default function Content({
 }) {
   const router = useRouter();
   const {toast} = useToast();
-  const {workspaceURL, workspaceURI} = useWorkspace();
   const [editing, setEditing] = useState<Editing>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [busy, setBusy] = useState(false);
@@ -76,12 +74,8 @@ export default function Content({
     try {
       const result =
         confirm.kind === 'member'
-          ? await deleteMember({
-              member: {id: confirm.id},
-              workspaceURL,
-              workspaceURI,
-            })
-          : await deleteInvite({id: confirm.id, workspaceURL});
+          ? await deleteMember({member: {id: confirm.id}})
+          : await deleteInvite({id: confirm.id});
 
       if (result && 'success' in result && result.success) {
         toast({

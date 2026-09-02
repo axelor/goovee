@@ -57,7 +57,7 @@ export default function InviteForm({
     authorization?: boolean;
   }>;
 }) {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
 
@@ -85,12 +85,7 @@ export default function InviteForm({
   });
 
   const onInviteSubmit = async (values: z.infer<typeof formSchema>) => {
-    const result =
-      (await sendInvites({
-        ...values,
-        workspaceURL,
-        workspaceURI,
-      })) || ({} as any);
+    const result = (await sendInvites(values)) || ({} as any);
 
     if ('success' in result) {
       toast({

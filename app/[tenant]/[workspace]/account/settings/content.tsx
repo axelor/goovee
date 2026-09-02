@@ -20,7 +20,6 @@ import {
 } from '@/ui/components';
 import {Workspace} from '@/orm/workspace';
 import {useToast} from '@/ui/hooks';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {removeWorkpace} from '@/app/[tenant]/[workspace]/account/settings/action';
@@ -32,7 +31,6 @@ export default function Content({
 }) {
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 
-  const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
 
@@ -47,7 +45,7 @@ export default function Content({
   const handleConfirmLeave = async () => {
     setIsAlertOpen(false);
     try {
-      const result = await removeWorkpace({workspaceURL, workspaceURI});
+      const result = await removeWorkpace();
 
       if (result?.success) {
         toast({
