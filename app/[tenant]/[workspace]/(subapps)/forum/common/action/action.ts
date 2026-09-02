@@ -3,7 +3,6 @@
 import {z} from 'zod';
 import {headers} from 'next/headers';
 import {after} from 'next/server';
-import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
 import {t, getTranslation} from '@/locale/server';
@@ -17,6 +16,8 @@ import {ID} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {filterPrivate} from '@/orm/filter';
 import {
   CreateComment,
@@ -161,7 +162,7 @@ export async function exitGroup({
         version: memberGroup.version,
       })
       .then(clone);
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+    revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -241,7 +242,7 @@ export async function joinGroup({
       })
       .then(clone);
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+    revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -264,7 +265,7 @@ export async function saveGroupNotifications(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {prefs, workspaceURL, workspaceURI} = parsed.data;
+  const {prefs, workspaceURL} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -316,7 +317,7 @@ export async function saveGroupNotifications(
     }
   }
 
-  revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+  revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
 
   if (failedIds.length) {
     return {
@@ -334,7 +335,7 @@ export async function addPost(input: AddPostInput) {
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {group, title, content, workspaceURL, workspaceURI} = parsed.data;
+  const {group, title, content, workspaceURL} = parsed.data;
   const attachments = parsed.data.attachments ?? [];
 
   const tenantId = (await headers()).get(TENANT_HEADER);
@@ -432,7 +433,8 @@ export async function addPost(input: AddPostInput) {
     });
 
     if (!('error' in subscribers)) {
-      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
+      const postSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.forum}/post/${post.id}`;
+      const postLink = `${workspaceURL}${postSubPath}`;
 
       const notificationRecievers = subscribers.filter(
         sub => sub.member?.id !== user.id, // exclude the post author
@@ -461,7 +463,7 @@ export async function addPost(input: AddPostInput) {
                 user.simpleFullName || user.name || '',
               ),
               body: post?.title ?? '',
-              url: postLink,
+              link: postSubPath,
               tag: NotificationTag.forumNewPost(post.id),
             },
           };
@@ -486,7 +488,7 @@ export async function addPost(input: AddPostInput) {
         );
       }
     }
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+    revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
     return {success: true, data: clone(post)};
   } catch (error) {
     return {
@@ -759,7 +761,7 @@ export const createComment: CreateComment = async props => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
+                    link: `/${SUBAPP_CODES.forum}/post/${post.id}`,
                     tag: NotificationTag.forumReply(parentComment.id),
                   },
                   getReplacementTitle: count =>
@@ -820,7 +822,7 @@ export const createComment: CreateComment = async props => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
+                    link: `/${SUBAPP_CODES.forum}/post/${post.id}`,
                     tag: NotificationTag.forumPostComment(post.id),
                   },
                   getReplacementTitle: (count: number) =>

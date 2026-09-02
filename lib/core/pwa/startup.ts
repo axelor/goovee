@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {listTenantConfigs} from '@/tenant/config-provider';
+import {listTenantConfigs} from '@/tenant/config';
 
 // ---- LOCAL IMPORTS ---- //
 import {getMaxConnections, getVapidDetails} from './utils';

@@ -11,12 +11,8 @@ import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
 import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
-import {manager} from '@/tenant';
-import {
-  tenantConfigProvider,
-  listTenantConfigs,
-} from '@/tenant/config-provider';
-import {addressedHost, ownsAddressedHost} from '@/lib/core/tenant/routing';
+import {getTenantConfig, listTenantIds} from '@/tenant/config';
+import {tenantEntryPath} from '@/lib/core/url/server';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
@@ -31,7 +27,7 @@ export async function generateMetadata(props: {
   params: Promise<{tenant: string}>;
 }): Promise<Metadata> {
   const {tenant} = await props.params;
-  const knownTenantIds = manager.listTenantIds();
+  const knownTenantIds = listTenantIds();
 
   if (!knownTenantIds.includes(tenant)) return {};
 
@@ -44,7 +40,7 @@ export default async function TenantLayout(props: {
 }) {
   const {tenant} = await props.params;
 
-  const config = tenantConfigProvider.get(tenant);
+  const config = getTenantConfig(tenant);
   const theme = await findTheme();
 
   const env = getPublicEnvironment(config);
@@ -54,32 +50,14 @@ export default async function TenantLayout(props: {
    * before PushProvider subscribes). Environment wraps both, since PushProvider
    * reads the VAPID public key from it.
    *
-   * The scope is the narrowest one covering the tenant's addresses on the origin
-   * this page was asked for: the root where the tenant holds that origin, and the
-   * tenant path segment anywhere else. A browser installs an app only where the
-   * page's worker encloses its scope and start address, and scopes match by path
-   * prefix, so this has to be no narrower than the manifest asks for — the
-   * manifest route decides it the same way.
-   *
-   * Read from the address rather than from the tenant's own routing, because a
-   * tenant holding an origin of its own is still served under its path segment on
-   * an origin it shares, where the screen ending a session made before the move
-   * lives. Scoping to the root there would register a worker covering the whole
-   * shared origin, which the upgrade cleanup in the root layout unregisters on
-   * sight — leaving a registration made and dropped on every visit.
+   * The scope is `tenantEntryPath`, the same value the manifest route serves as
+   * the app's entry — one function, because a browser installs an app only where
+   * the page's worker encloses the manifest's scope and start address.
    *
    * The tenant is named in the worker's own address, since a scope of `/` names
    * none, and the worker needs it to keep its caches and its notification channel
    * to itself. */
-  const scope = withBasePath(
-    ownsAddressedHost(
-      tenant,
-      addressedHost(await headers()),
-      listTenantConfigs(),
-    )
-      ? '/'
-      : `/${tenant}/`,
-  );
+  const scope = tenantEntryPath(tenant, await headers());
 
   return (
     <Environment value={env}>

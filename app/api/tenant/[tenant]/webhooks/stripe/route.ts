@@ -6,7 +6,7 @@ import Stripe from 'stripe';
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
 import {getStripe, getStripeWebhookSecret} from '@/payment/stripe';
-import {tenantConfigProvider} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
@@ -104,7 +104,7 @@ export async function POST(
    * so its webhook secret is selected without reading the untrusted payload.
    * The event is still trusted only after constructEvent verifies the signature
    * against that secret. */
-  const tenantConfig = tenantConfigProvider.get(tenantId);
+  const tenantConfig = getTenantConfig(tenantId);
 
   const webhookSecret = getStripeWebhookSecret(tenantConfig);
 

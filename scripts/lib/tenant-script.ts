@@ -1,4 +1,5 @@
 import {manager, type TenantClient, type TenantConfig} from '@/tenant';
+import {getDefaultTenantId, listTenantIds} from '@/tenant/config';
 import * as out from './output';
 import {
   runParsed,
@@ -60,10 +61,9 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
     async ({values, args}) => {
       /* Named in both failures below: the argument is either a typo of one of
        * these, or missing with nothing to fall back to. */
-      const configuredIds = manager.listTenantIds();
+      const configuredIds = listTenantIds();
 
-      const selected =
-        values.tenant ?? manager.getDefaultTenantId() ?? undefined;
+      const selected = values.tenant ?? getDefaultTenantId() ?? undefined;
 
       const requireTenant = (): string =>
         selected ??

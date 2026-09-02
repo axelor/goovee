@@ -5,7 +5,7 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSessionTenantId} from '@/lib/auth';
-import {manager} from '@/tenant';
+import {getDefaultTenantId, getTenantConfig} from '@/tenant/config';
 
 import {resolveLanding} from './landing';
 
@@ -27,11 +27,11 @@ async function resolveLandingTenantId(fromAddress: string): Promise<string> {
 
   const sessionTenantId = await getSessionTenantId(await headers());
 
-  if (sessionTenantId && manager.getConfig(sessionTenantId)) {
+  if (sessionTenantId && getTenantConfig(sessionTenantId)) {
     return sessionTenantId;
   }
 
-  return manager.getDefaultTenantId() ?? '';
+  return getDefaultTenantId() ?? '';
 }
 
 export default async function Page(props: {

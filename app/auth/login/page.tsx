@@ -10,7 +10,7 @@ import Content from './content';
 import {canRegisterForWorkspace} from '@/orm/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 import {manager} from '@/tenant';
-import {tenantConfigProvider} from '@/tenant/config-provider';
+import {getTenantConfig, listTenantIds} from '@/tenant/config';
 import {isSameOrigin} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
 
@@ -45,7 +45,7 @@ export default async function Page(props: {
 
   const tenantId = await resolveAuthTenantId(searchParams);
 
-  const tenantConfig = tenantId ? tenantConfigProvider.get(tenantId) : null;
+  const tenantConfig = tenantId ? getTenantConfig(tenantId) : null;
 
   const host = getPublicEnvironment(tenantConfig).GOOVEE_PUBLIC_HOST!;
 
@@ -70,7 +70,7 @@ export default async function Page(props: {
   let canRegister;
 
   if (workspaceURL && tenantId) {
-    const knownTenantIds = manager.listTenantIds();
+    const knownTenantIds = listTenantIds();
     if (!knownTenantIds.includes(tenantId)) {
       return notFound();
     }

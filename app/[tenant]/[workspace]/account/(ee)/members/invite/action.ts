@@ -2,7 +2,6 @@
 
 import {z} from 'zod';
 import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
@@ -10,6 +9,7 @@ import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {manager} from '@/tenant';
 import {
   findContactByEmail,
@@ -121,13 +121,7 @@ export async function sendInvites(input: SendInvites) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    emails: emailAddresses,
-    role,
-    apps,
-  } = validation.data;
+  const {workspaceURL, emails: emailAddresses, role, apps} = validation.data;
 
   const session = await getSession();
   const user = session?.user;
@@ -363,7 +357,7 @@ export async function sendInvites(input: SendInvites) {
   if (inviteError) {
     return error(await t('Error sending invites, try again.'));
   } else {
-    revalidatePath(`${workspaceURI}/account/members`);
+    revalidateWorkspacePath({tenantId, workspaceURL}, '/account/members');
 
     let message = '';
 

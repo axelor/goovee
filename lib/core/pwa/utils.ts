@@ -3,8 +3,10 @@ import https from 'node:https';
 import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
-import {getGlobalConfig, tenantConfigProvider} from '@/tenant/config-provider';
+import {getGlobalConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
+import type {WorkspaceSubPath} from '@/lib/core/url';
+import {fromStoredLink, toStoredLink} from '@/lib/core/url/persisted-link';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -386,8 +388,17 @@ export type NotifyUserArgs = {
   client: Client;
   payload: Omit<
     NotificationPayload,
-    'tenantId' | 'workspaceURL' | 'notification'
-  >;
+    'tenantId' | 'workspaceURL' | 'notification' | 'url'
+  > & {
+    /**
+     * Where the notification points, as a path below the workspace —
+     * `/forum/post/12`. An emitter names only that: how the workspace itself
+     * is addressed is decided here, once, for the stored row and again for
+     * each reader. Dropped when `workspaceURL` is not given, since there is
+     * no workspace to point into.
+     */
+    link?: WorkspaceSubPath;
+  };
   /**
    * When provided, called with the total unread count for this tag (including
    * the notification being created). Use this to produce grouped titles like
@@ -433,6 +444,17 @@ async function prepare({
 }: NotifyUserArgs): Promise<PreparedDelivery | null> {
   if (!client) return null;
 
+  const {link, ...pushPayload} = payload;
+
+  /* Stored as a route-tree path — `/{tenant}/{workspace}{link}` — the one shape
+   * that survives the tenant getting a new host, a new base path or a move
+   * between path and host routing. Readers render it for the visitor against
+   * the configuration of their moment, not this one. */
+  const storedLink =
+    link && workspaceURL
+      ? toStoredLink({tenantId, workspaceURL}, link)
+      : undefined;
+
   let unreadCount = 1; // +1 for the notification we are about to create
   if (getReplacementTitle && payload.tag) {
     try {
@@ -460,7 +482,7 @@ async function prepare({
         workspace: workspaceURL ? {select: {url: workspaceURL}} : undefined,
         title: payload.title,
         body: payload.body,
-        url: payload.url,
+        url: storedLink,
         isRead: false,
         tag: payload.tag,
       },
@@ -477,10 +499,7 @@ async function prepare({
   /* Signed with the acting tenant's own key pair. Captured here and carried on
    * the prepared delivery, so a retry and a shortened resend both sign with the
    * same tenant's keys as the first attempt. */
-  const vapidDetails = getVapidDetails(
-    tenantId,
-    tenantConfigProvider.get(tenantId),
-  );
+  const vapidDetails = getVapidDetails(tenantId, getTenantConfig(tenantId));
 
   if (!vapidDetails) return null;
 
@@ -502,8 +521,12 @@ async function prepare({
    * worker merges them back into the record it hands open tabs. `title` appears
    * in both because they differ: the top-level one may be a grouped title
    * standing in for several notifications. */
+  /* The push message is read within its own lifetime, so its address is
+   * rendered for the visitor now — the service worker only adds the base path
+   * of the origin it runs on. */
   const payloadJson = serializeWithinLimit({
-    ...payload,
+    ...pushPayload,
+    url: storedLink ? fromStoredLink(storedLink, tenantId) : undefined,
     title: pushTitle,
     tenantId,
     workspaceURL,

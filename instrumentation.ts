@@ -24,14 +24,14 @@ export async function register() {
    * retried with backoff — and one failing tenant must not abort resumption
    * for the rest. */
   setTimeout(async () => {
-    const [{manager}, {resumeHubPispPolling}] = await Promise.all([
-      import('@/tenant'),
+    const [{listTenantIds}, {resumeHubPispPolling}] = await Promise.all([
+      import('@/tenant/config'),
       import('@/lib/core/payment/hubpisp/startup'),
     ]);
 
     let tenantIds: string[];
     try {
-      tenantIds = manager.listTenantIds();
+      tenantIds = listTenantIds();
     } catch (err) {
       console.error('[HUBPISP][STARTUP] Could not list tenants:', err);
       return;

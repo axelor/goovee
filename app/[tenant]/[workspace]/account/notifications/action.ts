@@ -5,7 +5,7 @@ import {getSession} from '@/auth';
 import {t} from '@/locale/server';
 import {manager} from '@/tenant';
 import {updatePreferences} from '@/orm/notification';
-import {revalidatePath} from 'next/cache';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {
   UpdateNotificationPreferenceSchema,
   type UpdateNotificationPreference,
@@ -27,7 +27,6 @@ export async function updatePreference(data: UpdateNotificationPreference) {
 
   const {
     workspaceURL,
-    workspaceURI,
     code,
     data: notificationData,
     tenant: tenantId,
@@ -59,7 +58,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
       throw new Error();
     }
 
-    revalidatePath(`${workspaceURI}/account/notifications`);
+    revalidateWorkspacePath({tenantId, workspaceURL}, '/account/notifications');
 
     return {
       success: true,

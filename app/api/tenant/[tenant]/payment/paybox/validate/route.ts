@@ -4,7 +4,7 @@ import {NextResponse} from 'next/server';
 import {readPEMFile, verifySignature} from '@/payment/paybox/crypto';
 import {getParamsWithoutSign} from '@/payment/paybox/utils';
 import {PAYBOX_ERRORS} from '@/payment/paybox/constant';
-import {manager} from '@/tenant';
+import {listTenantIds} from '@/tenant/config';
 
 export async function GET(
   request: Request,
@@ -14,7 +14,7 @@ export async function GET(
 
   /* Paybox signs IPNs with its own (global) key, so this endpoint needs no
    * tenant client — just reject IPNs aimed at an unknown tenant path. */
-  const tenantIds = manager.listTenantIds();
+  const tenantIds = listTenantIds();
   if (!tenantIds.includes(tenantId)) {
     return new NextResponse('Bad Request', {status: 400});
   }

@@ -4,17 +4,12 @@ import {NextRequest, NextResponse} from 'next/server';
 import {SEARCH_PARAMS} from '@/constants';
 import {getSessionTenantId} from '@/lib/auth';
 import {isReservedSegment} from '@/lib/core/path/reserved-segments';
-import {
-  addressedHost,
-  hostRoutedTenantId,
-  isDeclaredHost,
-  isHostRouted,
-} from '@/lib/core/tenant/routing';
+import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
 import {
   getGlobalConfig,
+  getRoutingIndex,
   getTenantConfig,
-  listTenantConfigs,
-} from '@/tenant/config-provider';
+} from '@/tenant/config';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
@@ -165,13 +160,12 @@ function authOriginRedirect(req: NextRequest, hostTenant: string | null) {
 
 export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;
-  const tenants = listTenantConfigs();
 
   /* The host is read only where the document gives it a meaning. A deployment
    * whose tenants are all reached under a path segment resolves them from the
    * path alone, exactly as one with no proxy in front does, so no request is
    * refused for the address it arrived at. */
-  const routesByHost = tenants.some(([, config]) => isHostRouted(config));
+  const {routesByHost, tenantByHost, declaredHosts} = getRoutingIndex();
 
   let hostTenant: string | null = null;
 
@@ -184,14 +178,11 @@ export default async function proxy(req: NextRequest) {
      * of surfacing later as a workspace that cannot be found and a sign-in that
      * loops. Static files and route handlers are outside this matcher and answer
      * on any host, so a probe addressing the server directly still reaches them. */
-    if (
-      !host ||
-      !isDeclaredHost(host, getGlobalConfig().betterAuthUrl, tenants)
-    ) {
+    if (!host || !declaredHosts.has(host)) {
       return notFound(req);
     }
 
-    hostTenant = hostRoutedTenantId(host, tenants);
+    hostTenant = tenantByHost.get(host) ?? null;
   }
 
   /* The sign-in screens sit outside the tenant segment, so they are reached the

@@ -3,7 +3,7 @@ import type {Metadata} from 'next';
 // ---- CORE IMPORTS ---- //
 import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
-import {tenantConfigProvider} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {getPublicEnvironment} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
 
@@ -33,7 +33,7 @@ async function findAuthWorkspaceName({
   /* Read the host from the config alone: it is a per-tenant browser variable, and
    * resolving it first means an unknown or unconfigured tenant returns null here
    * instead of connecting a database just to build a title. */
-  const config = tenantConfigProvider.get(tenantId);
+  const config = getTenantConfig(tenantId);
   const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
   if (!host) return null;
 

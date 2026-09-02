@@ -1,7 +1,7 @@
 import {genericOAuth} from 'better-auth/plugins';
 import type {GenericOAuthConfig} from 'better-auth/plugins';
 
-import {listTenantConfigs} from '@/tenant/config-provider';
+import {listTenantConfigs} from '@/tenant/config';
 
 const GOOGLE_DISCOVERY_URL =
   'https://accounts.google.com/.well-known/openid-configuration';

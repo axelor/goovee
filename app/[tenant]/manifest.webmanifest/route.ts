@@ -1,11 +1,9 @@
 import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {manager} from '@/tenant';
-import {listTenantConfigs} from '@/tenant/config-provider';
-import {addressedHost, ownsAddressedHost} from '@/lib/core/tenant/routing';
+import {listTenantIds} from '@/tenant/config';
+import {tenantEntryPath} from '@/lib/core/url/server';
 import {buildManifest} from '@/lib/core/pwa/manifest';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
  * app is identified by it, launches on the tenant's landing workspace there, and
@@ -34,25 +32,15 @@ export async function GET(
 ) {
   const {tenant} = await params;
 
-  const knownTenantIds = manager.listTenantIds();
+  const knownTenantIds = listTenantIds();
   if (!knownTenantIds.includes(tenant)) {
     return new NextResponse('Not found', {status: 404});
   }
 
-  /* The entry follows the origin this was asked on, not the tenant's own routing:
-   * a tenant holding an origin of its own is still served under its path segment
-   * on an origin it shares, and an app installed from there launches at that
-   * segment. The service worker registered in app/[tenant]/layout.tsx is scoped
-   * the same way, which is what lets a browser install either. */
-  const entry = withBasePath(
-    ownsAddressedHost(
-      tenant,
-      addressedHost(request.headers),
-      listTenantConfigs(),
-    )
-      ? '/'
-      : `/${tenant}/`,
-  );
+  /* The same value the service worker in app/[tenant]/layout.tsx registers as
+   * its scope — one function, because a browser installs an app only where the
+   * page's worker encloses the manifest's scope and start address. */
+  const entry = tenantEntryPath(tenant, request.headers);
 
   return NextResponse.json(
     buildManifest({id: entry, startUrl: entry, scope: entry}),

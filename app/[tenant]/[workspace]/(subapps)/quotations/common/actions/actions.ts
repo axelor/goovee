@@ -8,6 +8,7 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {getQuotationsConfig} from '../orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -113,7 +114,7 @@ export const createComment: CreateComment = async props => {
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
-      const quotationUrl = `${workspaceURI}/${SUBAPP_CODES.quotations}/${rest.recordId}`;
+      const quotationLink: WorkspaceSubPath = `/${SUBAPP_CODES.quotations}/${rest.recordId}#comment-${comment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
@@ -131,7 +132,7 @@ export const createComment: CreateComment = async props => {
               quotation.saleOrderSeq ?? '',
             ),
             body: comment.body ?? '',
-            url: `${quotationUrl}#comment-${comment.id}`,
+            link: quotationLink,
             tag: NotificationTag.quotationReply(parentComment.id),
           },
           getReplacementTitle: count =>

@@ -4,7 +4,7 @@ import {NextResponse, after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/tenant';
-import {tenantConfigProvider} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
@@ -103,7 +103,7 @@ export async function GET(
    * than by resolving the tenant, which would connect its database: the forward
    * exists for payments that are not ours, and is the one answer that should
    * survive our database being down. */
-  const config = tenantConfigProvider.get(tenantId);
+  const config = getTenantConfig(tenantId);
   if (!config) {
     console.error('[UP2PAY][WEBHOOK] Tenant not found', {tenantId});
     return new NextResponse('Bad Request', {status: 400});

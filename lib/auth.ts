@@ -1,8 +1,7 @@
 import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
-import {getGlobalConfig, listTenantConfigs} from '@/tenant/config-provider';
-import {declaredOrigins} from '@/lib/core/tenant/routing';
+import {getGlobalConfig, getRoutingIndex} from '@/tenant/config';
 import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
@@ -308,7 +307,7 @@ const deploymentOrigin = new URL(globalConfig.betterAuthUrl);
  * tenant, and this list is then the deployment origin on its own.
  */
 function authOrigins(): string[] {
-  return declaredOrigins(globalConfig.betterAuthUrl, listTenantConfigs());
+  return [...getRoutingIndex().declaredOrigins];
 }
 
 export const auth = betterAuth({

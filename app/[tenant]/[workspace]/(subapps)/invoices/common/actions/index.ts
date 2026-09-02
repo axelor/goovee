@@ -2,10 +2,8 @@
 
 import {z} from 'zod';
 import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
-import {getPublicEnvironment} from '@/environment';
 import {
   DEFAULT_CURRENCY_CODE,
   DEFAULT_CURRENCY_SCALE,
@@ -13,6 +11,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import {t} from '@/locale/server';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {TENANT_HEADER} from '@/proxy';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
@@ -48,8 +47,7 @@ import {
 import type {CountryCode} from '@/lib/core/payment/stripe/types';
 import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
 import {scale} from '@/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {ensureLeadingSlash} from '@/utils/url';
+import {paymentReturnURL} from '@/lib/core/url/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -621,7 +619,10 @@ export async function validateStripePayment({
       }
     });
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
+    revalidateWorkspacePath(
+      {tenantId, workspaceURL},
+      `/${SUBAPP_CODES.invoices}/${$invoice.id}`,
+    );
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Stripe payment:', error);
@@ -883,7 +884,10 @@ export async function cancelStripeBankTransferPaymentIntent({
       client,
     });
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
+    revalidateWorkspacePath(
+      {tenantId, workspaceURL},
+      `/${SUBAPP_CODES.invoices}/${$invoice.id}`,
+    );
     return {success: true, data: null};
   } catch (error) {
     console.error('Error Cancelling:', error);
@@ -982,8 +986,24 @@ export async function payboxCreateOrder({
         paymentModeId,
       },
       url: {
-        success: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`))}`,
-        failure: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true${token ? `&token=${token}` : ''}`))}`,
+        success: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {
+            paybox_response: 'true',
+            type: isPartialPayment
+              ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+              : INVOICE_PAYMENT_OPTIONS.TOTAL,
+            ...(token ? {token} : {}),
+          },
+        }),
+        failure: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {paybox_error: 'true', ...(token ? {token} : {})},
+        }),
       },
     });
 
@@ -1134,7 +1154,10 @@ export async function validatePayboxPayment({
       version: context.version,
       client,
     });
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
+    revalidateWorkspacePath(
+      {tenantId, workspaceURL},
+      `/${SUBAPP_CODES.invoices}/${$invoice.id}`,
+    );
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Paybox payment:', error);
@@ -1259,17 +1282,36 @@ export async function up2payCreateOrder({
       },
       billingInfo,
       url: {
-        success: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(
-          ensureLeadingSlash(
-            `${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
-              isPartialPayment
-                ? INVOICE_PAYMENT_OPTIONS.PARTIAL
-                : INVOICE_PAYMENT_OPTIONS.TOTAL
-            }${token ? `&token=${token}` : ''}`,
-          ),
-        )}`,
-        failure: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`))}`,
-        cancel: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`))}`,
+        success: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {
+            status: UP2PAY_REDIRECT_STATUS.SUCCESS,
+            type: isPartialPayment
+              ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+              : INVOICE_PAYMENT_OPTIONS.TOTAL,
+            ...(token ? {token} : {}),
+          },
+        }),
+        failure: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {
+            status: UP2PAY_REDIRECT_STATUS.REFUSED,
+            ...(token ? {token} : {}),
+          },
+        }),
+        cancel: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {
+            status: UP2PAY_REDIRECT_STATUS.CANCELLED,
+            ...(token ? {token} : {}),
+          },
+        }),
       },
     });
 
@@ -1370,20 +1412,6 @@ export async function initiatePispPayment({
     };
   }
 
-  const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST;
-  const tokenSuffix = token ? `&token=${token}` : '';
-
-  const successfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}${tokenSuffix}`))}`;
-  const unsuccessfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.CANCELLED}${tokenSuffix}`))}`;
-
-  const pageConsentInfo = {
-    pageTimeout: 1200,
-    pageTimeoutUnit: 'SECONDS' as const,
-    pageUserTimeout: 300,
-    pageUserTimeoutUnit: 'SECONDS' as const,
-    pageTimeOutReturnURL: `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.EXPIRED}${tokenSuffix}`))}`,
-  };
-
   const pispEmail = token
     ? $invoice.partner?.emailAddress?.address
     : user?.email;
@@ -1398,6 +1426,29 @@ export async function initiatePispPayment({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.hubpisp);
 
   try {
+    const tokenQuery: Record<string, string> = token ? {token} : {};
+
+    /* Inside the try, because a refused `uri` throws here and has to come back
+     * as this action's own error shape, like the sibling gateways' calls do. */
+    const returnURL = (status: string) =>
+      paymentReturnURL({
+        tenantId,
+        workspaceURL,
+        uri,
+        query: {hubpisp_status: status, ...tokenQuery},
+      });
+
+    const successfulReportUrl = returnURL(HUBPISP_REDIRECT_STATUS.SUCCESS);
+    const unsuccessfulReportUrl = returnURL(HUBPISP_REDIRECT_STATUS.CANCELLED);
+
+    const pageConsentInfo = {
+      pageTimeout: 1200,
+      pageTimeoutUnit: 'SECONDS' as const,
+      pageUserTimeout: 300,
+      pageUserTimeoutUnit: 'SECONDS' as const,
+      pageTimeOutReturnURL: returnURL(HUBPISP_REDIRECT_STATUS.EXPIRED),
+    };
+
     const psuInfo = {
       name: [$invoice?.partner?.firstName, $invoice?.partner?.name]
         .filter(Boolean)

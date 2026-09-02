@@ -2,14 +2,12 @@
 
 import path from 'path';
 import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
-import {toWorkspaceURI} from '@/utils/workspace-url';
-import {getPublicEnvironment} from '@/environment';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
@@ -101,7 +99,7 @@ export async function upload(input: UploadInput) {
     return {error: true, message: await accessMessage(access.reason)};
   }
   const {user} = access;
-  const {client, config} = access.tenant;
+  const {client} = access.tenant;
 
   const parent = await fetchFile({
     id: parentId,
@@ -173,8 +171,9 @@ export async function upload(input: UploadInput) {
       });
     });
 
-    revalidatePath(
-      `${toWorkspaceURI(workspaceURL, getPublicEnvironment(config).GOOVEE_PUBLIC_HOST)}/${SUBAPP_CODES.resources}/folder/${parentId}`,
+    revalidateWorkspacePath(
+      {tenantId, workspaceURL},
+      `/${SUBAPP_CODES.resources}/folder/${parentId}`,
     );
   } catch (err) {
     return {

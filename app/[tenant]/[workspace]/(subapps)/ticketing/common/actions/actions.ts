@@ -1,12 +1,13 @@
 'use server';
 
 import {after} from 'next/server';
-import {revalidatePath} from 'next/cache';
 import {headers} from 'next/headers';
 import {ZodIssueCode} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone, uniqueById} from '@/utils';
@@ -73,7 +74,7 @@ export async function mutate(
     };
   }
 
-  const {workspaceURL, workspaceURI, action} = props;
+  const {workspaceURL, action} = props;
 
   const {force} = config || {};
 
@@ -265,8 +266,9 @@ export async function mutate(
     }
 
     if (ticket.project?.id) {
-      revalidatePath(
-        `${workspaceURI}/ticketing/projects/${ticket.project.id}/tickets`,
+      revalidateWorkspacePath(
+        {tenantId, workspaceURL},
+        `/ticketing/projects/${ticket.project.id}/tickets`,
       );
     }
 
@@ -1075,7 +1077,7 @@ export const createComment: CreateComment = async props => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const ticketUrl = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+    const ticketSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
     const userName = user.simpleFullName || user.name || '';
 
     const contacts = uniqueById(
@@ -1104,7 +1106,7 @@ export const createComment: CreateComment = async props => {
                 ticket.name,
               ),
               body: commentBody,
-              url: `${ticketUrl}#comment-${comment.id}`,
+              link: `${ticketSubPath}#comment-${comment.id}`,
               tag: NotificationTag.ticketReply(parentComment.id),
             },
             getReplacementTitle: count =>
@@ -1136,7 +1138,7 @@ export const createComment: CreateComment = async props => {
                 String(ticket.name),
               ),
               body: commentBody,
-              url: `${ticketUrl}#comment-${comment.id}`,
+              link: `${ticketSubPath}#comment-${comment.id}`,
               tag: NotificationTag.ticketComment(ticket.id),
             },
             getReplacementTitle: (count: number) =>

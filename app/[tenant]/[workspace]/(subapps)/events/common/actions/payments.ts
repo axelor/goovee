@@ -4,7 +4,6 @@ import {z} from 'zod';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getPublicEnvironment} from '@/environment';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
@@ -18,8 +17,7 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {ensureLeadingSlash} from '@/utils/url';
+import {paymentReturnURL} from '@/lib/core/url/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEvent} from '@/subapps/events/common/orm/event';
@@ -384,8 +382,18 @@ export async function payboxCreateOrder(props: {
       tenantId,
       client,
       url: {
-        success: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
-        failure: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
+        success: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {paybox_response: 'true'},
+        }),
+        failure: paymentReturnURL({
+          tenantId,
+          workspaceURL,
+          uri,
+          query: {paybox_error: 'true'},
+        }),
       },
     });
     return {success: true, order: response};

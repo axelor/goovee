@@ -15,6 +15,36 @@ const eslintConfig = defineConfig([
       'react-hooks/refs': 'off',
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/incompatible-library': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'next/cache',
+              importNames: ['revalidatePath'],
+              message:
+                'revalidatePath matches the route-tree path, which always carries the tenant segment — fed the visitor-shaped workspaceURI it silently revalidates nothing on a host-routed tenant. Use revalidateWorkspacePath or revalidateEverything from @/lib/core/url/revalidate.',
+            },
+            {
+              name: '@/lib/core/path/base-path',
+              importNames: ['getBasePath'],
+              message:
+                'Hand-joining the base path is how it ends up missing or doubled. Use withBasePath for a path, getPortalRoot from @/utils/workspace-url for host + base path.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  /* The named files hold the joins everything else is sent through. */
+  {
+    files: [
+      'utils/workspace-url.ts',
+      'app/api/auth/**/route.ts',
+      'scripts/**',
+    ],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   // Override default ignores of eslint-config-next.

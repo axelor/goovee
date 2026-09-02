@@ -1,5 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {manager, type TenantClient, type TenantConfig} from '@/tenant';
+import {listTenantIds} from '@/tenant/config';
 
 import {
   INITIAL_SWEEP_DELAY_MS,
@@ -40,7 +41,7 @@ async function forEachTenant(
 ): Promise<void> {
   let tenantIds: string[];
   try {
-    tenantIds = manager.listTenantIds();
+    tenantIds = listTenantIds();
   } catch (error) {
     console.error(`[UPLOAD][${label}] could not list tenants:`, error);
     return;

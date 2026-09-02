@@ -1,8 +1,7 @@
 'use server';
 
 import {DEFAULT_CURRENCY_SCALE, SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {getPublicEnvironment} from '@/environment';
+import {paymentReturnURL} from '@/lib/core/url/server';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
@@ -13,7 +12,6 @@ import {TENANT_HEADER} from '@/proxy';
 import {PaymentOption} from '@/types';
 import type {ActionResponse} from '@/types/action';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
-import {ensureLeadingSlash} from '@/utils/url';
 import {WorkspaceURLSchema} from '@/utils/validators';
 import {headers} from 'next/headers';
 import {after} from 'next/server';
@@ -245,8 +243,18 @@ export async function payboxCreateOrder(props: {
       tenantId: access.tenant.id,
       client: access.tenant.client,
       url: {
-        success: `${getPublicEnvironment(access.tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${parsed.data.uri}?paybox_response=true`))}`,
-        failure: `${getPublicEnvironment(access.tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${parsed.data.uri}?paybox_error=true`))}`,
+        success: paymentReturnURL({
+          tenantId: access.tenant.id,
+          workspaceURL: parsed.data.workspaceURL,
+          uri: parsed.data.uri,
+          query: {paybox_response: 'true'},
+        }),
+        failure: paymentReturnURL({
+          tenantId: access.tenant.id,
+          workspaceURL: parsed.data.workspaceURL,
+          uri: parsed.data.uri,
+          query: {paybox_error: 'true'},
+        }),
       },
     });
     return {success: true, order: response};

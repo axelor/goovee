@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // ---- CORE IMPORTS ---- //
-import {getGlobalConfig} from '@/tenant/config-provider';
+import {getGlobalConfig} from '@/tenant/config';
 
 // ---- LOCAL IMPORTS ---- //
 import {

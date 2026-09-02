@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
-import {MdApps, MdNotificationsNone} from 'react-icons/md';
+import {MdApps} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {Sheet, SheetContent} from '@/ui/components/sheet/sheet';
@@ -194,9 +194,6 @@ export function MobileMenu({
   config: ShellConfig | Cloned<ShellConfig>;
   cartCodes?: string[];
 }) {
-  const router = useRouter();
-  const redirect = () => router.push('/notifications');
-
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
@@ -219,12 +216,6 @@ export function MobileMenu({
         />
         {/** Render Subapp Menu using Portal */}
         <div id="subapp-menu" className="hidden" />
-        {false && (
-          <MdNotificationsNone
-            className="cursor-pointer h-6 w-6"
-            onClick={redirect}
-          />
-        )}
         {cartCodes.length > 0 && <CartIcon enabledCodes={cartCodes} />}
 
         {user && <Notification />}

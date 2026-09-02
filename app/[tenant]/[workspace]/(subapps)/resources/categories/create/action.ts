@@ -1,6 +1,5 @@
 'use server';
 
-import {revalidatePath} from 'next/cache';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 
@@ -11,8 +10,7 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
-import {toWorkspaceURI} from '@/utils/workspace-url';
-import {getPublicEnvironment} from '@/environment';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
@@ -53,7 +51,7 @@ export async function create(formData: FormData, workspaceURL: string) {
   }
 
   const {user} = access;
-  const {client, config} = access.tenant;
+  const {client} = access.tenant;
 
   const parent = await fetchFile({
     id: parentId,
@@ -128,8 +126,9 @@ export async function create(formData: FormData, workspaceURL: string) {
       })
       .then(clone);
 
-    revalidatePath(
-      `${toWorkspaceURI(workspaceURL, getPublicEnvironment(config).GOOVEE_PUBLIC_HOST)}/${SUBAPP_CODES.resources}`,
+    revalidateWorkspacePath(
+      {tenantId, workspaceURL},
+      `/${SUBAPP_CODES.resources}`,
     );
 
     return {

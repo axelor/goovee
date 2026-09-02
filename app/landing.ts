@@ -1,13 +1,15 @@
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
-import {getBasePath, withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {getPortalRoot} from '@/utils/workspace-url';
 import {
   findDefaultPartnerWorkspace,
   findWorkspace,
   findWorkspaces,
 } from '@/orm/workspace';
 import {manager} from '@/tenant';
+import {listTenantIds} from '@/tenant/config';
 import type {User} from '@/types';
 import {getPartnerId} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
@@ -61,7 +63,7 @@ export async function resolveLanding({
   tenantId: string;
   workspaceURI?: string;
 }): Promise<string | null> {
-  const knownTenantIds = manager.listTenantIds();
+  const knownTenantIds = listTenantIds();
 
   if (!tenantId || !knownTenantIds.includes(tenantId)) {
     return null;
@@ -79,7 +81,7 @@ export async function resolveLanding({
   const user = session?.user;
 
   const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
-  const baseUrl = `${host}${getBasePath()}`;
+  const baseUrl = getPortalRoot(host);
 
   const workspaces = await findWorkspaces({
     url: baseUrl,

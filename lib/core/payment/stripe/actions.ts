@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
 import {getStripe} from '.';
-import {manager} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {formatAmountForStripe, getAmountFromStripe} from '@/utils/stripe';
 import {
@@ -90,7 +90,7 @@ export async function createStripeOrder({
     );
   }
 
-  const stripe = getStripe(manager.getConfig(tenantId));
+  const stripe = getStripe(getTenantConfig(tenantId));
 
   try {
     const {id: contextId} = await createPaymentContext({
@@ -143,7 +143,7 @@ export async function findStripeOrder({
     throw new Error('Session id is required');
   }
 
-  const stripe = getStripe(manager.getConfig(tenantId));
+  const stripe = getStripe(getTenantConfig(tenantId));
 
   let stripeSession;
 
@@ -222,7 +222,7 @@ export async function createStripePaymentIntent({
     );
   }
 
-  const stripe = getStripe(manager.getConfig(tenantId));
+  const stripe = getStripe(getTenantConfig(tenantId));
 
   try {
     const bankTransfer = getBankTransferConfig(currency, countryCode);
@@ -342,7 +342,7 @@ export async function findStripePaymentIntent(
     throw new Error('Payment Intent id is required');
   }
 
-  const stripe = getStripe(manager.getConfig(tenantId));
+  const stripe = getStripe(getTenantConfig(tenantId));
 
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -373,7 +373,7 @@ export async function cancelStripePaymentIntent({
     throw new Error('Cancellation reason is required');
   }
 
-  const stripe = getStripe(manager.getConfig(tenantId));
+  const stripe = getStripe(getTenantConfig(tenantId));
 
   try {
     const paymentIntent = await findStripePaymentIntent(id, tenantId);

@@ -8,7 +8,7 @@ import {useTheme} from '@/app/theme';
 import {Theme} from '@/types/theme';
 import {type Workspace} from '@/orm/workspace';
 import {useEnvironment} from '@/environment';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {getPortalRoot} from '@/utils/workspace-url';
 
 export const WorkspaceContext = React.createContext<{
   tenant: string;
@@ -46,7 +46,7 @@ export function WorkspaceProvider({
   const prevTheme = useRef<any>(undefined);
   const env = useEnvironment();
 
-  const workspaceURL = `${env.GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
+  const workspaceURL = `${getPortalRoot(env.GOOVEE_PUBLIC_HOST)}${workspaceURI}`;
   const workspaceID = id;
 
   const value = useMemo(

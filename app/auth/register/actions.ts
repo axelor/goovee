@@ -1,7 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import {revalidatePath} from 'next/cache';
+import {revalidateEverything} from '@/lib/core/url/revalidate';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -113,7 +113,7 @@ export async function subscribe(data: Subscribe): ActionResponse<true> {
         select: {id: true},
       });
 
-      revalidatePath('/', 'layout');
+      revalidateEverything();
 
       return {
         success: true,
@@ -175,7 +175,7 @@ export async function subscribe(data: Subscribe): ActionResponse<true> {
           select: {id: true},
         });
 
-        revalidatePath('/', 'layout');
+        revalidateEverything();
 
         return {
           success: true,

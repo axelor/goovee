@@ -5,7 +5,8 @@ import {
 } from '@paypal/paypal-server-sdk';
 import PayPalClient from '.';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import {manager, type Tenant} from '@/tenant';
+import type {Tenant} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {createPaymentContext, findPaymentContext} from '../common/orm';
@@ -31,7 +32,7 @@ export async function createPaypalOrder({
   }
 
   const ordersController = new OrdersController(
-    PayPalClient(manager.getConfig(tenantId)),
+    PayPalClient(getTenantConfig(tenantId)),
   );
 
   const {id: contextId} = await createPaymentContext({
@@ -90,7 +91,7 @@ export async function findPaypalOrder({
   }
 
   const ordersController = new OrdersController(
-    PayPalClient(manager.getConfig(tenantId)),
+    PayPalClient(getTenantConfig(tenantId)),
   );
 
   let result;

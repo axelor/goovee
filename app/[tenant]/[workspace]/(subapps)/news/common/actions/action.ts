@@ -13,6 +13,7 @@ import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {addComment, findComments} from '@/comments/orm';
 import {
   CreateComment,
@@ -224,7 +225,7 @@ export const createComment: CreateComment = async props => {
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
-      const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}#comment-${comment.id}`;
+      const newsLink: WorkspaceSubPath = `/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}#comment-${comment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
@@ -242,7 +243,7 @@ export const createComment: CreateComment = async props => {
               newsItem.title ?? '',
             ),
             body: comment.note ?? '',
-            url: newsUrl,
+            link: newsLink,
             tag: NotificationTag.newsReply(parentComment.id),
           },
           getReplacementTitle: count =>

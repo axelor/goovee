@@ -1,9 +1,7 @@
-'server only';
-
 import {createClient} from '@/goovee/.generated/client';
 import {ensureStorageDir} from '@/storage/index';
 import {LRUCache} from './lru';
-import {getGlobalConfig, tenantConfigProvider} from './config-provider';
+import {getTenantConfig} from './config';
 import type {Tenant, TenantConfig} from './types';
 
 const CACHE_CAPACITY = 20;
@@ -54,11 +52,11 @@ async function connectTenant(
  * document names, so a document with one entry fills one cache slot and never
  * evicts anything.
  *
- * The signatures say what each method costs. `getConfig`, `getDefaultTenantId`
- * and `listTenantIds` are synchronous: they read the configuration document,
- * which is already in memory. `getTenant` and `getClient` return a promise
- * because they may open a Postgres pool, and the cache below then evicts
- * another tenant to make room for it.
+ * Connections only. Everything here returns a promise because it may open a
+ * Postgres pool, and the cache below then evicts another tenant to make room
+ * for it. Reading the configuration document is the other module's job
+ * (`./config`), which is what the request path imports — code that can reach
+ * this module can open a database, and the proxy must not be able to.
  */
 export class TenantManager {
   private cache: LRUCache<Tenant['id'], Tenant>;
@@ -91,7 +89,7 @@ export class TenantManager {
       return cached;
     }
 
-    const config = tenantConfigProvider.get(id);
+    const config = getTenantConfig(id);
 
     if (!config) {
       /* Unknown tenant is not an error: callers guard with `if (!tenant)` and
@@ -111,27 +109,8 @@ export class TenantManager {
     }
   }
 
-  getConfig(id: Tenant['id']) {
-    return tenantConfigProvider.get(id);
-  }
-
   async getClient(id: Tenant['id']) {
     return this.getTenant(id).then(tenant => tenant?.client);
-  }
-
-  /**
-   * The tenant used by addresses that name none: `/`, the auth screens, and a
-   * script run without `--tenant`. Null unless the document declares one, and
-   * then those addresses have to be told which tenant they are for.
-   *
-   * The document is checked at load, so any name returned here is one it names.
-   */
-  getDefaultTenantId(): string | null {
-    return getGlobalConfig().defaultTenant ?? null;
-  }
-
-  listTenantIds() {
-    return tenantConfigProvider.list();
   }
 }
 

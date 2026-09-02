@@ -25,6 +25,7 @@ import {
   isReservedSegment,
   reservedSegments,
 } from '@/lib/core/path/reserved-segments';
+import {canonicalHost} from './routing';
 
 /* $schema is an editor hint and $global holds the deployment-wide settings.
  * Every other key in the document names a tenant. */
@@ -113,10 +114,18 @@ function parseOrigin(value: unknown): URL | null {
    * with the parsed origin settles the trailing characters and the canonical
    * spelling at once. It settles nothing about the scheme: `ftp://`, `ws://` and
    * `wss://` each parse to an origin equal to what was written, so the protocol
-   * test beside it is what admits only the two a deployment is served over. */
+   * test beside it is what admits only the two a deployment is served over.
+   *
+   * Ports 80 and 443 are refused however they are written. A scheme's own port
+   * fails the equality (`new URL` leaves it off the origin), and the crossed
+   * spellings — https on 80, http on 443 — parse but can never be reached: a
+   * Host header carries no scheme, so request routing treats both ports as
+   * default and would strip what the document declared. */
   const isOrigin =
     (url.protocol === 'http:' || url.protocol === 'https:') &&
     value === url.origin &&
+    url.port !== '80' &&
+    url.port !== '443' &&
     HOSTNAME_PATTERN.test(url.hostname);
 
   return isOrigin ? url : null;
@@ -124,7 +133,8 @@ function parseOrigin(value: unknown): URL | null {
 
 const ORIGIN_ERROR =
   'must be written as an origin — a scheme and a host, with no path, query, ' +
-  'fragment or trailing slash, e.g. https://portal.example.com';
+  'fragment or trailing slash, e.g. https://portal.example.com. Ports 80 and ' +
+  '443 are the defaults and are left off';
 
 /* What the generated schema carries. Looser than the load on purpose: spelling
  * the host rule as a regex leaves an editor showing something unreadable, so an
@@ -687,6 +697,10 @@ function checkHostRouting(
   tenants: TenantEntry[],
 ): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
+
+  /* Keyed by `canonicalHost` — the spelling request routing compares with — so
+   * what this refuses as claimed twice is exactly what would collide in the
+   * routing index built from the same document. */
   const byHost = new Map<string, string>(); // host -> host-routed tenant id
 
   for (const [id, config] of tenants) {
@@ -698,7 +712,7 @@ function checkHostRouting(
      * reach here — but reading a host off it unchecked is what would throw. */
     if (!origin) continue;
 
-    const owner = byHost.get(origin.host);
+    const owner = byHost.get(canonicalHost(origin.host));
 
     if (owner) {
       issues.push({
@@ -712,7 +726,7 @@ function checkHostRouting(
       continue;
     }
 
-    byHost.set(origin.host, id);
+    byHost.set(canonicalHost(origin.host), id);
   }
 
   for (const [id, config] of tenants) {
@@ -722,7 +736,7 @@ function checkHostRouting(
 
     if (!origin) continue;
 
-    const owner = byHost.get(origin.host);
+    const owner = byHost.get(canonicalHost(origin.host));
 
     if (owner) {
       issues.push({
@@ -737,7 +751,8 @@ function checkHostRouting(
   }
 
   const deployment = parseOrigin(betterAuthUrl);
-  const deploymentOwner = deployment && byHost.get(deployment.host);
+  const deploymentOwner =
+    deployment && byHost.get(canonicalHost(deployment.host));
 
   if (deploymentOwner && defaultTenant && defaultTenant !== deploymentOwner) {
     issues.push({

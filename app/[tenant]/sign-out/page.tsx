@@ -3,7 +3,7 @@ import {redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSessionTenantId} from '@/lib/auth';
-import {getTenantConfig} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';

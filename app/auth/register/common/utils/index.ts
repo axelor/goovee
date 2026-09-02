@@ -1,7 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
-import {getTenantConfig} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {getPortalRoot} from '@/utils/workspace-url';

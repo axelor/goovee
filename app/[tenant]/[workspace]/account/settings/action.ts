@@ -1,13 +1,13 @@
 'use server';
 
 import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/proxy';
+import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {findWorkspace} from '@/orm/workspace';
 import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
@@ -28,7 +28,7 @@ export async function removeWorkpace(data: RemoveWorkspace) {
     };
   }
 
-  const {workspaceURL, workspaceURI} = validation.data;
+  const {workspaceURL} = validation.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -139,7 +139,10 @@ export async function removeWorkpace(data: RemoveWorkspace) {
         })
         .then(clone);
     }
-    revalidatePath(`${workspaceURI}/${SUBAPP_PAGE.account}`);
+    revalidateWorkspacePath(
+      {tenantId, workspaceURL},
+      `/${SUBAPP_PAGE.account}`,
+    );
     return {
       success: true,
     };

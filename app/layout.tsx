@@ -14,8 +14,8 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {LegacyServiceWorkerCleanup} from '@/pwa/legacy-sw-cleanup';
-import {addressedHost, hostRoutedTenantId} from '@/lib/core/tenant/routing';
-import {listTenantConfigs} from '@/tenant/config-provider';
+import {addressedHost} from '@/lib/core/tenant/routing';
+import {getRoutingIndex} from '@/tenant/config';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
@@ -98,7 +98,7 @@ export default async function RootLayout({
    * an earlier build left there rather than sitting alongside it. */
   const host = addressedHost(await headers());
   const servesHostRoutedTenant = Boolean(
-    host && hostRoutedTenantId(host, listTenantConfigs()),
+    host && getRoutingIndex().tenantByHost.has(host),
   );
 
   /* The root shell is tenant-agnostic: per-tenant theme and browser variables

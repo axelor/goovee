@@ -1,5 +1,5 @@
-import {manager} from '@/tenant';
 import type {Tenant} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {
@@ -64,7 +64,7 @@ export async function createHubPispPaymentLink({
   let resourceId: string;
   let consentHref: string;
   try {
-    const config = manager.getConfig(tenantId);
+    const config = getTenantConfig(tenantId);
 
     if (!config) {
       throw new Error(`Tenant "${tenantId}" is not configured`);

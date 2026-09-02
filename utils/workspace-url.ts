@@ -25,5 +25,23 @@ export function getPortalRoot(host?: string) {
  * as follows from the tenant's own configuration; this only strips the root.
  */
 export function toWorkspaceURI(workspaceURL: string, host?: string) {
-  return workspaceURL.replace(getPortalRoot(host), '') || '/';
+  const root = getPortalRoot(host);
+
+  /* Only a leading root followed by a path boundary is removed. An unanchored
+   * replace would also cut the root out of the middle of a URL that happens to
+   * carry it — in a query parameter, say — and without the boundary a URL
+   * under an origin the root is merely a string prefix of (`…example.com.br`,
+   * `…example.com:8443`) would be sliced mid-host. Either way the contract is
+   * the same: a URL not under this root comes back unchanged. */
+  if (!root || !workspaceURL.startsWith(root)) {
+    return workspaceURL || '/';
+  }
+
+  const rest = workspaceURL.slice(root.length);
+
+  if (rest && !rest.startsWith('/')) {
+    return workspaceURL;
+  }
+
+  return rest || '/';
 }

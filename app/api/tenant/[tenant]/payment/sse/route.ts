@@ -7,7 +7,7 @@ import {z} from 'zod';
 import {subscribe, unsubscribe} from '@/lib/core/payment/sse';
 import {PaymentSourceSchema} from '@/lib/core/payment/common/validators';
 import {IdSchema} from '@/utils/validators';
-import {manager} from '@/tenant';
+import {listTenantIds} from '@/tenant/config';
 
 const KEEP_ALIVE_INTERVAL_MS = 30_000;
 
@@ -44,7 +44,7 @@ export async function GET(
 
   /* The stream is in-memory pub/sub keyed by tenant, so no tenant client is
    * needed here — just reject subscriptions for an unknown tenant path. */
-  const tenantIds = manager.listTenantIds();
+  const tenantIds = listTenantIds();
   if (!tenantIds.includes(tenantId)) {
     return new NextResponse('Bad Request', {status: 400});
   }

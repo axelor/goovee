@@ -4,6 +4,7 @@ import {NextResponse, after} from 'next/server';
 import {z} from 'zod';
 
 import {manager} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import type {Client} from '@/goovee/.generated/client';
 import {findSubscribers} from '@/orm/notification';
 import NotificationManager, {
@@ -11,6 +12,7 @@ import NotificationManager, {
   type MailNotificationData,
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
@@ -189,7 +191,7 @@ async function buildSystemNotification({
   user: User;
   tenantId: string;
   mail?: Mail | null;
-  entity: {id: string; route: string};
+  entity: {id: string; route: string; link: WorkspaceSubPath};
   app: App;
   workspace: {
     id: string;
@@ -213,7 +215,7 @@ async function buildSystemNotification({
           app.name || '',
           workspace.name || APP_TITLE,
         )),
-      url: entity.route,
+      link: entity.link,
       tag: app.name
         ? NotificationTag.system(app.name, workspace.id)
         : undefined,
@@ -248,7 +250,7 @@ async function sendNotifications(data: {
 
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      manager.getConfig(tenantId),
+      getTenantConfig(tenantId),
     );
     const sender = workspace.name || APP_TITLE;
 

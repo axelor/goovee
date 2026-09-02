@@ -4,6 +4,7 @@ import {toNextJsHandler} from 'better-auth/next-js';
 import {auth} from '@/lib/auth'; // path to your auth file
 import {getBasePath} from '@/lib/core/path/base-path';
 import {withPathPrefix} from '@/lib/core/path/utils';
+import {addressedHost} from '@/lib/core/tenant/routing';
 
 const {POST: authPOST, GET: authGET} = toNextJsHandler(auth);
 
@@ -27,5 +28,26 @@ const withRestoredBasePath =
     return handler(request);
   };
 
-export const GET = withRestoredBasePath(authGET);
-export const POST = withRestoredBasePath(authPOST);
+/* better-auth reads the origin it answers on from `x-forwarded-host` itself,
+ * and it refuses a value its own host pattern does not match — a chain of
+ * proxies appends entries, and the comma-joined result falls back to the
+ * rewritten `Host` header, an origin no tenant is served at. The header is
+ * therefore reduced to the one host the rest of the deployment resolves
+ * (`addressedHost`), so routing and authentication cannot read the same
+ * request as two different origins. */
+const withAddressedHost =
+  (handler: AuthHandler): AuthHandler =>
+  request => {
+    const host = addressedHost(request.headers);
+    const forwarded = request.headers.get('x-forwarded-host');
+
+    if (!host || !forwarded || forwarded === host) return handler(request);
+
+    const normalized = new Request(request);
+    normalized.headers.set('x-forwarded-host', host);
+
+    return handler(normalized);
+  };
+
+export const GET = withAddressedHost(withRestoredBasePath(authGET));
+export const POST = withAddressedHost(withRestoredBasePath(authPOST));

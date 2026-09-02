@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import {createHash} from 'crypto';
 
 import {manager, type TenantClient, type TenantConfig} from '@/tenant';
-import {getTenantConfig} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {LRUCache} from '@/tenant/lru';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findLocaleLanguage} from '@/locale/utils';

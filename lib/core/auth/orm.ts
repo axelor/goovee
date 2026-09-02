@@ -23,7 +23,7 @@ import {
   updatePartner,
 } from '@/orm/partner';
 import {findWorkspaceByURL} from '@/orm/workspace';
-import {revalidatePath} from 'next/cache';
+import {revalidateEverything} from '@/lib/core/url/revalidate';
 import {getTranslation} from '../locale/server';
 import {UserType} from './types';
 import {getPortalRoot} from '@/utils/workspace-url';
@@ -33,7 +33,7 @@ import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {hash} from './utils';
 import {getPublicEnvironment} from '../environment/utils';
-import {getTenantConfig} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {withMattermostSync} from '../mattermost/user-api';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -158,7 +158,7 @@ export async function registerByInvite({
       getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
     );
 
-    revalidatePath('/', 'layout');
+    revalidateEverything();
 
     deleteInviteById({
       id: invite.id,

@@ -61,7 +61,7 @@ here.`,
         : 'Reading TENANTS_CONFIG',
     );
 
-    const provider = await import('@/tenant/config-provider');
+    const provider = await import('@/tenant/config');
 
     const loaded = (() => {
       try {

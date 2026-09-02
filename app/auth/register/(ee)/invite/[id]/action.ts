@@ -1,7 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import {revalidatePath} from 'next/cache';
+import {revalidateEverything} from '@/lib/core/url/revalidate';
 
 import {deleteInviteById} from '@/app/[tenant]/[workspace]/account/common/orm/invites';
 import {getSession} from '@/auth';
@@ -88,7 +88,7 @@ export async function subscribe(data: InviteSubscribe) {
       client,
     });
 
-    revalidatePath('/', 'layout');
+    revalidateEverything();
   } catch (err) {
     return error(
       await getTranslation({tenant: tenantId}, 'Error subscribing, try again'),

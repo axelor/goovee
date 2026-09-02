@@ -1,6 +1,6 @@
 import 'server-only';
 
-import {getTenantConfig} from '@/tenant/config-provider';
+import {getTenantConfig} from '@/tenant/config';
 import {getPublicEnvironment} from '@/environment/utils';
 import {isHostRouted} from '@/lib/core/tenant/routing';
 import {getPortalRoot} from './workspace-url';

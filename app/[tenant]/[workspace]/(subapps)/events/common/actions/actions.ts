@@ -17,6 +17,7 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, tattr, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -229,7 +230,7 @@ export async function register(
         payload: {
           title: await tr('You have been registered for an event!'),
           body: `${registration.event!.eventTitle}`,
-          url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
+          link: `/${SUBAPP_CODES.events}/${registration.event!.slug}`,
           tag: NotificationTag.event(registration.event!.id),
         },
       };
@@ -425,7 +426,7 @@ export const createComment: CreateComment = async props => {
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name || '';
-      const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
+      const eventSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.events}/${event.slug}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
@@ -443,7 +444,7 @@ export const createComment: CreateComment = async props => {
               event.eventTitle ?? '',
             ),
             body: comment.note ?? '',
-            url: `${eventUrl}#comment-${comment.id}`,
+            link: `${eventSubPath}#comment-${comment.id}`,
             tag: NotificationTag.eventReply(parentComment.id),
           },
           getReplacementTitle: count =>

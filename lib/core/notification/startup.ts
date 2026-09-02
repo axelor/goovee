@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {listTenantConfigs} from '@/tenant/config-provider';
+import {listTenantConfigs} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //

@@ -5,6 +5,7 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {DEFAULT_LOCALE} from '@/lib/core/locale';
 import {getTranslation} from '@/lib/core/locale/server';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {notifyAll} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import type {ID} from '@/types';
@@ -44,7 +45,8 @@ export async function notifyTicketChange({
   tenantId: string;
   client: Client;
 }): Promise<void> {
-  const ticketLink = `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+  const ticketSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+  const ticketLink = `${workspaceURL}${ticketSubPath}`;
 
   try {
     if (workspaceUserId) {
@@ -101,7 +103,7 @@ export async function notifyTicketChange({
                 user.simpleFullName ?? '',
                 ticket.name,
               ),
-        url: ticketLink,
+        link: ticketSubPath,
         tag: NotificationTag.ticketUpdate(ticket.id),
       },
     };

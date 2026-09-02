@@ -1,5 +1,6 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import {manager, type Tenant} from '@/tenant';
+import type {Tenant} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {decodeFilter as decode} from '@/utils/url';
@@ -48,7 +49,7 @@ export async function createPayboxOrder({
       contextId,
       currency,
       url,
-      config: manager.getConfig(tenantId),
+      config: getTenantConfig(tenantId),
       tenant: tenantId,
     }),
   };

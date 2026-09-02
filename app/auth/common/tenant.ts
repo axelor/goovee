@@ -1,9 +1,12 @@
 import {headers} from 'next/headers';
 
 import {SEARCH_PARAMS} from '@/constants';
-import {manager} from '@/tenant';
-import {listTenantConfigs} from '@/tenant/config-provider';
-import {addressedHost, hostRoutedTenantId} from '@/lib/core/tenant/routing';
+import {
+  getDefaultTenantId,
+  getRoutingIndex,
+  getTenantConfig,
+} from '@/tenant/config';
+import {addressedHost} from '@/lib/core/tenant/routing';
 
 /** The first value of a search param, which Next hands over repeated as an array. */
 export function firstValue(
@@ -39,10 +42,10 @@ export async function resolveAuthTenantId(
     firstValue(searchParams[SEARCH_PARAMS.TENANT_ID]) ||
     firstValue(searchParams.tenantId);
 
-  if (named && manager.getConfig(named)) return named;
+  if (named && getTenantConfig(named)) return named;
 
   const host = addressedHost(await headers());
-  const fromHost = host && hostRoutedTenantId(host, listTenantConfigs());
+  const fromHost = host && getRoutingIndex().tenantByHost.get(host);
 
-  return fromHost || named || manager.getDefaultTenantId() || '';
+  return fromHost || named || getDefaultTenantId() || '';
 }
