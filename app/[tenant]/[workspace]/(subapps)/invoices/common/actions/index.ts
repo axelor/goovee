@@ -446,13 +446,11 @@ export async function createStripeCheckoutSession({
 export async function validateStripePayment({
   stripeSessionId,
   workspaceURL: givenWorkspaceURL,
-  workspaceURI,
   token,
 }: ValidateStripePaymentInput) {
   const parsed = ValidateStripePaymentSchema.safeParse({
     stripeSessionId,
     workspaceURL: givenWorkspaceURL,
-    workspaceURI,
     token,
   });
   if (!parsed.success) {
@@ -771,14 +769,12 @@ export async function cancelStripeBankTransferPaymentIntent({
   id,
   contextId,
   workspaceURL: givenWorkspaceURL,
-  workspaceURI,
   token,
 }: CancelStripeBankTransferInput) {
   const parsed = CancelStripeBankTransferSchema.safeParse({
     id,
     contextId,
     workspaceURL: givenWorkspaceURL,
-    workspaceURI,
     token,
   });
   if (!parsed.success) {
@@ -1017,13 +1013,11 @@ export async function payboxCreateOrder({
 export async function validatePayboxPayment({
   params,
   workspaceURL: givenWorkspaceURL,
-  workspaceURI,
   token,
 }: ValidatePayboxPaymentInput) {
   const parsed = ValidatePayboxPaymentSchema.safeParse({
     params,
     workspaceURL: givenWorkspaceURL,
-    workspaceURI,
     token,
   });
   if (!parsed.success) {

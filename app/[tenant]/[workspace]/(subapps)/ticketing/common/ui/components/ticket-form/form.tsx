@@ -1,5 +1,4 @@
 // ---- CORE IMPORTS ---- //
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {RichTextEditor} from '@/ui/components';
 import {Button} from '@/ui/components/button';
@@ -63,7 +62,6 @@ export function TicketForm(props: TicketFormProps) {
     formFields,
   } = props;
   const {toast} = useToast();
-  const {workspaceURI} = useWorkspace();
   const [success, setSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -142,7 +140,6 @@ export function TicketForm(props: TicketFormProps) {
             ...value,
           },
         },
-        workspaceURI,
       };
 
       const {error, message, data} = await mutate(mutateProps);
@@ -154,7 +151,7 @@ export function TicketForm(props: TicketFormProps) {
 
       handleSuccess(data.id, projectId);
     },
-    [handleError, handleSuccess, projectId, workspaceURI],
+    [handleError, handleSuccess, projectId],
   );
 
   const handleSubmitWithAction = useCallback(

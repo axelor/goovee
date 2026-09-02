@@ -100,7 +100,6 @@ export function InvoicePayments({
       const response = await validateStripePayment({
         stripeSessionId,
         workspaceURL,
-        workspaceURI,
         token,
       });
 
@@ -124,7 +123,6 @@ export function InvoicePayments({
       const response = await validatePayboxPayment({
         params,
         workspaceURL,
-        workspaceURI,
         token,
       });
       return response as

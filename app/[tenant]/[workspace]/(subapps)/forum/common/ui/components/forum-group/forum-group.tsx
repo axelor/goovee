@@ -105,12 +105,10 @@ export function ForumGroup({
         ? await joinGroup({
             groupID: group.id,
             userId,
-            workspaceURI,
           })
         : await exitGroup({
             id: memberRecordId ?? '',
             groupID: group.id,
-            workspaceURI,
           });
       setPending(false);
       if (!res?.success) {

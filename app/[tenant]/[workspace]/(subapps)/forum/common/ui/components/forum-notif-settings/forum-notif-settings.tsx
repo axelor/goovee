@@ -89,7 +89,6 @@ export function ForumNotifSettings({groups}: {groups: MemberGroup[]}) {
       try {
         response = await saveGroupNotifications({
           prefs: payload,
-          workspaceURI,
         });
       } catch {
         // The call itself rejected (network drop, stale server-action id,

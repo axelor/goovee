@@ -183,7 +183,6 @@ export default function Content({
               invoiceType={invoiceType}
               isUnpaid={isUnpaid}
               config={config}
-              workspaceURI={workspaceURI}
               token={token}
               onPaymentUpdate={handlePaymentUpdate}
               allowStripeBankTransfer={allowStripeBankTransfer}

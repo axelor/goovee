@@ -192,7 +192,6 @@ export function GroupControls({
       const response = await exitGroup({
         id: group.id,
         groupID: groupId,
-        workspaceURI,
       });
       pendingRef.current.delete(groupId);
       if (!response.success) {
@@ -217,7 +216,6 @@ export function GroupControls({
       const response = await joinGroup({
         groupID: groupId,
         userId,
-        workspaceURI,
       });
       pendingRef.current.delete(groupId);
       if (!response.success) {

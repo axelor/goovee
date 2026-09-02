@@ -99,11 +99,10 @@ async function redeemAttachments({
   return redeemed;
 }
 
-export async function exitGroup({id, groupID, workspaceURI}: ExitGroupInput) {
+export async function exitGroup({id, groupID}: ExitGroupInput) {
   const parsed = ExitGroupSchema.safeParse({
     id,
     groupID,
-    workspaceURI,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
@@ -156,15 +155,10 @@ export async function exitGroup({id, groupID, workspaceURI}: ExitGroupInput) {
   }
 }
 
-export async function joinGroup({
-  groupID,
-  userId,
-  workspaceURI,
-}: JoinGroupInput) {
+export async function joinGroup({groupID, userId}: JoinGroupInput) {
   const parsed = JoinGroupSchema.safeParse({
     groupID,
     userId,
-    workspaceURI,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};

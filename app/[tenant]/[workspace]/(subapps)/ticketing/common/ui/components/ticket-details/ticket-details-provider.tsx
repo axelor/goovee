@@ -1,5 +1,4 @@
 'use client';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
@@ -84,8 +83,6 @@ export function TicketDetailsProvider(props: Props) {
   const {action: updateAssignmentAction, loading: isUpdatingAssignment} =
     useRetryAction(updateAssignment);
 
-  const {workspaceURI} = useWorkspace();
-
   const loading =
     isSubmitting ||
     isClosingTicket ||
@@ -120,7 +117,6 @@ export function TicketDetailsProvider(props: Props) {
             ...dirtyValues,
           },
         },
-        workspaceURI,
       };
 
       await mutateAction(mutateProps, {
@@ -135,15 +131,7 @@ export function TicketDetailsProvider(props: Props) {
         onDiscard: () => router.refresh(),
       });
     },
-    [
-      getDirtyValues,
-      mutateAction,
-      ticket.id,
-      ticket.version,
-      workspaceURI,
-      toast,
-      router,
-    ],
+    [getDirtyValues, mutateAction, ticket.id, ticket.version, toast, router],
   );
 
   const submitFormWithAction = useCallback(

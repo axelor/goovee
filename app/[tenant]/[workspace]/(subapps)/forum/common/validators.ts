@@ -11,8 +11,6 @@ import {
   NOTIFICATION_VALUES,
 } from '@/subapps/forum/common/constants';
 
-const WorkspaceURISchema = z.string().min(1);
-
 /* A forum post attachment references its pre-staged file by single-use claim
  * token (redeemed server-side when the post is created); `title` is the
  * per-file caption/alt text stored on the join record. */
@@ -25,14 +23,12 @@ export type PostAttachmentInput = z.infer<typeof PostAttachmentSchema>;
 export const ExitGroupSchema = z.object({
   id: IdSchema,
   groupID: IdSchema,
-  workspaceURI: WorkspaceURISchema,
 });
 export type ExitGroupInput = z.infer<typeof ExitGroupSchema>;
 
 export const JoinGroupSchema = z.object({
   groupID: IdSchema,
   userId: IdSchema,
-  workspaceURI: WorkspaceURISchema,
 });
 export type JoinGroupInput = z.infer<typeof JoinGroupSchema>;
 
@@ -55,7 +51,6 @@ export const SaveGroupNotificationsSchema = z.object({
       }),
     )
     .min(1),
-  workspaceURI: WorkspaceURISchema,
 });
 export type SaveGroupNotificationsInput = z.infer<
   typeof SaveGroupNotificationsSchema
@@ -72,7 +67,6 @@ export const AddPostSchema = z.object({
   group: z.object({id: IdSchema}),
   title: z.string().trim().min(1),
   content: z.string(),
-  workspaceURI: WorkspaceURISchema,
   attachments: z
     .array(PostAttachmentSchema)
     .max(MAX_FORUM_ATTACHMENTS)

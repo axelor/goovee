@@ -60,7 +60,6 @@ export function Total({
   config,
   invoice,
   invoiceType,
-  workspaceURI,
   token,
   onPaymentUpdate,
   allowStripeBankTransfer,
@@ -162,7 +161,6 @@ export function Total({
         id,
         contextId,
         workspaceURL,
-        workspaceURI,
         token,
       });
 
