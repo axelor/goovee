@@ -5,7 +5,6 @@ import {RELATED_MODELS, SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {findLatestDMSFileByName, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey} from '@/types';
 
@@ -24,14 +23,11 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {'order-id': orderId, 'customer-delivery-id': customerDeliveryId} =
     params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.orders,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -40,6 +36,8 @@ export async function GET(
     });
   }
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const orderWhereClause = getWhereClauseForEntity({
     user: access.user,

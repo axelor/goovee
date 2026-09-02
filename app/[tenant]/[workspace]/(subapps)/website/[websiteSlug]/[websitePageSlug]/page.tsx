@@ -30,13 +30,10 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {websiteSlug, websitePageSlug} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -46,6 +43,8 @@ export async function generateMetadata(props: {
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
@@ -75,13 +74,11 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
   const {websiteSlug, websitePageSlug} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -107,6 +104,8 @@ export default async function Page(props: {
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const [canUserEditWiki, websitePage] = await Promise.all([
     canEditWiki({userId: user?.id, client}),

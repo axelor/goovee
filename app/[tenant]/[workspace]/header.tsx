@@ -36,6 +36,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Icon} from '@/ui/components';
 import type {Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
+import type {WorkspaceLink} from './workspace-links';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
@@ -44,7 +45,6 @@ import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {toWorkspaceURI} from '@/utils/workspace-url';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
 
@@ -186,7 +186,7 @@ export default function Header({
 }: {
   subapps: any;
   isTopNavigation?: boolean;
-  workspaces: {id: string; name: string | null; url: string | null}[];
+  workspaces: WorkspaceLink[];
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   cartCodes?: string[];
@@ -332,13 +332,8 @@ export default function Header({
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces?.map(workspace => (
-                    <SelectItem
-                      key={workspace.url}
-                      value={toWorkspaceURI(
-                        workspace.url ?? '',
-                        env.GOOVEE_PUBLIC_HOST,
-                      )}>
-                      {workspace.name || workspace.url}
+                    <SelectItem key={workspace.href} value={workspace.href}>
+                      {workspace.name || workspace.href}
                     </SelectItem>
                   ))}
                 </SelectContent>

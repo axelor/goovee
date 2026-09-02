@@ -33,12 +33,9 @@ export async function generateMetadata(props: {
 }): Promise<Metadata | null> {
   const params = await props.params;
   const {websiteSlug} = params;
-  const {workspaceURL, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -46,6 +43,8 @@ export async function generateMetadata(props: {
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const website = await findWebsiteSeoBySlug({
     websiteSlug,
@@ -79,12 +78,10 @@ export default async function Layout(props: {
   const {children} = props;
 
   const {websiteSlug} = params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -97,6 +94,8 @@ export default async function Layout(props: {
 
   const {user} = access;
   const {client, config} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const website = await findWebsiteBySlug({
     websiteSlug,

@@ -33,12 +33,10 @@ async function Orders({
     return notFound();
   }
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.orders,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
@@ -62,6 +60,8 @@ async function Orders({
   }
 
   const {user} = access;
+
+  const workspaceURL = access.url.key();
   const {client} = access.tenant;
 
   const {role, isContactAdmin} = access.subapp;

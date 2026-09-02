@@ -24,12 +24,10 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -54,6 +52,8 @@ export default async function Page(props: {
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   return (
     <Suspense fallback={<HomeSkeleton />}>

@@ -25,12 +25,10 @@ export default async function Layout(props: {
 
   const {children} = props;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

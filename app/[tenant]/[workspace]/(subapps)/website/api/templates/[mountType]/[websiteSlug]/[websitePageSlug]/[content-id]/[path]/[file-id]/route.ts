@@ -31,7 +31,7 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI} = workspacePathname(params);
   const {
     'content-id': contentId,
     'file-id': fileId,
@@ -57,8 +57,6 @@ export async function GET(
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -69,6 +67,8 @@ export async function GET(
   const {user} = access;
   const {client} = access.tenant;
   const config = access.tenant.config;
+
+  const workspaceURL = access.url.key();
 
   let attrs;
   if (mountType === MOUNT_TYPE.PAGE) {

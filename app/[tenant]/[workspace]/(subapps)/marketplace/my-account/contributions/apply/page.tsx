@@ -32,16 +32,10 @@ export default async function PublisherApplyPage(props: {
   );
   if (!paramsResult.success) notFound();
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(paramsResult.data);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(paramsResult.data);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (
@@ -63,6 +57,7 @@ export default async function PublisherApplyPage(props: {
   }
 
   const {client} = access.tenant;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   if (
@@ -134,10 +129,7 @@ export default async function PublisherApplyPage(props: {
         </p>
       </div>
 
-      <PublisherApplyForm
-        workspaceURL={workspaceURL}
-        contributionsHref={contributionsHref}
-      />
+      <PublisherApplyForm contributionsHref={contributionsHref} />
     </div>
   );
 }

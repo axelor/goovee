@@ -89,14 +89,12 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURI, workspaceURL, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
   const projectId = params['project-id'];
   const ticketId = params['ticket-id'];
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 

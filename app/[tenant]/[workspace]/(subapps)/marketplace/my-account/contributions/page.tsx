@@ -61,16 +61,10 @@ export default async function MyContributionsPage(props: {
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (
@@ -92,6 +86,7 @@ export default async function MyContributionsPage(props: {
   }
 
   const {client} = access.tenant;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   /* Seller-only area. `allowToPublish` and the manage-products role are hard
@@ -232,7 +227,6 @@ export default async function MyContributionsPage(props: {
           {isPublisher && consoleData && (
             <PublishNewButton
               workspaceURI={workspaceURI}
-              workspaceURL={workspaceURL}
               categories={clone(consoleData.categories)}
               licenses={clone(consoleData.licenses)}
               compatibilityVersions={clone(consoleData.compatibilityVersions)}
@@ -315,7 +309,6 @@ export default async function MyContributionsPage(props: {
                 config={config}
                 newListingCurrency={consoleData.newListingCurrency}
                 workspaceURI={workspaceURI}
-                workspaceURL={workspaceURL}
                 categories={consoleData.categories}
                 licenses={consoleData.licenses}
                 compatibilityVersions={consoleData.compatibilityVersions}

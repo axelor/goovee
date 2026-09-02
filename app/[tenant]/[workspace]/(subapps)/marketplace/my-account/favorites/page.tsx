@@ -66,16 +66,10 @@ export default async function FavoritesPage(props: {
   if (!searchParamsResult.success) notFound();
   const {page, limit, search, priceType, type} = searchParamsResult.data;
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (
@@ -97,6 +91,7 @@ export default async function FavoritesPage(props: {
   }
 
   const {client} = access.tenant;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
   if (!config) notFound();
 
@@ -202,7 +197,6 @@ export default async function FavoritesPage(props: {
       <MyFavoritesTable
         favorites={clone(products)}
         workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         marketplaceBase={marketplaceBase}
         filtered={filtered}
       />

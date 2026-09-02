@@ -28,12 +28,10 @@ export default async function Page(props: {
   const params = await props.params;
   const postId = params['post-id'];
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

@@ -3,7 +3,6 @@ import React from 'react';
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import type {Category} from '@/types';
 
@@ -19,16 +18,10 @@ export default async function Layout(props: {
   }>;
   children: React.ReactNode;
 }) {
-  const params = await props.params;
-
   const {children} = props;
-
-  const {workspaceURL, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

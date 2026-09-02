@@ -29,12 +29,10 @@ async function Quotations({
   params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
@@ -59,6 +57,8 @@ async function Quotations({
 
   const {user, subapp} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const {limit, page, search} = searchParams;
 

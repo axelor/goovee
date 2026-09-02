@@ -65,18 +65,12 @@ export default async function Page(props: {
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const listingHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {

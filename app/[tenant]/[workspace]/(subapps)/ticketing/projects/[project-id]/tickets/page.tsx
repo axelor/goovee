@@ -80,12 +80,10 @@ export default async function Page(props: {
     title,
   } = searchParams;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 

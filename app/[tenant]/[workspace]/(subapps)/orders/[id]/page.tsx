@@ -23,12 +23,10 @@ async function Order({
 }) {
   const {id} = params;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.orders,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
@@ -52,6 +50,8 @@ async function Order({
   }
 
   const {user} = access;
+
+  const workspaceURL = access.url.key();
   const {client} = access.tenant;
 
   const {role, isContactAdmin} = access.subapp;

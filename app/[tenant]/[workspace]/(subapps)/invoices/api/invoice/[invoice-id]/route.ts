@@ -61,8 +61,6 @@ export async function GET(
   } else {
     const access = await ensureAccess({
       code: SUBAPP_CODES.invoices,
-      url: workspaceURL,
-      tenantId,
       allowGuest: false,
     });
     if (!access.ok) {

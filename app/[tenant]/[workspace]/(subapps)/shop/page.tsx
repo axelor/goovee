@@ -285,12 +285,10 @@ export default async function Page(props: {
       ? requestedPage
       : 1;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

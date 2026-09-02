@@ -12,7 +12,7 @@ import {findTheme} from '@/orm/theme';
 import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
 import {getTenantConfig, listTenantIds} from '@/tenant/config';
-import {tenantEntryPath} from '@/lib/core/url/server';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
@@ -31,7 +31,7 @@ export async function generateMetadata(props: {
 
   if (!knownTenantIds.includes(tenant)) return {};
 
-  return {manifest: withBasePath(`/${tenant}/manifest.webmanifest`)};
+  return {manifest: tenantURLs(tenant).manifest()};
 }
 
 export default async function TenantLayout(props: {
@@ -50,14 +50,15 @@ export default async function TenantLayout(props: {
    * before PushProvider subscribes). Environment wraps both, since PushProvider
    * reads the VAPID public key from it.
    *
-   * The scope is `tenantEntryPath`, the same value the manifest route serves as
-   * the app's entry — one function, because a browser installs an app only where
-   * the page's worker encloses the manifest's scope and start address.
+   * The scope is the tenant's entry address, the same value the manifest route
+   * serves as the app's entry — one function answers both, because a browser
+   * installs an app only where the page's worker encloses the manifest's scope
+   * and start address.
    *
    * The tenant is named in the worker's own address, since a scope of `/` names
    * none, and the worker needs it to keep its caches and its notification channel
    * to itself. */
-  const scope = tenantEntryPath(tenant, await headers());
+  const scope = tenantURLs(tenant).entry(await headers());
 
   return (
     <Environment value={env}>

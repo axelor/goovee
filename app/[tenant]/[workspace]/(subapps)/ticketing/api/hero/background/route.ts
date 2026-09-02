@@ -6,19 +6,10 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../../../common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 
-export async function GET(
-  request: NextRequest,
-  props: {params: Promise<{tenant: string; workspace: string}>},
-) {
-  const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
-
+export async function GET(request: NextRequest) {
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
   if (!access.ok) {

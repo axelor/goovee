@@ -25,12 +25,10 @@ export default async function Layout(props: {
   const params = await props.params;
 
   const {websiteSlug} = params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -56,6 +54,8 @@ export default async function Layout(props: {
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const website = await findWebsiteBySlug({
     websiteSlug,

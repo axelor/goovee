@@ -37,16 +37,10 @@ export default async function CheckoutSuccessPage(props: {
   if (!searchParamsResult.success) notFound();
   const {orderId} = searchParamsResult.data;
   if (!orderId) notFound();
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (

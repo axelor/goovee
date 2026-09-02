@@ -100,12 +100,10 @@ export default async function Page(context: {
   const params = await context.params;
   const searchParams = await context.searchParams;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 

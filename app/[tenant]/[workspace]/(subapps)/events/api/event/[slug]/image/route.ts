@@ -5,7 +5,6 @@ import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEventImage} from '@/subapps/events/common/orm/event';
@@ -21,13 +20,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {slug} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -36,6 +32,8 @@ export async function GET(
     });
   }
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const event = await findEventImage({
     slug,

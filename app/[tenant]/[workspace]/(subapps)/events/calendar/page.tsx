@@ -26,12 +26,10 @@ export default async function Page(context: {
 }) {
   const params = await context.params;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -57,6 +55,8 @@ export default async function Page(context: {
   const {user} = access;
   const {client} = access.tenant;
   const workspace = clone(access.workspace);
+
+  const workspaceURL = access.url.key();
 
   return (
     <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">
@@ -105,7 +105,6 @@ async function AgendaData({
     <EventsAgenda
       initialEvents={events}
       workspaceURI={workspaceURI}
-      workspaceURL={workspaceURL}
       magazineHref={magazineHref}
       searchAction={searchEvents}
     />

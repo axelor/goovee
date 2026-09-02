@@ -38,16 +38,10 @@ export default async function MyAccountPage(props: {
   if (!paramsResult.success) notFound();
   const params = paramsResult.data;
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (

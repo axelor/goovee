@@ -24,15 +24,13 @@ export default async function Layout({
 }) {
   const params = await paramsPromise;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   // The authoritative access gate lives on each page; here we only resolve the
   // scoped client/user to populate the sidebar. When access is denied we render
   // the shell with an empty tree and let the page handle the redirect/404.
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -85,7 +83,6 @@ export default async function Layout({
       <DocsSidebar
         categories={categories}
         workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         searchPlaceholder={searchPlaceholder}
         homeLabel={homeLabel}
         categoriesLabel={categoriesLabel}
@@ -94,7 +91,6 @@ export default async function Layout({
       <MobileMenuFolders
         categories={categories}
         workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         searchPlaceholder={searchPlaceholder}
         homeLabel={homeLabel}
         categoriesLabel={categoriesLabel}

@@ -38,15 +38,12 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
   if (!(productSlug && categorySlug)) return null;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) return null;
@@ -93,7 +90,7 @@ async function Detail({
 }) {
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   if (!(productSlug && categorySlug)) {
     return redirect(`${workspaceURI}/shop`);
@@ -101,8 +98,6 @@ async function Detail({
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

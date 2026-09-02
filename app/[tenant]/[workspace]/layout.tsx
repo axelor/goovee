@@ -10,6 +10,7 @@ import {findWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {getPortalRoot} from '@/utils/workspace-url';
 import {getPublicEnvironment} from '@/environment';
 import {manager} from '@/lib/core/tenant';
@@ -17,6 +18,7 @@ import {manager} from '@/lib/core/tenant';
 // ---- LOCAL IMPORTS ---- //
 import {getShellConfig} from './orm/config';
 import WorkspaceProvider from './workspace-context';
+import type {WorkspaceLink} from './workspace-links';
 import CartProvider from '@/app/[tenant]/[workspace]/cart/cart-provider';
 import Header from './header';
 import Sidebar from './sidebar';
@@ -125,13 +127,27 @@ export default async function Layout(props: {
   const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
   const baseUrl = getPortalRoot(host);
 
-  const workspaces = await findWorkspaces({
+  const found = await findWorkspaces({
     url: baseUrl,
     user,
     client,
   })
     .then(clone)
     .then(list => list.filter((w): w is NonNullable<typeof w> => w != null));
+
+  /* Each switcher gets an address rather than a stored key: only the tenant's
+   * configuration knows whether its addresses carry a tenant segment, and the
+   * browser has no reason to hold the value AOS identifies a workspace by. A
+   * workspace with no stored url cannot be addressed at all, so it is left out
+   * instead of offered as a link to nowhere. */
+  const tenantScope = tenantURLs(tenantId);
+  const workspaces: WorkspaceLink[] = found
+    .filter(w => Boolean(w.url))
+    .map(w => ({
+      id: w.id,
+      name: w.name,
+      href: tenantScope.workspaceByKey(w.url!).forRouter(),
+    }));
 
   let theme: any;
   try {

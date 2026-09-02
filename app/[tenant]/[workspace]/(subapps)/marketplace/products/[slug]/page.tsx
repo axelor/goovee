@@ -75,16 +75,10 @@ export default async function ProductPage(props: {
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -107,6 +101,7 @@ export default async function ProductPage(props: {
   }
 
   const client = access.tenant.client;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
   if (!config) notFound();
   const partnerId = access.user ? getPartnerId(access.user) : undefined;
@@ -232,7 +227,6 @@ export default async function ProductPage(props: {
           product={product}
           client={client}
           user={access.user}
-          workspaceURL={workspaceURL}
           workspaceURI={workspaceURI}
           tenantId={tenantId}
           preview={preview}
@@ -321,7 +315,6 @@ export default async function ProductPage(props: {
             {tab === ProductTab.Reviews && (
               <ReviewsTab
                 product={product}
-                workspaceURL={workspaceURL}
                 tenantId={tenantId}
                 client={client}
                 reviewPage={reviewPage}

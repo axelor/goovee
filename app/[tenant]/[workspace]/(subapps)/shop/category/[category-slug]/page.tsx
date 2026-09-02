@@ -20,12 +20,10 @@ export default async function Page(props: {
   const params = await props.params;
   const slug = params['category-slug'];
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

@@ -37,13 +37,10 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const productSlug = params['product-slug'];
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) return null;
@@ -88,13 +85,11 @@ async function Detail({
   params: {tenant: string; workspace: string; 'product-slug': string};
 }) {
   const productSlug = params['product-slug'];
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
   if (!productSlug) redirect(`${workspaceURI}/shop`);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 

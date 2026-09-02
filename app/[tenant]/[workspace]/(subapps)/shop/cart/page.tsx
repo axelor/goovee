@@ -25,12 +25,10 @@ async function CartView({
 }: {
   params: {tenant: string; workspace: string};
 }) {
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -55,6 +53,8 @@ async function CartView({
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) return notFound();

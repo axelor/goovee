@@ -26,16 +26,10 @@ export async function loadEditContext(params: {
   tenant: string;
   workspace: string;
 }) {
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (
@@ -57,6 +51,7 @@ export async function loadEditContext(params: {
   }
 
   const {client} = access.tenant;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   /* Seller-only area — the same hard gate as the contributions listing, so
@@ -98,7 +93,6 @@ export async function loadEditContext(params: {
 
   return {
     workspaceURI,
-    workspaceURL,
     tenantId,
     access,
     partnerId,

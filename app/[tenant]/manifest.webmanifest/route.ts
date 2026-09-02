@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {listTenantIds} from '@/tenant/config';
-import {tenantEntryPath} from '@/lib/core/url/server';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {buildManifest} from '@/lib/core/pwa/manifest';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
@@ -40,7 +40,7 @@ export async function GET(
   /* The same value the service worker in app/[tenant]/layout.tsx registers as
    * its scope — one function, because a browser installs an app only where the
    * page's worker encloses the manifest's scope and start address. */
-  const entry = tenantEntryPath(tenant, request.headers);
+  const entry = tenantURLs(tenant).entry(request.headers);
 
   return NextResponse.json(
     buildManifest({id: entry, startUrl: entry, scope: entry}),

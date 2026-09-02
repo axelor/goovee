@@ -34,12 +34,10 @@ export default async function Page(props: {
   const params = await props.params;
   const searchParams = await props.searchParams;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -78,7 +76,6 @@ export default async function Page(props: {
           user={user}
           client={client}
           workspaceURI={workspaceURI}
-          workspaceURL={workspaceURL}
           type={searchParams?.type === 'past' ? 'past' : 'active'}
           category={searchParams?.category || null}
           page={Number(searchParams?.page) || 1}
@@ -93,7 +90,6 @@ async function Magazine({
   user,
   client,
   workspaceURI,
-  workspaceURL,
   type,
   category,
   page,
@@ -102,7 +98,6 @@ async function Magazine({
   user?: User;
   client: Client;
   workspaceURI: string;
-  workspaceURL: string;
   type: 'active' | 'past';
   category: string | null;
   page: number;
@@ -231,7 +226,6 @@ async function Magazine({
       pastCount={pastTotal}
       categories={categories ?? []}
       workspaceURI={workspaceURI}
-      workspaceURL={workspaceURL}
       labels={labels}
       searchAction={searchEvents}
     />

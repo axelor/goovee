@@ -32,12 +32,10 @@ async function Invoices({
   const {limit, page, type, search} = searchParams;
   const invoiceType = type ?? INVOICE.UNPAID;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
@@ -62,6 +60,8 @@ async function Invoices({
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.url.key();
 
   const config = await getInvoicesConfig(access.workspace.config.id, client);
   if (!config) return notFound();

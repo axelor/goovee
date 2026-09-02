@@ -22,14 +22,13 @@ import {useNavigationVisibility} from '@/ui/hooks';
 import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
-import {toWorkspaceURI} from '@/utils/workspace-url';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
 import type {Subapp, Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
-type WorkspaceListItem = {id: string; name: string | null; url: string | null};
+import type {WorkspaceLink} from './workspace-links';
 
 function MobileSidebar({
   subapps,
@@ -37,7 +36,7 @@ function MobileSidebar({
   config,
 }: {
   subapps: Subapp[];
-  workspaces?: WorkspaceListItem[];
+  workspaces?: WorkspaceLink[];
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const pathname = usePathname();
@@ -77,7 +76,7 @@ function MobileSidebar({
             workspaces?.length === 1 ? (
               <Link href={workspaceURI}>
                 <p className="px-6 py-2">
-                  {workspaces[0]?.name || workspaces[0]?.url}
+                  {workspaces[0]?.name || workspaces[0]?.href}
                 </p>
               </Link>
             ) : (
@@ -86,14 +85,9 @@ function MobileSidebar({
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  {workspaces?.map((workspace: WorkspaceListItem) => (
-                    <SelectItem
-                      key={workspace.url}
-                      value={toWorkspaceURI(
-                        workspace.url ?? '',
-                        env.GOOVEE_PUBLIC_HOST,
-                      )}>
-                      {workspace.name || workspace.url}
+                  {workspaces?.map((workspace: WorkspaceLink) => (
+                    <SelectItem key={workspace.href} value={workspace.href}>
+                      {workspace.name || workspace.href}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -189,7 +183,7 @@ export function MobileMenu({
   cartCodes = [],
 }: {
   subapps: Subapp[];
-  workspaces?: WorkspaceListItem[];
+  workspaces?: WorkspaceLink[];
   workspace?: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   cartCodes?: string[];

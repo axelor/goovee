@@ -70,12 +70,10 @@ export default async function Page(props0: {
 
   const {limit = 7, page = 1, sort = DEFAULT_SORT} = searchParams;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 

@@ -79,8 +79,6 @@ async function Invoice({
      invoices app, and only sees invoices their partner owns. */
   const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 

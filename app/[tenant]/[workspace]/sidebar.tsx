@@ -26,13 +26,12 @@ import {APP_TITLE, SUBAPP_CODES, SUBAPP_PAGE, CHAT_TYPE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
 import {useEnvironment} from '@/lib/core/environment';
-import {toWorkspaceURI} from '@/utils/workspace-url';
 import {Link} from '@/ui/components/link';
 import type {Subapp} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
-type WorkspaceListItem = {id: string; name: string | null; url: string | null};
+import type {WorkspaceLink} from './workspace-links';
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = (name?.trim() || email?.split('@')[0] || '').toUpperCase();
@@ -49,7 +48,7 @@ export function Sidebar({
   config,
 }: {
   subapps: Subapp[];
-  workspaces?: WorkspaceListItem[];
+  workspaces?: WorkspaceLink[];
   showHome: boolean | null;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
@@ -86,9 +85,7 @@ export function Sidebar({
   // workspace — match it by id (fall back to URL), not the first in the list.
   const currentWorkspace =
     workspaces?.find(w => String(w.id) === String(workspaceID)) ??
-    workspaces?.find(
-      w => toWorkspaceURI(w.url ?? '', env.GOOVEE_PUBLIC_HOST) === workspaceURI,
-    );
+    workspaces?.find(w => w.href === workspaceURI);
   const workspaceName: string = currentWorkspace?.name || APP_TITLE;
 
   const isHomeActive = pathname === workspaceURI;
@@ -138,14 +135,9 @@ export function Sidebar({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {workspaces?.map((workspace: WorkspaceListItem) => (
-                  <SelectItem
-                    key={workspace.url}
-                    value={toWorkspaceURI(
-                      workspace.url ?? '',
-                      env.GOOVEE_PUBLIC_HOST,
-                    )}>
-                    {workspace.name || workspace.url}
+                {workspaces?.map((workspace: WorkspaceLink) => (
+                  <SelectItem key={workspace.href} value={workspace.href}>
+                    {workspace.name || workspace.href}
                   </SelectItem>
                 ))}
               </SelectContent>
