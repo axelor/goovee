@@ -1,12 +1,11 @@
 import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findSubapps, findWorkspace} from '@/orm/workspace';
+import {findSubapps} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/url';
-import {manager} from '@/lib/core/tenant';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
 import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';
 import {Home} from './home';
@@ -14,40 +13,41 @@ import {Home} from './home';
 export default async function Page(props: {
   params: Promise<{workspace: string; tenant: string}>;
 }) {
-  const params = await props.params;
-  const {tenant: tenantId} = params;
-  const session = await getSession();
+  const access = await ensureWorkspaceAccess({allowGuest: true});
 
-  const tenant = await manager.getTenant(tenantId);
+  if (!access.ok) {
+    /* Only an absent session is sent to login, and the gate returns that reason
+     * only for a workspace it has confirmed exists — so nobody is asked to sign
+     * in to reach an address that names nothing. The callback comes from the
+     * address rather than the gate, which resolved no workspace to build one
+     * from. */
+    if (access.reason === 'unauthenticated') {
+      const {workspaceURI, tenant} = workspacePathname(await props.params);
 
-  if (!tenant) {
-    return notFound();
+      redirect(
+        getLoginURL({
+          callbackurl: workspaceURI,
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+
+    notFound();
   }
 
+  const {user, tenant, workspace, url} = access;
   const {client} = tenant;
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-  const user = session?.user;
+  const tenantId = url.tenantId;
+  const workspaceURL = url.key();
+  const workspaceURI = url.forRouter();
 
   const loginURL = getLoginURL({
     callbackurl: workspaceURI,
     workspaceURI,
     [SEARCH_PARAMS.TENANT_ID]: tenantId,
   });
-
-  if (!workspaceURL) {
-    return user ? notFound() : redirect(loginURL);
-  }
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return user ? notFound() : redirect(loginURL);
-  }
 
   const config = await getShellConfig(workspace.config.id, client);
 
@@ -56,7 +56,7 @@ export default async function Page(props: {
   }
 
   const apps = await findSubapps({
-    user: session?.user,
+    user,
     url: workspaceURL,
     client,
   });
@@ -65,7 +65,7 @@ export default async function Page(props: {
     return (
       <Home
         client={client}
-        user={session?.user}
+        user={user}
         workspace={workspace}
         config={config}
         workspaceURI={workspaceURI}
