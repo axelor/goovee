@@ -4,16 +4,15 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
-import {findWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
+import {findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
 import {tenantURLs} from '@/lib/core/url/scope';
 import {getPortalRoot} from '@/utils/workspace-url';
 import {getPublicEnvironment} from '@/environment';
-import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {getShellConfig} from './orm/config';
@@ -32,35 +31,17 @@ const defaultTheme = {
   css: JSON.stringify(DEFAULT_THEME_OPTIONS),
 };
 
-export async function generateMetadata(props: {
-  params: Promise<{
-    tenant: string;
-    workspace: string;
-    websiteSlug: string;
-  }>;
-}): Promise<Metadata | null> {
-  const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+export async function generateMetadata(): Promise<Metadata | null> {
+  const granted = await ensureWorkspaceAccess({allowGuest: true});
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  const $workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!$workspace?.name) {
+  /* A title is the only thing at stake, so every denial and an unnamed
+   * workspace answer the same way: no metadata, and the page still renders. */
+  if (!granted.ok || !granted.workspace.name) {
     return null;
   }
 
   return {
-    title: $workspace?.name,
+    title: granted.workspace.name,
   };
 }
 
@@ -68,47 +49,37 @@ export default async function Layout(props: {
   params: Promise<{tenant: string; workspace: string}>;
   children: React.ReactNode;
 }) {
-  const params = await props.params;
-
   const {children} = props;
 
-  const {tenant: tenantId} = params;
-  const session = await getSession();
-  const user = session?.user;
+  const granted = await ensureWorkspaceAccess({allowGuest: true});
 
-  const {workspaceURL, workspaceURI, workspace} = workspacePathname(params);
+  if (!granted.ok) {
+    /* Only an absent session is sent to login, and the gate returns that reason
+     * only for a workspace it has confirmed exists — so nobody is asked to sign
+     * in to reach an address that names nothing. The callback comes from the
+     * address rather than the gate, which resolved no workspace to build one
+     * from. */
+    if (granted.reason === 'unauthenticated') {
+      const {workspaceURI, tenant} = workspacePathname(await props.params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return user
-      ? notFound()
-      : redirect(
-          getLoginURL({
-            callbackurl: workspaceURI,
-            workspaceURI,
-            [SEARCH_PARAMS.TENANT_ID]: tenantId,
-          }),
-        );
+      redirect(
+        getLoginURL({
+          callbackurl: workspaceURI,
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+
+    notFound();
   }
+
+  const {user, tenant, url} = granted;
   const {client} = tenant;
+  const $workspace = clone(granted.workspace);
 
-  const $workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
-
-  if (!$workspace) {
-    return user
-      ? notFound()
-      : redirect(
-          getLoginURL({
-            callbackurl: workspaceURI,
-            workspaceURI,
-            [SEARCH_PARAMS.TENANT_ID]: tenantId,
-          }),
-        );
-  }
+  const tenantId = url.tenantId;
+  const workspaceURI = url.forRouter();
 
   const config = await getShellConfig($workspace.config.id, client);
 
@@ -193,7 +164,7 @@ export default async function Layout(props: {
   return (
     <WorkspaceProvider
       id={$workspace.id}
-      workspace={workspace}
+      workspace={url.workspace}
       workspaceURI={workspaceURI}
       tenant={tenantId}
       theme={theme}>
