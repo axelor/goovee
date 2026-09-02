@@ -5,7 +5,6 @@ import {ZodIssueCode} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone, uniqueById} from '@/utils';
@@ -76,8 +75,6 @@ export async function mutate(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
   const {client} = access.tenant;
   const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
@@ -253,10 +250,7 @@ export async function mutate(
     }
 
     if (ticket.project?.id) {
-      revalidateWorkspacePath(
-        {tenantId, workspaceURL},
-        `/ticketing/projects/${ticket.project.id}/tickets`,
-      );
+      access.url.revalidate(`/ticketing/projects/${ticket.project.id}/tickets`);
     }
 
     return {

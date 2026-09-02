@@ -15,7 +15,6 @@ import {ID} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {filterPrivate} from '@/orm/filter';
 import {
   CreateComment,
@@ -118,8 +117,6 @@ export async function exitGroup({id, groupID, workspaceURI}: ExitGroupInput) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -145,7 +142,7 @@ export async function exitGroup({id, groupID, workspaceURI}: ExitGroupInput) {
         version: memberGroup.version,
       })
       .then(clone);
-    revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
+    access.url.revalidate(`/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -181,8 +178,6 @@ export async function joinGroup({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -214,7 +209,7 @@ export async function joinGroup({
       })
       .then(clone);
 
-    revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
+    access.url.revalidate(`/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -247,8 +242,6 @@ export async function saveGroupNotifications(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -284,7 +277,7 @@ export async function saveGroupNotifications(
     }
   }
 
-  revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
+  access.url.revalidate(`/${SUBAPP_CODES.forum}`);
 
   if (failedIds.length) {
     return {
@@ -442,7 +435,7 @@ export async function addPost(input: AddPostInput) {
         );
       }
     }
-    revalidateWorkspacePath({tenantId, workspaceURL}, `/${SUBAPP_CODES.forum}`);
+    access.url.revalidate(`/${SUBAPP_CODES.forum}`);
     return {success: true, data: clone(post)};
   } catch (error) {
     return {

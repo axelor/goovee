@@ -9,7 +9,7 @@ import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {manager} from '@/tenant';
 import {
   findContactByEmail,
@@ -357,7 +357,9 @@ export async function sendInvites(input: SendInvites) {
   if (inviteError) {
     return error(await t('Error sending invites, try again.'));
   } else {
-    revalidateWorkspacePath({tenantId, workspaceURL}, '/account/members');
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate('/account/members');
 
     let message = '';
 

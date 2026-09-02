@@ -11,7 +11,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import {t} from '@/locale/server';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {TENANT_HEADER} from '@/proxy';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
@@ -619,10 +619,9 @@ export async function validateStripePayment({
       }
     });
 
-    revalidateWorkspacePath(
-      {tenantId, workspaceURL},
-      `/${SUBAPP_CODES.invoices}/${$invoice.id}`,
-    );
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Stripe payment:', error);
@@ -884,10 +883,9 @@ export async function cancelStripeBankTransferPaymentIntent({
       client,
     });
 
-    revalidateWorkspacePath(
-      {tenantId, workspaceURL},
-      `/${SUBAPP_CODES.invoices}/${$invoice.id}`,
-    );
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: null};
   } catch (error) {
     console.error('Error Cancelling:', error);
@@ -1154,10 +1152,9 @@ export async function validatePayboxPayment({
       version: context.version,
       client,
     });
-    revalidateWorkspacePath(
-      {tenantId, workspaceURL},
-      `/${SUBAPP_CODES.invoices}/${$invoice.id}`,
-    );
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Paybox payment:', error);

@@ -8,49 +8,12 @@ import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
 import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 import {getPortalRoot, toWorkspaceURI} from '@/utils/workspace-url';
 
-import type {WorkspaceSubPath} from './index';
-
 /**
  * The host a tenant declares for itself, or undefined for a tenant the
  * configuration document does not hold.
  */
 export function tenantHost(tenantId: string): string | undefined {
   return getPublicEnvironment(getTenantConfig(tenantId)).GOOVEE_PUBLIC_HOST;
-}
-
-/**
- * The route-tree path of a workspace: `/{tenant}/{workspace}`, always both
- * segments, no base path, no host.
- *
- * This is the coordinate the route tree resolves for every request — the proxy
- * puts the tenant segment back on a host-routed address — so it is the shape
- * `revalidatePath` matches on and the shape a stored row survives in: it names
- * only what the row is about, never how the tenant is currently reached.
- *
- * Built from the stored `workspaceURL` rather than a workspace name, because
- * that URL is what every server action already holds access-checked.
- */
-export function routePathFromWorkspaceURL(
-  tenantId: string,
-  workspaceURL: string,
-): string {
-  const config = getTenantConfig(tenantId);
-  const workspaceURI = toWorkspaceURI(workspaceURL, tenantHost(tenantId));
-
-  /* A workspace URL under another root passes through toWorkspaceURI whole.
-   * Every path built on it would be wrong — a stored link carrying the old
-   * origin, a revalidation matching nothing — so the stale row is named here,
-   * once, instead of surfacing as links that quietly go nowhere. It means the
-   * workspace's stored URL was not updated when the tenant's address changed. */
-  if (!workspaceURI.startsWith('/')) {
-    throw new Error(
-      `Workspace URL '${workspaceURL}' is not under the portal root of tenant '${tenantId}'`,
-    );
-  }
-
-  return config && isHostRouted(config)
-    ? `/${tenantId}${workspaceURI}`
-    : workspaceURI;
 }
 
 /**
@@ -183,5 +146,3 @@ export function paymentReturnURL({
 
   return absoluteVisitorURL(tenantId, uri, query);
 }
-
-export type {WorkspaceSubPath};

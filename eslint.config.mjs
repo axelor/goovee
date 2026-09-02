@@ -23,7 +23,7 @@ const eslintConfig = defineConfig([
               name: 'next/cache',
               importNames: ['revalidatePath'],
               message:
-                'revalidatePath matches the route-tree path, which always carries the tenant segment — fed the visitor-shaped workspaceURI it silently revalidates nothing on a host-routed tenant. Use revalidateWorkspacePath or revalidateEverything from @/lib/core/url/revalidate.',
+                'revalidatePath matches the route-tree path, which always carries the tenant segment — fed the visitor-shaped workspaceURI it silently revalidates nothing on a host-routed tenant. Use access.url.revalidate(sub) inside an action, tenantURLs(id).workspace(slug).revalidate(sub) outside one, or revalidateEverything from @/lib/core/url/revalidate.',
             },
             {
               name: '@/lib/core/path/base-path',
@@ -38,11 +38,7 @@ const eslintConfig = defineConfig([
   },
   /* The named files hold the joins everything else is sent through. */
   {
-    files: [
-      'utils/workspace-url.ts',
-      'app/api/auth/**/route.ts',
-      'scripts/**',
-    ],
+    files: ['utils/workspace-url.ts', 'app/api/auth/**/route.ts', 'scripts/**'],
     rules: {
       'no-restricted-imports': 'off',
     },

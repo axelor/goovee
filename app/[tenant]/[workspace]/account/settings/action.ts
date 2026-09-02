@@ -7,7 +7,7 @@ import {z} from 'zod';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/proxy';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {findWorkspace} from '@/orm/workspace';
 import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
@@ -139,10 +139,9 @@ export async function removeWorkpace(data: RemoveWorkspace) {
         })
         .then(clone);
     }
-    revalidateWorkspacePath(
-      {tenantId, workspaceURL},
-      `/${SUBAPP_PAGE.account}`,
-    );
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_PAGE.account}`);
     return {
       success: true,
     };

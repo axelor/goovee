@@ -7,7 +7,7 @@ import {t} from '@/locale/server';
 import {manager} from '@/tenant';
 import {TENANT_HEADER} from '@/proxy';
 import {updatePreferences} from '@/orm/notification';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {
   UpdateNotificationPreferenceSchema,
   type UpdateNotificationPreference,
@@ -62,7 +62,9 @@ export async function updatePreference(data: UpdateNotificationPreference) {
       throw new Error();
     }
 
-    revalidateWorkspacePath({tenantId, workspaceURL}, '/account/notifications');
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate('/account/notifications');
 
     return {
       success: true,

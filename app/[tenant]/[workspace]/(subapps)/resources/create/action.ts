@@ -6,7 +6,6 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import type {Client} from '@/goovee/.generated/client';
@@ -87,7 +86,6 @@ export async function upload(input: UploadInput) {
   }
   const {user} = access;
   const {client} = access.tenant;
-  const tenantId = access.url.tenantId;
   const workspaceURL = access.url.key();
 
   const parent = await fetchFile({
@@ -160,10 +158,7 @@ export async function upload(input: UploadInput) {
       });
     });
 
-    revalidateWorkspacePath(
-      {tenantId, workspaceURL},
-      `/${SUBAPP_CODES.resources}/folder/${parentId}`,
-    );
+    access.url.revalidate(`/${SUBAPP_CODES.resources}/folder/${parentId}`);
   } catch (err) {
     return {
       error: true,

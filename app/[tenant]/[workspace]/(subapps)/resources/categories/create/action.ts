@@ -8,7 +8,6 @@ import {accessMessage} from '@/lib/core/access/denial';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {clone} from '@/utils';
-import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
@@ -38,7 +37,6 @@ export async function create(formData: FormData) {
 
   const {user} = access;
   const {client} = access.tenant;
-  const tenantId = access.url.tenantId;
   const workspaceURL = access.url.key();
 
   const parent = await fetchFile({
@@ -114,10 +112,7 @@ export async function create(formData: FormData) {
       })
       .then(clone);
 
-    revalidateWorkspacePath(
-      {tenantId, workspaceURL},
-      `/${SUBAPP_CODES.resources}`,
-    );
+    access.url.revalidate(`/${SUBAPP_CODES.resources}`);
 
     return {
       success: true,
