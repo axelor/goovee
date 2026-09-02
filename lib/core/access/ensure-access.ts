@@ -3,6 +3,8 @@ import 'server-only';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {manager, type Tenant} from '@/tenant';
+import {currentWorkspace} from '@/lib/core/url/current';
+import {tenantURLs, type ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {findWorkspace, type Subapp, type Workspace} from '@/orm/workspace';
 import type {User} from '@/types';
 
@@ -30,6 +32,14 @@ export type AccessResult<TAllowGuest extends boolean = false> =
       subapp: Subapp;
       workspace: Workspace;
       tenant: Tenant;
+      /**
+       * The addresses of the workspace just authorized — the same object
+       * `tenantURLs(id).workspace(slug)` returns, so the only difference from
+       * building one directly is that holding this one is proof the access
+       * check passed. That is what `url.fromClient` relies on for the second
+       * half of its guarantee.
+       */
+      url: ServerWorkspaceURLs;
     }
   | {
       ok: false;
@@ -45,19 +55,63 @@ export type AccessResult<TAllowGuest extends boolean = false> =
  * the app actually exist, so a guest is never bounced to login for something
  * that does not exist (the caller turns those reasons into a 404 instead).
  */
-export async function ensureAccess<TAllowGuest extends boolean = false>({
-  code,
-  url,
-  tenantId,
-  allowGuest = false as TAllowGuest,
-}: {
+export async function ensureAccess<TAllowGuest extends boolean = false>(args: {
+  code: string;
+  allowGuest?: TAllowGuest;
+}): Promise<AccessResult<TAllowGuest>>;
+
+/**
+ * @deprecated Pass `{code}` alone. The tenant comes from the header the proxy
+ *   sets and the workspace from the address the request arrived at, so neither
+ *   has to be carried into the action — and a client cannot name a workspace it
+ *   is not on.
+ */
+export async function ensureAccess<TAllowGuest extends boolean = false>(args: {
   code: string;
   url: string;
   tenantId: Tenant['id'];
   allowGuest?: TAllowGuest;
+}): Promise<AccessResult<TAllowGuest>>;
+
+export async function ensureAccess<TAllowGuest extends boolean = false>({
+  code,
+  url: givenURL,
+  tenantId: givenTenantId,
+  allowGuest = false as TAllowGuest,
+}: {
+  code: string;
+  url?: string;
+  tenantId?: Tenant['id'];
+  allowGuest?: TAllowGuest;
 }): Promise<AccessResult<TAllowGuest>> {
-  const tenant = await manager.getTenant(tenantId);
   const user = (await getSession())?.user;
+
+  /* Both forms resolve the workspace through the same builder, so the key they
+   * look up cannot drift apart while callers are still being moved over. The
+   * given form keeps looking the workspace up by the URL it was handed rather
+   * than by `scope.key()`: the two agree for a row written against the tenant's
+   * current configuration, and where they disagree the caller's value is the
+   * one that used to work.
+   *
+   * The overloads above admit the pair or neither, so a URL here always arrives
+   * with the tenant it belongs to. */
+  const scope =
+    givenURL && givenTenantId
+      ? tenantURLs(givenTenantId).workspaceByKey(givenURL)
+      : await currentWorkspace();
+
+  /* An address that names no workspace is answered like one naming a workspace
+   * that does not exist, so a request shaped that way — a tenant's landing
+   * address, a probe carrying an escaped separator — is denied rather than
+   * raising. */
+  if (!scope) {
+    return {ok: false, user, reason: 'workspace-not-found'};
+  }
+
+  const tenantId = givenTenantId ?? scope.tenantId;
+  const url = givenURL ?? scope.key();
+
+  const tenant = await manager.getTenant(tenantId);
 
   if (!tenant) {
     return {ok: false, user, reason: 'workspace-not-found'};
@@ -76,6 +130,7 @@ export async function ensureAccess<TAllowGuest extends boolean = false>({
       subapp,
       workspace,
       tenant,
+      url: scope,
     };
   }
 
