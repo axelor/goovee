@@ -4,7 +4,7 @@ import 'server-only';
 import {getSession} from '@/auth';
 import {manager, type Tenant} from '@/tenant';
 import {currentWorkspace} from '@/lib/core/url/current';
-import {tenantURLs, type ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {findWorkspace, type Subapp, type Workspace} from '@/orm/workspace';
 import type {User} from '@/types';
 
@@ -48,57 +48,29 @@ export type AccessResult<TAllowGuest extends boolean = false> =
     };
 
 /**
- * Resolves whether the current visitor may reach `code` in this workspace.
+ * Resolves whether the current visitor may reach `code` in the workspace the
+ * request is addressed to.
+ *
+ * The workspace and the tenant are read from the request, not given: a caller
+ * names only the application it is gating. That is what stops a client naming
+ * a workspace it is not on — it can only ever act where it is looking.
+ *
  * The positive case is a single scoped query; on denial it runs a couple of
  * extra probes to report a precise reason. With `allowGuest` false (default) a
  * guest is never authorized — but is only sent to login when the workspace AND
  * the app actually exist, so a guest is never bounced to login for something
  * that does not exist (the caller turns those reasons into a 404 instead).
  */
-export async function ensureAccess<TAllowGuest extends boolean = false>(args: {
-  code: string;
-  allowGuest?: TAllowGuest;
-}): Promise<AccessResult<TAllowGuest>>;
-
-/**
- * @deprecated Pass `{code}` alone. The tenant comes from the header the proxy
- *   sets and the workspace from the address the request arrived at, so neither
- *   has to be carried into the action — and a client cannot name a workspace it
- *   is not on.
- */
-export async function ensureAccess<TAllowGuest extends boolean = false>(args: {
-  code: string;
-  url: string;
-  tenantId: Tenant['id'];
-  allowGuest?: TAllowGuest;
-}): Promise<AccessResult<TAllowGuest>>;
-
 export async function ensureAccess<TAllowGuest extends boolean = false>({
   code,
-  url: givenURL,
-  tenantId: givenTenantId,
   allowGuest = false as TAllowGuest,
 }: {
   code: string;
-  url?: string;
-  tenantId?: Tenant['id'];
   allowGuest?: TAllowGuest;
 }): Promise<AccessResult<TAllowGuest>> {
   const user = (await getSession())?.user;
 
-  /* Both forms resolve the workspace through the same builder, so the key they
-   * look up cannot drift apart while callers are still being moved over. The
-   * given form keeps looking the workspace up by the URL it was handed rather
-   * than by `scope.key()`: the two agree for a row written against the tenant's
-   * current configuration, and where they disagree the caller's value is the
-   * one that used to work.
-   *
-   * The overloads above admit the pair or neither, so a URL here always arrives
-   * with the tenant it belongs to. */
-  const scope =
-    givenURL && givenTenantId
-      ? tenantURLs(givenTenantId).workspaceByKey(givenURL)
-      : await currentWorkspace();
+  const scope = await currentWorkspace();
 
   /* An address that names no workspace is answered like one naming a workspace
    * that does not exist, so a request shaped that way — a tenant's landing
@@ -108,8 +80,8 @@ export async function ensureAccess<TAllowGuest extends boolean = false>({
     return {ok: false, user, reason: 'workspace-not-found'};
   }
 
-  const tenantId = givenTenantId ?? scope.tenantId;
-  const url = givenURL ?? scope.key();
+  const {tenantId} = scope;
+  const url = scope.key();
 
   const tenant = await manager.getTenant(tenantId);
 
