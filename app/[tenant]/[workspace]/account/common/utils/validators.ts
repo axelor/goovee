@@ -54,7 +54,6 @@ export const UpdateNotificationPreferenceSchema = z.object({
   code: NotificationAppCodeSchema,
   workspaceURL: WorkspaceURLSchema,
   workspaceURI: z.string().min(1),
-  tenant: z.string().min(1, 'Tenant is required'),
   data: z.object({
     activateNotification: z.boolean().optional(),
     record: z
