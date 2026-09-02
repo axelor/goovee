@@ -1,4 +1,3 @@
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {
@@ -44,7 +43,6 @@ export function TicketSelect({
   const searchRef = useRef<string | undefined>(INIT_SEARCH_VALUE);
   const [loading, setLoading] = useState(true);
 
-  const {workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const [tickets, setTickets] = useState<Cloned<TicketSearch>[]>([]);
 
@@ -54,7 +52,6 @@ export function TicketSelect({
       try {
         const {error, message, data} = await searchTickets({
           search: search,
-          workspaceURL,
           ...(projectId && {projectId}),
           ...(excludeListIds && {excludeList: excludeListIds.split(',')}),
         });
@@ -79,7 +76,7 @@ export function TicketSelect({
         }
       }
     },
-    [workspaceURL, toast, excludeListIds, projectId],
+    [toast, excludeListIds, projectId],
   );
 
   const debouncedFetchTickets = useMemo(

@@ -181,26 +181,18 @@ export async function RecommendedNewsWrapper({
   navigatingPathFrom,
   isRecommendationEnable,
   config,
-  workspaceURL,
-  tenantId,
   categoryIds,
 }: {
   navigatingPathFrom: string;
   isRecommendationEnable: boolean;
   config: NewsConfig | Cloned<NewsConfig>;
-  workspaceURL: string;
-  tenantId: string;
   categoryIds: string[];
 }) {
   if (!isRecommendationEnable) {
     return;
   }
 
-  const newsResult = await findRecommendedNews({
-    workspaceURL,
-    tenantId,
-    categoryIds,
-  });
+  const newsResult = await findRecommendedNews({categoryIds});
   const title = await t(RECOMMENDED_NEWS);
 
   if (!Array.isArray(newsResult) || !newsResult.length) {

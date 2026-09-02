@@ -35,7 +35,6 @@ type ProductEditPageProps = {
   requiresReview: boolean;
   allowToPublish: boolean;
   workspaceURI: string;
-  workspaceURL: string;
   /** Where Save and Cancel navigate to. */
   returnHref: string;
 };
@@ -53,7 +52,6 @@ export function ProductEditPage({
   requiresReview,
   allowToPublish,
   workspaceURI,
-  workspaceURL,
   returnHref,
 }: ProductEditPageProps) {
   const router = useRouter();
@@ -62,7 +60,6 @@ export function ProductEditPage({
     defaultType,
     initialVersions,
     initialTotal,
-    workspaceURL,
     onSaved: () => router.push(returnHref, {scroll: false}),
   });
   const leave = () => router.push(returnHref, {scroll: false});

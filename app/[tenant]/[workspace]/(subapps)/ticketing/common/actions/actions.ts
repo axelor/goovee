@@ -1,11 +1,9 @@
 'use server';
 
 import {after} from 'next/server';
-import {headers} from 'next/headers';
 import {ZodIssueCode} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {TENANT_HEADER} from '@/proxy';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {t, getTranslation} from '@/locale/server';
@@ -65,23 +63,12 @@ export async function mutate(
   props: MutateProps,
   config?: ActionConfig,
 ): ActionResponse<MutateResponse> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const {workspaceURL, action} = props;
+  const {action} = props;
 
   const {force} = config || {};
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -89,6 +76,8 @@ export async function mutate(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {client} = access.tenant;
   const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
@@ -197,8 +186,7 @@ export async function mutate(
           contacts,
           user,
           workspaceUserId: access.workspace.workspaceUser?.id,
-          workspaceURL,
-          tenantId,
+          url: access.url,
           client,
         }),
       );
@@ -257,8 +245,7 @@ export async function mutate(
           contacts,
           user: access.user,
           workspaceUserId: access.workspace.workspaceUser?.id,
-          workspaceURL,
-          tenantId,
+          url: access.url,
           client,
         }),
       );
@@ -282,7 +269,6 @@ export async function mutate(
 }
 
 export type UpdateAssignmentProps = {
-  workspaceURL: string;
   data: {id: string; version: number; assignment: number};
 };
 
@@ -290,22 +276,11 @@ export async function updateAssignment(
   props: UpdateAssignmentProps,
   config?: ActionConfig,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
+  const {data} = props;
   const {force} = config || {};
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -364,8 +339,7 @@ export async function updateAssignment(
         contacts,
         user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
-        workspaceURL,
-        tenantId,
+        url: access.url,
         client,
       }),
     );
@@ -376,7 +350,6 @@ export async function updateAssignment(
 }
 
 export type TicketActionProps = {
-  workspaceURL: string;
   data: {id: string; version: number};
 };
 
@@ -384,22 +357,11 @@ export async function closeTicket(
   props: TicketActionProps,
   config?: ActionConfig,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
+  const {data} = props;
   const {force} = config || {};
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -467,8 +429,7 @@ export async function closeTicket(
         contacts,
         user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
-        workspaceURL,
-        tenantId,
+        url: access.url,
         client,
       }),
     );
@@ -483,22 +444,11 @@ export async function cancelTicket(
   props: TicketActionProps,
   config?: ActionConfig,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
+  const {data} = props;
   const {force} = config || {};
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -565,8 +515,7 @@ export async function cancelTicket(
         contacts,
         user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
-        workspaceURL,
-        tenantId,
+        url: access.url,
         client,
       }),
     );
@@ -578,28 +527,16 @@ export async function cancelTicket(
 }
 
 type CreateRelatedLinkProps = {
-  workspaceURL: string;
   data: {currentTicketId: ID; linkTicketId: ID; linkType: ID};
 };
 
 export async function createRelatedLink(
   props: CreateRelatedLinkProps,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {data} = props;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -641,28 +578,16 @@ export async function createRelatedLink(
 }
 
 type CreateChildLinkProps = {
-  workspaceURL: string;
   data: {currentTicketId: ID; linkTicketId: ID};
 };
 
 export async function createChildLink(
   props: CreateChildLinkProps,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {data} = props;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -704,21 +629,10 @@ export async function createChildLink(
 export async function createParentLink(
   props: CreateChildLinkProps,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {data} = props;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -758,28 +672,16 @@ export async function createParentLink(
 }
 
 type DeleteChildLinkProps = {
-  workspaceURL: string;
   data: {currentTicketId: ID; linkTicketId: ID};
 };
 
 export async function deleteChildLink(
   props: DeleteChildLinkProps,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {data} = props;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -819,28 +721,16 @@ export async function deleteChildLink(
 }
 
 type DeleteParentLinkProps = {
-  workspaceURL: string;
   data: {currentTicketId: ID; linkTicketId: ID};
 };
 
 export async function deleteParentLink(
   props: DeleteParentLinkProps,
 ): ActionResponse<true> {
-  const {workspaceURL, data} = props;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {data} = props;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -879,28 +769,16 @@ export async function deleteParentLink(
   }
 }
 type DeleteRelatedLinkProps = {
-  workspaceURL: string;
   data: {currentTicketId: ID; linkTicketId: ID; linkId: ID};
 };
 
 export async function deleteRelatedLink(
   props: DeleteRelatedLinkProps,
 ): ActionResponse<number> {
-  const {workspaceURL, data} = props;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {data} = props;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -939,28 +817,15 @@ export async function deleteRelatedLink(
 
 export async function searchTickets({
   search,
-  workspaceURL,
   projectId,
   excludeList,
 }: {
   search?: string;
-  workspaceURL: string;
   projectId?: ID;
   excludeList?: ID[];
 }): ActionResponse<Cloned<TicketSearch>[]> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -982,21 +847,18 @@ export async function searchTickets({
 }
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const {
+    workspaceURL: _workspaceURL,
+    workspaceURI: _workspaceURI,
+    ...rest
+  } = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 
@@ -1004,6 +866,8 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user, subapp} = access;
   const {client} = access.tenant;
   const workspaceConfig = await getTicketingConfig(
@@ -1096,8 +960,7 @@ export const createComment: CreateComment = async props => {
         after(async () => {
           await notifyUser({
             userId: partner.id,
-            tenantId,
-            workspaceURL,
+            url: access.url,
             client,
             payload: {
               title: await tr(
@@ -1128,8 +991,7 @@ export const createComment: CreateComment = async props => {
 
           return {
             userId: contact.id,
-            tenantId,
-            workspaceURL,
+            url: access.url,
             client,
             payload: {
               title: await tr(
@@ -1189,17 +1051,11 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const {workspaceURL: _workspaceURL, ...rest} =
+    FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
 

@@ -75,7 +75,7 @@ export function ShopCart({
   displayPrices?: boolean;
 }) {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
   const pathname = usePathname() ?? '';
   const {cart, loaded: cartLoaded, removeItem, updateQuantity} = useCart();
   const {data: session} = authClient.useSession();
@@ -130,9 +130,7 @@ export function ShopCart({
 
       try {
         const results = await Promise.all(
-          items.map((i: CartItem) =>
-            findProduct({id: String(i.product), workspaceURL}),
-          ),
+          items.map((i: CartItem) => findProduct({id: String(i.product)})),
         );
         if (cancelled) return;
         const resolved = results.filter((p): p is ComputedProduct =>
@@ -158,7 +156,7 @@ export function ShopCart({
     return () => {
       cancelled = true;
     };
-  }, [cart, cartLoaded, workspaceURL, removeItem]);
+  }, [cart, cartLoaded, removeItem]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])

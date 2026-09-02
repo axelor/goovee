@@ -49,7 +49,7 @@ export function NewsTopNav({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   const newsBase = `${workspaceURI}/${SUBAPP_CODES.news}`;
   // Only look at the path *after* the news base, so a tenant or workspace segment
@@ -109,7 +109,7 @@ export function NewsTopNav({
               placeholder={i18n.t('Search an article…')}
               searchKey="title"
               findQuery={({query}: {query: string}) =>
-                findSearchNews({workspaceURL, search: query})
+                findSearchNews({search: query})
                   .then(r => ('error' in r ? [] : r))
                   .catch(() => [])
               }

@@ -16,7 +16,6 @@ import {ProductFormDialog} from '../product-edit';
 
 type Props = {
   workspaceURI: string;
-  workspaceURL: string;
   productId: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
@@ -36,7 +35,6 @@ type Props = {
 
 export function EditProductButton({
   workspaceURI,
-  workspaceURL,
   productId,
   categories,
   licenses,
@@ -57,7 +55,7 @@ export function EditProductButton({
   const handleOpen = async () => {
     setLoading(true);
     try {
-      const result = await loadMyProductForEdit({productId, workspaceURL});
+      const result = await loadMyProductForEdit({productId});
       if (!result.success) {
         toast({variant: 'destructive', title: result.message});
         return;
@@ -101,7 +99,6 @@ export function EditProductButton({
           onOpenChange={setOpen}
           mode="edit"
           workspaceURI={workspaceURI}
-          workspaceURL={workspaceURL}
           categories={categories}
           licenses={licenses}
           compatibilityVersions={compatibilityVersions}

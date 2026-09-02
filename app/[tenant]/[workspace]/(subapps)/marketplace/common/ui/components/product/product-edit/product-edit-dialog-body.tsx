@@ -21,7 +21,6 @@ import {VersionSection} from './version-section';
 export type ProductEditDialogBodyProps = {
   mode: 'create' | 'edit';
   workspaceURI: string;
-  workspaceURL: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
@@ -59,7 +58,6 @@ export type ProductEditDialogBodyProps = {
 export function ProductEditDialogBody({
   mode,
   workspaceURI,
-  workspaceURL,
   categories,
   licenses,
   compatibilityVersions,
@@ -107,7 +105,6 @@ export function ProductEditDialogBody({
         initialVersions={initialVersions}
         initialTotal={initialTotal}
         workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         categories={categories}
         licenses={licenses}
         compatibilityVersions={compatibilityVersions}
@@ -137,7 +134,6 @@ function DialogForm({
   initialVersions,
   initialTotal,
   workspaceURI,
-  workspaceURL,
   categories,
   licenses,
   compatibilityVersions,
@@ -158,7 +154,6 @@ function DialogForm({
     defaultType,
     initialVersions,
     initialTotal,
-    workspaceURL,
     onSaved,
     onInvalidLocation: location => {
       /* Reveal whatever the user can't currently see so the error is visible. */

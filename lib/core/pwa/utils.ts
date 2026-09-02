@@ -6,7 +6,7 @@ import type {Client} from '@/goovee/.generated/client';
 import {getGlobalConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import {fromStoredLink, toStoredLink} from '@/lib/core/url/persisted-link';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -383,8 +383,15 @@ async function deliver({
 
 export type NotifyUserArgs = {
   userId: string;
-  tenantId: string;
-  workspaceURL?: string;
+  /**
+   * The workspace the notification belongs to, which also names the tenant it
+   * is signed and stored for.
+   *
+   * An action holds one from `ensureAccess`; a caller with no request — the
+   * notification webhook, a script — builds the same object with
+   * `tenantURLs(id).workspace(slug)`.
+   */
+  url: ServerWorkspaceURLs;
   client: Client;
   payload: Omit<
     NotificationPayload,
@@ -394,10 +401,9 @@ export type NotifyUserArgs = {
      * Where the notification points, as a path below the workspace —
      * `/forum/post/12`. An emitter names only that: how the workspace itself
      * is addressed is decided here, once, for the stored row and again for
-     * each reader. Dropped when `workspaceURL` is not given, since there is
-     * no workspace to point into.
+     * each reader.
      */
-    link?: WorkspaceSubPath;
+    link: WorkspaceSubPath;
   };
   /**
    * When provided, called with the total unread count for this tag (including
@@ -436,13 +442,15 @@ function emptyReport(): PushDeliveryReport {
  * when there is nothing to deliver — the record is still stored. */
 async function prepare({
   userId,
-  tenantId,
-  workspaceURL,
+  url,
   client,
   payload,
   getReplacementTitle,
 }: NotifyUserArgs): Promise<PreparedDelivery | null> {
   if (!client) return null;
+
+  const {tenantId} = url;
+  const workspaceURL = url.key();
 
   const {link, ...pushPayload} = payload;
 
@@ -450,10 +458,7 @@ async function prepare({
    * that survives the tenant getting a new host, a new base path or a move
    * between path and host routing. Readers render it for the visitor against
    * the configuration of their moment, not this one. */
-  const storedLink =
-    link && workspaceURL
-      ? toStoredLink({tenantId, workspaceURL}, link)
-      : undefined;
+  const storedLink = url.routePath(link);
 
   let unreadCount = 1; // +1 for the notification we are about to create
   if (getReplacementTitle && payload.tag) {
@@ -479,7 +484,7 @@ async function prepare({
     dbNotification = await client.pushNotification.create({
       data: {
         partner: {select: {id: userId}},
-        workspace: workspaceURL ? {select: {url: workspaceURL}} : undefined,
+        workspace: {select: {url: workspaceURL}},
         title: payload.title,
         body: payload.body,
         url: storedLink,
@@ -526,7 +531,7 @@ async function prepare({
    * of the origin it runs on. */
   const payloadJson = serializeWithinLimit({
     ...pushPayload,
-    url: storedLink ? fromStoredLink(storedLink, tenantId) : undefined,
+    url: url.forRouter(link),
     title: pushTitle,
     tenantId,
     workspaceURL,

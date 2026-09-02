@@ -71,7 +71,7 @@ export function ForumGroup({
   commentsEnabled: boolean;
   backHref: string;
 }) {
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
   const {toast} = useToast();
@@ -105,13 +105,11 @@ export function ForumGroup({
         ? await joinGroup({
             groupID: group.id,
             userId,
-            workspaceURL,
             workspaceURI,
           })
         : await exitGroup({
             id: memberRecordId ?? '',
             groupID: group.id,
-            workspaceURL,
             workspaceURI,
           });
       setPending(false);

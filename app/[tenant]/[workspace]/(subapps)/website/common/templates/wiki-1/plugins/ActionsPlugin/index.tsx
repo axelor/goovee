@@ -18,7 +18,6 @@ import {
 } from 'lexical';
 import {useEffect, useState} from 'react';
 
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import {useParams, useRouter} from 'next/navigation';
@@ -47,8 +46,6 @@ export default function ActionsPlugin({
   contentId: string;
   contentVersion: number;
 }): JSX.Element {
-  const {workspaceURL} = useWorkspace();
-
   const params = useParams();
   const {toast} = useToast();
   const router = useRouter();
@@ -66,7 +63,6 @@ export default function ActionsPlugin({
     setSaving(true);
     try {
       const {error, message} = await updateWikiContent({
-        workspaceURL,
         websiteSlug: params.websiteSlug as string,
         websitePageSlug: params.websitePageSlug as string,
         contentId,

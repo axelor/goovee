@@ -1,12 +1,10 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
@@ -43,34 +41,20 @@ import {
 
 export async function paypalCaptureOrder({
   orderId,
-  workspaceURL,
 }: PaypalCaptureOrderInput): ActionResponse<string> {
-  const parsedPaypalCapture = PaypalCaptureOrderSchema.safeParse({
-    orderId,
-    workspaceURL,
-  });
+  const parsedPaypalCapture = PaypalCaptureOrderSchema.safeParse({orderId});
   if (!parsedPaypalCapture.success) {
     return {error: true, message: z.prettifyError(parsedPaypalCapture.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid tenant'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
+  const tenantId = access.url.tenantId;
   const {user, tenant} = access;
   const {client} = tenant;
 
@@ -183,30 +167,20 @@ export async function paypalCaptureOrder({
   }
 }
 
-export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
-  const parsedCartOrder = CartOrderSchema.safeParse({cart, workspaceURL});
+export async function paypalCreateOrder({cart}: CartOrderInput) {
+  const parsedCartOrder = CartOrderSchema.safeParse({cart});
   if (!parsedCartOrder.success) {
     return {error: true, message: z.prettifyError(parsedCartOrder.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid tenant'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
+  const tenantId = access.url.tenantId;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -296,33 +270,21 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   }
 }
 
-export async function createStripeCheckoutSession({
-  cart,
-  workspaceURL,
-}: CartOrderInput) {
-  const parsedCartOrder = CartOrderSchema.safeParse({cart, workspaceURL});
+export async function createStripeCheckoutSession({cart}: CartOrderInput) {
+  const parsedCartOrder = CartOrderSchema.safeParse({cart});
   if (!parsedCartOrder.success) {
     return {error: true, message: z.prettifyError(parsedCartOrder.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid tenant'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user} = access;
   const {client} = access.tenant;
 
@@ -428,11 +390,9 @@ export async function createStripeCheckoutSession({
 
 export async function validateStripePayment({
   stripeSessionId,
-  workspaceURL,
 }: ValidateStripePaymentInput): ActionResponse<string> {
   const parsedStripeValidation = ValidateStripePaymentSchema.safeParse({
     stripeSessionId,
-    workspaceURL,
   });
   if (!parsedStripeValidation.success) {
     return {
@@ -441,24 +401,14 @@ export async function validateStripePayment({
     };
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid tenant'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
+  const tenantId = access.url.tenantId;
   const {user, tenant} = access;
   const {client} = tenant;
 
@@ -573,38 +523,21 @@ export async function validateStripePayment({
   }
 }
 
-export async function payboxCreateOrder({
-  cart,
-  workspaceURL,
-  uri,
-}: PayboxCreateOrderInput) {
-  const parsedPayboxCreate = PayboxCreateOrderSchema.safeParse({
-    cart,
-    workspaceURL,
-    uri,
-  });
+export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
+  const parsedPayboxCreate = PayboxCreateOrderSchema.safeParse({cart, uri});
   if (!parsedPayboxCreate.success) {
     return {error: true, message: z.prettifyError(parsedPayboxCreate.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid tenant'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user} = access;
   const {client} = access.tenant;
 
@@ -709,11 +642,9 @@ export async function payboxCreateOrder({
 
 export async function validatePayboxPayment({
   params,
-  workspaceURL,
 }: ValidatePayboxPaymentInput): ActionResponse<string> {
   const parsedPayboxValidation = ValidatePayboxPaymentSchema.safeParse({
     params,
-    workspaceURL,
   });
   if (!parsedPayboxValidation.success) {
     return {
@@ -722,19 +653,8 @@ export async function validatePayboxPayment({
     };
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid tenant'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok)

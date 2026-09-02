@@ -29,7 +29,6 @@ const CODE_REGEX = (code: string) =>
 
 type VisibilityHandler = (
   subPath: string,
-  workspaceURL: string,
   userId: string | undefined,
 ) => Promise<boolean>;
 
@@ -49,7 +48,6 @@ const HANDLERS: Array<Handler> = [
 
 async function navigationVisibilityForEvents(
   subPath: string,
-  workspaceURL: string,
   userId: string | undefined,
 ): Promise<boolean> {
   const handler = HANDLERS.find(h => h.code === SUBAPP_CODES.events)!;
@@ -60,7 +58,7 @@ async function navigationVisibilityForEvents(
   if (match?.groups) {
     const {slug} = match.groups;
 
-    const response = await fetchEvent({slug, workspaceURL});
+    const response = await fetchEvent({slug});
     if (response?.success) {
       const {
         data: {isHidden},
@@ -81,7 +79,7 @@ export function useNavigationVisibility() {
 
   const pathname = usePathname();
 
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {data: session} = authClient.useSession();
   const user = session?.user;
   const userId = user?.id;
@@ -109,11 +107,7 @@ export function useNavigationVisibility() {
 
         if (matchedHandler && subPath) {
           setLoading(true);
-          const visible = await matchedHandler.visibility(
-            subPath,
-            workspaceURL,
-            userId,
-          );
+          const visible = await matchedHandler.visibility(subPath, userId);
           if (mounted) setVisible(visible);
         } else {
           if (mounted) setVisible(true);
@@ -130,7 +124,7 @@ export function useNavigationVisibility() {
     return () => {
       mounted = false;
     };
-  }, [pathname, userId, workspaceURI, workspaceURL]);
+  }, [pathname, userId, workspaceURI]);
 
   return useMemo(() => ({visible, loading}), [visible, loading]);
 }

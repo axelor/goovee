@@ -74,7 +74,7 @@ export function ShopCheckout({
   orderSubapp?: Subapp | null;
   labels: ShopCheckoutLabels;
 }) {
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
   const {cart, loaded: cartLoaded} = useCart();
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
@@ -121,9 +121,7 @@ export function ShopCheckout({
 
       try {
         const results = await Promise.all(
-          items.map((i: CartItem) =>
-            findProduct({id: String(i.product), workspaceURL}),
-          ),
+          items.map((i: CartItem) => findProduct({id: String(i.product)})),
         );
         if (!cancelled) {
           const resolved = results.filter((p): p is ComputedProduct =>
@@ -139,7 +137,7 @@ export function ShopCheckout({
     return () => {
       cancelled = true;
     };
-  }, [cart, cartLoaded, workspaceURL]);
+  }, [cart, cartLoaded]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])
@@ -456,7 +454,6 @@ function CheckoutAddressPicker({
   loadingLabel: string;
 }) {
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
-  const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
     null,
@@ -472,12 +469,8 @@ function CheckoutAddressPicker({
     (async () => {
       try {
         const [list, def] = await Promise.all([
-          isInvoicing
-            ? fetchInvoicingAddresses({workspaceURL})
-            : fetchDeliveryAddresses({workspaceURL}),
-          isInvoicing
-            ? findDefaultInvoicing({workspaceURL})
-            : findDefaultDelivery({workspaceURL}),
+          isInvoicing ? fetchInvoicingAddresses() : fetchDeliveryAddresses(),
+          isInvoicing ? findDefaultInvoicing() : findDefaultDelivery(),
         ]);
         if (cancelled) return;
         setAddresses((list as PartnerAddress[] | null) ?? []);

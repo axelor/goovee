@@ -28,7 +28,6 @@ type ProductsListTabProps = {
   products: ListMyProduct[];
   title: string;
   workspaceURI: string;
-  workspaceURL: string;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
@@ -44,7 +43,6 @@ export async function ProductsListTab({
   products,
   title,
   workspaceURI,
-  workspaceURL,
   categories,
   licenses,
   compatibilityVersions,
@@ -61,7 +59,6 @@ export async function ProductsListTab({
         products={clone(products)}
         title={title}
         workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         categories={clone(categories)}
         licenses={clone(licenses)}
         compatibilityVersions={clone(compatibilityVersions)}

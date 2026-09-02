@@ -1,13 +1,11 @@
 'use server';
 
 import {after} from 'next/server';
-import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
-import {TENANT_HEADER} from '@/proxy';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {getQuotationsConfig} from '../orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
@@ -30,21 +28,16 @@ import {NotificationTag} from '@/pwa/tags';
 import {findQuotation} from '../orm/quotations';
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
+  /* The workspace and its visitor prefix are pulled out of `rest` and left
+   * unread: the workspace commented on is the one the request arrived at. */
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -90,7 +83,7 @@ export const createComment: CreateComment = async props => {
     id: rest.recordId,
     client,
     params: {where: quotationWhereClause},
-    workspaceURL,
+    workspaceURL: access.url.key(),
   });
   if (!quotation) {
     return {error: true, message: await t('Record not found')};
@@ -117,14 +110,13 @@ export const createComment: CreateComment = async props => {
       const quotationLink: WorkspaceSubPath = `/${SUBAPP_CODES.quotations}/${rest.recordId}#comment-${comment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
-        tenant: tenantId,
+        tenant: access.url.tenantId,
       });
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          tenantId,
+          url: access.url,
           client,
-          workspaceURL,
           payload: {
             title: await tr(
               '{0} replied to your comment on {1}',
@@ -158,21 +150,12 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
+  /* The workspace is pulled out of `rest` and left unread: the workspace whose
+   * comments are read is the one the request arrived at. */
   const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -213,7 +196,7 @@ export const fetchComments: FetchComments = async props => {
     id: rest.recordId,
     client,
     params: {where: quotationWhereClause},
-    workspaceURL,
+    workspaceURL: access.url.key(),
   });
   if (!quotation) {
     return {error: true, message: await t('Record not found')};

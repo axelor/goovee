@@ -68,7 +68,6 @@ export function MagazineHub({
   pastCount,
   categories,
   workspaceURI,
-  workspaceURL,
   labels,
   searchAction,
 }: {
@@ -80,12 +79,8 @@ export function MagazineHub({
   pastCount: number;
   categories: MagazineHubCategory[];
   workspaceURI: string;
-  workspaceURL: string;
   labels: MagazineHubLabels;
-  searchAction: (args: {
-    search: string;
-    workspaceURL: string;
-  }) => Promise<ListEvent[]>;
+  searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {
   const {update} = useSearchParams();
   const [filterOpen, setFilterOpen] = useState(false);
@@ -108,7 +103,7 @@ export function MagazineHub({
     let active = true;
     setSearching(true);
     const handle = setTimeout(() => {
-      searchAction({search: q, workspaceURL})
+      searchAction({search: q})
         .then(res => {
           if (active) setSearchResults(res);
         })
@@ -123,7 +118,7 @@ export function MagazineHub({
       active = false;
       clearTimeout(handle);
     };
-  }, [search, searchAction, workspaceURL]);
+  }, [search, searchAction]);
 
   const isPast = currentType === 'past';
   const hasFilters = !!currentCategory;

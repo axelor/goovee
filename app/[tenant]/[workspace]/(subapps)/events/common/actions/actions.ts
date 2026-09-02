@@ -2,7 +2,6 @@
 
 import {z} from 'zod';
 import {after} from 'next/server';
-import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ----//
 import {
@@ -16,7 +15,6 @@ import {addComment, findComments} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, tattr, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
-import {TENANT_HEADER} from '@/proxy';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
@@ -69,19 +67,17 @@ export async function register(
 ): ActionResponse<Cloned<Registration>> {
   const parsed = RegisterSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {eventId, workspaceURL} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return error(await t('Tenant ID is missing!'));
+  const {eventId} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const workspaceURL = access.url.key();
+  const tenantId = access.url.tenantId;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -224,8 +220,7 @@ export async function register(
 
       return {
         userId: contact.id,
-        tenantId,
-        workspaceURL,
+        url: access.url,
         client,
         payload: {
           title: await tr('You have been registered for an event!'),
@@ -252,26 +247,19 @@ export async function register(
 
 export async function fetchContacts(props: {
   search: string;
-  workspaceURL: string;
 }): ActionResponse<Contact[]> {
   const parsed = FetchContactsSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {search, workspaceURL} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
+  const {search} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const workspaceURL = access.url.key();
   const {client} = access.tenant;
 
   try {
@@ -284,31 +272,25 @@ export async function fetchContacts(props: {
 }
 
 export async function isValidParticipant(props: {
-  workspaceURL: string;
   eventId: ID;
   email: string;
 }): ActionResponse<true> {
   const parsed = IsValidParticipantSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {workspaceURL, eventId, email} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
+  const {eventId, email} = parsed.data;
 
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
   if (!email) {
     return error(await t('Email is required'));
   }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const workspaceURL = access.url.key();
   const {client} = access.tenant;
 
   const workspaceConfig = await getEventsConfig(
@@ -349,11 +331,6 @@ export async function isValidParticipant(props: {
 }
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
@@ -362,13 +339,12 @@ export const createComment: CreateComment = async props => {
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const tenantId = access.url.tenantId;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -434,8 +410,7 @@ export const createComment: CreateComment = async props => {
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          tenantId,
-          workspaceURL,
+          url: access.url,
           client,
           payload: {
             title: await tr(
@@ -475,19 +450,8 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: z.prettifyError(parsedComments.error)};
   const {workspaceURL, ...rest} = parsedComments.data;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -549,19 +513,13 @@ export const fetchComments: FetchComments = async props => {
 
 export const fetchEvent = async (props: {
   slug: string;
-  workspaceURL: string;
 }): ActionResponse<Cloned<FullEvent>> => {
   const parsed = FetchEventSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {slug, workspaceURL} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return error(await t('Tenant ID is missing!'));
+  const {slug} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {

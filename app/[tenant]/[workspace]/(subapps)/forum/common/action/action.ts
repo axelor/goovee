@@ -1,7 +1,6 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
 import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
@@ -15,7 +14,6 @@ import {accessMessage} from '@/lib/core/access/denial';
 import {ID} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
-import {TENANT_HEADER} from '@/proxy';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {revalidateWorkspacePath} from '@/lib/core/url/revalidate';
 import {filterPrivate} from '@/orm/filter';
@@ -102,41 +100,26 @@ async function redeemAttachments({
   return redeemed;
 }
 
-export async function exitGroup({
-  id,
-  groupID,
-  workspaceURL,
-  workspaceURI,
-}: ExitGroupInput) {
+export async function exitGroup({id, groupID, workspaceURI}: ExitGroupInput) {
   const parsed = ExitGroupSchema.safeParse({
     id,
     groupID,
-    workspaceURL,
     workspaceURI,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -179,38 +162,27 @@ export async function exitGroup({
 export async function joinGroup({
   groupID,
   userId,
-  workspaceURL,
   workspaceURI,
 }: JoinGroupInput) {
   const parsed = JoinGroupSchema.safeParse({
     groupID,
     userId,
-    workspaceURL,
     workspaceURI,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -265,23 +237,18 @@ export async function saveGroupNotifications(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {prefs, workspaceURL} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const {prefs} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -335,28 +302,19 @@ export async function addPost(input: AddPostInput) {
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {group, title, content, workspaceURL} = parsed.data;
+  const {group, title, content} = parsed.data;
   const attachments = parsed.data.attachments ?? [];
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -427,10 +385,7 @@ export async function addPost(input: AddPostInput) {
       });
     }); // end $transaction
 
-    const subscribers = await getSubscribersByGroup({
-      groupID: group.id,
-      workspaceURL,
-    });
+    const subscribers = await getSubscribersByGroup({groupID: group.id});
 
     if (!('error' in subscribers)) {
       const postSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.forum}/post/${post.id}`;
@@ -454,8 +409,7 @@ export async function addPost(input: AddPostInput) {
 
           return {
             userId: member.id,
-            tenantId,
-            workspaceURL,
+            url: access.url,
             client,
             payload: {
               title: await tr(
@@ -508,23 +462,12 @@ export async function fetchPosts(input: FetchPostsInput) {
     limit,
     page,
     search = '',
-    workspaceURL,
     memberGroupIDs = [],
     groupIDs = [],
   } = parsed.data;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -577,31 +520,22 @@ export async function fetchPosts(input: FetchPostsInput) {
   return {posts: postsWithCounts, scoreByPost, pageInfo};
 }
 
-export async function findSearchPosts(input: {
-  workspaceURL: string;
-  search?: string;
-}) {
+export async function findSearchPosts(input: {search?: string}) {
   const parsed = FindSearchPostsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, search} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const {search} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const workspaceURL = access.url.key();
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -634,27 +568,26 @@ export async function findSearchPosts(input: {
 }
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const {
+    workspaceURL: _workspaceURL,
+    workspaceURI: _workspaceURI,
+    ...rest
+  } = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
+  const workspaceURL = access.url.key();
   const {user} = access;
   const {client} = access.tenant;
 
@@ -727,7 +660,6 @@ export const createComment: CreateComment = async props => {
       if (post?.id) {
         const subscribers = await getSubscribersByGroup({
           groupID: post.forumGroup.id,
-          workspaceURL,
         });
 
         if (!('error' in subscribers)) {
@@ -752,8 +684,7 @@ export const createComment: CreateComment = async props => {
               after(async () => {
                 await notifyUser({
                   userId: parentComment.partner!.id,
-                  tenantId,
-                  workspaceURL,
+                  url: access.url,
                   client,
                   payload: {
                     title: await tr(
@@ -813,8 +744,7 @@ export const createComment: CreateComment = async props => {
 
                 return {
                   userId: member.id,
-                  tenantId,
-                  workspaceURL,
+                  url: access.url,
                   client,
                   payload: {
                     title: await tr(
@@ -872,18 +802,11 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const {workspaceURL: _workspaceURL, ...rest} =
+    FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -937,27 +860,14 @@ export const fetchComments: FetchComments = async props => {
   }
 };
 
-const getSubscribersByGroup = async ({
-  groupID,
-  workspaceURL,
-}: GetSubscribersByGroupInput) => {
-  const parsed = GetSubscribersByGroupSchema.safeParse({groupID, workspaceURL});
+const getSubscribersByGroup = async ({groupID}: GetSubscribersByGroupInput) => {
+  const parsed = GetSubscribersByGroupSchema.safeParse({groupID});
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -1002,15 +912,9 @@ const getSubscribersByGroup = async ({
 // Forum reactions (up/down votes) + best answer / resolved status
 // ============================================================
 
-async function resolveForumContext(workspaceURL: string) {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId)
-    return {error: true as const, message: await t('TenantId is required')};
-
+async function resolveForumContext() {
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -1026,7 +930,6 @@ async function resolveForumContext(workspaceURL: string) {
 }
 
 export async function reactionSummary(input: {
-  workspaceURL?: string;
   postIds?: Array<string | number>;
   commentIds?: Array<string | number>;
 }) {
@@ -1034,15 +937,10 @@ export async function reactionSummary(input: {
 
   const parsed = ReactionSummarySchema.safeParse(input);
   if (!parsed.success) return empty;
-  const {workspaceURL, postIds, commentIds} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return empty;
+  const {postIds, commentIds} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) return empty;
@@ -1066,7 +964,6 @@ export async function reactionSummary(input: {
 }
 
 export async function toggleReaction(input: {
-  workspaceURL: string;
   target: 'post' | 'comment';
   id: string;
   value: 'like' | 'dislike';
@@ -1075,9 +972,9 @@ export async function toggleReaction(input: {
   if (!parsed.success) {
     return {error: true as const, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, target, id, value} = parsed.data;
+  const {target, id, value} = parsed.data;
 
-  const ctx = await resolveForumContext(workspaceURL);
+  const ctx = await resolveForumContext();
   if (ctx.error) return ctx;
   const {client, user, workspace} = ctx;
 
@@ -1157,7 +1054,6 @@ export async function toggleReaction(input: {
 }
 
 export async function setBestReply(input: {
-  workspaceURL: string;
   postId: string;
   commentId: string | null;
 }) {
@@ -1165,9 +1061,9 @@ export async function setBestReply(input: {
   if (!parsed.success) {
     return {error: true as const, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, postId, commentId} = parsed.data;
+  const {postId, commentId} = parsed.data;
 
-  const ctx = await resolveForumContext(workspaceURL);
+  const ctx = await resolveForumContext();
   if (ctx.error) return ctx;
   const {client, user, workspace} = ctx;
 
@@ -1219,7 +1115,6 @@ export async function setBestReply(input: {
 }
 
 export async function setPostStatus(input: {
-  workspaceURL: string;
   postId: string;
   resolved: boolean;
 }) {
@@ -1227,9 +1122,9 @@ export async function setPostStatus(input: {
   if (!parsed.success) {
     return {error: true as const, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, postId, resolved} = parsed.data;
+  const {postId, resolved} = parsed.data;
 
-  const ctx = await resolveForumContext(workspaceURL);
+  const ctx = await resolveForumContext();
   if (ctx.error) return ctx;
   const {client, user, workspace} = ctx;
 

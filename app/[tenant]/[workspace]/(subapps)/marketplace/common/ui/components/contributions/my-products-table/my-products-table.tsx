@@ -56,7 +56,6 @@ type Props = {
   products: Product[];
   title: string;
   workspaceURI: string;
-  workspaceURL: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
@@ -70,7 +69,6 @@ export function MyProductsTable({
   products,
   title,
   workspaceURI,
-  workspaceURL,
   categories,
   licenses,
   compatibilityVersions,
@@ -255,7 +253,6 @@ export function MyProductsTable({
                     <EditProductButton
                       productId={product.id}
                       workspaceURI={workspaceURI}
-                      workspaceURL={workspaceURL}
                       categories={categories}
                       licenses={licenses}
                       compatibilityVersions={compatibilityVersions}

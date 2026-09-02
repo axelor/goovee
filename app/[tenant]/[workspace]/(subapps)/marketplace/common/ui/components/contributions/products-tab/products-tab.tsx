@@ -20,7 +20,6 @@ type ProductsTabProps = {
   config: MarketplaceConfig;
   newListingCurrency: Currency | null;
   workspaceURI: string;
-  workspaceURL: string;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
@@ -36,7 +35,6 @@ export async function ProductsTab({
   config,
   newListingCurrency,
   workspaceURI,
-  workspaceURL,
   categories,
   licenses,
   compatibilityVersions,
@@ -64,7 +62,6 @@ export async function ProductsTab({
       newListingCurrency={newListingCurrency}
       inAti={config.defaultProductForMarketplace?.inAti === true}
       workspaceURI={workspaceURI}
-      workspaceURL={workspaceURL}
       categories={categories}
       licenses={licenses}
       compatibilityVersions={compatibilityVersions}

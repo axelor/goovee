@@ -100,7 +100,7 @@ export function GroupControls({
 }) {
   const userId = user?.id as string;
   const isLoggedIn = !!user?.id;
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
@@ -192,7 +192,6 @@ export function GroupControls({
       const response = await exitGroup({
         id: group.id,
         groupID: groupId,
-        workspaceURL,
         workspaceURI,
       });
       pendingRef.current.delete(groupId);
@@ -218,7 +217,6 @@ export function GroupControls({
       const response = await joinGroup({
         groupID: groupId,
         userId,
-        workspaceURL,
         workspaceURI,
       });
       pendingRef.current.delete(groupId);

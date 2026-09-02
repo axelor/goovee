@@ -27,7 +27,7 @@ export default function Content({
 
   const {clearCart, cart} = useCart();
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
   const invoicingAddress = cart?.invoicingAddress;
@@ -49,7 +49,7 @@ export default function Content({
 
     setRequestingQuotation(true);
 
-    const res = await requestQuotation({cart, workspaceURL});
+    const res = await requestQuotation({cart});
 
     if (res?.data) {
       toast({

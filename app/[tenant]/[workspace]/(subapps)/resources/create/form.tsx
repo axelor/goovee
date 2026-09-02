@@ -73,7 +73,7 @@ export default function ResourceForm({
 }) {
   const {toast} = useToast();
   const router = useRouter();
-  const {tenant, workspaceURI, workspaceURL} = useWorkspace();
+  const {tenant, workspaceURI} = useWorkspace();
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -108,7 +108,7 @@ export default function ResourceForm({
       values.push({title: row.title, description: row.description, token});
     }
 
-    const result = await upload({workspaceURL, parent: parent.id, values});
+    const result = await upload({parent: parent.id, values});
 
     if (result.success) {
       toast({

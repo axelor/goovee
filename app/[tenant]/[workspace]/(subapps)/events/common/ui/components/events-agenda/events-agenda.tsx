@@ -30,18 +30,13 @@ type QuickRange = {key: string; label: string; from: string; to: string};
 export function EventsAgenda({
   initialEvents,
   workspaceURI,
-  workspaceURL,
   magazineHref,
   searchAction,
 }: {
   initialEvents: ListEvent[];
   workspaceURI: string;
-  workspaceURL: string;
   magazineHref: string;
-  searchAction: (args: {
-    search: string;
-    workspaceURL: string;
-  }) => Promise<ListEvent[]>;
+  searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ListEvent[]>(initialEvents);
@@ -62,7 +57,7 @@ export function EventsAgenda({
     let active = true;
     setSearching(true);
     const handle = setTimeout(() => {
-      searchAction({search: q, workspaceURL})
+      searchAction({search: q})
         .then(res => {
           if (active) setResults(res);
         })
@@ -77,7 +72,7 @@ export function EventsAgenda({
       active = false;
       clearTimeout(handle);
     };
-  }, [query, searchAction, workspaceURL, initialEvents]);
+  }, [query, searchAction, initialEvents]);
 
   const quickRanges = useMemo<QuickRange[]>(() => buildQuickRanges(), []);
 

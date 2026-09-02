@@ -37,8 +37,6 @@ export async function ArticleNews({
   config,
   segments,
   client,
-  tenantId,
-  workspaceURL,
   workspaceURI,
   user,
   slug,
@@ -47,8 +45,6 @@ export async function ArticleNews({
   config: NewsConfig | Cloned<NewsConfig>;
   segments: string[];
   client: Client;
-  tenantId: string;
-  workspaceURL: string;
   workspaceURI: string;
   user?: User;
   slug: string;
@@ -153,8 +149,6 @@ export async function ArticleNews({
                 isRecommendationEnable={isRecommendationEnable}
                 config={config}
                 navigatingPathFrom={navigatingPathFromURL}
-                workspaceURL={workspaceURL}
-                tenantId={tenantId}
                 categoryIds={categoryIds}
               />
             </Suspense>

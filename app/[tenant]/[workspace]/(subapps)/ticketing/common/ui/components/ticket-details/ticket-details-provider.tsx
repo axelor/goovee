@@ -84,7 +84,7 @@ export function TicketDetailsProvider(props: Props) {
   const {action: updateAssignmentAction, loading: isUpdatingAssignment} =
     useRetryAction(updateAssignment);
 
-  const {workspaceURL, workspaceURI} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   const loading =
     isSubmitting ||
@@ -120,7 +120,6 @@ export function TicketDetailsProvider(props: Props) {
             ...dirtyValues,
           },
         },
-        workspaceURL,
         workspaceURI,
       };
 
@@ -142,7 +141,6 @@ export function TicketDetailsProvider(props: Props) {
       ticket.id,
       ticket.version,
       workspaceURI,
-      workspaceURL,
       toast,
       router,
     ],
@@ -184,7 +182,6 @@ export function TicketDetailsProvider(props: Props) {
               ? ASSIGNMENT.CUSTOMER
               : ASSIGNMENT.PROVIDER,
           },
-          workspaceURL,
         },
         {
           onSuccess: () => {
@@ -207,7 +204,6 @@ export function TicketDetailsProvider(props: Props) {
     ticket.id,
     ticket.version,
     ticket.assignment,
-    workspaceURL,
     router,
     toast,
     client,
@@ -219,7 +215,6 @@ export function TicketDetailsProvider(props: Props) {
       cancelTicketAction(
         {
           data: {id: ticket.id, version: data?.version ?? ticket.version},
-          workspaceURL,
         },
         {
           onSuccess: () => {
@@ -238,7 +233,6 @@ export function TicketDetailsProvider(props: Props) {
     cancelTicketAction,
     ticket.id,
     ticket.version,
-    workspaceURL,
     toast,
     router,
   ]);
@@ -248,7 +242,6 @@ export function TicketDetailsProvider(props: Props) {
       closeTicketAction(
         {
           data: {id: ticket.id, version: data?.version ?? ticket.version},
-          workspaceURL,
         },
         {
           onSuccess: () => {
@@ -267,7 +260,6 @@ export function TicketDetailsProvider(props: Props) {
     closeTicketAction,
     ticket.id,
     ticket.version,
-    workspaceURL,
     router,
     toast,
   ]);

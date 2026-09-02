@@ -13,6 +13,7 @@ import NotificationManager, {
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {WorkspaceSubPath} from '@/lib/core/url';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
@@ -203,8 +204,9 @@ async function buildSystemNotification({
 }): Promise<NotifyUserArgs> {
   return {
     userId: user.id,
-    tenantId,
-    workspaceURL: workspace.url,
+    /* No proxy headers on this route — it sits under /api — so the workspace is
+     * named from the row the webhook resolved. */
+    url: tenantURLs(tenantId).workspaceByKey(workspace.url),
     client,
     payload: {
       title:

@@ -76,7 +76,7 @@ export const RegistrationForm = ({
 
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
   const {searchParams} = useSearchParams();
@@ -151,7 +151,6 @@ export const RegistrationForm = ({
         required: true,
         customComponent: getEmailFieldComponent({
           eventId,
-          workspaceURL,
         }),
       },
       {
@@ -190,7 +189,6 @@ export const RegistrationForm = ({
       user,
       isCompanyOrAddressRequired,
       eventId,
-      workspaceURL,
       facilityList,
       eventPrice,
       formattedDefaultPriceAti,
@@ -383,7 +381,6 @@ export const RegistrationForm = ({
       const {error, message} = await register({
         eventId,
         values: result,
-        workspaceURL,
       });
 
       if (error) {
@@ -571,11 +568,9 @@ export const RegistrationForm = ({
 const getEmailFieldComponent = ({
   isDisabled = false,
   eventId,
-  workspaceURL,
 }: {
   isDisabled?: boolean;
   eventId: string;
-  workspaceURL: string;
 }) => {
   const EmailComponent = (props: customComponentOptions) => (
     <EmailFormField
@@ -587,7 +582,6 @@ const getEmailFieldComponent = ({
         return isValidParticipant({
           email,
           eventId,
-          workspaceURL,
         });
       }}
     />

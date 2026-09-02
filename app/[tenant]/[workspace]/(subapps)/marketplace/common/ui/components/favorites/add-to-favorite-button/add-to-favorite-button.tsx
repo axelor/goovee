@@ -12,7 +12,6 @@ import {addProductToFavorites} from '../../../../actions';
 
 interface AddToFavoriteButtonProps {
   productId: string;
-  workspaceURL: string;
   workspaceURI: string;
   isFavorite?: boolean;
   /**
@@ -26,7 +25,6 @@ interface AddToFavoriteButtonProps {
 
 export function AddToFavoriteButton({
   productId,
-  workspaceURL,
   workspaceURI,
   isFavorite: initialIsFavorite = false,
   variant = 'overlay',
@@ -43,7 +41,6 @@ export function AddToFavoriteButton({
       try {
         const result = await addProductToFavorites({
           productId,
-          workspaceURL,
           workspaceURI,
           returnUrl: pathname,
           isFavorite: next,

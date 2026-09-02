@@ -26,14 +26,10 @@ export interface DocsSidebarCategory {
 export interface DocsSidebarProps {
   categories: DocsSidebarCategory[];
   workspaceURI: string;
-  workspaceURL: string;
   searchPlaceholder: string;
   homeLabel: string;
   categoriesLabel: string;
-  searchAction: (args: {
-    search: string;
-    workspaceURL: string;
-  }) => Promise<DocumentSearchResult[]>;
+  searchAction: (args: {search: string}) => Promise<DocumentSearchResult[]>;
 }
 
 /* Container-agnostic on purpose: the desktop column and the mobile slide-out
@@ -43,7 +39,6 @@ export interface DocsSidebarProps {
 export function DocsSidebarContent({
   categories,
   workspaceURI,
-  workspaceURL,
   searchPlaceholder,
   homeLabel,
   categoriesLabel,
@@ -71,7 +66,7 @@ export function DocsSidebarContent({
     let active = true;
     setSearching(true);
     const handle = setTimeout(() => {
-      searchAction({search: q, workspaceURL})
+      searchAction({search: q})
         .then(res => {
           if (active) setFileResults(res);
         })
@@ -86,7 +81,7 @@ export function DocsSidebarContent({
       active = false;
       clearTimeout(handle);
     };
-  }, [search, searchAction, workspaceURL]);
+  }, [search, searchAction]);
 
   const activeFolderId = useMemo(() => {
     const m = pathname.match(/\/resources\/folder\/([^/]+)/);

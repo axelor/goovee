@@ -2,34 +2,15 @@ import 'server-only';
 
 import {getPortalRoot} from '@/utils/workspace-url';
 
-import {isAbsoluteURL, type WorkspaceSubPath} from './index';
-import {
-  routePathFromWorkspaceURL,
-  tenantHost,
-  visitorPathFromRoutePath,
-} from './server';
+import {isAbsoluteURL} from './index';
+import {tenantHost, visitorPathFromRoutePath} from './server';
 
-/**
- * The form a link is stored in: the route-tree path,
- * `/{tenant}/{workspace}{link}`.
- *
- * A stored row outlives the deployment that wrote it. The route-tree path is
- * the only shape that survives every change a tenant can go through — a new
- * host, a new base path, a move between path and host routing — because it
- * names only what the row is about. Rendering it for a visitor happens at read
- * time, against the tenant's configuration as it is then.
+/*
+ * The read half of a stored link. A row is written as the route-tree path that
+ * `ServerWorkspaceURLs.routePath` produces, and is rendered for its reader
+ * here — so this file holds only the direction that has to tolerate the shapes
+ * older rows were written in.
  */
-export function toStoredLink(
-  scope: {tenantId: string; workspaceURL: string},
-  link: WorkspaceSubPath,
-): string {
-  const routePath = routePathFromWorkspaceURL(
-    scope.tenantId,
-    scope.workspaceURL,
-  );
-
-  return link === '/' ? routePath : `${routePath}${link}`;
-}
 
 /**
  * A stored link as the visitor's address bar holds it today, ready for a

@@ -111,7 +111,7 @@ export const CreatePost = ({
   const [loading, setLoading] = useState(false);
 
   const {toast} = useToast();
-  const {tenant, workspaceURI, workspaceURL} = useWorkspace();
+  const {tenant, workspaceURI} = useWorkspace();
   const router = useRouter();
 
   const {
@@ -238,7 +238,6 @@ export const CreatePost = ({
         group: {id: groupID},
         title,
         content: editorContent,
-        workspaceURL,
         workspaceURI,
         attachments,
       });

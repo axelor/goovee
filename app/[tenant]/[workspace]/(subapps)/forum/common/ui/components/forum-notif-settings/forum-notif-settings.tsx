@@ -52,7 +52,7 @@ function readPrefs(groups: MemberGroup[]): Prefs {
 }
 
 export function ForumNotifSettings({groups}: {groups: MemberGroup[]}) {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -89,7 +89,6 @@ export function ForumNotifSettings({groups}: {groups: MemberGroup[]}) {
       try {
         response = await saveGroupNotifications({
           prefs: payload,
-          workspaceURL,
           workspaceURI,
         });
       } catch {

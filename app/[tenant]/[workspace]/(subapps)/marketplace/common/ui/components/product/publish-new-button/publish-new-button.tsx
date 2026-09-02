@@ -16,7 +16,6 @@ import {ProductFormDialog} from '../product-edit';
 
 type Props = {
   workspaceURI: string;
-  workspaceURL: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
@@ -29,7 +28,6 @@ type Props = {
 
 export function PublishNewButton({
   workspaceURI,
-  workspaceURL,
   categories,
   licenses,
   compatibilityVersions,
@@ -55,7 +53,6 @@ export function PublishNewButton({
         onOpenChange={setOpen}
         mode="create"
         workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         categories={categories}
         licenses={licenses}
         compatibilityVersions={compatibilityVersions}

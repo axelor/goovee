@@ -33,7 +33,7 @@ export function Search({
   className?: string;
 }) {
   const router = useRouter();
-  const {workspaceURL, workspaceURI, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -45,10 +45,7 @@ export function Search({
     () =>
       debounce(async (search: string) => {
         try {
-          const {error, message, data} = await searchEntries({
-            search,
-            workspaceURL,
-          });
+          const {error, message, data} = await searchEntries({search});
           if (searchRef.current !== search) return;
           if (error) {
             setSearchResult([]);
@@ -70,7 +67,7 @@ export function Search({
           }
         }
       }, 500),
-    [toast, workspaceURL],
+    [toast],
   );
 
   const handleSearch = useCallback(

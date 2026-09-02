@@ -105,7 +105,6 @@ type UseProductEditFormParams = {
   /** First page of existing versions (server-fetched in the route). */
   initialVersions: ExistingVersion[];
   initialTotal: number;
-  workspaceURL: string;
   /** Called after a successful combined save. */
   onSaved: () => void;
   /** Reports where the first validation error is on a failed save, so a host
@@ -128,7 +127,6 @@ export function useProductEditForm({
   defaultType,
   initialVersions,
   initialTotal,
-  workspaceURL,
   onSaved,
   onInvalidLocation,
 }: UseProductEditFormParams) {
@@ -270,7 +268,6 @@ export function useProductEditForm({
       try {
         const result = await loadProductVersions({
           productId,
-          workspaceURL,
           skip: versionsFA.fields.length,
           take: VERSIONS_PAGE_SIZE,
         });
@@ -309,7 +306,6 @@ export function useProductEditForm({
     versionsFA,
     total,
     productId,
-    workspaceURL,
     toast,
     resetDefaultValues,
     productBaseline,
@@ -516,7 +512,6 @@ export function useProductEditForm({
             ...(imagesChanged ? {images} : {}),
             versions: changedExisting,
             newVersions,
-            workspaceURL,
           });
           if (!result.success) {
             toast({variant: 'destructive', title: result.message});

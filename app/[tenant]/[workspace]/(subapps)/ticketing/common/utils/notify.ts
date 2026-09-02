@@ -6,6 +6,7 @@ import type {Client} from '@/goovee/.generated/client';
 import {DEFAULT_LOCALE} from '@/lib/core/locale';
 import {getTranslation} from '@/lib/core/locale/server';
 import type {WorkspaceSubPath} from '@/lib/core/url';
+import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {notifyAll} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import type {ID} from '@/types';
@@ -27,8 +28,7 @@ export async function notifyTicketChange({
   contacts,
   user,
   workspaceUserId,
-  workspaceURL,
-  tenantId,
+  url,
   client,
 }: {
   type: 'create' | 'update';
@@ -41,12 +41,14 @@ export async function notifyTicketChange({
   contacts: Array<{id: string; localization: {code: string | null} | null}>;
   user: UserCtx;
   workspaceUserId?: ID;
-  workspaceURL: string;
-  tenantId: string;
+  url: ServerWorkspaceURLs;
   client: Client;
 }): Promise<void> {
+  const {tenantId} = url;
+  const workspaceURL = url.key();
+
   const ticketSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
-  const ticketLink = `${workspaceURL}${ticketSubPath}`;
+  const ticketLink = url.forExternal(ticketSubPath);
 
   try {
     if (workspaceUserId) {
@@ -83,9 +85,8 @@ export async function notifyTicketChange({
 
     return {
       userId: contact.id,
-      tenantId,
+      url,
       client,
-      workspaceURL,
       payload: {
         title:
           type === 'create'

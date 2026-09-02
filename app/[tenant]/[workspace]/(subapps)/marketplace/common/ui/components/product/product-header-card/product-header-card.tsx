@@ -26,7 +26,6 @@ export interface ProductHeaderCardProps {
   product: SingleProduct;
   client: Client;
   user?: {id: ID; mainPartnerId?: ID};
-  workspaceURL: string;
   workspaceURI: string;
   tenantId: string;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
@@ -38,7 +37,6 @@ export async function ProductHeaderCard({
   product,
   client,
   user,
-  workspaceURL,
   workspaceURI,
   tenantId,
   preview = false,
@@ -101,7 +99,6 @@ export async function ProductHeaderCard({
             }>
             <FavoriteButton
               productId={product.id}
-              workspaceURL={workspaceURL}
               workspaceURI={workspaceURI}
               userId={user?.id}
               client={client}
@@ -373,13 +370,11 @@ function DocumentationButton({url, label}: {url: string; label: string}) {
 
 async function FavoriteButton({
   productId,
-  workspaceURL,
   workspaceURI,
   userId,
   client,
 }: {
   productId: ID;
-  workspaceURL: string;
   workspaceURI: string;
   userId?: ID;
   client: Client;
@@ -395,7 +390,6 @@ async function FavoriteButton({
   return (
     <AddToFavoriteButton
       productId={productId}
-      workspaceURL={workspaceURL}
       workspaceURI={workspaceURI}
       isFavorite={isFavorited}
     />

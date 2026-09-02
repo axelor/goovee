@@ -52,7 +52,7 @@ export function EventPayments({
 
   const {toast} = useToast();
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   const redirectToEvents = useCallback(
     async (result: SuccessResponse<Registration>) => {
@@ -127,7 +127,6 @@ export function EventPayments({
         onPaypalCreatedOrder={async () => {
           const formValues = getMappedParticipants(form, metaFields);
           return await paypalCreateOrder({
-            workspaceURL,
             values: formValues,
             eventId: event.id,
           });
@@ -135,7 +134,6 @@ export function EventPayments({
         onPaypalCaptureOrder={async orderID => {
           return await register({
             payment: {data: {id: orderID}, mode: PaymentOption.paypal},
-            workspaceURL,
             eventId: event.id,
           });
         }}
@@ -144,7 +142,6 @@ export function EventPayments({
           const formValues = getMappedParticipants(form, metaFields);
           return await createStripeCheckoutSession({
             eventId: event.id,
-            workspaceURL,
             values: formValues,
           });
         }}
@@ -158,7 +155,6 @@ export function EventPayments({
               data: {id: stripeSessionId},
               mode: PaymentOption.stripe,
             },
-            workspaceURL,
             eventId: event.id,
           });
         }}
@@ -166,7 +162,6 @@ export function EventPayments({
           const formValues = getMappedParticipants(form, metaFields);
           return await payboxCreateOrder({
             eventId: event.id,
-            workspaceURL,
             values: formValues,
             uri,
           });
@@ -177,7 +172,6 @@ export function EventPayments({
               mode: PaymentOption.paybox,
               data: {params},
             },
-            workspaceURL,
             eventId: event.id,
           });
         }}

@@ -59,7 +59,7 @@ export default function ResourceForm({
   const formRef = useRef<HTMLFormElement>(null);
   const {toast} = useToast();
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,7 +79,7 @@ export default function ResourceForm({
     formData.append('icon', values.icon);
     formData.append('color', values.color);
 
-    const result = await create(formData, workspaceURL);
+    const result = await create(formData);
 
     if (result.success) {
       toast({

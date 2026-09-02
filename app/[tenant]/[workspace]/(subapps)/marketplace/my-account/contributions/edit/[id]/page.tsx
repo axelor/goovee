@@ -136,7 +136,6 @@ export default async function EditProductPage(props: {
         requiresReview={ctx.requiresReview}
         allowToPublish={ctx.allowToPublish}
         workspaceURI={ctx.workspaceURI}
-        workspaceURL={ctx.workspaceURL}
         returnHref={returnHref}
       />
     </div>

@@ -60,7 +60,7 @@ export function ForumFeed({
   canPost?: boolean;
   commentsEnabled: boolean;
 }) {
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
   const activeSort = searchParams.get('sort') || 'new';
@@ -134,7 +134,7 @@ export function ForumFeed({
             placeholder={i18n.t('Search a discussion…')}
             searchKey="title"
             findQuery={({query}: {query: string}) =>
-              findSearchPosts({workspaceURL, search: query})
+              findSearchPosts({search: query})
                 .then((r: any) => (r?.error ? [] : r))
                 .catch(() => [])
             }

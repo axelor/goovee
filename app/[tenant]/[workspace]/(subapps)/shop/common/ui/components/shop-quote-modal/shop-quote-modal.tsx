@@ -85,7 +85,7 @@ export function ShopQuoteModal({
   labels: ShopQuoteModalLabels;
   displayPrices?: boolean;
 }) {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {cart, clearCart} = useCart();
   const {toast} = useToast();
   const router = useRouter();
@@ -134,7 +134,7 @@ export function ShopQuoteModal({
     }
     setSubmitting(true);
     try {
-      const res = (await requestQuotation({cart, workspaceURL})) as {
+      const res = (await requestQuotation({cart})) as {
         data?: string;
       };
       if (res?.data) {
@@ -423,7 +423,6 @@ function QuoteAddressPicker({
   addressesHref: string;
 }) {
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
-  const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
@@ -443,12 +442,8 @@ function QuoteAddressPicker({
       if (!cartLoaded) return;
       try {
         const [list, def] = await Promise.all([
-          isInvoicing
-            ? fetchInvoicingAddresses({workspaceURL})
-            : fetchDeliveryAddresses({workspaceURL}),
-          isInvoicing
-            ? findDefaultInvoicing({workspaceURL})
-            : findDefaultDelivery({workspaceURL}),
+          isInvoicing ? fetchInvoicingAddresses() : fetchDeliveryAddresses(),
+          isInvoicing ? findDefaultInvoicing() : findDefaultDelivery(),
         ]);
         if (cancelled) return;
         const all = (list as PartnerAddress[] | null) ?? [];

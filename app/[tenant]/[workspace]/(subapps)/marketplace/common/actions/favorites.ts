@@ -18,7 +18,6 @@ import {
 
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),
-  workspaceURL: z.string().min(1),
   workspaceURI: z.string().min(1),
   returnUrl: z.string().min(1),
   isFavorite: z.boolean(),
@@ -46,13 +45,10 @@ export async function addProductToFavorites(
     };
   }
 
-  const {productId, workspaceURL, workspaceURI, returnUrl, isFavorite} =
-    result.data;
+  const {productId, workspaceURI, returnUrl, isFavorite} = result.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     /* Favouriting requires a login: a guest is sent to sign-in with

@@ -63,7 +63,7 @@ export function TicketForm(props: TicketFormProps) {
     formFields,
   } = props;
   const {toast} = useToast();
-  const {workspaceURL, workspaceURI} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const [success, setSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -142,7 +142,6 @@ export function TicketForm(props: TicketFormProps) {
             ...value,
           },
         },
-        workspaceURL,
         workspaceURI,
       };
 
@@ -155,7 +154,7 @@ export function TicketForm(props: TicketFormProps) {
 
       handleSuccess(data.id, projectId);
     },
-    [handleError, handleSuccess, projectId, workspaceURI, workspaceURL],
+    [handleError, handleSuccess, projectId, workspaceURI],
   );
 
   const handleSubmitWithAction = useCallback(

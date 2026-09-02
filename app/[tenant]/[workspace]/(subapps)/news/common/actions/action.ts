@@ -2,7 +2,6 @@
 
 import {z} from 'zod';
 import {after} from 'next/server';
-import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
@@ -12,7 +11,6 @@ import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
-import {TENANT_HEADER} from '@/proxy';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {addComment, findComments} from '@/comments/orm';
 import {
@@ -38,11 +36,8 @@ import {
   type FindSearchNewsInput,
 } from '@/subapps/news/common/validators';
 
-export async function findSearchNews({
-  workspaceURL,
-  search,
-}: FindSearchNewsInput) {
-  const parsed = FindSearchNewsSchema.safeParse({workspaceURL, search});
+export async function findSearchNews({search}: FindSearchNewsInput) {
+  const parsed = FindSearchNewsSchema.safeParse({search});
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
@@ -52,19 +47,8 @@ export async function findSearchNews({
   const searchTerm = parsed.data.search?.trim();
   if (!searchTerm) return [];
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Bad request'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -104,23 +88,15 @@ export async function findSearchNews({
 }
 
 export async function findRecommendedNews({
-  workspaceURL,
-  tenantId,
   categoryIds,
 }: FindRecommendedNewsInput) {
-  const parsed = FindRecommendedNewsSchema.safeParse({
-    workspaceURL,
-    tenantId,
-    categoryIds,
-  });
+  const parsed = FindRecommendedNewsSchema.safeParse({categoryIds});
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -152,27 +128,25 @@ export async function findRecommendedNews({
 }
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const {
+    workspaceURL: _workspaceURL,
+    workspaceURI: _workspaceURI,
+    ...rest
+  } = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.url.tenantId;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -233,8 +207,7 @@ export const createComment: CreateComment = async props => {
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          tenantId,
-          workspaceURL,
+          url: access.url,
           client,
           payload: {
             title: await tr(
@@ -269,21 +242,11 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {workspaceURL: _workspaceURL, ...rest} =
+    FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {

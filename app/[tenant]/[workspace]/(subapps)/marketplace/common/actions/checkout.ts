@@ -8,12 +8,9 @@ import {markPaymentAsProcessed} from '@/payment/common/orm';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder} from '@/payment/stripe/actions';
-import {TENANT_HEADER} from '@/proxy';
 import {PaymentOption} from '@/types';
 import type {ActionResponse} from '@/types/action';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
-import {WorkspaceURLSchema} from '@/utils/validators';
-import {headers} from 'next/headers';
 import {after} from 'next/server';
 import {z} from 'zod';
 import {findPartnerInvoicingAddresses, recordOrder} from '../orm';
@@ -32,13 +29,11 @@ import {getPaymentInfo} from '../utils/payment-info';
 
 const BaseSchema = z.object({
   productIds: CartProductIdsSchema,
-  workspaceURL: WorkspaceURLSchema,
 });
 
 const PayboxSchema = BaseSchema.extend({uri: z.string().min(1)});
 
 const CheckoutSchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
   payment: z.object({
     mode: z.enum(PaymentOption),
     data: z.object({
@@ -57,16 +52,13 @@ const err = (message: string): Err => ({error: true, message});
  * The unified `checkout()` action pulls the cart back
  * from PaymentContext on the return leg. */
 
-async function prepare(input: {productIds: string[]; workspaceURL: string}) {
-  const {productIds, workspaceURL} = input;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return err(await t('Tenant ID is missing.'));
+async function prepare(input: {productIds: string[]}) {
+  const {productIds} = input;
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) return err(await accessMessage(access.reason));
+  const workspaceURL = access.url.key();
   const {client, config} = access.tenant;
   const marketplaceConfig = await getMarketplaceConfig(
     access.workspace.config.id,
@@ -111,7 +103,6 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
 
 export async function createStripeCheckoutSession(props: {
   productIds: string[];
-  workspaceURL: string;
 }) {
   const parsed = BaseSchema.safeParse(props);
   if (!parsed.success) return err(z.prettifyError(parsed.error));
@@ -142,8 +133,9 @@ export async function createStripeCheckoutSession(props: {
      * `stripe_session_id` from the URL and calls `checkout()` to finalize,
      * then pushes the buyer to the success page. That is why this is not the
      * success URL, while `cancelUrl` below is a page of its own. */
-    const successUrl = `${parsed.data.workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${parsed.data.workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`;
+    const workspaceURL = access.url.key();
+    const successUrl = `${workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`;
 
     const session = await createStripeOrder({
       customer: {id: payerId, email: emailAddress},
@@ -161,10 +153,7 @@ export async function createStripeCheckoutSession(props: {
   }
 }
 
-export async function paypalCreateOrder(props: {
-  productIds: string[];
-  workspaceURL: string;
-}) {
+export async function paypalCreateOrder(props: {productIds: string[]}) {
   const parsed = BaseSchema.safeParse(props);
   if (!parsed.success) return err(z.prettifyError(parsed.error));
 
@@ -207,18 +196,15 @@ export async function paypalCreateOrder(props: {
 
 export async function payboxCreateOrder(props: {
   productIds: string[];
-  workspaceURL: string;
   uri: string;
 }) {
   const parsed = PayboxSchema.safeParse(props);
   if (!parsed.success) return err(z.prettifyError(parsed.error));
 
-  const prep = await prepare({
-    productIds: parsed.data.productIds,
-    workspaceURL: parsed.data.workspaceURL,
-  });
+  const prep = await prepare({productIds: parsed.data.productIds});
   if ('error' in prep) return prep;
   const {access, cart, paymentOptionSet, context} = prep.data;
+  const workspaceURL = access.url.key();
 
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.paybox)) {
     return err(await t('Paybox is not available.'));
@@ -245,13 +231,13 @@ export async function payboxCreateOrder(props: {
       url: {
         success: paymentReturnURL({
           tenantId: access.tenant.id,
-          workspaceURL: parsed.data.workspaceURL,
+          workspaceURL,
           uri: parsed.data.uri,
           query: {paybox_response: 'true'},
         }),
         failure: paymentReturnURL({
           tenantId: access.tenant.id,
-          workspaceURL: parsed.data.workspaceURL,
+          workspaceURL,
           uri: parsed.data.uri,
           query: {paybox_error: 'true'},
         }),
@@ -274,18 +260,13 @@ export async function checkout(
   if (!parsed.success)
     return {error: true, message: z.prettifyError(parsed.error)};
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId)
-    return {error: true, message: await t('Tenant ID is missing.')};
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: parsed.data.workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const tenantId = access.url.tenantId;
   const {client, config} = access.tenant;
   const marketplaceConfig = await getMarketplaceConfig(
     access.workspace.config.id,

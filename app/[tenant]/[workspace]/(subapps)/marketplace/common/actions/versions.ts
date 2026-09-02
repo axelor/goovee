@@ -1,12 +1,10 @@
 'use server';
 
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
 import {clone} from '@/utils';
 import {getTotal} from '@/utils/pagination';
-import {headers} from 'next/headers';
 import {z} from 'zod';
 import {
   findMyProductVersions,
@@ -22,7 +20,6 @@ import {getPartnerId} from '@/utils';
 
 const loadProductVersionsSchema = z.object({
   productId: z.string().min(1),
-  workspaceURL: z.string().min(1),
   skip: z.number().int().nonnegative(),
   take: z.number().int().positive().max(50),
 });
@@ -38,20 +35,14 @@ export async function loadProductVersions(
   versions: Cloned<MyProductVersion>[];
   total: number;
 }> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
   const parsed = loadProductVersionsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {productId, workspaceURL, skip, take} = parsed.data;
+  const {productId, skip, take} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
