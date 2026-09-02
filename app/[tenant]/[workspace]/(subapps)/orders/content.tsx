@@ -38,7 +38,7 @@ type ContentProps = {
 const Content = ({orders, pageInfo, orderType}: ContentProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const [input, setInput] = useSearchQuery();
 
@@ -58,7 +58,7 @@ const Content = ({orders, pageInfo, orderType}: ContentProps) => {
   };
 
   const handleTabChange = (href: string) => {
-    router.push(`${workspaceURI}/${SUBAPP_CODES.orders}?type=${href}`);
+    router.push(url.forRouter(`/${SUBAPP_CODES.orders}?type=${href}`));
   };
 
   return (
@@ -126,7 +126,7 @@ const Content = ({orders, pageInfo, orderType}: ContentProps) => {
                       onSelect={() => setSelectedId(o.id)}
                       onOpen={() =>
                         router.push(
-                          `${workspaceURI}/${SUBAPP_CODES.orders}/${o.id}`,
+                          url.forRouter(`/${SUBAPP_CODES.orders}/${o.id}`),
                         )
                       }
                     />
@@ -164,7 +164,9 @@ const Content = ({orders, pageInfo, orderType}: ContentProps) => {
             {selected ? (
               <OrderPreview
                 order={selected}
-                detailHref={`${workspaceURI}/${SUBAPP_CODES.orders}/${selected.id}`}
+                detailHref={url.forRouter(
+                  `/${SUBAPP_CODES.orders}/${selected.id}`,
+                )}
               />
             ) : (
               <div className="bg-white rounded-xl border border-ink-100 shadow-xs grid place-items-center min-h-[400px]">

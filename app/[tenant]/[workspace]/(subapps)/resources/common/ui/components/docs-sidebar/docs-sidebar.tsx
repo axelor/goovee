@@ -8,6 +8,7 @@ import {MdExpandMore, MdHomeFilled, MdSearch} from 'react-icons/md';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {DocFileIcon, FolderIcon} from '../doc-file-icon';
 import type {DocumentSearchResult} from '@/subapps/resources/search/action';
 
@@ -38,14 +39,14 @@ export interface DocsSidebarProps {
    supplies the flex column the tree stretches into. */
 export function DocsSidebarContent({
   categories,
-  workspaceURI,
   searchPlaceholder,
   homeLabel,
   categoriesLabel,
   searchAction,
 }: DocsSidebarProps) {
+  const {url} = useWorkspace();
   const pathname = usePathname() ?? '';
-  const homeHref = `${workspaceURI}/${SUBAPP_CODES.resources}`;
+  const homeHref = url.forRouter(`/${SUBAPP_CODES.resources}`);
   const isHomeActive = pathname === homeHref;
 
   const [search, setSearch] = useState('');
@@ -180,7 +181,7 @@ export function DocsSidebarContent({
                 {fileResults.map(f => (
                   <li key={f.id}>
                     <Link
-                      href={`${workspaceURI}/${SUBAPP_CODES.resources}/${f.id}`}
+                      href={url.forRouter(`/${SUBAPP_CODES.resources}/${f.id}`)}
                       className="flex items-center gap-2.5 px-3 py-2 hover:bg-ink-25 transition-colors">
                       <DocFileIcon
                         fileType={f.metaFile?.fileType}
@@ -242,7 +243,6 @@ export function DocsSidebarContent({
                 openCats={openCats}
                 toggleCat={toggleCat}
                 isSearching={isSearching}
-                workspaceURI={workspaceURI}
               />
             ))}
       </div>
@@ -273,7 +273,6 @@ function CategoryNode({
   openCats,
   toggleCat,
   isSearching,
-  workspaceURI,
 }: {
   node: DocsSidebarCategory;
   depth: number;
@@ -281,8 +280,8 @@ function CategoryNode({
   openCats: Record<string, boolean>;
   toggleCat: (id: string) => void;
   isSearching: boolean;
-  workspaceURI: string;
 }) {
+  const {url} = useWorkspace();
   const hasChildren = (node.children?.length ?? 0) > 0;
   const open = isSearching || !!openCats[node.id];
   const isActive = activeFolderId === node.id;
@@ -315,7 +314,7 @@ function CategoryNode({
           <span className="shrink-0 w-6 h-7" aria-hidden />
         )}
         <Link
-          href={`${workspaceURI}/${SUBAPP_CODES.resources}/folder/${node.id}`}
+          href={url.forRouter(`/${SUBAPP_CODES.resources}/folder/${node.id}`)}
           className={cn(
             'flex-1 min-w-0 flex items-center gap-2 px-1 py-1.5 font-semibold',
             textSize,
@@ -337,7 +336,6 @@ function CategoryNode({
               openCats={openCats}
               toggleCat={toggleCat}
               isSearching={isSearching}
-              workspaceURI={workspaceURI}
             />
           ))}
         </div>

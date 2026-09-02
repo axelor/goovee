@@ -27,14 +27,16 @@ export default function Content({
 
   const {clearCart, cart} = useCart();
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {toast} = useToast();
 
   const invoicingAddress = cart?.invoicingAddress;
   const deliveryAddress = cart?.deliveryAddress;
 
-  const callbackURL = `${workspaceURI}/${SUBAPP_CODES.shop}/cart/request-quotation`;
-  const checkoutURL = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
+  const callbackURL = url.forRouter(
+    `/${SUBAPP_CODES.shop}/cart/request-quotation`,
+  );
+  const checkoutURL = url.forRouter(`/${SUBAPP_CODES.shop}/cart`);
 
   const handleRequestQuotation = async () => {
     if (!(cart?.invoicingAddress && cart?.deliveryAddress)) {
@@ -58,15 +60,15 @@ export default function Content({
       });
       clearCart();
       const redirectURL = quotationSubapp
-        ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
-        : `${workspaceURI}/shop`;
+        ? url.forRouter(`/${SUBAPP_CODES.quotations}/${res.data}`)
+        : url.forRouter('/shop');
       router.replace(redirectURL);
     } else {
       toast({
         variant: 'destructive',
         title: i18n.t('Error requesting quotation, try again !'),
       });
-      router.replace(`${workspaceURI}/${SUBAPP_CODES.shop}/cart`);
+      router.replace(url.forRouter(`/${SUBAPP_CODES.shop}/cart`));
     }
   };
 

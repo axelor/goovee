@@ -23,7 +23,7 @@ import styles from './styles.module.scss';
 
 export default function MobileMenu({items}: {items: MenuItem[]}) {
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -36,7 +36,7 @@ export default function MobileMenu({items}: {items: MenuItem[]}) {
   const filteredItems = session ? items : items.filter(item => item.id === 1);
 
   const handleMenuClick = (link: string) => {
-    router.push(`${workspaceURI}/${SUBAPP_CODES.forum}/${link}`);
+    router.push(url.forRouter(`/${SUBAPP_CODES.forum}/${link}`));
     closeSidebar();
   };
 

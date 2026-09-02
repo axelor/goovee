@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/ui/components/table';
 import {useResponsive} from '@/ui/hooks';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
 import {ChevronDown, ChevronUp, ExternalLink} from 'lucide-react';
 import {Link} from '@/ui/components/link';
@@ -50,10 +51,10 @@ type Props = {
 
 export function MyFavoritesTable({
   favorites,
-  workspaceURI,
   marketplaceBase,
   filtered = false,
 }: Props) {
+  const {url} = useWorkspace();
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -213,7 +214,9 @@ export function MyFavoritesTable({
                 <TableCell className="p-3">
                   <div className="flex justify-end items-center gap-1">
                     <Link
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${favorite.slug}`}
+                      href={url.forRouter(
+                        `/${SUBAPP_CODES.marketplace}/products/${favorite.slug}`,
+                      )}
                       title={i18n.t('View live')}
                       className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
                       <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
@@ -222,7 +225,7 @@ export function MyFavoritesTable({
                         re-added; the list only shrinks on reload. */}
                     <AddToFavoriteButton
                       productId={favorite.id}
-                      workspaceURI={workspaceURI}
+                      workspaceURI={url.forRouter()}
                       isFavorite
                       variant="bare"
                     />

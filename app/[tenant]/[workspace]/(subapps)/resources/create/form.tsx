@@ -73,7 +73,7 @@ export default function ResourceForm({
 }) {
   const {toast} = useToast();
   const router = useRouter();
-  const {tenant, workspaceURI} = useWorkspace();
+  const {tenant, url} = useWorkspace();
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -120,7 +120,7 @@ export default function ResourceForm({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push(`${workspaceURI}/resources/folder/${parent?.id}`);
+        router.push(url.forRouter(`/resources/folder/${parent?.id}`));
       }
     } else {
       toast({

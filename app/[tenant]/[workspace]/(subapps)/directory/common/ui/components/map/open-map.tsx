@@ -42,7 +42,7 @@ export const Map = memo((props: MapContentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [popup, setPopup] = useState<Popup | null>(null);
   const {className, center, zoom, items, small} = props;
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
 
   useLayoutEffect(() => {
     if (!mapRef.current) return;
@@ -84,7 +84,9 @@ export const Map = memo((props: MapContentProps) => {
         createPortal(
           <Card
             item={popup.item}
-            url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${popup.item.id}`}
+            url={url.forRouter(
+              `/${SUBAPP_CODES.directory}/entry/${popup.item.id}`,
+            )}
             compact={small}
             tenant={tenant}
             className="hover:bg-accent"

@@ -100,7 +100,7 @@ export function GroupControls({
 }) {
   const userId = user?.id as string;
   const isLoggedIn = !!user?.id;
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {toast} = useToast();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
@@ -239,7 +239,7 @@ export function GroupControls({
     onMemberCountChange?.(memberList.length);
   }, [memberList.length, onMemberCountChange]);
   const groupHref = (groupId: any) =>
-    `${workspaceURI}/${SUBAPP_CODES.forum}/group/${groupId}`;
+    url.forRouter(`/${SUBAPP_CODES.forum}/group/${groupId}`);
 
   return (
     <div className="bg-white border border-ink-100 rounded-[14px] p-4">

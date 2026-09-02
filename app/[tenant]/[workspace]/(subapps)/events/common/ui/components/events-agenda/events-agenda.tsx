@@ -17,6 +17,7 @@ import {formatDate} from '@/locale/formatters';
 import {Button} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //
 import type {ListEvent} from '@/subapps/events/common/orm/event';
@@ -29,11 +30,13 @@ type QuickRange = {key: string; label: string; from: string; to: string};
 
 export function EventsAgenda({
   initialEvents,
-  workspaceURI,
   magazineHref,
   searchAction,
 }: {
   initialEvents: ListEvent[];
+  /* Accepted but unread: every address below comes from the workspace context,
+   * which knows how this tenant is routed. The page that renders this still
+   * passes it. */
   workspaceURI: string;
   magazineHref: string;
   searchAction: (args: {search: string}) => Promise<ListEvent[]>;
@@ -230,7 +233,6 @@ export function EventsAgenda({
                     <AgendaRow
                       key={event.id}
                       event={event}
-                      workspaceURI={workspaceURI}
                       last={i === group.events.length - 1}
                     />
                   ))}
@@ -246,15 +248,8 @@ export function EventsAgenda({
 
 // ---- Building blocks ---- //
 
-function AgendaRow({
-  event,
-  workspaceURI,
-  last,
-}: {
-  event: ListEvent;
-  workspaceURI: string;
-  last: boolean;
-}) {
+function AgendaRow({event, last}: {event: ListEvent; last: boolean}) {
+  const {url} = useWorkspace();
   const start = new Date(event.eventStartDateTime ?? '');
   const day = start.getDate();
   const monthAbbr = monthAbbrev(start);
@@ -265,7 +260,7 @@ function AgendaRow({
   const dateRange = isMultiDay ? formatEventSchedule(event) : '';
   const time = isMultiDay || event.eventAllDay ? '' : formatHHmm(start);
   const cat = event.eventCategorySet?.[0];
-  const detailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
+  const detailHref = url.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
 
   return (
     <Link

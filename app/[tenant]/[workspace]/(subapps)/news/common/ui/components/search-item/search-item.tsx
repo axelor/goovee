@@ -42,13 +42,11 @@ export function SearchItem({
   config: NewsConfig | Cloned<NewsConfig> | null;
 }) {
   const {slug, title, categorySet, image, publicationDateTime} = result;
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {isShowPublicationDate} = config ?? {};
 
   const src = image?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
-      )
+    ? url.forBrowser(`/${SUBAPP_CODES.news}/api/news/${slug}/image`)
     : withBasePath(NO_IMAGE_URL);
   const cat = categorySet?.[0]?.name;
 

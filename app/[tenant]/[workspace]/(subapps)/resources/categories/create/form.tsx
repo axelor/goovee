@@ -59,7 +59,7 @@ export default function ResourceForm({
   const formRef = useRef<HTMLFormElement>(null);
   const {toast} = useToast();
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,7 +89,7 @@ export default function ResourceForm({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push(`${workspaceURI}/resources/folder/${result?.data?.id}`);
+        router.push(url.forRouter(`/resources/folder/${result?.data?.id}`));
       }
     } else {
       toast({

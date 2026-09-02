@@ -75,7 +75,7 @@ export function ShopCart({
   displayPrices?: boolean;
 }) {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
   const pathname = usePathname() ?? '';
   const {cart, loaded: cartLoaded, removeItem, updateQuantity} = useCart();
   const {data: session} = authClient.useSession();
@@ -207,11 +207,11 @@ export function ShopCart({
     await removeItem(product.id);
   };
 
-  const catalogHref = `${workspaceURI}/${SUBAPP_CODES.shop}`;
-  const checkoutHref = `${workspaceURI}/${SUBAPP_CODES.shop}/cart/checkout`;
+  const catalogHref = url.forRouter(`/${SUBAPP_CODES.shop}`);
+  const checkoutHref = url.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`);
   const loginHref = `/auth/login?callbackurl=${encodeURIComponent(
     pathname,
-  )}&workspaceURI=${encodeURIComponent(workspaceURI)}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(
+  )}&workspaceURI=${encodeURIComponent(url.forRouter())}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(
     tenant,
   )}`;
 
@@ -265,7 +265,6 @@ export function ShopCart({
                   key={item.computedProduct.product.id}
                   item={item}
                   tenant={tenant}
-                  workspaceURI={workspaceURI}
                   onQtyChange={q =>
                     handleQty(
                       item.computedProduct.product.id,
@@ -373,7 +372,6 @@ export function ShopCart({
 function CartLine({
   item,
   tenant,
-  workspaceURI,
   onQtyChange,
   onRemove,
   fmt,
@@ -383,7 +381,6 @@ function CartLine({
 }: {
   item: ResolvedCartItem;
   tenant: string;
-  workspaceURI: string;
   onQtyChange: (q: number) => Promise<void>;
   onRemove: () => Promise<void>;
   fmt: (n: number) => string;
@@ -391,6 +388,7 @@ function CartLine({
   removeLabel: string;
   displayPrices?: boolean;
 }) {
+  const {url} = useWorkspace();
   const product = item.computedProduct.product;
   const price = item.computedProduct.price;
   const portalCat = product?.portalCategorySet?.[0];
@@ -402,7 +400,9 @@ function CartLine({
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
 
-  const productHref = `${workspaceURI}/${SUBAPP_CODES.shop}/product/${encodeURIComponent(product.slug)}`;
+  const productHref = url.forRouter(
+    `/${SUBAPP_CODES.shop}/product/${encodeURIComponent(product.slug)}`,
+  );
 
   // Per-line total from the numeric unit price (locale-safe).
   const unitNum = Number(price?.primary ?? 0);

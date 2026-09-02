@@ -23,7 +23,7 @@ import {SearchItem} from './common/ui/components/shared/search-item';
 
 export function Search({className}: {className?: string}) {
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -82,7 +82,7 @@ export function Search({className}: {className?: string}) {
   );
 
   const handleRedirection = (slug: string) => {
-    router.push(`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${slug}`);
+    router.push(url.forRouter(`/${SUBAPP_CODES.marketplace}/products/${slug}`));
   };
 
   return (

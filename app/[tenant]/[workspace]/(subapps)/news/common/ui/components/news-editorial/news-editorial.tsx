@@ -48,7 +48,7 @@ export function NewsEditorial({
      pages drop it and lay every article out in the grid. */
   page?: number;
 }) {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {isShowPublicationAuthor, isShowPublicationDate} = config;
 
   const hubMode = featured !== undefined;
@@ -91,12 +91,12 @@ export function NewsEditorial({
   // hub, or a later category page — every article flows into the grid.
   const gridArticles = showHero ? rest : articles;
 
-  const newsBase = `${workspaceURI}/${SUBAPP_CODES.news}`;
+  const newsBase = url.forRouter(`/${SUBAPP_CODES.news}`);
   const articleHref = (a: Article) =>
     `${newsBase}/${SUBAPP_PAGE.article}/${a.slug}`;
   const imageURL = (a: Article) =>
     a?.image?.id
-      ? withBasePath(`${newsBase}/api/news/${a.slug}/image`)
+      ? url.forBrowser(`/${SUBAPP_CODES.news}/api/news/${a.slug}/image`)
       : withBasePath(NO_IMAGE_URL);
   const catLabel = (a: Article) => a?.categorySet?.[0]?.name || '';
   const meta = (a: Article) =>

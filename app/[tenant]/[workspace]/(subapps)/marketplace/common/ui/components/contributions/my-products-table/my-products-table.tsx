@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/ui/components/table';
 import {useResponsive} from '@/ui/hooks';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
 import {ChevronDown, ChevronUp, ExternalLink, Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
@@ -68,7 +69,6 @@ type Props = {
 export function MyProductsTable({
   products,
   title,
-  workspaceURI,
   categories,
   licenses,
   compatibilityVersions,
@@ -77,6 +77,7 @@ export function MyProductsTable({
   newListingCurrency,
   inAti,
 }: Props) {
+  const {url} = useWorkspace();
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -252,7 +253,7 @@ export function MyProductsTable({
                   <div className="flex justify-end gap-1">
                     <EditProductButton
                       productId={product.id}
-                      workspaceURI={workspaceURI}
+                      workspaceURI={url.forRouter()}
                       categories={categories}
                       licenses={licenses}
                       compatibilityVersions={compatibilityVersions}
@@ -269,14 +270,18 @@ export function MyProductsTable({
                     />
                     {product.currentVersion ? (
                       <Link
-                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                        href={url.forRouter(
+                          `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
+                        )}
                         title={i18n.t('View live')}
                         className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
                         <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
                       </Link>
                     ) : (
                       <Link
-                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?preview=1`}
+                        href={url.forRouter(
+                          `/${SUBAPP_CODES.marketplace}/products/${product.slug}?preview=1`,
+                        )}
                         title={i18n.t('Preview')}
                         className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
                         <Eye className="w-3.5 h-3.5 text-ink-500" />

@@ -35,7 +35,7 @@ export function AddressSelection({
   );
 
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const {
     invoicingAddress: cartInvoicingAddress,
@@ -129,7 +129,9 @@ export function AddressSelection({
   }: React.ComponentPropsWithoutRef<typeof Button>) => (
     <Link
       className="block"
-      href={`${workspaceURI}/account/addresses?checkout=true${callbackURL ? `&callbackURL=${callbackURL}` : ''}`}>
+      href={url.forRouter(
+        `/account/addresses?checkout=true${callbackURL ? `&callbackURL=${callbackURL}` : ''}`,
+      )}>
       <Button variant={variant ?? 'royal-outline'} size="sm" {...props}>
         {children}
       </Button>

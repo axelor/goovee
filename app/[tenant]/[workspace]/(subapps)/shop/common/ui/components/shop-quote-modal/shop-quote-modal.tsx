@@ -85,7 +85,7 @@ export function ShopQuoteModal({
   labels: ShopQuoteModalLabels;
   displayPrices?: boolean;
 }) {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {cart, clearCart} = useCart();
   const {toast} = useToast();
   const router = useRouter();
@@ -141,8 +141,8 @@ export function ShopQuoteModal({
         toast({variant: 'success', title: labels.successTitle});
         clearCart();
         const redirectURL = quotationSubapp
-          ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
-          : `${workspaceURI}/${SUBAPP_CODES.shop}`;
+          ? url.forRouter(`/${SUBAPP_CODES.quotations}/${res.data}`)
+          : url.forRouter(`/${SUBAPP_CODES.shop}`);
         onOpenChange(false);
         router.replace(redirectURL);
       } else {
@@ -161,9 +161,11 @@ export function ShopQuoteModal({
   /* Leaving for the addresses page closes this modal, so it comes back to the
    * cart and the request is started again from there. `checkout=true` is what
    * puts that page in picking mode and has it write the choice to the cart. */
-  const addressesHref = `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?checkout=true&callbackURL=${encodeURIComponent(
-    `${workspaceURI}/${SUBAPP_CODES.shop}/cart`,
-  )}`;
+  const addressesHref = url.forRouter(
+    `/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?checkout=true&callbackURL=${encodeURIComponent(
+      url.forRouter(`/${SUBAPP_CODES.shop}/cart`),
+    )}`,
+  );
 
   const addressesReady = Boolean(
     cart?.invoicingAddress && cart?.deliveryAddress,

@@ -64,14 +64,16 @@ export default function MobileMenuCategory({
   categories: RawNewsCategory[];
 }) {
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const [container, setContainer] = useState<HTMLElement | null>(null);
 
   const $categories: Category[] = transformCategories(categories);
 
-  const handleCategoryClick = ({url}: {url: string}) => {
-    router.push(`${workspaceURI}/news/${url}`);
+  /* The clicked category's own path, renamed on the way in so it does not
+   * shadow the workspace addresses. */
+  const handleCategoryClick = ({url: categoryPath}: {url: string}) => {
+    router.push(url.forRouter(`/news/${categoryPath}`));
   };
 
   useEffect(() => {

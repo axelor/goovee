@@ -4,6 +4,7 @@ import type {TicketingConfig} from '../../../../common/orm/config';
 import type {ID} from '@/types';
 import {useRouter} from 'next/navigation';
 import {useCallback} from 'react';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {
   Category,
   ContactPartner,
@@ -28,18 +29,18 @@ export function Form(props: {
     contacts,
     userId,
     parentId,
-    workspaceURI,
     formFields,
   } = props;
 
+  const {url} = useWorkspace();
   const router = useRouter();
   const handleSuccess = useCallback(
     (ticketId: string, projectId: string) => {
       router.replace(
-        `${workspaceURI}/ticketing/projects/${projectId}/tickets/${ticketId}`,
+        url.forRouter(`/ticketing/projects/${projectId}/tickets/${ticketId}`),
       );
     },
-    [workspaceURI, router],
+    [url, router],
   );
 
   return (

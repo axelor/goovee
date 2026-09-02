@@ -4,6 +4,7 @@ import {Link} from '@/ui/components/link';
 import {MdArrowBack, MdChevronRight, MdDownload} from 'react-icons/md';
 
 import {SUBAPP_CODES} from '@/constants';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 import {cn} from '@/utils/css';
 
@@ -27,7 +28,6 @@ export interface DocsViewerShellLabels {
 
 export function DocsViewerShell({
   file,
-  workspaceURI,
   backHref,
   downloadHref,
   siblings,
@@ -88,7 +88,6 @@ export function DocsViewerShell({
             <SameFolderCard
               siblings={siblings}
               currentId={file.id}
-              workspaceURI={workspaceURI}
               labels={labels}
             />
           </aside>
@@ -266,14 +265,13 @@ function Row({
 function SameFolderCard({
   siblings,
   currentId,
-  workspaceURI,
   labels,
 }: {
   siblings: DmsFile[];
   currentId: string;
-  workspaceURI: string;
   labels: DocsViewerShellLabels;
 }) {
+  const {url} = useWorkspace();
   const others = siblings.filter(s => s.id !== currentId);
   return (
     <section className="bg-white rounded-2xl border border-ink-100 shadow-xs overflow-hidden">
@@ -289,7 +287,7 @@ function SameFolderCard({
           {others.slice(0, 8).map(sibling => (
             <li key={sibling.id}>
               <Link
-                href={`${workspaceURI}/${SUBAPP_CODES.resources}/${sibling.id}`}
+                href={url.forRouter(`/${SUBAPP_CODES.resources}/${sibling.id}`)}
                 className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-ink-25 transition-colors">
                 <DocFileIcon
                   fileType={sibling.metaFile?.fileType}

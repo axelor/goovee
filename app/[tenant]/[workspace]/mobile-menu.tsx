@@ -45,7 +45,7 @@ function MobileSidebar({
 
   const user = session?.user;
 
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const env = useEnvironment();
   const router = useRouter();
 
@@ -74,13 +74,13 @@ function MobileSidebar({
           className="bg-white overflow-auto flex flex-col">
           {user && Boolean(workspaces?.length) ? (
             workspaces?.length === 1 ? (
-              <Link href={workspaceURI}>
+              <Link href={url.forRouter()}>
                 <p className="px-6 py-2">
                   {workspaces[0]?.name || workspaces[0]?.href}
                 </p>
               </Link>
             ) : (
-              <Select defaultValue={workspaceURI} onValueChange={redirect}>
+              <Select defaultValue={url.forRouter()} onValueChange={redirect}>
                 <SelectTrigger className="grow max-w-100 overflow-hidden px-6 py-2 mt-4 bg-none! h-[auto]">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
@@ -95,7 +95,9 @@ function MobileSidebar({
             )
           ) : null}
 
-          {showHome && <App href={workspaceURI} icon="home" name="app-home" />}
+          {showHome && (
+            <App href={url.forRouter()} icon="home" name="app-home" />
+          )}
           {subapps
             ?.filter((app: Subapp) => app.isInstalled)
             .sort(
@@ -117,7 +119,7 @@ function MobileSidebar({
                   href={
                     isExternalChat
                       ? mattermostUrl
-                      : `${workspaceURI}/${code}${page}`
+                      : url.forRouter(`/${code}${page}`)
                   }
                   icon={icon ?? ''}
                   color={color ?? undefined}
@@ -129,7 +131,7 @@ function MobileSidebar({
 
           {Boolean(user) && (
             <App
-              href={`${workspaceURI}/account`}
+              href={url.forRouter('/account')}
               icon="account"
               name="My Account"
             />
@@ -192,7 +194,7 @@ export function MobileMenu({
   const user = session?.user;
 
   const {loading, visible} = useNavigationVisibility();
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
 
   const canDisplayContent = !loading && visible;
 
@@ -213,7 +215,7 @@ export function MobileMenu({
         {cartCodes.length > 0 && <CartIcon enabledCodes={cartCodes} />}
 
         {user && <Notification />}
-        <Account baseURL={workspaceURI} tenant={tenant} />
+        <Account baseURL={url.forRouter()} tenant={tenant} />
       </div>
     </nav>
   );

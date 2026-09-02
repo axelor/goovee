@@ -52,7 +52,7 @@ export default function Menubar({
   role?: string;
 }) {
   const pathname = usePathname();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const tabs = ACCOUNT_TABS.filter(tab => !tab.adminOnly || isAdmin);
   const initial = (companyName?.trim()?.[0] || 'A').toUpperCase();
@@ -90,7 +90,7 @@ export default function Menubar({
               {groupTabs.map(tab => {
                 const Icon = TAB_ICONS[tab.icon];
                 const active = isTabActive(pathname, tab);
-                const href = `${workspaceURI}/account/${tab.route}`;
+                const href = url.forRouter(`/account/${tab.route}`);
 
                 return (
                   <Link

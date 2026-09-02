@@ -34,7 +34,7 @@ type ShopPaymentsProps = {
 export function ShopPayments({config, orderSubapp}: ShopPaymentsProps) {
   const router = useRouter();
   const {toast} = useToast();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   const {cart, clearCart} = useCart();
   const noAddress = !(cart?.invoicingAddress && cart?.deliveryAddress);
@@ -42,12 +42,12 @@ export function ShopPayments({config, orderSubapp}: ShopPaymentsProps) {
   const redirectOrder = useCallback(
     async (order: SuccessResponse<string>) => {
       if (orderSubapp) {
-        router.replace(`${workspaceURI}/${SUBAPP_CODES.orders}/${order.data}`);
+        router.replace(url.forRouter(`/${SUBAPP_CODES.orders}/${order.data}`));
       } else {
-        router.replace(`${workspaceURI}/shop?${ORDER_SUCCESS_PARAM}=true`);
+        router.replace(url.forRouter(`/shop?${ORDER_SUCCESS_PARAM}=true`));
       }
     },
-    [workspaceURI, router, orderSubapp],
+    [url, router, orderSubapp],
   );
 
   return (

@@ -5,13 +5,12 @@ import Image from 'next/image';
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {DmsFile} from '@/subapps/resources/common/types';
 
 export function ImageViewer({record}: {record: DmsFile}) {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   /*
    * A vector image is one file at every size, so it is asked for as it is. The
@@ -25,8 +24,8 @@ export function ImageViewer({record}: {record: DmsFile}) {
     <div className="container">
       <Image
         className="object-cover max-w-100 w-full h-auto"
-        src={withBasePath(
-          `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record?.id}`,
+        src={url.forBrowser(
+          `/${SUBAPP_CODES.resources}/api/file/${record?.id}`,
         )}
         alt="Viewer"
         width={0}

@@ -14,10 +14,10 @@ import {MARKETPLACE_LINKS} from '../../../../constants/marketplace-links';
 import styles from './index.module.scss';
 
 function NavLinks() {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const pathname = usePathname();
   const {data: session} = authClient.useSession();
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = url.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const links = useMemo(
     () => MARKETPLACE_LINKS.filter(item => !item.requiresAuth || session?.user),

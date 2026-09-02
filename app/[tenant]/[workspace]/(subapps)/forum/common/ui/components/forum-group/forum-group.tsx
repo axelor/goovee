@@ -71,7 +71,7 @@ export function ForumGroup({
   commentsEnabled: boolean;
   backHref: string;
 }) {
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
   const {toast} = useToast();
@@ -90,7 +90,7 @@ export function ForumGroup({
   });
 
   const activeSort = searchParams.get('sort') || 'new';
-  const postBase = `${workspaceURI}/${SUBAPP_CODES.forum}/post`;
+  const postBase = url.forRouter(`/${SUBAPP_CODES.forum}/post`);
   const colorClass = groupColorClass(group.name || '');
   const initial = (group.name || '#').trim().charAt(0).toUpperCase();
   const memberCount = groupMeta.memberCount + (joined && !isMember ? 1 : 0);
@@ -252,7 +252,7 @@ export function ForumGroup({
                         {stripHtml(post.content)}
                       </p>
                     )}
-                    <PostImages post={post} workspaceURI={workspaceURI} />
+                    <PostImages post={post} workspaceURI={url.forRouter()} />
                     <div className="mt-3 flex items-center gap-3.5 text-[12px] text-ink-500 flex-wrap">
                       <span className="inline-flex items-center gap-1.5">
                         <span className="w-[22px] h-[22px] rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[9px] font-bold shrink-0">

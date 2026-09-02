@@ -21,7 +21,9 @@ import {formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
 import {Link} from '@/ui/components/link';
 import {useSearchParams} from '@/ui/hooks';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {withBasePath} from '@/lib/core/path/base-path';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import type {PageInfo} from '@/types';
 import type {ListEvent} from '@/subapps/events/common/orm/event';
 import {formatEventSchedule} from '@/subapps/events/common/utils/schedule';
@@ -67,7 +69,6 @@ export function MagazineHub({
   activeCount,
   pastCount,
   categories,
-  workspaceURI,
   labels,
   searchAction,
 }: {
@@ -78,10 +79,14 @@ export function MagazineHub({
   activeCount: number;
   pastCount: number;
   categories: MagazineHubCategory[];
+  /* Accepted but unread: every address below comes from the workspace context,
+   * which knows how this tenant is routed. The page that renders this still
+   * passes it. */
   workspaceURI: string;
   labels: MagazineHubLabels;
   searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {
+  const {url} = useWorkspace();
   const {update} = useSearchParams();
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -130,7 +135,7 @@ export function MagazineHub({
   const featured = page <= 1 ? (events[0] ?? null) : null;
   const grid = page <= 1 ? events.slice(1) : events;
 
-  const agendaHref = `${workspaceURI}/${SUBAPP_CODES.events}/calendar`;
+  const agendaHref = url.forRouter(`/${SUBAPP_CODES.events}/calendar`);
 
   const selectTab = (key: Tab) =>
     update(
@@ -249,7 +254,9 @@ export function MagazineHub({
                     {searchResults.map(event => (
                       <li key={event.id}>
                         <Link
-                          href={`${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`}
+                          href={url.forRouter(
+                            `/${SUBAPP_CODES.events}/${event.slug}`,
+                          )}
                           onClick={() => setSearchOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 hover:bg-ink-25 transition-colors">
                           <div className="min-w-0 flex-1">
@@ -393,7 +400,6 @@ export function MagazineHub({
       {featured ? (
         <FeaturedCard
           event={featured}
-          workspaceURI={workspaceURI}
           ctaLabel={isPast ? labels.pastCta : labels.registerNow}
           daysLabel={labels.daysLabel}
           badgeLabel={isPast ? labels.replayBadge : labels.featuredBadge}
@@ -419,7 +425,6 @@ export function MagazineHub({
               <MagazineCard
                 key={event.id}
                 event={event}
-                workspaceURI={workspaceURI}
                 seeLabel={labels.seeLabel}
                 freeLabel={labels.freeLabel}
                 registeredBadge={labels.registeredBadge}
@@ -460,19 +465,19 @@ export function MagazineHub({
 
 // ---- Helpers ---- //
 
-function getEventImageURL(event: ListEvent, workspaceURI: string): string {
+function getEventImageURL(event: ListEvent, url: WorkspaceURLs): string {
   if (!event) return withBasePath(NO_IMAGE_URL);
   const categoryWithImage = event.eventCategorySet?.find(
     cat => cat.thumbnailImage?.id || cat.image?.id,
   );
   if (categoryWithImage) {
-    return withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`,
+    return url.forBrowser(
+      `/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`,
     );
   }
   if (event.eventImage?.id) {
-    return withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${event.slug}/image`,
+    return url.forBrowser(
+      `/${SUBAPP_CODES.events}/api/event/${event.slug}/image`,
     );
   }
   return withBasePath(NO_IMAGE_URL);
@@ -498,7 +503,6 @@ function getPrice(event: ListEvent): {value: number; display: string | null} {
 
 function FeaturedCard({
   event,
-  workspaceURI,
   ctaLabel,
   daysLabel,
   badgeLabel,
@@ -506,17 +510,17 @@ function FeaturedCard({
   isPast,
 }: {
   event: ListEvent;
-  workspaceURI: string;
   ctaLabel: string;
   daysLabel: string;
   badgeLabel: string;
   registeredBadge: string;
   isPast: boolean;
 }) {
-  const imageURL = getEventImageURL(event, workspaceURI);
+  const {url} = useWorkspace();
+  const imageURL = getEventImageURL(event, url);
   const days = daysUntil(event.eventStartDateTime);
   const category = event.eventCategorySet?.[0];
-  const detailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
+  const detailHref = url.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
 
   return (
     <Link
@@ -623,23 +627,22 @@ function FeaturedCard({
 
 function MagazineCard({
   event,
-  workspaceURI,
   seeLabel,
   freeLabel,
   registeredBadge,
   isPast,
 }: {
   event: ListEvent;
-  workspaceURI: string;
   seeLabel: string;
   freeLabel: string;
   registeredBadge: string;
   isPast: boolean;
 }) {
-  const imageURL = getEventImageURL(event, workspaceURI);
+  const {url} = useWorkspace();
+  const imageURL = getEventImageURL(event, url);
   const days = daysUntil(event.eventStartDateTime);
   const category = event.eventCategorySet?.[0];
-  const detailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
+  const detailHref = url.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
   const price = getPrice(event);
 
   return (

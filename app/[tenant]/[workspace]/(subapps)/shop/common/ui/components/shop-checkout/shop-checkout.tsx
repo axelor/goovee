@@ -74,7 +74,7 @@ export function ShopCheckout({
   orderSubapp?: Subapp | null;
   labels: ShopCheckoutLabels;
 }) {
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
   const {cart, loaded: cartLoaded} = useCart();
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
@@ -196,7 +196,7 @@ export function ShopCheckout({
       .format(n)
       .concat(' ', currency);
 
-  const cartHref = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
+  const cartHref = url.forRouter(`/${SUBAPP_CODES.shop}/cart`);
   const confirmOrder = !!config?.confirmOrder;
   // Workspaces configured to hide prices must not surface any amount, even
   // inside the checkout summary (parity with the pre-redesign gate).
@@ -242,7 +242,6 @@ export function ShopCheckout({
               <SectionCard title={labels.addressCardTitle}>
                 <CheckoutAddressPicker
                   type={ADDRESS_TYPE.delivery}
-                  workspaceURI={workspaceURI}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   newActionLabel={labels.addressNewAction}
                   noneTitle={labels.addressNoneTitle}
@@ -253,7 +252,6 @@ export function ShopCheckout({
               <SectionCard title={i18n.t('Billing address')}>
                 <CheckoutAddressPicker
                   type={ADDRESS_TYPE.invoicing}
-                  workspaceURI={workspaceURI}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   newActionLabel={labels.addressNewAction}
                   noneTitle={labels.addressNoneTitle}
@@ -440,19 +438,18 @@ function TotalsRow({label, value}: {label: string; value: string | number}) {
 
 function CheckoutAddressPicker({
   type,
-  workspaceURI,
   defaultBadgeLabel,
   newActionLabel,
   noneTitle,
   loadingLabel,
 }: {
   type: ADDRESS_TYPE;
-  workspaceURI: string;
   defaultBadgeLabel: string;
   newActionLabel: string;
   noneTitle: string;
   loadingLabel: string;
 }) {
+  const {url} = useWorkspace();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
@@ -512,9 +509,11 @@ function CheckoutAddressPicker({
 
   // "Change address" opens the standard address-selection page in checkout
   // mode; on confirm it updates the cart and returns here via callbackURL.
-  const changeAddressHref = `${workspaceURI}/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
-    `${workspaceURI}/${SUBAPP_CODES.shop}/cart/checkout`,
-  )}`;
+  const changeAddressHref = url.forRouter(
+    `/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
+      url.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`),
+    )}`,
+  );
 
   if (loading) {
     return (

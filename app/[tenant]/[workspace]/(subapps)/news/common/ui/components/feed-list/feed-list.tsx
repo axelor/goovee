@@ -30,7 +30,7 @@ export const FeedList = ({
   navigatingPathFrom: string;
   config: NewsConfig | Cloned<NewsConfig>;
 }) => {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {isShowPublicationDate} = config;
 
   return (
@@ -45,15 +45,15 @@ export const FeedList = ({
         {items?.map(
           ({id, title, publicationDateTime, categorySet, image, slug}) => {
             const imageUrl = image?.id
-              ? withBasePath(
-                  `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
-                )
+              ? url.forBrowser(`/${SUBAPP_CODES.news}/api/news/${slug}/image`)
               : withBasePath(NO_IMAGE_URL);
 
             return (
               <Link
                 key={id}
-                href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+                href={url.forRouter(
+                  `/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`,
+                )}
                 className="group w-full flex gap-3 items-center py-3 px-1 -mx-1 first:pt-0 last:pb-0 cursor-pointer rounded-lg transition-colors hover:bg-ink-25">
                 <Image
                   src={imageUrl}

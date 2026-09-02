@@ -17,7 +17,6 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {getProductImageURL} from '@/utils/files';
 import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -65,7 +64,7 @@ const Content = ({order}: {order: DetailOrder}) => {
     deliveredAt: undefined,
   });
 
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
 
   const hideDiscount = saleOrderLineList?.every(
     item => parseFloat(String(item.discountAmount)) === 0,
@@ -88,13 +87,13 @@ const Content = ({order}: {order: DetailOrder}) => {
             <strong className="text-ink-900 tabular-nums">{inTaxTotal}</strong>
           </>
         }
-        backHref={`${workspaceURI}/${SUBAPP_CODES.orders}`}
+        backHref={url.forRouter(`/${SUBAPP_CODES.orders}`)}
         actions={
           orderReport ? (
             <Button asChild variant="ink-outline" size="sm">
               <a
-                href={withBasePath(
-                  `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/attachment`,
+                href={url.forBrowser(
+                  `/${SUBAPP_CODES.orders}/api/order/${id}/attachment`,
                 )}>
                 <MdOutlineFileDownload className="text-base mr-1" />
                 {i18n.t('Download order')}
@@ -202,8 +201,8 @@ const Content = ({order}: {order: DetailOrder}) => {
                   id: record.id,
                   label: record.invoiceId,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
-                  downloadURL: withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`,
+                  downloadURL: url.forBrowser(
+                    `/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`,
                   ),
                 }))}
               />
@@ -216,8 +215,8 @@ const Content = ({order}: {order: DetailOrder}) => {
                   id: record.id,
                   label: record.stockMoveSeq,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
-                  downloadURL: withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`,
+                  downloadURL: url.forBrowser(
+                    `/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`,
                   ),
                 }))}
               />

@@ -5,7 +5,6 @@ import {Card} from '@/ui/components';
 import {SORT_TYPE, Comments} from '@/comments';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {CommentSectionProps} from '@/subapps/events/common/ui/components';
@@ -15,7 +14,7 @@ import {
 } from '@/subapps/events/common/actions/actions';
 
 export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   return (
     <Card className="rounded-2xl border-none shadow-none p-4 w-full space-y-4 ">
       <Comments
@@ -35,8 +34,8 @@ export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
         fetchComments={fetchComments}
         trackingField="publicBody"
         commentField="note"
-        attachmentDownloadUrl={withBasePath(
-          `${workspaceURI}/${SUBAPP_CODES.events}/api/comments/attachments/${slug}`,
+        attachmentDownloadUrl={url.forBrowser(
+          `/${SUBAPP_CODES.events}/api/comments/attachments/${slug}`,
         )}
       />
     </Card>

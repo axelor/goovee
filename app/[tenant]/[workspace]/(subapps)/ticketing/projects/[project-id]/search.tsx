@@ -33,7 +33,7 @@ export function Search({
   className?: string;
 }) {
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -88,7 +88,7 @@ export function Search({
 
   const handleRedirection = (ticketId: string) => {
     router.push(
-      `${workspaceURI}/ticketing/projects/${projectId}/tickets/${ticketId}`,
+      url.forRouter(`/ticketing/projects/${projectId}/tickets/${ticketId}`),
     );
   };
 

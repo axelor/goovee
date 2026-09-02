@@ -8,7 +8,7 @@ import {Icon} from '@/ui/components';
 import {Link} from '@/ui/components/link';
 
 export default function Content({subapps}: {subapps: any}) {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -24,7 +24,7 @@ export default function Content({subapps}: {subapps: any}) {
           return (
             <Link
               key={code}
-              href={`${workspaceURI}/${code}${page}`}
+              href={url.forRouter(`/${code}${page}`)}
               className="group no-underline">
               <div className="flex items-center gap-3 p-3 rounded-xl border border-ink-100 bg-white transition-all hover:border-ink-200 hover:shadow-md hover:-translate-y-0.5">
                 <div

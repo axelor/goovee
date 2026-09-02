@@ -49,7 +49,7 @@ function CartGlyph({count}: {count: number}) {
  *   popover / mobile bottom drawer) listing each cart with its own count
  */
 export default function CartIcon({enabledCodes}: {enabledCodes: string[]}) {
-  const {workspaceURI} = useWorkspace();
+  const {url} = useWorkspace();
   const responsive = useResponsive();
   const [open, setOpen] = useState(false);
 
@@ -63,7 +63,7 @@ export default function CartIcon({enabledCodes}: {enabledCodes: string[]}) {
   const enabledCarts = descriptors.map(descriptor => ({
     key: descriptor.code,
     label: descriptor.label(),
-    href: descriptor.href(workspaceURI),
+    href: descriptor.href(url),
     count: counts[descriptor.code] ?? 0,
   }));
 

@@ -26,7 +26,6 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {formatRelativeTime} from '@/locale/formatters';
 import {getPartnerImageURL, getFileSizeText} from '@/utils/files';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {ProgressFill, RichTextViewer} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -459,7 +458,7 @@ export function ForumDetail({
   isAuthor?: boolean;
   backHref: string;
 }) {
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
   // Voting only needs membership; writing comments also needs the workspace's
   // comment feature to be enabled (mirrors server enforcement in createComment).
   const canWriteComment = canComment && commentsEnabled;
@@ -490,15 +489,15 @@ export function ForumDetail({
   const group = post.forumGroup?.name;
   const groupId = post.forumGroup?.id;
   const groupHref = groupId
-    ? `${workspaceURI}/${SUBAPP_CODES.forum}/group/${groupId}`
+    ? url.forRouter(`/${SUBAPP_CODES.forum}/group/${groupId}`)
     : backHref;
   const date = post.postDateT || post.createdOn;
   const replyTotal = totalMainThread || replyCount;
 
   // Download URL for a comment attachment (streamed via the forum route).
   const commentAttUrl = (fileId: string) =>
-    withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}/${fileId}`,
+    url.forBrowser(
+      `/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}/${fileId}`,
     );
 
   // ---- Reactions (up/down votes) ----
@@ -794,8 +793,8 @@ export function ForumDetail({
               post.attachmentList.length > 0 &&
               (() => {
                 const attUrl = (fileId: string) =>
-                  withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
+                  url.forBrowser(
+                    `/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
                   );
                 // Skip attachments whose metaFile is missing (deleted/orphaned
                 // file) — dereferencing a.metaFile.id below would otherwise

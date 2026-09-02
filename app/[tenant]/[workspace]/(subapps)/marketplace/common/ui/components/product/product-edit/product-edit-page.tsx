@@ -1,6 +1,7 @@
 'use client';
 
 import {i18n} from '@/locale';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {Cloned} from '@/types/util';
 import {Button} from '@/ui/components/button';
 import {Form} from '@/ui/components/form';
@@ -51,9 +52,9 @@ export function ProductEditPage({
   inAti,
   requiresReview,
   allowToPublish,
-  workspaceURI,
   returnHref,
 }: ProductEditPageProps) {
+  const {url} = useWorkspace();
   const router = useRouter();
   const model = useProductEditForm({
     initial,
@@ -84,7 +85,7 @@ export function ProductEditPage({
             requiresReview={requiresReview}
             allowToPublish={allowToPublish}
             compatibilityVersions={compatibilityVersions}
-            workspaceURI={workspaceURI}
+            workspaceURI={url.forRouter()}
           />
         </div>
 

@@ -30,7 +30,6 @@ import {
   fetchComments,
   createComment,
 } from '@/subapps/quotations/common/actions';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {
   getStatus,
   getStatusKey,
@@ -61,7 +60,7 @@ const Content = ({
     statusSelect,
   } = quotation;
 
-  const {workspaceURI, tenant} = useWorkspace();
+  const {url, tenant} = useWorkspace();
 
   const {status} = getStatus(statusSelect);
   const statusKey = getStatusKey(Number(statusSelect));
@@ -102,12 +101,14 @@ const Content = ({
             </strong>
           </>
         }
-        backHref={`${workspaceURI}/${SUBAPP_CODES.quotations}`}
+        backHref={url.forRouter(`/${SUBAPP_CODES.quotations}`)}
         primaryAction={
           isDraft ? (
             <Button asChild variant="royal" size="sm">
               <Link
-                href={`${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?quotation=${id}`}>
+                href={url.forRouter(
+                  `/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?quotation=${id}`,
+                )}>
                 <MdEdit className="text-base mr-1" />
                 {i18n.t('Edit addresses')}
               </Link>
@@ -174,8 +175,8 @@ const Content = ({
                     showRepliesInMainThread
                     createComment={createComment}
                     fetchComments={fetchComments}
-                    attachmentDownloadUrl={withBasePath(
-                      `${workspaceURI}/${SUBAPP_CODES.quotations}/api/comments/attachments/${id}`,
+                    attachmentDownloadUrl={url.forBrowser(
+                      `/${SUBAPP_CODES.quotations}/api/comments/attachments/${id}`,
                     )}
                     trackingField="body"
                     commentField="body"
