@@ -3,7 +3,6 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {ID} from '@/types';
@@ -55,7 +54,6 @@ export function useComments(props: UseCommentsProps) {
   const [fetching, setFetching] = useState(false);
   const [creating, setCreating] = useState(false);
   const [totalComments, setTotalComments] = useState(0);
-  const {workspaceURL, workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
   const loadComments = useCallback(
@@ -67,7 +65,6 @@ export function useComments(props: UseCommentsProps) {
           recordId,
           sort: sortBy,
           limit,
-          workspaceURL,
           exclude,
           showRepliesInMainThread,
         });
@@ -92,15 +89,7 @@ export function useComments(props: UseCommentsProps) {
         setFetching(false);
       }
     },
-    [
-      recordId,
-      sortBy,
-      toast,
-      workspaceURL,
-      limit,
-      showRepliesInMainThread,
-      fetchComments,
-    ],
+    [recordId, sortBy, toast, limit, showRepliesInMainThread, fetchComments],
   );
 
   const loadMore = useCallback(() => {
@@ -114,8 +103,6 @@ export function useComments(props: UseCommentsProps) {
       try {
         const createCommentProps: CreateCommentProps = {
           data: commentData,
-          workspaceURL,
-          workspaceURI,
           recordId,
           parentId: parent,
           showRepliesInMainThread,
@@ -159,15 +146,7 @@ export function useComments(props: UseCommentsProps) {
         setCreating(false);
       }
     },
-    [
-      workspaceURL,
-      workspaceURI,
-      recordId,
-      toast,
-      newCommentOnTop,
-      showRepliesInMainThread,
-      createComment,
-    ],
+    [recordId, toast, newCommentOnTop, showRepliesInMainThread, createComment],
   );
 
   const hasMore = useMemo(

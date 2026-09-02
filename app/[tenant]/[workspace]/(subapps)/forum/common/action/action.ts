@@ -565,11 +565,7 @@ export const createComment: CreateComment = async props => {
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {
-    workspaceURL: _workspaceURL,
-    workspaceURI: _workspaceURI,
-    ...rest
-  } = parsed.data;
+  const commentProps = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
@@ -604,7 +600,7 @@ export const createComment: CreateComment = async props => {
   }
 
   const {posts} = await findPosts({
-    whereClause: {id: rest.recordId},
+    whereClause: {id: commentProps.recordId},
     workspaceID: access.workspace.id,
     client,
     user,
@@ -643,7 +639,7 @@ export const createComment: CreateComment = async props => {
           commentField: 'note',
           trackingField: 'publicBody',
           subject: `${user.simpleFullName || user.name} added a comment`,
-          ...rest,
+          ...commentProps,
         }),
     );
 
@@ -795,8 +791,7 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  const {workspaceURL: _workspaceURL, ...rest} =
-    FetchCommentsPropsSchema.parse(props);
+  const commentQuery = FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
@@ -824,7 +819,7 @@ export const fetchComments: FetchComments = async props => {
   }
 
   const {posts} = await findPosts({
-    whereClause: {id: rest.recordId},
+    whereClause: {id: commentQuery.recordId},
     workspaceID: access.workspace.id,
     client,
     user,
@@ -839,7 +834,7 @@ export const fetchComments: FetchComments = async props => {
       client,
       commentField: 'note',
       trackingField: 'publicBody',
-      ...rest,
+      ...commentQuery,
     });
     return {success: true, data: clone(data)};
   } catch (e) {

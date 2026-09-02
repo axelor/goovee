@@ -335,7 +335,7 @@ export const createComment: CreateComment = async props => {
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const commentProps = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
@@ -374,7 +374,7 @@ export const createComment: CreateComment = async props => {
   }
 
   const event = await findEvent({
-    id: rest.recordId,
+    id: commentProps.recordId,
     client,
     config,
     user,
@@ -396,7 +396,7 @@ export const createComment: CreateComment = async props => {
           commentField: 'note',
           trackingField: 'publicBody',
           subject: `${user.simpleFullName || user.name} added a comment`,
-          ...rest,
+          ...commentProps,
         }),
     );
 
@@ -448,7 +448,7 @@ export const fetchComments: FetchComments = async props => {
   const parsedComments = FetchCommentsPropsSchema.safeParse(props);
   if (!parsedComments.success)
     return {error: true, message: z.prettifyError(parsedComments.error)};
-  const {workspaceURL, ...rest} = parsedComments.data;
+  const commentQuery = parsedComments.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
@@ -481,7 +481,7 @@ export const fetchComments: FetchComments = async props => {
   }
 
   const event = await findEvent({
-    id: rest.recordId,
+    id: commentQuery.recordId,
     client,
     config,
     user,
@@ -497,7 +497,7 @@ export const fetchComments: FetchComments = async props => {
       client,
       commentField: 'note',
       trackingField: 'publicBody',
-      ...rest,
+      ...commentQuery,
     });
     return {success: true, data: clone(data)};
   } catch (e) {

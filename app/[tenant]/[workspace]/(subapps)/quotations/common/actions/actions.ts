@@ -32,9 +32,7 @@ export const createComment: CreateComment = async props => {
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  /* The workspace and its visitor prefix are pulled out of `rest` and left
-   * unread: the workspace commented on is the one the request arrived at. */
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const commentProps = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
@@ -80,7 +78,7 @@ export const createComment: CreateComment = async props => {
   });
 
   const quotation = await findQuotation({
-    id: rest.recordId,
+    id: commentProps.recordId,
     client,
     params: {where: quotationWhereClause},
     workspaceURL: access.url.key(),
@@ -101,13 +99,13 @@ export const createComment: CreateComment = async props => {
           commentField: 'body',
           trackingField: 'body',
           subject: `${user.simpleFullName || user.name} added a comment`,
-          ...rest,
+          ...commentProps,
         }),
     );
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
-      const quotationLink: WorkspaceSubPath = `/${SUBAPP_CODES.quotations}/${rest.recordId}#comment-${comment.id}`;
+      const quotationLink: WorkspaceSubPath = `/${SUBAPP_CODES.quotations}/${commentProps.recordId}#comment-${comment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: access.url.tenantId,
@@ -150,9 +148,7 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  /* The workspace is pulled out of `rest` and left unread: the workspace whose
-   * comments are read is the one the request arrived at. */
-  const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
+  const commentQuery = FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
@@ -193,7 +189,7 @@ export const fetchComments: FetchComments = async props => {
   });
 
   const quotation = await findQuotation({
-    id: rest.recordId,
+    id: commentQuery.recordId,
     client,
     params: {where: quotationWhereClause},
     workspaceURL: access.url.key(),
@@ -208,7 +204,7 @@ export const fetchComments: FetchComments = async props => {
       client,
       commentField: 'body',
       trackingField: 'body',
-      ...rest,
+      ...commentQuery,
     });
     return {success: true, data: clone(data)};
   } catch (e) {
