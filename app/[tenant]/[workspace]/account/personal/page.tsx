@@ -2,10 +2,8 @@ import {notFound} from 'next/navigation';
 import {uniqBy} from 'lodash-es';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
 import {PartnerTypeMap, findGooveeUserByEmail} from '@/orm/partner';
-import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/lib/core/tenant';
 import {t} from '@/lib/core/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -13,22 +11,13 @@ import Form from './form';
 import {Role} from '../common/types';
 import {SectionHeader} from '../common/ui/components';
 
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  const {tenant: tenantId, workspaceURL} = workspacePathname(params);
+export default async function Page() {
+  const access = await ensureWorkspaceAccess();
+  if (!access.ok) return notFound();
 
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) {
-    return notFound();
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
+  const {user, tenant} = access;
   const {client} = tenant;
+  const workspaceURL = access.url.key();
 
   const partner = await findGooveeUserByEmail(user.email, client);
 

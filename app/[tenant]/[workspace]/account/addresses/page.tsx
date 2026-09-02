@@ -2,8 +2,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone, getPartnerId} from '@/utils';
-import {getSession} from '@/auth';
-import {workspacePathname} from '@/utils/workspace';
+import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {PartnerKey} from '@/types';
@@ -14,7 +13,6 @@ import {
   findInvoicingAddresses,
 } from '@/orm/address';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {manager} from '@/tenant';
 import {findQuotation} from '@/subapps/quotations/common/orm/quotations';
 
 // ---- LOCAL IMPORTS ---- //
@@ -22,7 +20,6 @@ import AddressesContent from './content';
 import {AddressBook} from './common/ui/components';
 
 interface PageParams {
-  params: Promise<{id: string; tenant: string; workspace: string}>;
   searchParams: Promise<{
     quotation?: string;
     checkout?: boolean;
@@ -32,23 +29,19 @@ interface PageParams {
 
 export default async function Page(props: PageParams) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
-  const {tenant: tenantId} = params;
   const {
     quotation: quotationId = null,
     checkout = false,
     callbackURL,
   } = searchParams || {};
 
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) return notFound();
+  const access = await ensureWorkspaceAccess();
+  if (!access.ok) return notFound();
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
+  const {user, tenant} = access;
   const {client} = tenant;
+  const workspaceURL = access.url.key();
 
-  const {workspaceURL} = workspacePathname(params);
   const userId = getPartnerId(user);
 
   const fromQuotation = !!quotationId;
