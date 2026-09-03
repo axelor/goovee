@@ -1,13 +1,13 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 import {accessStatus} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findFile, streamFile} from '@/utils/download';
 
 import {getShellConfig} from '../../../../orm/config';
 
 export async function GET(request: NextRequest) {
-  const access = await ensureWorkspaceAccess({allowGuest: true});
+  const access = await ensureAccess({allowGuest: true});
   if (!access.ok) {
     return new NextResponse('Invalid workspace', {
       status: accessStatus(access.reason),

@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {Separator} from '@/ui/components/separator';
 import {SUBAPP_CODES} from '@/constants';
 import {findPreferences} from '@/orm/notification';
@@ -14,7 +14,7 @@ import {DevicePushPreference} from './device-push-preference';
 import {findSubapps} from '@/orm/workspace';
 
 export default async function Page() {
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
   if (!access.ok) return notFound();
 
   const {user, tenant} = access;

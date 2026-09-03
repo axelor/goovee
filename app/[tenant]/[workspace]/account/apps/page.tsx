@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {findSubapps} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/lib/core/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -12,7 +12,7 @@ import SettingsContent from '../settings/content';
 import {SectionHeader} from '../common/ui/components';
 
 export default async function Account() {
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) return notFound();
 

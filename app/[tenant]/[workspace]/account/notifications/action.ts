@@ -3,7 +3,7 @@
 import {z} from 'zod';
 import {t} from '@/locale/server';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {updatePreferences} from '@/orm/notification';
 import {
   UpdateNotificationPreferenceSchema,
@@ -26,7 +26,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
 
   const {code, data: notificationData} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));

@@ -20,7 +20,7 @@ import {generateOTP} from '@/otp/actions';
 import {findOne, isValid, markUsed} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {withMattermostEmailSync} from '@/lib/core/mattermost';
 import {z} from 'zod';
 import {
@@ -352,7 +352,7 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
 
   const {email} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));

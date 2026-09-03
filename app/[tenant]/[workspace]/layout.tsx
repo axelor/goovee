@@ -9,7 +9,7 @@ import {findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {tenantURLs} from '@/lib/core/url/scope';
 import {getPortalRoot} from '@/utils/workspace-url';
 import {getPublicEnvironment} from '@/environment';
@@ -32,7 +32,7 @@ const defaultTheme = {
 };
 
 export async function generateMetadata(): Promise<Metadata | null> {
-  const granted = await ensureWorkspaceAccess({allowGuest: true});
+  const granted = await ensureAccess({allowGuest: true});
 
   /* A title is the only thing at stake, so every denial and an unnamed
    * workspace answer the same way: no metadata, and the page still renders. */
@@ -51,7 +51,7 @@ export default async function Layout(props: {
 }) {
   const {children} = props;
 
-  const granted = await ensureWorkspaceAccess({allowGuest: true});
+  const granted = await ensureAccess({allowGuest: true});
 
   if (!granted.ok) {
     /* Only an absent session is sent to login, and the gate returns that reason

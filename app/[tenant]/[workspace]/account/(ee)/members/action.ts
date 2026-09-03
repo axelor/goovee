@@ -6,7 +6,7 @@ import {z} from 'zod';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findWorkspaceMembers} from '@/orm/workspace';
 import {isAdminContact, isPartner, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
@@ -71,7 +71,7 @@ export async function updateInviteApplication(input: UpdateInviteApplication) {
 
   const {invite, app, value} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));
@@ -173,7 +173,7 @@ export async function updateInviteAuthentication(
 
   const {invite, app, value} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));
@@ -263,7 +263,7 @@ export async function deleteMember(input: DeleteMember) {
 
   const {member} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));
@@ -331,7 +331,7 @@ export async function updateMemberApplication(input: UpdateMemberApplication) {
 
   const {member, app, value} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));
@@ -445,7 +445,7 @@ export async function updateMemberAuthentication(
 
   const {member, app, value} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));

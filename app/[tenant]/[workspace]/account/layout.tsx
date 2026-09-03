@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findGooveeUserByEmail, isAdminContact, isPartner} from '@/orm/partner';
 
 // ---- LOCAL IMPORTS ---- //
@@ -12,7 +12,7 @@ import {Role} from './common/types';
 export default async function Layout(props: {children: React.ReactNode}) {
   const {children} = props;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
   if (!access.ok) return notFound();
 
   const {user, tenant} = access;

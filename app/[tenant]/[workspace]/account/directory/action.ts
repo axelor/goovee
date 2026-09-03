@@ -1,7 +1,7 @@
 'use server';
 import {t} from '@/locale/server';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   findGooveeUserByEmail,
   isAdminContact,
@@ -23,7 +23,7 @@ export async function updateDirectorySettings({
   values: DirectorySettingsFormValues;
 }): ActionResponse<null> {
   try {
-    const access = await ensureWorkspaceAccess();
+    const access = await ensureAccess();
 
     if (!access.ok) {
       return {error: true, message: await accessMessage(access.reason)};
@@ -105,7 +105,7 @@ export async function updateCompanyProfileImage(
 
   const {token} = parsed;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};

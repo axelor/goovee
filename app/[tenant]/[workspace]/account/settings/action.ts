@@ -3,13 +3,13 @@
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
 import {SUBAPP_PAGE} from '@/constants';
 
 export async function removeWorkpace() {
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};

@@ -5,7 +5,7 @@ import {findSubapps} from '@/orm/workspace';
 import {currentWorkspace} from '@/lib/core/url/current';
 import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/url';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';
 import {Home} from './home';
@@ -13,7 +13,7 @@ import {Home} from './home';
 export default async function Page(props: {
   params: Promise<{workspace: string; tenant: string}>;
 }) {
-  const access = await ensureWorkspaceAccess({allowGuest: true});
+  const access = await ensureAccess({allowGuest: true});
 
   if (!access.ok) {
     /* Only an absent session is sent to login, and the gate returns that reason

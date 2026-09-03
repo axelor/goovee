@@ -2,7 +2,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone, getPartnerId} from '@/utils';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {PartnerKey} from '@/types';
@@ -35,7 +35,7 @@ export default async function Page(props: PageParams) {
     callbackURL,
   } = searchParams || {};
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
   if (!access.ok) return notFound();
 
   const {user, tenant} = access;

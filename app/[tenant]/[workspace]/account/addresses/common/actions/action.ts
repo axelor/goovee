@@ -9,7 +9,7 @@ import {t} from '@/locale/server';
 import {ADDRESS_TYPE, SUBAPP_CODES} from '@/constants';
 import {getSession} from '@/auth';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {clone, getPartnerId} from '@/utils';
 import {
@@ -301,7 +301,7 @@ export async function confirmAddresses(data: ConfirmAddresses) {
 
   const {record, subAppCode} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};

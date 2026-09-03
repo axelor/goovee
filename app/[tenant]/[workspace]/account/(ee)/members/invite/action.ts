@@ -6,7 +6,7 @@ import {after} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   findContactByEmail,
   findGooveeUserByEmail,
@@ -48,7 +48,7 @@ export async function deleteInvite({id}: {id: string}) {
     return error(await t('Bad request'));
   }
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));
@@ -99,7 +99,7 @@ export async function sendInvites(input: SendInvites) {
 
   const {emails: emailAddresses, role, apps} = validation.data;
 
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return error(await accessMessage(access.reason));

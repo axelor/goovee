@@ -2,7 +2,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {isAdminContact, isPartner} from '@/orm/partner';
-import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -11,7 +11,7 @@ import {findAvailableSubapps, findMembers} from '../../common/orm/members';
 import {findInvites} from '../../common/orm/invites';
 
 export default async function Page() {
-  const access = await ensureWorkspaceAccess();
+  const access = await ensureAccess();
 
   if (!access.ok) {
     return notFound();

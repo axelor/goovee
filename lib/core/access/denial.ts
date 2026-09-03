@@ -5,7 +5,6 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {SEARCH_PARAMS} from '@/constants';
 import {currentWorkspace} from '@/lib/core/url/current';
 import {t} from '@/locale/server';
-import type {User} from '@/types';
 import {getCurrentPath} from '@/utils/current-path';
 import {getLoginURL} from '@/utils/url';
 import type {AccessReason} from './ensure-access';
@@ -47,8 +46,8 @@ export async function accessMessage(reason: AccessReason): Promise<string> {
 
 /**
  * Answers a denied page in the medium a page has: not-found for something that
- * does not exist, a sign-in screen for a visitor who has none, and forbidden
- * for one whose session is simply not allowed in.
+ * does not exist, a sign-in screen where signing in can still change the
+ * answer, and forbidden for a visitor simply not allowed in.
  *
  * The sibling of `accessStatus` and `accessMessage` for the third caller —
  * `AccessReason` is deliberately navigation-neutral, and this is where a page
@@ -62,10 +61,7 @@ export async function accessMessage(reason: AccessReason): Promise<string> {
  * denial carries no workspace to build a sign-in address from — that is the
  * whole reason a page cannot get this from the gate's result.
  */
-export async function denyPage(access: {
-  reason: AccessReason;
-  user: User | undefined;
-}): Promise<never> {
+export async function denyPage(access: {reason: AccessReason}): Promise<never> {
   if (
     access.reason === 'workspace-not-found' ||
     access.reason === 'app-not-installed'
@@ -73,12 +69,10 @@ export async function denyPage(access: {
     notFound();
   }
 
-  /* Tested on the session rather than the reason: `ensureAccess` answers a real
-   * workspace closed to an anonymous visitor with 'no-workspace-access', and
-   * that visitor still has a sign-in to be offered. Both gates only report a
-   * login-eligible reason for a workspace and app they confirmed exist, so
-   * nobody is sent here for an address that names nothing. */
-  if (!access.user) {
+  /* The one reason signing in can still answer, and the gate reports it only
+   * for what it confirmed exists — so nobody is sent here for an address that
+   * names nothing. */
+  if (access.reason === 'unauthenticated') {
     const scope = await currentWorkspace();
 
     redirect(
