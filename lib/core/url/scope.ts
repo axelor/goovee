@@ -95,16 +95,6 @@ export type TenantURLs = {
   readonly tenantId: string;
 
   /**
-   * A root path the browser fetches itself, base path included: the worker
-   * script, a fallback image, an image route.
-   *
-   * These addresses name their tenant in the path, because everything under
-   * `/api` and the manifest route sit outside the proxy matcher — nothing
-   * restores a tenant segment for them on any origin.
-   */
-  forBrowser(path: RootPath): string;
-
-  /**
    * A root path as an absolute address on this tenant's own origin — the
    * password-reset and invitation links, whose screens sit outside every tenant
    * segment but are served per tenant.
@@ -254,8 +244,6 @@ export function tenantURLs(tenantId: string): TenantURLs {
 
   return {
     tenantId,
-
-    forBrowser: path => withBasePath(path),
 
     forExternal: path => `${getPortalRoot(host)}${path}`,
 
