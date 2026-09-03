@@ -4,7 +4,7 @@ import {getPublicEnvironment} from '@/environment';
 import {getTenantConfig} from '@/tenant/config';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {getPortalRoot} from '@/utils/workspace-url';
+import {absoluteRoot} from '@/lib/core/url/absolute';
 
 export function extractSearchParams({
   searchParams,
@@ -22,7 +22,7 @@ export function extractSearchParams({
 
   const config = tenantId ? getTenantConfig(tenantId) : null;
 
-  const workspaceURL = `${getPortalRoot(
+  const workspaceURL = `${absoluteRoot(
     getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
   )}${workspaceURI || ''}`;
 

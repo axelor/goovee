@@ -6,8 +6,8 @@ import {getPublicEnvironment} from '@/environment/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
 import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
-import {getPortalRoot} from '@/utils/workspace-url';
 
+import {absoluteRoot} from './absolute';
 import type {WorkspaceSubPath} from './index';
 import {revalidateRoutePath} from './revalidate';
 import {workspaceURLsFrom, type WorkspaceURLs} from './workspace-urls';
@@ -292,11 +292,11 @@ export function tenantURLs(tenantId: string): TenantURLs {
     return {
       ...base,
       routePath,
-      key: () => `${getPortalRoot(host)}${visitorPrefix}`,
+      key: () => `${absoluteRoot(host)}${visitorPrefix}`,
       fromClient: (path, query) => {
         workspaceVisitorPathSchema(visitorPrefix).parse(path);
 
-        const url = `${getPortalRoot(host)}${path}`;
+        const url = `${absoluteRoot(host)}${path}`;
 
         return query ? `${url}?${new URLSearchParams(query)}` : url;
       },
@@ -307,7 +307,7 @@ export function tenantURLs(tenantId: string): TenantURLs {
   return {
     tenantId,
 
-    forExternal: path => `${getPortalRoot(host)}${path}`,
+    forExternal: path => `${absoluteRoot(host)}${path}`,
 
     entry: headers =>
       withBasePath(

@@ -11,7 +11,7 @@ import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {tenantURLs} from '@/lib/core/url/scope';
-import {getPortalRoot} from '@/utils/workspace-url';
+import {absoluteRoot} from '@/lib/core/url/absolute';
 import {getPublicEnvironment} from '@/environment';
 
 // ---- LOCAL IMPORTS ---- //
@@ -97,7 +97,7 @@ export default async function Layout(props: {
   }
 
   const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
-  const baseUrl = getPortalRoot(host);
+  const baseUrl = absoluteRoot(host);
 
   const found = await findWorkspaces({
     url: baseUrl,

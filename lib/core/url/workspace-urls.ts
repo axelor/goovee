@@ -1,6 +1,6 @@
 import {withBasePath} from '@/lib/core/path/base-path';
-import {getPortalRoot} from '@/utils/workspace-url';
 
+import {absoluteRoot} from './absolute';
 import type {WorkspaceSubPath} from './index';
 
 /**
@@ -80,6 +80,6 @@ export function workspaceURLsFrom({
     workspace,
     forRouter,
     forBrowser: sub => withBasePath(forRouter(sub)),
-    forExternal: sub => `${getPortalRoot(host)}${forRouter(sub)}`,
+    forExternal: sub => `${absoluteRoot(host)}${forRouter(sub)}`,
   };
 }

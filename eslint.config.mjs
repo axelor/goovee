@@ -29,18 +29,18 @@ const eslintConfig = defineConfig([
               name: '@/lib/core/path/base-path',
               importNames: ['getBasePath'],
               message:
-                'Hand-joining the base path is how it ends up missing or doubled. Use withBasePath for a path, getPortalRoot from @/utils/workspace-url for host + base path.',
+                'Hand-joining the base path is how it ends up missing or doubled. Use withBasePath for a path, absoluteRoot from @/lib/core/url/absolute for an origin joined to the base path.',
             },
           ],
         },
       ],
     },
   },
-  /* The named files hold the joins everything else is sent through. Scoped to
-   * the one rule they need lifted, so a file exempted for the base path does
-   * not also lose the `revalidatePath` restriction. */
+  /* The named file holds the join everything else is sent through. Scoped to
+   * the one rule it needs lifted, so a file exempted for the base path does not
+   * also lose the `revalidatePath` restriction. */
   {
-    files: ['utils/workspace-url.ts', 'scripts/**'],
+    files: ['lib/core/url/absolute.ts'],
     rules: {
       'no-restricted-imports': [
         'error',

@@ -2,7 +2,7 @@
 import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {getPortalRoot} from '@/utils/workspace-url';
+import {absoluteRoot} from '@/lib/core/url/absolute';
 import {
   findDefaultPartnerWorkspace,
   findWorkspace,
@@ -81,7 +81,7 @@ export async function resolveLanding({
   const user = session?.user;
 
   const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
-  const baseUrl = getPortalRoot(host);
+  const baseUrl = absoluteRoot(host);
 
   const workspaces = await findWorkspaces({
     url: baseUrl,

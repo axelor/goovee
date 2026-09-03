@@ -12,9 +12,9 @@ import {runScript} from '@/scripts/lib/script';
 /* Safe to import here, unlike the document's loader: this module reads nothing,
  * so importing it cannot settle where the document is read from. */
 import {isHostRouted} from '@/lib/core/tenant/routing';
-/* Reads NEXT_PUBLIC_BASE_PATH as it is evaluated, which the import above of
- * `@/load-swc-env` has already filled in. */
-import {getBasePath} from '@/lib/core/path/base-path';
+/* Reaches `getBasePath`, whose module reads NEXT_PUBLIC_BASE_PATH as it is
+ * evaluated, which the import above of `@/load-swc-env` has already filled in. */
+import {absoluteRoot} from '@/lib/core/url/absolute';
 
 /*
  * Answers the question a deployment otherwise answers by starting: is this
@@ -87,7 +87,7 @@ here.`,
     out.ok(
       `Accepted — ${tenants.length} ${tenants.length === 1 ? 'tenant' : 'tenants'}. ` +
         `Addresses naming none are served on ` +
-        `${deployment.betterAuthUrl}${getBasePath()}.`,
+        `${absoluteRoot(deployment.betterAuthUrl)}.`,
     );
 
     /* The address, not just the origin, because a tenant routed by host is
@@ -96,7 +96,7 @@ here.`,
      * environment rather than the document, so this is the address as served by
      * a deployment carrying the NEXT_PUBLIC_BASE_PATH this script was run with. */
     for (const [id, config] of tenants) {
-      const root = `${config.publicEnv.GOOVEE_PUBLIC_HOST}${getBasePath()}`;
+      const root = absoluteRoot(config.publicEnv.GOOVEE_PUBLIC_HOST);
       const hostRouted = isHostRouted(config);
       const isDefault = id === deployment.defaultTenant;
 

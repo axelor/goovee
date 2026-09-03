@@ -3,7 +3,8 @@ import 'server-only';
 import {getPublicEnvironment} from '@/environment/utils';
 import {isHostRouted} from '@/lib/core/tenant/routing';
 import {getTenantConfig} from '@/tenant/config';
-import {getPortalRoot} from '@/utils/workspace-url';
+
+import {absoluteRoot} from './absolute';
 
 /*
  * The read half of a stored link. A row is written as the route-tree path that
@@ -65,7 +66,7 @@ export function fromStoredLink(stored: string, tenantId: string): string {
   let path = stored;
 
   if (isAbsoluteURL(stored)) {
-    const root = getPortalRoot(tenantHost(tenantId));
+    const root = absoluteRoot(tenantHost(tenantId));
 
     /* The root is taken off as a prefix of the whole string, not through URL
      * parsing, so the link's query and fragment survive. */
@@ -74,7 +75,9 @@ export function fromStoredLink(stored: string, tenantId: string): string {
     } else {
       const parsed = new URL(stored);
       const full = `${parsed.pathname}${parsed.search}${parsed.hash}`;
-      const basePath = getPortalRoot();
+      /* No host, because this row's own root is not one this tenant declares:
+       * the base path alone is all of the root its recorded path can carry. */
+      const basePath = absoluteRoot(undefined);
 
       path =
         basePath && full.startsWith(`${basePath}/`)
