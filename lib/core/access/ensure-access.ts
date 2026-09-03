@@ -34,10 +34,8 @@ export type AccessResult<TAllowGuest extends boolean = false> =
       tenant: Tenant;
       /**
        * The addresses of the workspace just authorized — the same object
-       * `tenantURLs(id).workspace(slug)` returns, so the only difference from
-       * building one directly is that holding this one is proof the access
-       * check passed. That is what `url.fromClient` relies on for the second
-       * half of its guarantee.
+       * `tenantURLs(id).workspace(slug)` returns, reached without naming the
+       * workspace a second time.
        */
       url: ServerWorkspaceURLs;
     }

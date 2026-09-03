@@ -47,7 +47,6 @@ import {
 import type {CountryCode} from '@/lib/core/payment/stripe/types';
 import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
 import {scale} from '@/utils';
-import {paymentReturnURL} from '@/lib/core/url/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -969,6 +968,8 @@ export async function payboxCreateOrder({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.paybox);
 
   try {
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
     const response = await createPayboxOrder({
       client,
       tenantId,
@@ -980,23 +981,16 @@ export async function payboxCreateOrder({
         paymentModeId,
       },
       url: {
-        success: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {
-            paybox_response: 'true',
-            type: isPartialPayment
-              ? INVOICE_PAYMENT_OPTIONS.PARTIAL
-              : INVOICE_PAYMENT_OPTIONS.TOTAL,
-            ...(token ? {token} : {}),
-          },
+        success: workspaceScope.fromClient(uri, {
+          paybox_response: 'true',
+          type: isPartialPayment
+            ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+            : INVOICE_PAYMENT_OPTIONS.TOTAL,
+          ...(token ? {token} : {}),
         }),
-        failure: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {paybox_error: 'true', ...(token ? {token} : {})},
+        failure: workspaceScope.fromClient(uri, {
+          paybox_error: 'true',
+          ...(token ? {token} : {}),
         }),
       },
     });
@@ -1257,6 +1251,8 @@ export async function up2payCreateOrder({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.up2pay);
 
   try {
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
     const response = await createUp2payOrder({
       tenantId,
       client,
@@ -1273,35 +1269,20 @@ export async function up2payCreateOrder({
       },
       billingInfo,
       url: {
-        success: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {
-            status: UP2PAY_REDIRECT_STATUS.SUCCESS,
-            type: isPartialPayment
-              ? INVOICE_PAYMENT_OPTIONS.PARTIAL
-              : INVOICE_PAYMENT_OPTIONS.TOTAL,
-            ...(token ? {token} : {}),
-          },
+        success: workspaceScope.fromClient(uri, {
+          status: UP2PAY_REDIRECT_STATUS.SUCCESS,
+          type: isPartialPayment
+            ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+            : INVOICE_PAYMENT_OPTIONS.TOTAL,
+          ...(token ? {token} : {}),
         }),
-        failure: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {
-            status: UP2PAY_REDIRECT_STATUS.REFUSED,
-            ...(token ? {token} : {}),
-          },
+        failure: workspaceScope.fromClient(uri, {
+          status: UP2PAY_REDIRECT_STATUS.REFUSED,
+          ...(token ? {token} : {}),
         }),
-        cancel: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {
-            status: UP2PAY_REDIRECT_STATUS.CANCELLED,
-            ...(token ? {token} : {}),
-          },
+        cancel: workspaceScope.fromClient(uri, {
+          status: UP2PAY_REDIRECT_STATUS.CANCELLED,
+          ...(token ? {token} : {}),
         }),
       },
     });
@@ -1419,14 +1400,15 @@ export async function initiatePispPayment({
   try {
     const tokenQuery: Record<string, string> = token ? {token} : {};
 
-    /* Inside the try, because a refused `uri` throws here and has to come back
-     * as this action's own error shape, like the sibling gateways' calls do. */
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
+    /* Inside the try, because a refused `uri` throws where this is called and
+     * has to come back as this action's own error shape, like the sibling
+     * gateways' calls do. */
     const returnURL = (status: string) =>
-      paymentReturnURL({
-        tenantId,
-        workspaceURL,
-        uri,
-        query: {hubpisp_status: status, ...tokenQuery},
+      workspaceScope.fromClient(uri, {
+        hubpisp_status: status,
+        ...tokenQuery,
       });
 
     const successfulReportUrl = returnURL(HUBPISP_REDIRECT_STATUS.SUCCESS);

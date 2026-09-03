@@ -15,7 +15,6 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
-import {paymentReturnURL} from '@/lib/core/url/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEvent} from '@/subapps/events/common/orm/event';
@@ -371,18 +370,8 @@ export async function payboxCreateOrder(props: {
       tenantId,
       client,
       url: {
-        success: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {paybox_response: 'true'},
-        }),
-        failure: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {paybox_error: 'true'},
-        }),
+        success: access.url.fromClient(uri, {paybox_response: 'true'}),
+        failure: access.url.fromClient(uri, {paybox_error: 'true'}),
       },
     });
     return {success: true, order: response};

@@ -6,7 +6,6 @@ import {getPublicEnvironment} from '@/environment/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
 import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
-import {getPortalRoot, toWorkspaceURI} from '@/utils/workspace-url';
 
 /**
  * The host a tenant declares for itself, or undefined for a tenant the
@@ -39,29 +38,6 @@ export function visitorPathFromRoutePath(
   return routePath;
 }
 
-/**
- * An absolute URL on a tenant's own origin for a visitor path:
- * `{host}{basePath}{path}`, plus the given query parameters.
- *
- * The one blessed way to hand a portal address to the outside — a payment
- * gateway's return URL, a link in an email. The host comes from the tenant's
- * configuration, never from the request, so nothing an address carries decides
- * where the outside is sent.
- *
- * `path` must be a visitor path with no query string of its own.
- */
-export function absoluteVisitorURL(
-  tenantId: string,
-  path: string,
-  query?: Record<string, string>,
-): string {
-  const url = `${getPortalRoot(tenantHost(tenantId))}${path}`;
-
-  if (!query) return url;
-
-  return `${url}?${new URLSearchParams(query)}`;
-}
-
 /* A path segment of one or two dots, written plainly or percent-encoded — the
  * segments a browser resolves against the rest of the path, which would carry
  * an address out of the prefix the schema below checked. */
@@ -73,11 +49,12 @@ const DOT_SEGMENT = /(^|\/)(?:\.|%2e){1,2}(?=\/|$)/i;
  * no scheme, no backslashes, no query or fragment, no dot-segments.
  *
  * For server actions that echo a browser path back out — a payment gateway's
- * return address, say. The prefix check is the authorization: a path bound to
- * the workspace the action already access-checked cannot name another
- * tenant's or another workspace's address. Dot-segments are refused because a
- * browser resolves them, which would step the address back out of the checked
- * prefix; a query is refused because the caller appends its own.
+ * return address, say. The prefix check is the confinement, not the
+ * authorization: a path bound to a workspace cannot name another tenant's or
+ * another workspace's address, and the caller establishes separately that the
+ * sender may reach it. Dot-segments are refused because a browser resolves
+ * them, which would step the address back out of the checked prefix; a query is
+ * refused because the caller appends its own.
  */
 export function workspaceVisitorPathSchema(workspaceURI: string) {
   return z
@@ -119,30 +96,4 @@ export function tenantEntryPath(tenantId: string, headers: Headers): string {
   );
 
   return withBasePath(owns ? '/' : `/${tenantId}/`);
-}
-
-/**
- * The absolute URL a payment gateway sends the payer back to.
- *
- * `uri` is the browser's own path, sent up by the client, so it is validated
- * before it is echoed into a signed gateway payload: it must sit inside the
- * workspace the action already access-checked. A path outside it throws — a
- * crafted value is a probe, not a flow to soften.
- */
-export function paymentReturnURL({
-  tenantId,
-  workspaceURL,
-  uri,
-  query,
-}: {
-  tenantId: string;
-  workspaceURL: string;
-  uri: string;
-  query: Record<string, string>;
-}): string {
-  const workspaceURI = toWorkspaceURI(workspaceURL, tenantHost(tenantId));
-
-  workspaceVisitorPathSchema(workspaceURI).parse(uri);
-
-  return absoluteVisitorURL(tenantId, uri, query);
 }

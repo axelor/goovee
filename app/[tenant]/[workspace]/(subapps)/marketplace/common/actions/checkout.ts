@@ -1,7 +1,6 @@
 'use server';
 
 import {DEFAULT_CURRENCY_SCALE, SUBAPP_CODES} from '@/constants';
-import {paymentReturnURL} from '@/lib/core/url/server';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
@@ -204,7 +203,6 @@ export async function payboxCreateOrder(props: {
   const prep = await prepare({productIds: parsed.data.productIds});
   if ('error' in prep) return prep;
   const {access, cart, paymentOptionSet, context} = prep.data;
-  const workspaceURL = access.url.key();
 
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.paybox)) {
     return err(await t('Paybox is not available.'));
@@ -229,17 +227,11 @@ export async function payboxCreateOrder(props: {
       tenantId: access.tenant.id,
       client: access.tenant.client,
       url: {
-        success: paymentReturnURL({
-          tenantId: access.tenant.id,
-          workspaceURL,
-          uri: parsed.data.uri,
-          query: {paybox_response: 'true'},
+        success: access.url.fromClient(parsed.data.uri, {
+          paybox_response: 'true',
         }),
-        failure: paymentReturnURL({
-          tenantId: access.tenant.id,
-          workspaceURL,
-          uri: parsed.data.uri,
-          query: {paybox_error: 'true'},
+        failure: access.url.fromClient(parsed.data.uri, {
+          paybox_error: 'true',
         }),
       },
     });

@@ -31,11 +31,6 @@ export type WorkspaceAccessResult<TAllowGuest extends boolean = false> =
       user: GuestUser<TAllowGuest>;
       workspace: Workspace;
       tenant: Tenant;
-      /**
-       * The addresses of the workspace just authorized. Holding this object is
-       * proof the check passed, which is the half of `url.fromClient`'s
-       * guarantee that confinement alone does not cover.
-       */
       url: ServerWorkspaceURLs;
     }
   | {

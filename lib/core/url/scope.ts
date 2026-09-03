@@ -63,9 +63,10 @@ export type ServerWorkspaceURLs = WorkspaceURLs & {
    * An absolute address built from a path the browser sent, refusing anything
    * that does not sit inside this workspace.
    *
-   * Guarantees confinement, not authorization: it proves the path names this
-   * workspace, not that the visitor may reach it. Obtain this object from
-   * `ensureAccess` where both are needed.
+   * Guarantees confinement only: it proves the path names this workspace, not
+   * that the sender may reach it. Whoever calls this has already established
+   * that separately — a session through the access gate, or a capability token
+   * fused with the record it was minted for.
    *
    * @throws when `path` is outside the workspace, or carries a scheme, a
    *   query, a fragment, a backslash or a dot-segment — a crafted value is a

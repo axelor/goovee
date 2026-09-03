@@ -16,7 +16,6 @@ import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {markPaymentAsProcessed} from '@/lib/core/payment/common/orm';
-import {paymentReturnURL} from '@/lib/core/url/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -537,7 +536,6 @@ export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
     return {error: true, message: await accessMessage(access.reason)};
 
   const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
   const {user} = access;
   const {client} = access.tenant;
 
@@ -615,18 +613,8 @@ export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
       email: payerEmail,
       context: cart,
       url: {
-        success: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {paybox_response: 'true'},
-        }),
-        failure: paymentReturnURL({
-          tenantId,
-          workspaceURL,
-          uri,
-          query: {paybox_error: 'true'},
-        }),
+        success: access.url.fromClient(uri, {paybox_response: 'true'}),
+        failure: access.url.fromClient(uri, {paybox_error: 'true'}),
       },
     });
 
