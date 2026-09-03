@@ -46,8 +46,7 @@ export type WorkspaceScope = {
 };
 
 /**
- * Builds the workspace addresses from a prefix that is already in visitor
- * shape.
+ * Builds a workspace's scope from a prefix that is already in visitor shape.
  *
  * `visitorPrefix` is `/{workspace}` for a tenant reached on an origin of its
  * own and `/{tenant}/{workspace}` for one reached under a path segment; it
@@ -58,7 +57,7 @@ export type WorkspaceScope = {
  * both give the prefix with no trailing slash, because Next redirects a
  * trailing slash away before a request reaches the route.
  */
-export function workspaceURLsFrom({
+export function buildWorkspaceScope({
   tenantId,
   workspace,
   visitorPrefix,

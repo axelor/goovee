@@ -9,7 +9,7 @@ import {Theme} from '@/types/theme';
 import {type Workspace} from '@/orm/workspace';
 import {useEnvironment} from '@/environment';
 import {
-  workspaceURLsFrom,
+  buildWorkspaceScope,
   type WorkspaceScope,
 } from '@/lib/core/url/workspace-urls';
 
@@ -20,7 +20,7 @@ export const WorkspaceContext = React.createContext<{
    * The workspace's stored `url`, for the two consumers that need the value
    * itself rather than an address: the cart's storage key, and the invoice
    * payment actions, whose capability-token path names the workspace the token
-   * was minted for. It is a database key — to link somewhere, use `url`.
+   * was minted for. It is a database key — to link somewhere, use `scope`.
    */
   workspaceURL: string;
   workspaceID: Workspace['id'];
@@ -31,7 +31,7 @@ export const WorkspaceContext = React.createContext<{
   workspace: DEFAULT_WORKSPACE,
   workspaceURL: '',
   workspaceID: '',
-  scope: workspaceURLsFrom({
+  scope: buildWorkspaceScope({
     tenantId: '',
     workspace: DEFAULT_WORKSPACE,
     visitorPrefix: '',
@@ -42,7 +42,7 @@ export const WorkspaceContext = React.createContext<{
 /* The visitor prefix is given rather than built from the tenant and workspace
  * names: its shape depends on how the tenant is routed, which is server-side
  * configuration. The workspace shell resolves it from the access gate. It
- * reaches the rest of the app only through `url` — nothing reads the prefix
+ * reaches the rest of the app only through `scope` — nothing reads the prefix
  * itself. */
 export function WorkspaceProvider({
   id,
@@ -71,7 +71,7 @@ export function WorkspaceProvider({
    * joined a second way. */
   const scope = useMemo(
     () =>
-      workspaceURLsFrom({
+      buildWorkspaceScope({
         tenantId: tenant,
         workspace,
         visitorPrefix: workspaceURI,

@@ -10,7 +10,7 @@ import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 import {absoluteRoot} from './absolute';
 import type {WorkspaceSubPath} from './index';
 import {revalidateRoutePath} from './revalidate';
-import {workspaceURLsFrom, type WorkspaceScope} from './workspace-urls';
+import {buildWorkspaceScope, type WorkspaceScope} from './workspace-urls';
 
 /**
  * Whether the origin a request arrived on is the one this tenant holds to
@@ -269,7 +269,7 @@ export function tenantURLs(tenantId: string): TenantURLs {
   const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
   const hostRouted = Boolean(config && isHostRouted(config));
 
-  const workspaceURLs = (slug: string): ServerWorkspaceScope => {
+  const buildServerScope = (slug: string): ServerWorkspaceScope => {
     const workspace = assertSlug(slug);
 
     /* The tenant segment is absent from a host-routed tenant's addresses,
@@ -279,7 +279,7 @@ export function tenantURLs(tenantId: string): TenantURLs {
       ? `/${workspace}`
       : `/${tenantId}/${workspace}`;
 
-    const base = workspaceURLsFrom({
+    const base = buildWorkspaceScope({
       tenantId,
       workspace,
       visitorPrefix,
@@ -318,8 +318,8 @@ export function tenantURLs(tenantId: string): TenantURLs {
 
     manifest: () => withBasePath(`/${tenantId}/manifest.webmanifest`),
 
-    workspace: workspaceURLs,
+    workspace: buildServerScope,
 
-    workspaceByKey: storedURL => workspaceURLs(workspaceSlugOf(storedURL)),
+    workspaceByKey: storedURL => buildServerScope(workspaceSlugOf(storedURL)),
   };
 }
