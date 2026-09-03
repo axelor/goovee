@@ -1,6 +1,10 @@
-import {normalizePathPrefix, withPathPrefix} from './utils';
+import {normalizePathPrefix, withPathPrefix} from './prefix';
 
-export const BASE_PATH = normalizePathPrefix(process.env.NEXT_PUBLIC_BASE_PATH);
+/* Not exported: `withBasePath` is the join everything should reach for, and
+ * `getBasePath` the single raw read the lint rule names and restricts. Handing
+ * out the value itself as well would leave a second, unrestricted door onto the
+ * footgun that rule exists to close. */
+const BASE_PATH = normalizePathPrefix(process.env.NEXT_PUBLIC_BASE_PATH);
 
 /**
  * Adds the configured base path to an internal URL.

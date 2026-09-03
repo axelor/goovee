@@ -12,7 +12,7 @@ import {
 } from 'serwist';
 import type {NotificationPayload} from './types';
 import {pushChannelName, MSG_TYPE} from './sw-constants';
-import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/utils';
+import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/prefix';
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the

@@ -2,23 +2,22 @@ import {toNextJsHandler} from 'better-auth/next-js';
 
 // ---- CORE IMPORTS ---- //
 import {auth} from '@/lib/auth'; // path to your auth file
-import {getBasePath} from '@/lib/core/path/base-path';
-import {withPathPrefix} from '@/lib/core/path/utils';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {addressedHost} from '@/lib/core/tenant/routing';
 
 const {POST: authPOST, GET: authGET} = toNextJsHandler(auth);
 
-const basePath = getBasePath();
-
 type AuthHandler = (request: Request) => Promise<Response>;
 
+/* Next strips the base path before a route sees the request, and better-auth
+ * builds its own addresses from the pathname it is handed — so the prefix is
+ * put back before the handler reads it. A deployment with no base path leaves
+ * the pathname untouched and falls through unchanged. */
 const withRestoredBasePath =
   (handler: AuthHandler): AuthHandler =>
   request => {
-    if (!basePath) return handler(request);
-
     const url = new URL(request.url);
-    const pathname = withPathPrefix(basePath, url.pathname);
+    const pathname = withBasePath(url.pathname);
 
     if (pathname !== url.pathname) {
       url.pathname = pathname;

@@ -2,11 +2,14 @@ import 'server-only';
 
 import {headers} from 'next/headers';
 
-import {addressedHost} from '@/lib/core/tenant/routing';
 import {CURRENT_PATH_HEADER, TENANT_HEADER} from '@/proxy';
-import {getRoutingIndex} from '@/tenant/config';
 
-import {isUsableSlug, tenantURLs, type ServerWorkspaceURLs} from './scope';
+import {
+  isUsableSlug,
+  ownsAddressedOrigin,
+  tenantURLs,
+  type ServerWorkspaceURLs,
+} from './scope';
 
 /**
  * The workspace the request being handled is addressed to, read from the
@@ -49,6 +52,21 @@ export async function currentWorkspace(): Promise<ServerWorkspaceURLs | null> {
 }
 
 /**
+ * The path being rendered, query string included, as the proxy captured it.
+ *
+ * Used as the post-login callback, so a denied visitor returns to exactly
+ * where they were with their search params intact.
+ *
+ * Empty where the proxy did not run, rather than raising as `currentWorkspace`
+ * does: a caller with nowhere to send someone back to still has a sign-in
+ * screen to show them, so the absence is answerable here in a way that a
+ * missing workspace is not.
+ */
+export async function getCurrentPath(): Promise<string> {
+  return (await headers()).get(CURRENT_PATH_HEADER) ?? '';
+}
+
+/**
  * The workspace segment of a visitor address, or null where it holds none.
  *
  * Whether the address opens with the workspace or with the tenant follows the
@@ -84,12 +102,7 @@ function workspaceSegment(
     }
   }
 
-  const host = addressedHost(requestHeaders);
-  const onOwnOrigin = Boolean(
-    host && getRoutingIndex().tenantByHost.get(host) === tenantId,
-  );
-
-  const named = onOwnOrigin
+  const named = ownsAddressedOrigin(tenantId, requestHeaders)
     ? segments[0]
     : segments[0] === tenantId
       ? segments[1]

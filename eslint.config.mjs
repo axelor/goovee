@@ -36,11 +36,25 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  /* The named files hold the joins everything else is sent through. */
+  /* The named files hold the joins everything else is sent through. Scoped to
+   * the one rule they need lifted, so a file exempted for the base path does
+   * not also lose the `revalidatePath` restriction. */
   {
-    files: ['utils/workspace-url.ts', 'app/api/auth/**/route.ts', 'scripts/**'],
+    files: ['utils/workspace-url.ts', 'scripts/**'],
     rules: {
-      'no-restricted-imports': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'next/cache',
+              importNames: ['revalidatePath'],
+              message:
+                'revalidatePath matches the route-tree path, which always carries the tenant segment — fed the visitor-shaped workspaceURI it silently revalidates nothing on a host-routed tenant. Use access.url.revalidate(sub) inside an action, tenantURLs(id).workspace(slug).revalidate(sub) outside one, or revalidateEverything from @/lib/core/url/revalidate.',
+            },
+          ],
+        },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.

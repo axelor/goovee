@@ -1,15 +1,72 @@
 import 'server-only';
 
+import {z} from 'zod';
+
 import {getPublicEnvironment} from '@/environment/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {isHostRouted} from '@/lib/core/tenant/routing';
-import {getTenantConfig} from '@/tenant/config';
+import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
+import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 import {getPortalRoot} from '@/utils/workspace-url';
 
 import type {WorkspaceSubPath} from './index';
 import {revalidateRoutePath} from './revalidate';
-import {tenantEntryPath, workspaceVisitorPathSchema} from './server';
 import {workspaceURLsFrom, type WorkspaceURLs} from './workspace-urls';
+
+/**
+ * Whether the origin a request arrived on is the one this tenant holds to
+ * itself.
+ *
+ * The tenant's declared routing is the wrong question: a tenant given an
+ * origin of its own is still served under its path segment on an origin it
+ * shares — where the screen ending a session made before the move lives — and
+ * its addresses there begin with that segment like any other tenant's.
+ *
+ * Lives here rather than beside `isHostRouted` in `tenant/routing.ts`, which
+ * documents itself as reading nothing from the configuration document so that
+ * `pnpm config:check` can import it before naming the document. This reads the
+ * document, and `tenant/config.ts` already imports `routing.ts`, so putting it
+ * there would both break that script and close an import cycle.
+ */
+export function ownsAddressedOrigin(
+  tenantId: string,
+  headers: Headers,
+): boolean {
+  const host = addressedHost(headers);
+
+  return Boolean(host && getRoutingIndex().tenantByHost.get(host) === tenantId);
+}
+
+/* A path segment of one or two dots, written plainly or percent-encoded — the
+ * segments a browser resolves against the rest of the path, which would carry
+ * an address out of the prefix the schema below checked. */
+const DOT_SEGMENT = /(^|\/)(?:\.|%2e){1,2}(?=\/|$)/i;
+
+/**
+ * Validates a client-supplied visitor path as an address inside the given
+ * workspace: the exact workspace root or a path below it, plain path only —
+ * no scheme, no backslashes, no query or fragment, no dot-segments.
+ *
+ * The prefix check is the confinement, not the authorization: a path bound to
+ * a workspace cannot name another tenant's or another workspace's address, and
+ * the caller establishes separately that the sender may reach it. Dot-segments
+ * are refused because a browser resolves them, which would step the address
+ * back out of the checked prefix; a query is refused because the caller
+ * appends its own.
+ */
+function workspaceVisitorPathSchema(workspaceURI: string) {
+  return z
+    .string()
+    .refine(
+      path =>
+        (path === workspaceURI || path.startsWith(`${workspaceURI}/`)) &&
+        !path.includes('://') &&
+        !path.includes('\\') &&
+        !path.includes('?') &&
+        !path.includes('#') &&
+        !DOT_SEGMENT.test(path),
+      {message: 'Path must be inside the workspace'},
+    );
+}
 
 /*
  * Two scopes, because the application has two: some addresses belong to a
@@ -23,10 +80,12 @@ import {workspaceURLsFrom, type WorkspaceURLs} from './workspace-urls';
  * A path from the deployment root, starting with a slash: `/auth/login`,
  * `/api/tenant/acme/partner/image/3`, `/sw.js`.
  *
- * Distinct from `WorkspaceSubPath` only in what it is measured from; the
- * separate name is what keeps the two from being passed to each other.
+ * Distinct from `WorkspaceSubPath` only in what it is measured from. Both are
+ * the same type underneath, so the compiler will not stop one being passed
+ * where the other belongs: the name records the measurement base for a reader
+ * and nothing more.
  */
-export type RootPath = `/${string}`;
+type RootPath = `/${string}`;
 
 /**
  * A workspace's addresses, plus the forms that are not addresses.
@@ -89,7 +148,7 @@ export type ServerWorkspaceURLs = WorkspaceURLs & {
  * returning its own argument would only invite the question of whether it does
  * something.
  */
-export type TenantURLs = {
+type TenantURLs = {
   readonly tenantId: string;
 
   /**
@@ -109,6 +168,11 @@ export type TenantURLs = {
    * and `/acme` does not enclose `/acme/…`. A browser installs an app only
    * where the page's worker encloses the manifest's scope, so a drift between
    * the two shows up as the install prompt silently not appearing.
+   *
+   * It follows the origin the request arrived on rather than the tenant's own
+   * routing, because scoping to the root on a shared origin would register a
+   * worker covering every tenant served there — which the upgrade cleanup in
+   * the root layout unregisters on sight.
    */
   entry(headers: Headers): string;
 
@@ -245,7 +309,10 @@ export function tenantURLs(tenantId: string): TenantURLs {
 
     forExternal: path => `${getPortalRoot(host)}${path}`,
 
-    entry: headers => tenantEntryPath(tenantId, headers),
+    entry: headers =>
+      withBasePath(
+        ownsAddressedOrigin(tenantId, headers) ? '/' : `/${tenantId}/`,
+      ),
 
     manifest: () => withBasePath(`/${tenantId}/manifest.webmanifest`),
 

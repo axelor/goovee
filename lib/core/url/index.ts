@@ -9,16 +9,6 @@
  */
 export type WorkspaceSubPath = `/${string}`;
 
-const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
-
-/**
- * Whether `value` is an absolute URL — a scheme and authority in front, rather
- * than a path. Anchored, so a path whose query merely embeds a URL is not one.
- */
-export function isAbsoluteURL(value: string): boolean {
-  return ABSOLUTE_URL.test(value);
-}
-
 /**
  * The part of `pathname` below the workspace, or null when the pathname is
  * outside it. `/` when the pathname is the workspace root itself.
