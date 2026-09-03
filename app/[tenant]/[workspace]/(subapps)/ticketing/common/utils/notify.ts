@@ -48,9 +48,6 @@ export async function notifyTicketChange({
   client: Client;
 }): Promise<void> {
   const ticketSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
-  const ticketLink = tenantURLs(tenantId)
-    .workspaceByKey(workspaceURL)
-    .forExternal(ticketSubPath);
 
   try {
     if (workspaceUserId) {
@@ -115,6 +112,13 @@ export async function notifyTicketChange({
 
   const sendTracking = async () => {
     try {
+      /* `workspaceByKey` raises on a stored workspace whose last path segment
+       * cannot name a workspace. The mail is the only part of this function
+       * that needs an absolute address, so such a row costs the mail alone. */
+      const ticketLink = tenantURLs(tenantId)
+        .workspaceByKey(workspaceURL)
+        .forExternal(ticketSubPath);
+
       const reciepients = await getMailRecipients({
         contacts,
         client,
