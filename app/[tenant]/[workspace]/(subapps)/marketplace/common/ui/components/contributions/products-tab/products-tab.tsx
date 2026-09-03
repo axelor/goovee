@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import type {ID} from '@/types';
 import {getSkip, getTotal} from '@/utils/pagination';
@@ -20,7 +20,7 @@ type ProductsTabProps = {
   workspace: Workspace;
   config: MarketplaceConfig;
   newListingCurrency: Currency | null;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];

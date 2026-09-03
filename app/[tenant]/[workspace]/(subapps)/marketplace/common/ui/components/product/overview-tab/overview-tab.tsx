@@ -1,4 +1,4 @@
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
 import type {SingleProduct} from '../../../../orm';
@@ -7,7 +7,7 @@ import {ScreenshotGallery} from '../../shared/screenshot-gallery';
 
 interface OverviewTabProps {
   product: SingleProduct;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }
 
 export async function OverviewTab({product, url}: OverviewTabProps) {

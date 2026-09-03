@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {
   Pagination,
@@ -28,7 +28,7 @@ import {MyProductsTable} from '../my-products-table';
 type ProductsListTabProps = {
   products: ListMyProduct[];
   title: string;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];

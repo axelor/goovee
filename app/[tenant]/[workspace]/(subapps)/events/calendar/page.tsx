@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
@@ -60,7 +60,7 @@ async function AgendaData({
   workspace: Workspace | Cloned<Workspace>;
   user: User | null | undefined;
   client: Client;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   workspaceURL: string;
 }) {
   const result = await findEvents({

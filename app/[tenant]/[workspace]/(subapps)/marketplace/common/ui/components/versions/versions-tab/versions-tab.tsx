@@ -10,7 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
@@ -25,7 +25,7 @@ import {VersionCard} from '../version-card/version-card';
 
 interface VersionsTabProps {
   product: SingleProduct;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   client: Client;
   versionPage: number;
   currentVersionId?: string;

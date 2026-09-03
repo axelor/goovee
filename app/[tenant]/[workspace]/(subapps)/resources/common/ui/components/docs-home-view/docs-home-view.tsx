@@ -3,7 +3,7 @@ import {MdArrowForward, MdStar} from 'react-icons/md';
 
 import {SUBAPP_CODES} from '@/constants';
 import {formatDateTime} from '@/lib/core/locale/formatters';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {cn} from '@/utils/css';
 
 import {FolderLogoIcon} from '../folder-logo-icon';
@@ -25,7 +25,7 @@ export function DocsHomeView({
   labels,
 }: {
   pinnedFolders: PinnedFolder[];
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   labels: DocsHomeViewLabels;
 }) {
   return (
@@ -78,7 +78,7 @@ function PinnedFolderCard({
   labels,
 }: {
   folder: PinnedFolder;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   labels: DocsHomeViewLabels;
 }) {
   const parentName = folder.parent?.fileName;

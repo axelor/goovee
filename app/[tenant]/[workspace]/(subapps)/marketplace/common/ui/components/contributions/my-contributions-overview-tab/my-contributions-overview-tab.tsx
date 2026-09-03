@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import type {ID} from '@/types';
 import {Suspense} from 'react';
 import {
@@ -29,7 +29,7 @@ interface OverviewTabProps {
   client: Client;
   workspace: Workspace;
   config: MarketplaceConfig;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   tenantId: string;
 }
 

@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
@@ -53,7 +53,7 @@ async function HomeContent({
   workspaceURL: string;
   client: Client;
   user?: User;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const [pinnedFolders, labels] = await Promise.all([
     fetchPinnedFoldersWithMeta({workspaceURL, client, user}).then(clone),

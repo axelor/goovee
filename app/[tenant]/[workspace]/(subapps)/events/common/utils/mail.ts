@@ -8,7 +8,7 @@ import {generateIcs} from './index';
 import {formatDate} from '@/lib/core/locale/server/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 
@@ -175,7 +175,7 @@ export const generateRegistrationMailAction = async ({
   client: Client;
   config: TenantConfig;
   workspace: Workspace | Cloned<Workspace>;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) => {
   if (![eventId, participants?.length, workspace.url].every(Boolean)) {
     console.error(

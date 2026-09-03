@@ -13,7 +13,7 @@ import {
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
@@ -150,7 +150,7 @@ async function MyRegistrations({
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   filter: FilterKey;
   filters: Filters;
 }) {

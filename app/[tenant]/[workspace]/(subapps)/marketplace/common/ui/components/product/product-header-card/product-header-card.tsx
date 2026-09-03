@@ -5,7 +5,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/login-url';
 import {Download, FileText, Heart} from 'lucide-react';
@@ -26,7 +26,7 @@ export interface ProductHeaderCardProps {
   product: SingleProduct;
   client: Client;
   user?: {id: ID; mainPartnerId?: ID};
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   tenantId: string;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
   preview?: boolean;
@@ -247,7 +247,7 @@ async function CTAButton({
 }: {
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   tenantId: string;
   paid: boolean;
   priceAti: number;

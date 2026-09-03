@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import {Link} from '@/ui/components/link';
@@ -22,7 +22,7 @@ export async function RecentActivity({
   tenantId,
 }: {
   activity: Promise<ActivityItem[]>;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   tenantId: string;
 }) {
   const items = await activity;
@@ -56,7 +56,7 @@ async function ActivityRow({
   tenantId,
 }: {
   item: ActivityItem;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   tenantId: string;
 }) {
   const action =

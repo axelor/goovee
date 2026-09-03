@@ -23,7 +23,7 @@ import {Skeleton} from '@/ui/components/skeleton/skeleton';
 import {FileIcon} from '@/ui/components/file-icon';
 import {cn} from '@/utils/css';
 import {withBasePath} from '@/lib/core/path/base-path';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {Link} from '@/ui/components/link';
 import {HeroSearch} from '@/ui/components';
 
@@ -57,7 +57,7 @@ export async function Home({
   user: User | undefined;
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   apps: HomeApps;
 }) {
   const showNews =
@@ -189,7 +189,7 @@ async function LatestNews({
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const {news} = await findHomePageHeaderNews({
     workspace,
@@ -220,7 +220,7 @@ function HeroNewsCard({
   url,
 }: {
   article: HeroArticle;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const {slug, image, title, description, categorySet, publicationDateTime} =
     article;
@@ -298,7 +298,7 @@ async function EventsCard({
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const {events} = await findEvents({
     limit: 3,
@@ -362,7 +362,7 @@ async function ForumCard({
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const posts = await findRecentlyActivePosts({
     workspaceID: workspace.id,
@@ -429,7 +429,7 @@ async function ResourcesCard({
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const files = await fetchLatestFiles({
     take: 5,
@@ -487,7 +487,7 @@ function HyperlinkGrid({
   url,
 }: {
   config: ShellConfig | Cloned<ShellConfig>;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }) {
   const hyperlinkList = config.hyperlinkList;
 

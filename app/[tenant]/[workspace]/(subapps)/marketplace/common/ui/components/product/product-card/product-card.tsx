@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {t, tattr} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
@@ -15,7 +15,7 @@ import {Rating} from '../../shared/rating';
 
 export interface ProductCardProps {
   product: ListProduct;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
 }
 
 export async function ProductCard({product, url}: ProductCardProps) {

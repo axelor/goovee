@@ -13,7 +13,8 @@ import NotificationManager, {
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import {tenantURLs, type ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import {tenantURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
@@ -162,7 +163,7 @@ async function buildNotificationMail({
   mail?: Mail | null;
   entity: {id: string; link: WorkspaceSubPath};
   app: App;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   sender: string;
 }): Promise<MailNotificationData> {
   const html =

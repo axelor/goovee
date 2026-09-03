@@ -9,7 +9,7 @@ import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
 import {CommentsSkeleton, isCommentEnabled} from '@/lib/core/comments';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -46,7 +46,7 @@ export async function ArticleNews({
   config: NewsConfig | Cloned<NewsConfig>;
   segments: string[];
   client: Client;
-  url: ServerWorkspaceURLs;
+  url: WorkspaceURLs;
   user?: User;
   slug: string;
 }) {
