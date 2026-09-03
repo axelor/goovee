@@ -10,9 +10,7 @@ import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';
 import {Home} from './home';
 
-export default async function Page(props: {
-  params: Promise<{workspace: string; tenant: string}>;
-}) {
+export default async function Page() {
   const access = await ensureAccess({allowGuest: true});
 
   if (!access.ok) {

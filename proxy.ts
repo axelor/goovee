@@ -12,7 +12,6 @@ import {
 } from '@/tenant/config';
 
 export const TENANT_HEADER = 'x-tenant-id';
-export const WORKSPACE_HEADER = 'x-workspace-id';
 export const CURRENT_PATH_HEADER = 'x-current-path';
 
 export const config = {

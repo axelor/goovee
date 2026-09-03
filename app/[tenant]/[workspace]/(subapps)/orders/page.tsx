@@ -17,10 +17,8 @@ import {ORDER, ORDER_TAB_ITEMS} from '@/subapps/orders/common/constants/orders';
 import {OrderType} from '@/subapps/orders/common/types/orders';
 
 async function Orders({
-  params,
   searchParams,
 }: {
-  params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
   const {limit, page, type, search} = searchParams;
@@ -81,14 +79,12 @@ async function Orders({
 }
 
 export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
   return (
     <Suspense fallback={<SplitViewListSkeleton />}>
-      <Orders params={params} searchParams={searchParams} />
+      <Orders searchParams={searchParams} />
     </Suspense>
   );
 }

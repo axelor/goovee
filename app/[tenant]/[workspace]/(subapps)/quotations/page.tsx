@@ -16,10 +16,8 @@ import type {Quotation} from '@/subapps/quotations/common/types/quotations';
 import {fetchQuotations} from '@/subapps/quotations/common/orm/quotations';
 
 async function Quotations({
-  params,
   searchParams,
 }: {
-  params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
   const access = await ensureAccess({
@@ -77,14 +75,12 @@ async function Quotations({
 }
 
 export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
   return (
     <Suspense fallback={<SplitViewListSkeleton />}>
-      <Quotations params={params} searchParams={searchParams} />
+      <Quotations searchParams={searchParams} />
     </Suspense>
   );
 }

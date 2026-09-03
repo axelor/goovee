@@ -53,9 +53,8 @@ export type ServerWorkspaceURLs = WorkspaceURLs & {
   /**
    * The workspace's stored `url`, which AOS uses as its identity.
    *
-   * An address by spelling only — it is compared as an opaque string by an
-   * exact-match lookup, so it must be reproduced character for character and
-   * is never somewhere to send a browser.
+   * An address by spelling only — it must be reproduced character for
+   * character to find the row, and is never somewhere to send a browser.
    */
   key(): string;
 
@@ -69,8 +68,7 @@ export type ServerWorkspaceURLs = WorkspaceURLs & {
    * fused with the record it was minted for.
    *
    * @throws when `path` is outside the workspace, or carries a scheme, a
-   *   query, a fragment, a backslash or a dot-segment — a crafted value is a
-   *   probe, not a flow to soften.
+   *   query, a fragment, a backslash or a dot-segment.
    */
   fromClient(path: string, query?: Record<string, string>): string;
 
@@ -150,7 +148,17 @@ function workspaceSlugOf(storedURL: string): string {
   return withoutQuery.split('/').filter(Boolean).pop() ?? '';
 }
 
-/* A workspace slug is interpolated into a lookup key that AOS compares by exact
+/* FIXME: RM-117842 - three lookups match the key as a LIKE pattern instead of
+ * comparing it, so the exact-match property this guard rests on does not hold
+ * for them: `findGuestWorkspace` and `findDefaultPartnerWorkspaceConfig` in
+ * `orm/workspace.ts`, and the workspace-exists probe in `ensureAccess`. `_`
+ * passes the check below and is a wildcard in those three, so a slug of
+ * `franc_` resolves the workspace stored as `france` for a visitor with no
+ * session, and tells any visitor whether a workspace of that spelling exists.
+ * The lookups that resolve a signed-in partner or contact compare exactly and
+ * miss, so they are unaffected.
+ *
+ * A workspace slug is interpolated into a lookup key that AOS compares by exact
  * string match, so a slug carrying a path separator would compose the key of a
  * different workspace — one that may exist and that the visitor may even be
  * granted. Refused rather than escaped, because there is no spelling of these
