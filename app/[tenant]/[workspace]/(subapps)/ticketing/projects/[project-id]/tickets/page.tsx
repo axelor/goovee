@@ -1,17 +1,17 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 import {MdAdd} from 'react-icons/md';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 import {getTicketingConfig} from '../../../common/orm/config';
 import type {TicketingConfig} from '../../../common/orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {getCurrentPath} from '@/utils/current-path';
+import {denyPage} from '@/lib/core/access/denial';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,8 +34,7 @@ import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons} from '@/utils/pagination';
-import {decodeFilter, getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
+import {decodeFilter} from '@/utils/url';
 import type {ID} from '@/types';
 import {Link} from '@/ui/components/link';
 
@@ -79,32 +78,12 @@ export default async function Page(props: {
     filter,
     title,
   } = searchParams;
-
-  const {workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;

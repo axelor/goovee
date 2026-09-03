@@ -1,9 +1,6 @@
 import {SUBAPP_CODES} from '@/constants';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {
   findCompatibilityVersions,
   findLicenses,
@@ -13,6 +10,7 @@ import {
 } from '../../../common/orm';
 import {canManageProducts} from '../../../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../../../common/orm/config';
 
 /**
@@ -26,29 +24,10 @@ export async function loadEditContext(params: {
   tenant: string;
   workspace: string;
 }) {
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 
@@ -92,7 +71,7 @@ export async function loadEditContext(params: {
     ]);
 
   return {
-    tenantId,
+    tenantId: access.tenant.id,
     access,
     partnerId,
     config,

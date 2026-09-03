@@ -15,11 +15,10 @@ import {
 import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
 import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {
   MARKETPLACE_VERSION_STATUS_LABELS,
@@ -42,6 +41,7 @@ import {canManageProducts} from '../../common/utils/auth-helper';
 import {hasDirectoryAccess} from '../../common/utils/directory';
 import {PartnerProfileLink} from '../../common/ui/components/shared/partner-profile-link';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 import {getPartnerId} from '@/utils';
 import {
@@ -81,24 +81,7 @@ export default async function ProductPage(props: {
     code: SUBAPP_CODES.marketplace,
     allowGuest: true,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const client = access.tenant.client;
 

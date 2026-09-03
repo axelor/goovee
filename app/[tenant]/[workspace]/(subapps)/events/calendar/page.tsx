@@ -1,18 +1,15 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
@@ -25,33 +22,12 @@ const FETCH_LIMIT = 200;
 export default async function Page(context: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
-  const params = await context.params;
-
-  const {workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;

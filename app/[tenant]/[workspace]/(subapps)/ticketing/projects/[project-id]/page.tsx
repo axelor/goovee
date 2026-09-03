@@ -1,4 +1,4 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {IconType} from 'react-icons';
 import {FaChevronRight} from 'react-icons/fa';
@@ -12,10 +12,10 @@ import {
 } from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../../common/orm/config';
-import {getCurrentPath} from '@/utils/current-path';
 import {t} from '@/locale/server';
 import {
   Breadcrumb,
@@ -28,8 +28,7 @@ import {
 } from '@/ui/components';
 import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
-import {encodeFilter, getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
+import {encodeFilter} from '@/utils/url';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -69,32 +68,12 @@ export default async function Page(props0: {
   const projectId = params?.['project-id'];
 
   const {limit = 7, page = 1, sort = DEFAULT_SORT} = searchParams;
-
-  const {workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;

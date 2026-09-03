@@ -21,13 +21,10 @@ import {
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPages, getPaginationButtons, getSkip} from '@/utils/pagination';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
 import {findFavoriteProducts} from '../../common/orm';
 import {getMarketplaceConfig} from '../../common/orm/config';
@@ -35,6 +32,7 @@ import {PriceTypeSelect} from '../../common/ui/components/product/price-type-sel
 import {ProductTypeSelect} from '../../common/ui/components/product/product-type-select';
 import {MyFavoritesTable} from '../../common/ui/components/favorites/my-favorites-table';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {FavoritesSearch} from './search';
 import {
   myAccountParamsSchema,
@@ -59,36 +57,15 @@ export default async function FavoritesPage(props: {
 
   const paramsResult = myAccountParamsSchema.safeParse(rawParams);
   if (!paramsResult.success) notFound();
-  const params = paramsResult.data;
 
   const searchParamsResult =
     myFavoritesSearchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const {page, limit, search, priceType, type} = searchParamsResult.data;
-
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 

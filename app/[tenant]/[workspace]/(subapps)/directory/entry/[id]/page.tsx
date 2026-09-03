@@ -1,17 +1,16 @@
 import Image from 'next/image';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
 import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
-import {NO_IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {t, tattr} from '@/lib/core/locale/server';
 import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerImageURL} from '@/utils/files';
-import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
@@ -20,38 +19,20 @@ import {civility} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
-
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;
 }) {
   const params = await props.params;
   const {id} = params;
-  const {workspaceURI, tenant} = workspacePathname(params);
+  const {tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 

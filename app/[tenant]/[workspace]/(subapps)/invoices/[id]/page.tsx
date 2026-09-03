@@ -1,15 +1,14 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
@@ -34,7 +33,7 @@ async function Invoice({
 }) {
   const {id, tenant} = params;
   const token = searchParams.token;
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const {workspaceURL} = workspacePathname(params);
 
   /* Token path: a capability scoped to one invoice. ensureTokenAccess only
      establishes the workspace; the token is fused into findInvoice below, which
@@ -81,24 +80,7 @@ async function Invoice({
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const invoicesWhereClause = getWhereClauseForEntity({
     user: access.user,

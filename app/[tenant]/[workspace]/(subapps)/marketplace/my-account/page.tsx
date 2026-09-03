@@ -8,10 +8,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {
   ChevronRight,
   Heart,
@@ -20,10 +18,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {canManageProducts} from '../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../common/orm/config';
 import {hasDirectoryAccess} from '../common/utils/directory';
 import {PartnerProfileLink} from '../common/ui/components/shared/partner-profile-link';
@@ -36,31 +35,10 @@ export default async function MyAccountPage(props: {
 
   const paramsResult = myAccountParamsSchema.safeParse(rawParams);
   if (!paramsResult.success) notFound();
-  const params = paramsResult.data;
-
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const config = await getMarketplaceConfig(
     access.workspace.config.id,

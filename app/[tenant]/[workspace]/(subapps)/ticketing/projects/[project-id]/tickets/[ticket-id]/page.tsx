@@ -1,15 +1,16 @@
 import type {ID} from '@/types';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {formatDate} from '@/locale/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,9 +22,7 @@ import {
 import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
-import {encodeFilter, getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {workspacePathname} from '@/utils/workspace';
+import {encodeFilter} from '@/utils/url';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -88,7 +87,6 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURI, tenant} = workspacePathname(params);
   const projectId = params['project-id'];
   const ticketId = params['ticket-id'];
 
@@ -97,24 +95,7 @@ export default async function Page(props: {
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;

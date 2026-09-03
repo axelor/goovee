@@ -9,42 +9,20 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
 import {clone} from '@/utils';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {CheckoutContent} from '../../common/ui/components/checkout/checkout-content';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 
 export default async function CheckoutPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
-  const params = await props.params;
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const config = await getMarketplaceConfig(
     access.workspace.config.id,

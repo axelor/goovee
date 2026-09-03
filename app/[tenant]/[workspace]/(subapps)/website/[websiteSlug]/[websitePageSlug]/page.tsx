@@ -1,9 +1,8 @@
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {denyPage} from '@/lib/core/access/denial';
+import {SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
@@ -17,7 +16,6 @@ import {
 } from '@/subapps/website/common/orm/website';
 import {clone} from '@/utils';
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Plugins, Template} from '../client-wrapper';
 import {Metadata} from 'next';
 
@@ -74,7 +72,7 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI} = workspacePathname(params);
   const {websiteSlug, websitePageSlug} = params;
 
   const access = await ensureAccess({
@@ -82,24 +80,7 @@ export default async function Page(props: {
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;

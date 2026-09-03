@@ -10,12 +10,9 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
 import {clone} from '@/utils';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {MyContributionsTab} from '../../common/constants/tabs';
 import {
@@ -35,6 +32,7 @@ import {OverviewTab} from '../../common/ui/components/contributions/my-contribut
 import {ProductsTab} from '../../common/ui/components/contributions/products-tab';
 import {canManageProducts} from '../../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 import {PublisherAccessRequest} from '../../common/ui/components/contributions/publisher-access-request';
 import {
@@ -54,36 +52,15 @@ export default async function MyContributionsPage(props: {
 
   const paramsResult = myContributionsParamsSchema.safeParse(rawParams);
   if (!paramsResult.success) notFound();
-  const params = paramsResult.data;
 
   const searchParamsResult =
     myContributionsSearchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
-
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 
@@ -302,7 +279,7 @@ export default async function MyContributionsPage(props: {
                 workspace={access.workspace}
                 config={config}
                 url={access.url}
-                tenantId={tenantId}
+                tenantId={access.tenant.id}
               />
             )}
             {tab === MyContributionsTab.Products && (

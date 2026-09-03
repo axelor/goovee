@@ -9,11 +9,8 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
 import {Link} from '@/ui/components/link';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import {
   canRequestPublisherAccess,
   findPublisherAccess,
@@ -22,6 +19,7 @@ import {getMarketplaceConfig} from '../../../common/orm/config';
 import {PublisherApplyForm} from '../../../common/ui/components/contributions/publisher-apply-form';
 import {canManageProducts} from '../../../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {myContributionsParamsSchema} from '../../../common/utils/validators';
 
 export default async function PublisherApplyPage(props: {
@@ -31,30 +29,10 @@ export default async function PublisherApplyPage(props: {
     await props.params,
   );
   if (!paramsResult.success) notFound();
-
-  const {workspaceURI, tenant: tenantId} = workspacePathname(paramsResult.data);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 

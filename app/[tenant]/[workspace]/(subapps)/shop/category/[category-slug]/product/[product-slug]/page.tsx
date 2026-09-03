@@ -1,14 +1,13 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {clone, htmlToNormalString} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 // ---- LOCAL IMPORTS ---- //
@@ -90,7 +89,7 @@ async function Detail({
 }) {
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
-  const {workspaceURI, tenant} = workspacePathname(params);
+  const {workspaceURI} = workspacePathname(params);
 
   if (!(productSlug && categorySlug)) {
     return redirect(`${workspaceURI}/shop`);
@@ -101,24 +100,7 @@ async function Detail({
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client, config} = access.tenant;
