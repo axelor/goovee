@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
@@ -16,16 +15,11 @@ import {FolderLogoIcon} from '@/subapps/resources/common/ui/components/folder-lo
 import MobileMenuFolders from '@/subapps/resources/mobile-menu-folders';
 
 export default async function Layout({
-  params: paramsPromise,
   children,
 }: {
   params: Promise<{tenant: string; workspace: string}>;
   children: React.ReactNode;
 }) {
-  const params = await paramsPromise;
-
-  const {workspaceURL} = workspacePathname(params);
-
   // The authoritative access gate lives on each page; here we only resolve the
   // scoped client/user to populate the sidebar. When access is denied we render
   // the shell with an empty tree and let the page handle the redirect/404.
@@ -38,7 +32,7 @@ export default async function Layout({
     await Promise.all([
       access.ok
         ? fetchExplorerCategories({
-            workspaceURL,
+            workspaceURL: access.workspace.url,
             client: access.tenant.client,
             user: access.user,
           }).then(clone)

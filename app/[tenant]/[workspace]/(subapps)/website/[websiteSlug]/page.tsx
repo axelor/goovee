@@ -4,7 +4,6 @@ import {notFound, redirect} from 'next/navigation';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
 import {SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
 import {Website} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -24,7 +23,6 @@ export default async function Layout(props: {
   const params = await props.params;
 
   const {websiteSlug} = params;
-  const {workspaceURI} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
@@ -32,6 +30,8 @@ export default async function Layout(props: {
   });
 
   if (!access.ok) return denyPage(access);
+
+  const workspaceURI = access.url.forRouter();
 
   const {user} = access;
   const {client} = access.tenant;

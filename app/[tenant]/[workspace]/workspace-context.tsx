@@ -41,8 +41,9 @@ export const WorkspaceContext = React.createContext<{
 
 /* The visitor prefix is given rather than built from the tenant and workspace
  * names: its shape depends on how the tenant is routed, which is server-side
- * configuration. `workspacePathname` is where it comes from. It reaches the rest
- * of the app only through `url` — nothing reads the prefix itself. */
+ * configuration. The workspace shell resolves it from the access gate. It
+ * reaches the rest of the app only through `url` — nothing reads the prefix
+ * itself. */
 export function WorkspaceProvider({
   id,
   tenant,

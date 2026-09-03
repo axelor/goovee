@@ -1,11 +1,11 @@
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {CheckCircle2, Download} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound, redirect, unauthorized} from 'next/navigation';
@@ -26,18 +26,13 @@ export default async function CheckoutSuccessPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{orderId?: string}>;
 }) {
-  const [params, rawSearchParams] = await Promise.all([
-    props.params,
-    props.searchParams,
-  ]);
+  const rawSearchParams = await props.searchParams;
 
   const searchParamsResult =
     checkoutSuccessSearchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const {orderId} = searchParamsResult.data;
   if (!orderId) notFound();
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
@@ -48,12 +43,19 @@ export default async function CheckoutSuccessPage(props: {
     ) {
       notFound();
     }
+    /* Not `denyPage`: a visitor who signs in from here is sent on to their
+     * purchases rather than back to a success page whose order is already
+     * recorded. */
     if (!access.user) {
+      const scope = await currentWorkspace();
+
       redirect(
         getLoginURL({
-          callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
-          workspaceURI,
-          tenant: tenantId,
+          callbackurl: scope?.forRouter(
+            `/${SUBAPP_CODES.marketplace}/my-account/purchases`,
+          ),
+          workspaceURI: scope?.forRouter(),
+          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
         }),
       );
     }

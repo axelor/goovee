@@ -6,7 +6,6 @@ import type {Metadata} from 'next';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
 import {clone, htmlToNormalString} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
@@ -39,7 +38,6 @@ export async function generateMetadata(props: {
   const params = await props.params;
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
-  if (!(productSlug && categorySlug)) return null;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
@@ -89,11 +87,6 @@ async function Detail({
 }) {
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
-  const {workspaceURI} = workspacePathname(params);
-
-  if (!(productSlug && categorySlug)) {
-    return redirect(`${workspaceURI}/shop`);
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,

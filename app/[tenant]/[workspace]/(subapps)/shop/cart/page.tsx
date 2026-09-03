@@ -5,7 +5,6 @@ import {notFound} from 'next/navigation';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
 import {findSubappAccess} from '@/orm/workspace';
-import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
@@ -24,8 +23,6 @@ async function CartView({
 }: {
   params: {tenant: string; workspace: string};
 }) {
-  const {tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     allowGuest: true,
@@ -58,7 +55,7 @@ async function CartView({
 
   return (
     <Content
-      tenant={tenant}
+      tenant={access.tenant.id}
       labels={labels}
       modalLabels={modalLabels}
       hideRequestQuotation={!config?.requestQuotation}

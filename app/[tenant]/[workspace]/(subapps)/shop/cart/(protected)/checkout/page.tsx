@@ -7,7 +7,6 @@ import {denyPage} from '@/lib/core/access/denial';
 import {findSubappAccess} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {t} from '@/locale/server';
 
@@ -24,8 +23,6 @@ async function Checkout({
 }: {
   params: {tenant: string; workspace: string};
 }) {
-  const {tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     allowGuest: false,
@@ -62,7 +59,7 @@ async function Checkout({
     <Content
       config={clone(config)}
       orderSubapp={clone(orderSubapp)}
-      tenant={tenant}
+      tenant={access.tenant.id}
       labels={labels}
     />
   );

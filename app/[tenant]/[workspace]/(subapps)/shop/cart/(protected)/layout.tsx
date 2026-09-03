@@ -3,25 +3,26 @@ import {redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
+import {getLoginURL} from '@/utils/url';
 import {SEARCH_PARAMS} from '@/constants';
 
 export default async function Layout(props: {
   children: React.ReactNode;
   params: Promise<{tenant: string; workspace: string}>;
 }) {
-  const params = await props.params;
-
   const {children} = props;
 
-  const {tenant: tenantId} = params;
   const session = await getSession();
 
-  const {workspaceURI} = workspacePathname(params);
-
   if (!session?.user) {
+    const scope = await currentWorkspace();
+
     redirect(
-      `/auth/login?workspaceURI=${encodeURIComponent(workspaceURI)}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(tenantId)}`,
+      getLoginURL({
+        workspaceURI: scope?.forRouter(),
+        [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
+      }),
     );
   }
 

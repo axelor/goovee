@@ -18,7 +18,6 @@ import {
 } from '@/ui/components/pagination';
 import {clone} from '@/utils';
 import {getPaginationButtons, getPages, getSkip} from '@/utils/pagination';
-import {workspacePathname} from '@/utils/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
 
@@ -41,8 +40,6 @@ export default async function Page(props: {
   searchParams: Promise<SearchParams>;
 }) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
-  const {tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
@@ -105,7 +102,7 @@ export default async function Page(props: {
                     `/${SUBAPP_CODES.directory}/entry/${item.id}`,
                   )}
                   key={item.id}
-                  tenant={tenant}
+                  tenant={access.tenant.id}
                 />
               ))}
               {pages > 1 && (

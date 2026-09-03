@@ -11,7 +11,6 @@ import {t, tattr} from '@/lib/core/locale/server';
 import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
 import {getPartnerImageURL} from '@/utils/files';
-import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -25,7 +24,6 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
   const {id} = params;
-  const {tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
@@ -53,7 +51,7 @@ export default async function Page(props: {
           {await t('Back to Directory')}
         </Link>
         <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
-          <Details entryDetail={entry} tenant={tenant} />
+          <Details entryDetail={entry} tenant={access.tenant.id} />
           <div className="px-4 sm:px-6 lg:px-8 pb-6">
             <Map
               className="h-96 w-full rounded-lg"
@@ -75,7 +73,11 @@ export default async function Page(props: {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {entry.mainPartnerContacts.map(contact => (
-                <Contact key={contact.id} tenant={tenant} contact={contact} />
+                <Contact
+                  key={contact.id}
+                  tenant={access.tenant.id}
+                  contact={contact}
+                />
               ))}
             </div>
           </div>

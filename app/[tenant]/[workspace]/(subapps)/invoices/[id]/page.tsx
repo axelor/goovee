@@ -8,7 +8,7 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
 import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
 import {SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
@@ -31,17 +31,21 @@ async function Invoice({
   params: Params;
   searchParams: SearchParams;
 }) {
-  const {id, tenant} = params;
+  const {id} = params;
   const token = searchParams.token;
-  const {workspaceURL} = workspacePathname(params);
 
   /* Token path: a capability scoped to one invoice. ensureTokenAccess only
      establishes the workspace; the token is fused into findInvoice below, which
-     is what actually authorizes this invoice. */
+     is what actually authorizes this invoice. The workspace is named from the
+     address the request arrived at, because there is no gate before it to
+     resolve one. */
   if (token) {
+    const scope = await currentWorkspace();
+    if (!scope) notFound();
+
     const access = await ensureTokenAccess({
-      url: workspaceURL,
-      tenantId: tenant,
+      url: scope.key(),
+      tenantId: scope.tenantId,
       token,
     });
     if (!access.ok) notFound();
@@ -50,8 +54,8 @@ async function Invoice({
       id,
       token: access.token,
       client: access.tenant.client,
-      workspaceURL,
-      tenantId: tenant,
+      workspaceURL: access.workspace.url,
+      tenantId: access.tenant.id,
     });
     if (!invoice) return <TokenInvalid />;
 
@@ -93,8 +97,8 @@ async function Invoice({
     id,
     params: {where: invoicesWhereClause},
     client: access.tenant.client,
-    workspaceURL,
-    tenantId: tenant,
+    workspaceURL: access.workspace.url,
+    tenantId: access.tenant.id,
   });
   if (!invoice) notFound();
 

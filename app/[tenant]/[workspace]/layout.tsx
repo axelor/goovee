@@ -4,7 +4,7 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
@@ -56,17 +56,18 @@ export default async function Layout(props: {
   if (!granted.ok) {
     /* Only an absent session is sent to login, and the gate returns that reason
      * only for a workspace it has confirmed exists — so nobody is asked to sign
-     * in to reach an address that names nothing. The callback comes from the
-     * address rather than the gate, which resolved no workspace to build one
-     * from. */
+     * in to reach an address that names nothing. A denial carries no addresses
+     * even so, which is why the workspace is read from the address the request
+     * arrived at rather than taken from the gate. */
     if (granted.reason === 'unauthenticated') {
-      const {workspaceURI, tenant} = workspacePathname(await props.params);
+      const scope = await currentWorkspace();
+      const workspaceURI = scope?.forRouter();
 
       redirect(
         getLoginURL({
           callbackurl: workspaceURI,
           workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
+          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
         }),
       );
     }

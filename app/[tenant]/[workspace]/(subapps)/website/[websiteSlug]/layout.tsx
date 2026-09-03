@@ -5,7 +5,6 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {SUBAPP_CODES} from '@/constants';
 import {Website} from '@/types';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
@@ -78,7 +77,6 @@ export default async function Layout(props: {
   const {children} = props;
 
   const {websiteSlug} = params;
-  const {workspaceURI} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
@@ -96,6 +94,7 @@ export default async function Layout(props: {
   const {client, config} = access.tenant;
 
   const workspaceURL = access.workspace.url;
+  const workspaceURI = access.url.forRouter();
 
   const website = await findWebsiteBySlug({
     websiteSlug,

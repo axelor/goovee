@@ -15,7 +15,6 @@ import {
 import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
 import {getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
 import {Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
@@ -75,13 +74,14 @@ export default async function ProductPage(props: {
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
 
-  const {workspaceURI, tenant: tenantId} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
     allowGuest: true,
   });
   if (!access.ok) return denyPage(access);
+
+  const workspaceURI = access.url.forRouter();
+  const tenantId = access.tenant.id;
 
   const client = access.tenant.client;
 

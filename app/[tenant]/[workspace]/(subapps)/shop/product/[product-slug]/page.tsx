@@ -6,7 +6,6 @@ import type {Metadata} from 'next';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
 import {clone, htmlToNormalString} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
@@ -84,8 +83,6 @@ async function Detail({
   params: {tenant: string; workspace: string; 'product-slug': string};
 }) {
   const productSlug = params['product-slug'];
-  const {workspaceURI} = workspacePathname(params);
-  if (!productSlug) redirect(`${workspaceURI}/shop`);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
