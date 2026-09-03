@@ -34,7 +34,7 @@ export async function getLocaleRedirectionURL(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURI, websiteSlug, websitePageSlug} = parsed.data;
+  const {websiteSlug, websitePageSlug} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
@@ -47,6 +47,7 @@ export async function getLocaleRedirectionURL(
   const {user} = access;
   const {client, config} = access.tenant;
   const workspaceURL = access.workspace.url;
+  const workspaceURI = access.url.forRouter();
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -129,7 +130,7 @@ export async function getLocaleRedirectionURL(
   return {
     success: true,
     data: {
-      url: `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}`,
+      url: baseURL,
     },
   };
 }

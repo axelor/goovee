@@ -2,7 +2,6 @@ import {z} from 'zod';
 import {IdSchema} from '@/utils/validators';
 
 export const LocaleRedirectionSchema = z.object({
-  workspaceURI: z.string(),
   websiteSlug: z.string(),
   websitePageSlug: z.string().optional(),
 });

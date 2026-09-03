@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 
 // ---- LOCAL IMPORTS ---- //
@@ -20,7 +19,6 @@ import {getLocaleRedirectionURL} from '../common/action';
 import {useToast} from '@/ui/hooks';
 
 export function LanguageSelection({languageList, active}: any) {
-  const {url} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const params = useParams();
@@ -31,7 +29,6 @@ export function LanguageSelection({languageList, active}: any) {
 
   const handleLanguageChange = async (websiteSlug: string) => {
     const result = await getLocaleRedirectionURL({
-      workspaceURI: url.forRouter(),
       websiteSlug,
       websitePageSlug,
     });

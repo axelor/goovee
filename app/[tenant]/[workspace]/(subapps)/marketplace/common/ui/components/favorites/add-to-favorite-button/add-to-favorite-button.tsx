@@ -1,7 +1,6 @@
 'use client';
 
 import {i18n} from '@/locale';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Button} from '@/ui/components';
 import {useToast} from '@/ui/hooks/use-toast';
 import {cn} from '@/utils/css';
@@ -28,7 +27,6 @@ export function AddToFavoriteButton({
   isFavorite: initialIsFavorite = false,
   variant = 'overlay',
 }: AddToFavoriteButtonProps) {
-  const {url} = useWorkspace();
   const pathname = usePathname();
   const {toast} = useToast();
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
@@ -41,7 +39,6 @@ export function AddToFavoriteButton({
       try {
         const result = await addProductToFavorites({
           productId,
-          workspaceURI: url.forRouter(),
           returnUrl: pathname,
           isFavorite: next,
         });

@@ -5,6 +5,7 @@ import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getLoginURL} from '@/utils/url';
 import {headers} from 'next/headers';
@@ -18,7 +19,6 @@ import {
 
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),
-  workspaceURI: z.string().min(1),
   returnUrl: z.string().min(1),
   isFavorite: z.boolean(),
 });
@@ -45,17 +45,25 @@ export async function addProductToFavorites(
     };
   }
 
-  const {productId, workspaceURI, returnUrl, isFavorite} = result.data;
+  const {productId, returnUrl, isFavorite} = result.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
   if (!access.ok) {
     /* Favouriting requires a login: a guest is sent to sign-in with
-     * `returnUrl` as the callback; other denials become errors. */
+     * `returnUrl` as the callback; other denials become errors. A denial
+     * carries no addresses, so the workspace comes from the address the
+     * request arrived at. */
     if (access.reason === 'unauthenticated') {
+      const scope = await currentWorkspace();
+
       redirect(
-        getLoginURL({callbackurl: returnUrl, workspaceURI, tenant: tenantId}),
+        getLoginURL({
+          callbackurl: returnUrl,
+          workspaceURI: scope?.forRouter(),
+          tenant: tenantId,
+        }),
       );
     }
     return {error: true, message: await accessMessage(access.reason)};
