@@ -23,16 +23,17 @@ import {
   updatePartner,
 } from '@/orm/partner';
 import {findWorkspaceByURL} from '@/orm/workspace';
-import {revalidatePath} from 'next/cache';
+import {revalidateEverything} from '@/lib/core/url/revalidate';
 import {getTranslation} from '../locale/server';
 import {UserType} from './types';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {absoluteRoot} from '@/lib/core/url/absolute';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {type Tenant, type TenantConfig} from '../tenant';
 import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {hash} from './utils';
 import {getPublicEnvironment} from '../environment/utils';
+import {getTenantConfig} from '@/tenant/config';
 import {withMattermostSync} from '../mattermost/user-api';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -152,9 +153,9 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
-    const uri = toWorkspaceURI(workspace.url, process.env.GOOVEE_PUBLIC_HOST);
+    const scope = tenantURLs(tenantId).workspaceByKey(workspace.url);
 
-    revalidatePath('/', 'layout');
+    revalidateEverything();
 
     deleteInviteById({
       id: invite.id,
@@ -164,7 +165,7 @@ export async function registerByInvite({
     });
 
     return {
-      query: `?callbackurl=${encodeURIComponent(`${workspace.url}/`)}&workspaceURI=${encodeURIComponent(`${uri}/`)}&tenant=${tenantId}`,
+      query: `?callbackurl=${encodeURIComponent(`${scope.forExternal()}/`)}&workspaceURI=${encodeURIComponent(`${scope.forRouter()}/`)}&tenant=${tenantId}`,
     };
   } catch (err) {
     throw new Error(
@@ -638,7 +639,15 @@ export async function registerByKeycloak({
   workspaceURI: string;
   client: Client;
 }): Promise<void> {
-  const workspaceURL = `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
+  const config = getTenantConfig(tenantId);
+
+  /* Built through `absoluteRoot` rather than by interpolating the host, which
+   * is absent for a tenant that is not served. This url is persisted and later
+   * matched against a stored workspace, so a missing host has to leave it
+   * relative rather than write the word "undefined" into it. */
+  const workspaceURL = `${absoluteRoot(
+    getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
+  )}${workspaceURI}`;
   const localization = await findRegistrationLocalization({
     locale,
     client,

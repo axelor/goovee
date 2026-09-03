@@ -21,7 +21,10 @@ import {
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
 import {useToast} from '@/ui/hooks';
+import {useEnvironment} from '@/lib/core/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {toWorkspaceURI} from '@/lib/core/url/absolute';
+import {isSameOrigin} from '@/utils/same-origin';
 
 // ---- LOCAL IMPORTS ----//
 
@@ -35,10 +38,12 @@ export default function SignUp({
   email,
   inviteId,
   workspaceURL,
+  googleProviderId,
 }: {
   email: string;
   inviteId: string;
   workspaceURL?: string;
+  googleProviderId?: string;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,7 +56,22 @@ export default function SignUp({
 
   const searchParams = useSearchParams();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
-  const redirection = workspaceURL || withBasePath('/');
+  const env = useEnvironment();
+  const host = env.GOOVEE_PUBLIC_HOST!;
+
+  /* The stored workspace URL opens only on the tenant's own origin, so any
+   * other host falls back to the landing address rather than sending the
+   * OAuth callback somewhere the session cookie never reaches. */
+  const redirection =
+    (workspaceURL && isSameOrigin(workspaceURL, host) && workspaceURL) ||
+    withBasePath('/');
+
+  /* The path the error screen links back to, without the base path: next/link
+   * adds it there, and `new URL(...).pathname` would keep it and get it added
+   * twice. */
+  const workspaceURI = workspaceURL
+    ? toWorkspaceURI(workspaceURL, host)
+    : undefined;
 
   const {toast} = useToast();
 
@@ -64,19 +84,25 @@ export default function SignUp({
       return;
     }
 
-    await authClient.signIn.social({
-      provider: 'google',
+    const signUpOptions = {
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
-        `/auth/error?tenantId=${tenantId}${workspaceURL ? `&workspaceURI=${new URL(workspaceURL).pathname}` : ''}`,
+        `/auth/error?tenantId=${encodeURIComponent(tenantId)}${workspaceURI ? `&workspaceURI=${encodeURIComponent(workspaceURI)}` : ''}`,
       ),
       requestSignUp: true,
       additionalData: {
         ...values,
-        tenantId,
         inviteId,
         locale: l10n.getLocale(),
       },
+    };
+
+    /* OAuth is per-tenant: sign up through the generic provider registered
+     * under google-<tenantId>. */
+    if (!googleProviderId) return;
+    await authClient.signIn.oauth2({
+      providerId: googleProviderId,
+      ...signUpOptions,
     });
   };
 

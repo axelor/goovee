@@ -60,7 +60,7 @@ import {
   PARTNER_PICTURE_PURPOSE,
   PARTNER_PICTURE_MAX_FILE_SIZE,
 } from '../common/constants';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 
@@ -168,7 +168,7 @@ export default function Personal({
 }) {
   const pathname = usePathname();
   const {toast} = useToast();
-  const {tenant, workspaceURL, workspaceURI} = useWorkspace();
+  const {tenant, scope} = useWorkspace();
   const {
     uploads,
     upload,
@@ -255,7 +255,7 @@ export default function Personal({
 
           const loginURL = getLoginURL({
             callbackurl: pathname,
-            workspaceURI,
+            workspaceURI: scope.forRouter(),
             tenant,
           });
           window.location.href = withBasePath(loginURL);
@@ -428,7 +428,7 @@ export default function Personal({
 
   const handleGenerateOTP = async () => {
     try {
-      const res = await generateOTPForUpdate({email, workspaceURL});
+      const res = await generateOTPForUpdate({email});
       if (res && 'error' in res) {
         toast({title: i18n.t(res.message), variant: 'destructive'});
       } else {

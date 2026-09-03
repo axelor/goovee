@@ -11,7 +11,7 @@ import React, {
 import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
 import {authClient} from '@/lib/auth-client';
-import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
+import {pushChannelName, MSG_TYPE} from './sw-constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 interface PushContextType {
@@ -28,6 +28,39 @@ interface PushContextType {
 }
 
 const PushContext = createContext<PushContextType | undefined>(undefined);
+
+/**
+ * Whether a subscription was made for `key`, the VAPID public key this tenant
+ * publishes.
+ *
+ * True where there is nothing to compare — a browser that reports no key on the
+ * subscription, or a tenant that publishes none — so a subscription is only ever
+ * discarded on a key that is known to differ.
+ *
+ * The browser holds the key as the bytes it decoded, so the comparison is made in
+ * that direction: base64url out of the bytes, then against the published string
+ * with its padding and its two substituted characters normalised.
+ */
+function subscribedWithKey(
+  subscription: PushSubscription,
+  key: string | undefined,
+): boolean {
+  const subscribed = subscription.options.applicationServerKey;
+
+  if (!subscribed || !key) return true;
+
+  const bytes = new Uint8Array(subscribed);
+  let binary = '';
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  const base64url = (value: string) =>
+    value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  return base64url(btoa(binary)) === base64url(key);
+}
 
 export function PushProvider({
   children,
@@ -136,6 +169,27 @@ export function PushProvider({
       const registration = await navigator.serviceWorker.ready;
       let sub = await registration.pushManager.getSubscription();
 
+      /* A subscription is signed for one key pair, and the push service refuses a
+       * delivery signed with another — with a 401 or 403, which is neither
+       * temporary nor gone, so nothing retries it and nothing prunes the record.
+       * The device would go silent for good. Discarding the subscription lets the
+       * auto-heal below make one for the key this tenant now publishes.
+       *
+       * A subscription outlives the key it was made with wherever the worker
+       * holding it is updated rather than replaced, which is what happens when a
+       * registration keeps its scope: a tenant changing its key pair, or one given
+       * an origin of its own on a host it was already served on. */
+      if (
+        sub &&
+        currentPermission === 'granted' &&
+        tenant &&
+        userId &&
+        !subscribedWithKey(sub, env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY)
+      ) {
+        await sub.unsubscribe().catch(() => {});
+        sub = null;
+      }
+
       // AUTO-HEAL: If permission is granted but subscription is missing, create it
       if (currentPermission === 'granted' && !sub && tenant && userId) {
         try {
@@ -234,7 +288,7 @@ export function PushProvider({
     }
 
     // Listen for messages from the Service Worker (e.g. to refresh count when push arrives)
-    broadcastChannel.current = new BroadcastChannel(PUSH_CHANNEL);
+    broadcastChannel.current = new BroadcastChannel(pushChannelName(tenant));
     broadcastChannel.current.onmessage = event => {
       if (event.data?.type === MSG_TYPE.NEW && event.data.notification) {
         setUnreadNotifications(prev =>
@@ -256,7 +310,10 @@ export function PushProvider({
       broadcastChannel.current?.close();
       broadcastChannel.current = null;
     };
-  }, [refreshPushNotifications]);
+    /* `tenant` names the channel, so a change has to tear the old one down and
+     * open the new one — otherwise the panel would keep listening to the tenant
+     * it was first mounted for. */
+  }, [refreshPushNotifications, tenant]);
 
   // Safety cleanup: If we have a subscription but no user, unsubscribe
   useEffect(() => {

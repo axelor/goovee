@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
-import {MdApps, MdNotificationsNone} from 'react-icons/md';
+import {MdApps} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {Sheet, SheetContent} from '@/ui/components/sheet/sheet';
@@ -22,14 +22,13 @@ import {useNavigationVisibility} from '@/ui/hooks';
 import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
-import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
 import type {Subapp, Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
-type WorkspaceListItem = {id: string; name: string | null; url: string | null};
+import type {WorkspaceLink} from './workspace-links';
 
 function MobileSidebar({
   subapps,
@@ -37,7 +36,7 @@ function MobileSidebar({
   config,
 }: {
   subapps: Subapp[];
-  workspaces?: WorkspaceListItem[];
+  workspaces?: WorkspaceLink[];
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const pathname = usePathname();
@@ -46,7 +45,7 @@ function MobileSidebar({
 
   const user = session?.user;
 
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const env = useEnvironment();
   const router = useRouter();
 
@@ -75,25 +74,20 @@ function MobileSidebar({
           className="bg-white overflow-auto flex flex-col">
           {user && Boolean(workspaces?.length) ? (
             workspaces?.length === 1 ? (
-              <Link href={workspaceURI}>
+              <Link href={scope.forRouter()}>
                 <p className="px-6 py-2">
-                  {workspaces[0]?.name || workspaces[0]?.url}
+                  {workspaces[0]?.name || workspaces[0]?.href}
                 </p>
               </Link>
             ) : (
-              <Select defaultValue={workspaceURI} onValueChange={redirect}>
+              <Select defaultValue={scope.forRouter()} onValueChange={redirect}>
                 <SelectTrigger className="grow max-w-100 overflow-hidden px-6 py-2 mt-4 bg-none! h-[auto]">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  {workspaces?.map((workspace: WorkspaceListItem) => (
-                    <SelectItem
-                      key={workspace.url}
-                      value={toWorkspaceURI(
-                        workspace.url ?? '',
-                        env.GOOVEE_PUBLIC_HOST,
-                      )}>
-                      {workspace.name || workspace.url}
+                  {workspaces?.map((workspace: WorkspaceLink) => (
+                    <SelectItem key={workspace.href} value={workspace.href}>
+                      {workspace.name || workspace.href}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -101,7 +95,9 @@ function MobileSidebar({
             )
           ) : null}
 
-          {showHome && <App href={workspaceURI} icon="home" name="app-home" />}
+          {showHome && (
+            <App href={scope.forRouter()} icon="home" name="app-home" />
+          )}
           {subapps
             ?.filter((app: Subapp) => app.isInstalled)
             .sort(
@@ -123,7 +119,7 @@ function MobileSidebar({
                   href={
                     isExternalChat
                       ? mattermostUrl
-                      : `${workspaceURI}/${code}${page}`
+                      : scope.forRouter(`/${code}${page}`)
                   }
                   icon={icon ?? ''}
                   color={color ?? undefined}
@@ -135,7 +131,7 @@ function MobileSidebar({
 
           {Boolean(user) && (
             <App
-              href={`${workspaceURI}/account`}
+              href={scope.forRouter('/account')}
               icon="account"
               name="My Account"
             />
@@ -144,9 +140,11 @@ function MobileSidebar({
             {displayContact && (
               <div className="flex flex-col gap-1 mt-4 pt-8 px-6 py-2">
                 <p className="font-medium">{config?.contactName}</p>
-                <p>
-                  <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-                </p>
+                {contactEmail && (
+                  <p>
+                    <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                  </p>
+                )}
                 <p>{config?.contactPhone}</p>
               </div>
             )}
@@ -189,19 +187,16 @@ export function MobileMenu({
   cartCodes = [],
 }: {
   subapps: Subapp[];
-  workspaces?: WorkspaceListItem[];
+  workspaces?: WorkspaceLink[];
   workspace?: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   cartCodes?: string[];
 }) {
-  const router = useRouter();
-  const redirect = () => router.push('/notifications');
-
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const {loading, visible} = useNavigationVisibility();
-  const {workspaceURI, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
 
   const canDisplayContent = !loading && visible;
 
@@ -219,16 +214,10 @@ export function MobileMenu({
         />
         {/** Render Subapp Menu using Portal */}
         <div id="subapp-menu" className="hidden" />
-        {false && (
-          <MdNotificationsNone
-            className="cursor-pointer h-6 w-6"
-            onClick={redirect}
-          />
-        )}
         {cartCodes.length > 0 && <CartIcon enabledCodes={cartCodes} />}
 
         {user && <Notification />}
-        <Account baseURL={workspaceURI} tenant={tenant} />
+        <Account baseURL={scope.forRouter()} tenant={tenant} />
       </div>
     </nav>
   );

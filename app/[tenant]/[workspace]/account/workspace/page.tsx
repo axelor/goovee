@@ -1,11 +1,11 @@
-import {redirect} from 'next/navigation';
-import {workspacePathname} from '@/utils/workspace';
+import {notFound, redirect} from 'next/navigation';
+
+import {currentWorkspace} from '@/lib/core/url/current';
 
 // Legacy consolidated route — superseded by the per-tab rail.
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  const {workspaceURI} = workspacePathname(params);
-  redirect(`${workspaceURI}/account/apps`);
+export default async function Page() {
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
+
+  redirect(scope.forRouter('/account/apps'));
 }

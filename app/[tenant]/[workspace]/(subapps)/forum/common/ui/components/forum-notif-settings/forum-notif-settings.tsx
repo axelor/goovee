@@ -52,7 +52,7 @@ function readPrefs(groups: MemberGroup[]): Prefs {
 }
 
 export function ForumNotifSettings({groups}: {groups: MemberGroup[]}) {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -89,8 +89,6 @@ export function ForumNotifSettings({groups}: {groups: MemberGroup[]}) {
       try {
         response = await saveGroupNotifications({
           prefs: payload,
-          workspaceURL,
-          workspaceURI,
         });
       } catch {
         // The call itself rejected (network drop, stale server-action id,
@@ -143,7 +141,7 @@ export function ForumNotifSettings({groups}: {groups: MemberGroup[]}) {
     <div className="bg-ink-25 min-h-full">
       <div className="max-w-[900px] mx-auto px-4 pt-7 pb-14">
         <Link
-          href={`${workspaceURI}/${SUBAPP_CODES.forum}`}
+          href={scope.forRouter(`/${SUBAPP_CODES.forum}`)}
           className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-500 hover:text-royal mb-4 transition-colors">
           <MdArrowBack className="size-4" />
           {i18n.t('Back to forum')}

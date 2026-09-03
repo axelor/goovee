@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 import {getPartnerId} from '@/utils';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
@@ -26,18 +25,10 @@ export async function GET(
     }>;
   },
 ) {
-  const {
-    tenant: tenantId,
-    workspace,
-    'product-id': productId,
-    'file-id': fileId,
-  } = await props.params;
-  const {workspaceURL} = workspacePathname({tenant: tenantId, workspace});
+  const {'product-id': productId, 'file-id': fileId} = await props.params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {

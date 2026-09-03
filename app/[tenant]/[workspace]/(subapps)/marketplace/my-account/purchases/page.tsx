@@ -22,16 +22,14 @@ import {
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPages, getPaginationButtons, getSkip} from '@/utils/pagination';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {findPurchases} from '../../common/orm';
 import {MyPurchasesTable} from '../../common/ui/components/purchases/my-purchases-table';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {
   myPurchasesParamsSchema,
   myPurchasesSearchParamsSchema,
@@ -49,42 +47,15 @@ export default async function MyPurchasesPage(props: {
 
   const paramsResult = myPurchasesParamsSchema.safeParse(rawParams);
   if (!paramsResult.success) notFound();
-  const params = paramsResult.data;
 
   const searchParamsResult =
     myPurchasesSearchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
-
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {limit, page} = searchParams;
 
@@ -114,7 +85,9 @@ export default async function MyPurchasesPage(props: {
 
   const totalPages = getPages(purchases, limit);
 
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
   const purchasesHref = `${marketplaceBase}/my-account/purchases`;
 
   return (
@@ -175,10 +148,7 @@ export default async function MyPurchasesPage(props: {
         </div>
       ) : (
         <>
-          <MyPurchasesTable
-            purchases={clone(purchases)}
-            workspaceURI={workspaceURI}
-          />
+          <MyPurchasesTable purchases={clone(purchases)} />
 
           {totalPages > 1 && (
             <Pagination className="mt-4">

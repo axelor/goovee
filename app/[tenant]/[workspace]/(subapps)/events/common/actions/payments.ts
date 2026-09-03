@@ -1,7 +1,6 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
@@ -12,13 +11,10 @@ import {createStripeOrder} from '@/payment/stripe/actions';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
 import {isPaymentOptionAvailable} from '@/utils/payment';
-import {TENANT_HEADER} from '@/proxy';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {ensureLeadingSlash} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEvent} from '@/subapps/events/common/orm/event';
@@ -34,24 +30,21 @@ import {
 
 export async function createStripeCheckoutSession(props: {
   eventId: string;
-  workspaceURL: string;
   values: RegistrationValues;
 }) {
   const parsed = CreateStripeCheckoutSessionSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {eventId, workspaceURL, values} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return error(await t('TenantId is required'));
+  const {eventId, values} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -144,8 +137,12 @@ export async function createStripeCheckoutSession(props: {
       tenantId,
       client,
       url: {
-        success: `${workspaceURL}/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_session_id={CHECKOUT_SESSION_ID}`,
-        error: `${workspaceURL}/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_error=true`,
+        success: access.scope.forExternal(
+          `/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_session_id={CHECKOUT_SESSION_ID}`,
+        ),
+        error: access.scope.forExternal(
+          `/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_error=true`,
+        ),
       },
     });
 
@@ -164,24 +161,21 @@ export async function createStripeCheckoutSession(props: {
 
 export async function paypalCreateOrder(props: {
   values: RegistrationValues;
-  workspaceURL: string;
   eventId: string;
 }) {
   const parsed = PaypalCreateOrderSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {values, workspaceURL, eventId} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return error(await t('TenantId is required'));
+  const {values, eventId} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -265,6 +259,7 @@ export async function paypalCreateOrder(props: {
       amount: expectedAmount,
       currency: currencyCode,
       email: emailAddress,
+      tenantId,
       client,
       context: values,
     });
@@ -279,25 +274,22 @@ export async function paypalCreateOrder(props: {
 
 export async function payboxCreateOrder(props: {
   eventId: string;
-  workspaceURL: string;
   values: RegistrationValues;
   uri: string;
 }) {
   const parsed = PayboxCreateOrderSchema.safeParse(props);
   if (!parsed.success) return error(z.prettifyError(parsed.error));
-  const {eventId, workspaceURL, values, uri} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return error(await t('TenantId is required'));
+  const {eventId, values, uri} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -379,10 +371,11 @@ export async function payboxCreateOrder(props: {
       currency: currencyCode,
       email: emailAddress,
       context: values,
+      tenantId,
       client,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
+        success: access.scope.fromClient(uri, {paybox_response: 'true'}),
+        failure: access.scope.fromClient(uri, {paybox_error: 'true'}),
       },
     });
     return {success: true, order: response};

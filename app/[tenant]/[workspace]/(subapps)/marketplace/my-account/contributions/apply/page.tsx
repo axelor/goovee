@@ -9,11 +9,8 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
 import {Link} from '@/ui/components/link';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import {
   canRequestPublisherAccess,
   findPublisherAccess,
@@ -22,6 +19,7 @@ import {getMarketplaceConfig} from '../../../common/orm/config';
 import {PublisherApplyForm} from '../../../common/ui/components/contributions/publisher-apply-form';
 import {canManageProducts} from '../../../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {myContributionsParamsSchema} from '../../../common/utils/validators';
 
 export default async function PublisherApplyPage(props: {
@@ -31,38 +29,13 @@ export default async function PublisherApplyPage(props: {
     await props.params,
   );
   if (!paramsResult.success) notFound();
-
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(paramsResult.data);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   if (
@@ -72,7 +45,9 @@ export default async function PublisherApplyPage(props: {
     notFound();
   }
 
-  const contributionsHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`;
+  const contributionsHref = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+  );
 
   /* Only someone eligible to apply — no request yet, or a declined request
    * whose cooldown has passed — sees the form. An approved, pending, banned or
@@ -98,7 +73,8 @@ export default async function PublisherApplyPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
-                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                <Link
+                  href={access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
                   {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>
@@ -134,10 +110,7 @@ export default async function PublisherApplyPage(props: {
         </p>
       </div>
 
-      <PublisherApplyForm
-        workspaceURL={workspaceURL}
-        contributionsHref={contributionsHref}
-      />
+      <PublisherApplyForm contributionsHref={contributionsHref} />
     </div>
   );
 }

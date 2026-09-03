@@ -3,28 +3,44 @@ import type {Metadata} from 'next';
 // ---- CORE IMPORTS ---- //
 import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
+import {getPublicEnvironment} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {SEARCH_PARAMS} from '@/constants';
+
+// ---- LOCAL IMPORTS ---- //
+import {firstValue, resolveAuthTenantId} from './tenant';
 
 /**
  * The auth screens sit outside the `[tenant]/[workspace]` segment, so the
- * workspace is only known through the `workspaceURI`/`tenant` search params the
- * portal appends when it bounces an anonymous visitor here. The visitor has no
- * session yet, so the lookup resolves as a guest.
+ * workspace is known only from the `workspaceURI` search param the portal
+ * appends when it bounces an anonymous visitor here, plus the tenant it was
+ * bounced from. The visitor has no session yet, so the lookup resolves as a
+ * guest. The name is decoration, so an unknown tenant, a tenant with no
+ * configured host, and a URI that matches no workspace all resolve to null
+ * rather than breaking the page.
  */
 async function findAuthWorkspaceName({
   workspaceURI,
   tenantId,
 }: {
   workspaceURI?: string | null;
-  tenantId?: string | null;
+  /* Resolved by the caller, so the tab is named after the same tenant the
+   * screen itself acts for. */
+  tenantId: string;
 }): Promise<string | null> {
   if (!(workspaceURI && tenantId)) return null;
+
+  /* Read the host from the config alone: it is a per-tenant browser variable, and
+   * resolving it first means an unknown or unconfigured tenant returns null here
+   * instead of connecting a database just to build a title. */
+  const config = getTenantConfig(tenantId);
+  const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
+  if (!host) return null;
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return null;
 
-  const url = `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
+  const url = `${host}${withBasePath(workspaceURI)}`;
   const workspace = await findWorkspace({url, client: tenant.client});
 
   return workspace?.name ?? null;
@@ -39,13 +55,10 @@ export async function resolveAuthWorkspaceName(
   searchParams: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<string | null> {
   const params = await searchParams;
-  const first = (value: string | string[] | undefined) =>
-    Array.isArray(value) ? value[0] : value;
 
   return findAuthWorkspaceName({
-    workspaceURI: first(params.workspaceURI),
-    // `/auth/error` spells the tenant param `tenantId`, the others use `tenant`.
-    tenantId: first(params[SEARCH_PARAMS.TENANT_ID]) ?? first(params.tenantId),
+    workspaceURI: firstValue(params.workspaceURI),
+    tenantId: await resolveAuthTenantId(params),
   });
 }
 

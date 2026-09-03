@@ -1,4 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import {Link} from '@/ui/components/link';
@@ -11,10 +12,10 @@ const CARD = 'bg-white rounded-lg border border-ink-100 p-4 md:p-6';
 
 export async function PendingActions({
   pending,
-  workspaceURI,
+  scope,
 }: {
   pending: Promise<PendingActionsData>;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const {versions, reviews} = await pending;
 
@@ -81,7 +82,9 @@ export async function PendingActions({
                   <div className="font-medium text-sm text-ink-900 truncate">
                     {t('{0} new reviews on', String(review.count))}{' '}
                     <Link
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${review.marketplaceProduct.slug}`}
+                      href={scope.forRouter(
+                        `/${SUBAPP_CODES.marketplace}/products/${review.marketplaceProduct.slug}`,
+                      )}
                       className="text-royal hover:underline">
                       {review.marketplaceProduct.name}
                     </Link>

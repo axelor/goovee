@@ -1,5 +1,6 @@
 import type SMTPPool from 'nodemailer/lib/smtp-pool';
 import type Mail from 'nodemailer/lib/mailer';
+import type {TenantConfig} from '@/tenant';
 import MailNotificationService from './mail';
 
 export interface MailNotificationData {
@@ -29,10 +30,21 @@ export enum NotificationType {
 }
 
 export class NotificationManager {
-  static getService(type: NotificationType): NotificationService | null {
+  /**
+   * The notification service for a tenant.
+   *
+   * `tenantConfig` is required rather than optional even though it may be null:
+   * mail settings are per tenant, so a call that omits it silently sends nothing
+   * at all. Requiring it makes that omission a compile error instead of a
+   * deployment where notifications are stored but never mailed.
+   */
+  static getService(
+    type: NotificationType,
+    tenantConfig: TenantConfig | null | undefined,
+  ): NotificationService | null {
     switch (type) {
       case NotificationType.mail:
-        return MailNotificationService.create();
+        return MailNotificationService.create(tenantConfig);
       default:
         return null;
     }

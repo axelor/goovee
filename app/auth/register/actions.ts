@@ -1,7 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import {revalidatePath} from 'next/cache';
+import {revalidateEverything} from '@/lib/core/url/revalidate';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -15,28 +15,37 @@ import {
   SubscribeSchema,
   type Subscribe,
 } from '@/lib/core/auth/validation-utils';
+import type {ActionResponse, ErrorResponse} from '@/types/action';
 
-function error(message: string): {error: true; message: string} {
+function error(message: string): ErrorResponse {
   return {
     error: true,
     message,
   };
 }
 
-export async function subscribe(data: Subscribe) {
+export async function subscribe(data: Subscribe): ActionResponse<true> {
   const validation = SubscribeSchema.safeParse(data);
 
   if (!validation.success) {
-    return {error: true, message: z.prettifyError(validation.error)};
+    return error(z.prettifyError(validation.error));
   }
 
-  const {workspace, tenantId} = validation.data;
+  const {workspace} = validation.data;
 
   const session = await getSession();
   const user = session?.user;
 
   if (!user) {
-    return error(await getTranslation({tenant: tenantId}, 'Unauthorized'));
+    return error(await getTranslation({}, 'Unauthorized'));
+  }
+
+  /* Partner ids are per-tenant: `user.id` names this caller in the tenant that
+   * issued their session, and the same number belongs to somebody else in every
+   * other one. */
+  const tenantId = user.tenantId;
+  if (!tenantId) {
+    return error(await getTranslation({}, 'Unauthorized'));
   }
 
   const url = workspace?.url;
@@ -104,10 +113,11 @@ export async function subscribe(data: Subscribe) {
         select: {id: true},
       });
 
-      revalidatePath('/', 'layout');
+      revalidateEverything();
 
       return {
         success: true,
+        data: true,
         message: await getTranslation(
           {tenant: tenantId},
           'Successfully subscribed',
@@ -165,10 +175,11 @@ export async function subscribe(data: Subscribe) {
           select: {id: true},
         });
 
-        revalidatePath('/', 'layout');
+        revalidateEverything();
 
         return {
           success: true,
+          data: true,
           message: await getTranslation(
             {tenant: tenantId},
             'Successfully subscribed',

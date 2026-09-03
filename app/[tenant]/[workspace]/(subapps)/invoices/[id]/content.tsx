@@ -18,7 +18,7 @@ import {
   PaymentUpdateStatus,
   PAYMENT_UPDATE_STATUS,
 } from '@/lib/core/payment/sse/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
@@ -33,8 +33,8 @@ import {
 interface ContentProps {
   invoice: Cloned<InvoiceType>;
   config: InvoicesConfig | Cloned<InvoicesConfig>;
-  workspaceURI: string;
   token?: string;
+  allowStripeBankTransfer: boolean;
 }
 
 function getInvoiceStatusKey(invoice: Cloned<InvoiceType>): StatusKey {
@@ -70,11 +70,12 @@ function getInvoiceTone(
 export default function Content({
   invoice,
   config,
-  workspaceURI,
   token,
+  allowStripeBankTransfer,
 }: ContentProps) {
   const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
 
+  const {scope} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
 
@@ -147,13 +148,13 @@ export default function Content({
           // A token scopes the viewer to this one invoice — the list requires
           // a real session, so sending a token viewer there is a login wall.
           // Omit the back link entirely for token viewers.
-          token ? undefined : `${workspaceURI}/${SUBAPP_CODES.invoices}`
+          token ? undefined : scope.forRouter(`/${SUBAPP_CODES.invoices}`)
         }
         actions={
           <Button asChild variant="ink-outline" size="sm">
             <a
-              href={withBasePath(
-                `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
+              href={scope.forBrowser(
+                `/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
               )}>
               <MdOutlineFileDownload className="text-base mr-1" />
               {i18n.t('Download invoice')}
@@ -168,8 +169,8 @@ export default function Content({
           <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
             <Invoice
               invoiceId={id}
-              downloadURL={withBasePath(
-                `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
+              downloadURL={scope.forBrowser(
+                `/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
               )}
             />
           </div>
@@ -181,9 +182,9 @@ export default function Content({
               invoiceType={invoiceType}
               isUnpaid={isUnpaid}
               config={config}
-              workspaceURI={workspaceURI}
               token={token}
               onPaymentUpdate={handlePaymentUpdate}
+              allowStripeBankTransfer={allowStripeBankTransfer}
             />
           </div>
         </div>

@@ -5,7 +5,6 @@ import {SUBAPP_CODES} from '@/constants';
 import {getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import type {Client} from '@/goovee/.generated/client';
-import {toWorkspaceURI} from '@/utils/workspace';
 
 export async function notifyInvoicePaymentSuccess({
   invoiceId,
@@ -32,13 +31,6 @@ export async function notifyInvoicePaymentSuccess({
 
     if (!invoice?.portalWorkspace?.url) return;
 
-    const workspaceURL = invoice.portalWorkspace.url;
-    const workspaceURI = toWorkspaceURI(
-      workspaceURL,
-      process.env.GOOVEE_PUBLIC_HOST,
-    );
-    const invoiceUrl = `${workspaceURI}/${SUBAPP_CODES.invoices}/${invoiceId}`;
-
     const tr = getTranslation.bind(null, {
       locale: user.localization?.code || DEFAULT_LOCALE,
       tenant: tenantId,
@@ -46,14 +38,16 @@ export async function notifyInvoicePaymentSuccess({
     await notifyUser({
       userId: user.id,
       tenantId,
+      /* This runs from a payment callback, which carries no proxy headers, so
+       * the workspace is named from the invoice's own row. */
+      workspaceURL: invoice.portalWorkspace.url,
       client,
-      workspaceURL,
       payload: {
         title: await tr(
           'Payment received for invoice {0}',
           String(invoice.invoiceId ?? invoiceId),
         ),
-        url: invoiceUrl,
+        link: `/${SUBAPP_CODES.invoices}/${invoiceId}`,
         tag: NotificationTag.invoicePayment(invoiceId),
       },
     });

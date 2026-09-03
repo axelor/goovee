@@ -22,9 +22,11 @@ export default function Footer({
           {displayContact && (
             <div className="flex flex-col gap-0.5 items-start text-xs">
               <p className="font-medium">{config.contactName}</p>
-              <p>
-                <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-              </p>
+              {contactEmail && (
+                <p>
+                  <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                </p>
+              )}
               <p>{config.contactPhone}</p>
             </div>
           )}

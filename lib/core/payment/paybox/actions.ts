@@ -1,7 +1,9 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
+import type {Tenant} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
-import {decodeFilter as decode} from '@/utils/url';
+import {decode} from '@/utils/compressed-param';
 import {getPaymentURL} from '.';
 import {createPaymentContext, findPaymentContext} from '../common/orm';
 import {PAYBOX_ERRORS} from './constant';
@@ -15,6 +17,7 @@ export async function createPayboxOrder({
   currency = DEFAULT_CURRENCY_CODE,
   context,
   url,
+  tenantId,
   client,
 }: {
   amount: string | number;
@@ -25,6 +28,7 @@ export async function createPayboxOrder({
     success: string;
     failure: string;
   };
+  tenantId: Tenant['id'];
   client: Client;
 }) {
   if (!(amount && currency && email)) {
@@ -45,6 +49,8 @@ export async function createPayboxOrder({
       contextId,
       currency,
       url,
+      config: getTenantConfig(tenantId),
+      tenant: tenantId,
     }),
   };
 }

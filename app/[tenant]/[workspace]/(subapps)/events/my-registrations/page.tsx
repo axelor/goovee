@@ -1,4 +1,4 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import type {Cloned} from '@/types/util';
 import {Suspense} from 'react';
 import {Link} from '@/ui/components/link';
@@ -12,16 +12,15 @@ import {
 
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {Button} from '@/ui/components';
-import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
 import {t} from '@/lib/core/locale/server';
 
@@ -97,36 +96,13 @@ export default async function Page(context: {
     date?: string;
   }>;
 }) {
-  const params = await context.params;
   const searchParams = await context.searchParams;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
@@ -155,7 +131,7 @@ export default async function Page(context: {
           workspace={workspace}
           user={user}
           client={client}
-          workspaceURI={workspaceURI}
+          scope={access.scope}
           filter={filter}
         />
       </Suspense>
@@ -167,14 +143,14 @@ async function MyRegistrations({
   workspace,
   user,
   client,
-  workspaceURI,
+  scope,
   filter,
   filters,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
-  workspaceURI: string;
+  scope: WorkspaceScope;
   filter: FilterKey;
   filters: Filters;
 }) {
@@ -226,8 +202,8 @@ async function MyRegistrations({
   const next =
     filter === 'upcoming' && filters.page === 1 ? list[0] : undefined;
 
-  const baseHref = `${workspaceURI}/${SUBAPP_CODES.events}/my-registrations`;
-  const allEventsHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
+  const baseHref = scope.forRouter(`/${SUBAPP_CODES.events}/my-registrations`);
+  const allEventsHref = scope.forRouter(`/${SUBAPP_CODES.events}`);
 
   /* Links keep whatever the user is filtering by. Switching tab returns to the
    * first page, since a page number only means something within one tab. */
@@ -298,7 +274,7 @@ async function MyRegistrations({
       {next && (
         <NextEventSpotlight
           event={next}
-          detailHref={`${workspaceURI}/${SUBAPP_CODES.events}/${next.slug}`}
+          detailHref={scope.forRouter(`/${SUBAPP_CODES.events}/${next.slug}`)}
         />
       )}
 
@@ -374,7 +350,9 @@ async function MyRegistrations({
             <RegistrationCard
               key={event.id}
               event={event}
-              detailHref={`${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`}
+              detailHref={scope.forRouter(
+                `/${SUBAPP_CODES.events}/${event.slug}`,
+              )}
               past={filter === 'past'}
             />
           ))}

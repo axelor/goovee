@@ -36,6 +36,13 @@ export type InvoiceFilter = {token: string} | {params: {where: object}};
  * the invoice query); the session path goes through ensureAccess and scopes the
  * query to the partner's invoices. Returns the tenant so callers keep using
  * tenant.client / tenant.config exactly as before.
+ *
+ * `workspaceURL` and `tenantId` are the ones the request carried, and only the
+ * token path reads them: a capability token names the workspace it was minted
+ * for. The session path resolves the workspace from the address the request
+ * arrived at instead, which is why the resolved `workspaceURL` comes back in the
+ * data — every query below the gate must scope to the workspace the gate
+ * authorized, not to the one the caller was handed.
  */
 export async function resolveInvoicePaymentAccess({
   workspaceURL,
@@ -51,6 +58,7 @@ export async function resolveInvoicePaymentAccess({
     config: InvoicesConfig;
     user: User | undefined;
     invoiceFilter: InvoiceFilter;
+    workspaceURL: string;
   }>
 > {
   if (token) {
@@ -76,14 +84,13 @@ export async function resolveInvoicePaymentAccess({
         config,
         user: undefined,
         invoiceFilter: {token},
+        workspaceURL,
       },
     };
   }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -109,6 +116,7 @@ export async function resolveInvoicePaymentAccess({
       config,
       user: access.user,
       invoiceFilter: {params: {where: invoicesWhereClause}},
+      workspaceURL: access.workspace.url,
     },
   };
 }
@@ -126,6 +134,7 @@ export async function validatePaymentData({
   amount,
   invoiceFilter,
   workspaceURL,
+  tenantId,
 }: {
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   client: Client;
@@ -133,6 +142,7 @@ export async function validatePaymentData({
   amount: string;
   invoiceFilter: InvoiceFilter;
   workspaceURL: string;
+  tenantId: string;
 }): Promise<
   ActionResponse<{
     $amount: string | number;
@@ -145,6 +155,7 @@ export async function validatePaymentData({
     type: INVOICE.UNPAID,
     ...invoiceFilter,
     workspaceURL,
+    tenantId,
     client,
   });
   if (!$invoice) {

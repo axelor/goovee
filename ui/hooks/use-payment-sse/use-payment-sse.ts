@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useLayoutEffect, useRef} from 'react';
+import {useParams} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -23,16 +24,21 @@ export function usePaymentSSE({
   contextId,
   onUpdate,
 }: UsePaymentSSEOptions) {
+  /* The SSE endpoint is tenant-scoped; these components only ever render
+   * within the [tenant] route, so the active tenant comes from the params. */
+  const params = useParams();
+  const tenant = typeof params?.tenant === 'string' ? params.tenant : undefined;
+
   const onUpdateRef = useRef(onUpdate);
   useLayoutEffect(() => {
     onUpdateRef.current = onUpdate;
   });
 
   useEffect(() => {
-    if (!entityId || !source || !contextId) return;
+    if (!entityId || !source || !contextId || !tenant) return;
 
     const url = withBasePath(
-      `/api/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`,
+      `/api/tenant/${tenant}/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`,
     );
     const es = new EventSource(url);
 
@@ -59,7 +65,7 @@ export function usePaymentSSE({
     return () => {
       es.close();
     };
-  }, [source, entityId, contextId]);
+  }, [source, entityId, contextId, tenant]);
 }
 
 export default usePaymentSSE;

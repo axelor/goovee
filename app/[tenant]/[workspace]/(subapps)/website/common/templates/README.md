@@ -537,8 +537,8 @@ Populate the database with template definitions and demo content.
 ## Commands
 
 Every command below takes the tenant as `--tenant <id>`, and answers `--help` with
-its own options. The tenant may be left out only when `MULTI_TENANCY` is not true,
-in which case the single configured tenant is used.
+its own options. The tenant may be left out only when the configuration document
+declares `$global.defaultTenant`, in which case that tenant is used.
 
 ```bash
 # Seed template structure (components and fields)

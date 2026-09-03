@@ -1,18 +1,16 @@
 import Image from 'next/image';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
 import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
-import {NO_IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {t, tattr} from '@/lib/core/locale/server';
 import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerImageURL} from '@/utils/files';
-import {getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -20,40 +18,19 @@ import {civility} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
-
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;
 }) {
   const params = await props.params;
   const {id} = params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 
@@ -68,13 +45,13 @@ export default async function Page(props: {
     <div className="bg-ink-25 min-h-full">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <Link
-          href={`${workspaceURI}/${SUBAPP_CODES.directory}`}
+          href={access.scope.forRouter(`/${SUBAPP_CODES.directory}`)}
           className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700">
           <IoArrowBackOutline className="h-4 w-4" />
           {await t('Back to Directory')}
         </Link>
         <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
-          <Details entryDetail={entry} tenant={tenant} />
+          <Details entryDetail={entry} tenant={access.tenant.id} />
           <div className="px-4 sm:px-6 lg:px-8 pb-6">
             <Map
               className="h-96 w-full rounded-lg"
@@ -96,7 +73,11 @@ export default async function Page(props: {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {entry.mainPartnerContacts.map(contact => (
-                <Contact key={contact.id} tenant={tenant} contact={contact} />
+                <Contact
+                  key={contact.id}
+                  tenant={access.tenant.id}
+                  contact={contact}
+                />
               ))}
             </div>
           </div>

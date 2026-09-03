@@ -1,53 +1,52 @@
 import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findSubapps, findWorkspace} from '@/orm/workspace';
-import {workspacePathname} from '@/utils/workspace';
+import {findSubapps} from '@/orm/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {SEARCH_PARAMS} from '@/constants';
-import {getLoginURL} from '@/utils/url';
-import {manager} from '@/lib/core/tenant';
+import {getLoginURL} from '@/utils/login-url';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';
 import {Home} from './home';
 
-export default async function Page(props: {
-  params: Promise<{workspace: string; tenant: string}>;
-}) {
-  const params = await props.params;
-  const {tenant: tenantId} = params;
-  const session = await getSession();
+export default async function Page() {
+  const access = await ensureAccess({allowGuest: true});
 
-  const tenant = await manager.getTenant(tenantId);
+  if (!access.ok) {
+    /* Only an absent session is sent to login, and the gate returns that reason
+     * only for a workspace it has confirmed exists — so nobody is asked to sign
+     * in to reach an address that names nothing. A denial carries no addresses
+     * even so, which is why the workspace is read from the address the request
+     * arrived at rather than taken from the gate. */
+    if (access.reason === 'unauthenticated') {
+      const scope = await currentWorkspace();
+      const workspaceURI = scope?.forRouter();
 
-  if (!tenant) {
-    return notFound();
+      redirect(
+        getLoginURL({
+          callbackurl: workspaceURI,
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
+        }),
+      );
+    }
+
+    notFound();
   }
 
+  const {user, tenant, workspace, scope} = access;
   const {client} = tenant;
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-  const user = session?.user;
+  const tenantId = tenant.id;
+  const workspaceURL = workspace.url;
+  const workspaceURI = scope.forRouter();
 
   const loginURL = getLoginURL({
     callbackurl: workspaceURI,
     workspaceURI,
     [SEARCH_PARAMS.TENANT_ID]: tenantId,
   });
-
-  if (!workspaceURL) {
-    return user ? notFound() : redirect(loginURL);
-  }
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return user ? notFound() : redirect(loginURL);
-  }
 
   const config = await getShellConfig(workspace.config.id, client);
 
@@ -56,7 +55,7 @@ export default async function Page(props: {
   }
 
   const apps = await findSubapps({
-    user: session?.user,
+    user,
     url: workspaceURL,
     client,
   });
@@ -65,10 +64,10 @@ export default async function Page(props: {
     return (
       <Home
         client={client}
-        user={session?.user}
+        user={user}
         workspace={workspace}
         config={config}
-        workspaceURI={workspaceURI}
+        scope={scope}
         apps={apps}
       />
     );
@@ -79,5 +78,5 @@ export default async function Page(props: {
   }
 
   const defaultApp = apps[0];
-  return <ClientRedirection url={`${workspaceURI}/${defaultApp.code}`} />;
+  return <ClientRedirection url={scope.forRouter(`/${defaultApp.code}`)} />;
 }

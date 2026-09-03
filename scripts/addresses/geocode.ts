@@ -4,7 +4,7 @@ import type {GooveeClient} from '@/goovee/.generated/client';
 import {explainHttpFailure} from '@/scripts/lib/http';
 import * as out from '@/scripts/lib/output';
 import {runTenantScript} from '@/scripts/lib/tenant-script';
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import axios from 'axios';
 import {InvalidArgumentError} from 'commander';
 
@@ -110,8 +110,11 @@ the final coverage can be lower than the number of records processed.`,
     const aos = config.aos;
     if (!aos?.url) out.fail(`AOS url not configured for tenant '${tenantId}'.`);
 
+    /* getAOSHeaders rather than the auth headers alone: a tenant sharing an AOS
+     * instance selects itself with X-Tenant-ID on every request, and without it
+     * this would write coordinates onto another tenant's addresses. */
     const headers = {
-      ...getAOSAuthHeaders(aos.auth),
+      ...getAOSHeaders(aos),
       'Content-Type': 'application/json',
     };
     const endpoint = `${aos.url}/ws/action/${ACTION}`;

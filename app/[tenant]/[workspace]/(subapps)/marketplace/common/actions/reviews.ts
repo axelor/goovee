@@ -1,9 +1,7 @@
 'use server';
 
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
-import {headers} from 'next/headers';
 import {after} from 'next/server';
 import {z} from 'zod';
 import {
@@ -34,10 +32,6 @@ import {getPartnerId} from '@/utils';
 export async function saveReview(
   input: SaveReviewInput,
 ): ActionResponse<{reviewId: string}> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
   const parsed = saveReviewSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -48,8 +42,6 @@ export async function saveReview(
   const payload = parsed.data;
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: payload.workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
@@ -166,10 +158,6 @@ export async function saveReview(
 export async function deleteReview(
   input: DeleteReviewInput,
 ): ActionResponse<true> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
   const parsed = deleteReviewSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -177,11 +165,9 @@ export async function deleteReview(
       message: z.prettifyError(parsed.error),
     };
   }
-  const {productId, workspaceURL} = parsed.data;
+  const {productId} = parsed.data;
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
@@ -228,19 +214,13 @@ export async function deleteReview(
 export async function reportReview(
   input: ReportReviewInput,
 ): ActionResponse<true> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
   const parsed = reportReviewSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {reviewId, workspaceURL, reasonSelect} = parsed.data;
+  const {reviewId, reasonSelect} = parsed.data;
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};

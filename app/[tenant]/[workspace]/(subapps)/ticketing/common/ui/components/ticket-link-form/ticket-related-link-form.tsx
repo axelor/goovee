@@ -1,4 +1,3 @@
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {
@@ -54,7 +53,6 @@ export function TicketRelatedLinkForm({
   links: Cloned<TicketLink>[];
   onSubmit: () => void;
 }) {
-  const {workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -73,7 +71,6 @@ export function TicketRelatedLinkForm({
     submitFormWithAction(async () => {
       await action(
         {
-          workspaceURL,
           data: {
             linkType: values.linkType,
             linkTicketId: values.ticket.id,
@@ -180,7 +177,6 @@ export function TicketChildLinkForm({
   projectId?: ID;
   onSubmit: () => void;
 }) {
-  const {workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -196,7 +192,6 @@ export function TicketChildLinkForm({
     submitFormWithAction(async () => {
       await action(
         {
-          workspaceURL,
           data: {
             linkTicketId: values.ticket.id,
             currentTicketId: ticketId,
@@ -268,7 +263,6 @@ export function TicketParentLinkForm({
   projectId?: ID;
   onSubmit: () => void;
 }) {
-  const {workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -283,7 +277,6 @@ export function TicketParentLinkForm({
     submitFormWithAction(async () => {
       await action(
         {
-          workspaceURL,
           data: {
             linkTicketId: values.ticket.id,
             currentTicketId: ticketId,

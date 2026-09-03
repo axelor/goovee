@@ -16,6 +16,13 @@ export async function GET(
   const session = await getSession();
   const user = session?.user;
 
+  /* Guard cross-tenant access: /api/* bypasses the proxy that switches
+   * sessions. Guests (no user) are allowed since products may be public; an
+   * authenticated user must belong to the path tenant. */
+  if (user && user.tenantId !== tenantId) {
+    return new NextResponse('Forbidden', {status: 403});
+  }
+
   const tenant = await manager.getTenant(tenantId);
   if (!tenant || !id) {
     return new NextResponse('Bad request', {status: 400});

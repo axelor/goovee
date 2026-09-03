@@ -1,20 +1,13 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {workspacePathname} from '@/utils/workspace';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {clone} from '@/utils';
-import {
-  DEFAULT_LIMIT,
-  DEFAULT_PAGE,
-  SEARCH_PARAMS,
-  SUBAPP_CODES,
-} from '@/constants';
+import {DEFAULT_LIMIT, DEFAULT_PAGE, SUBAPP_CODES} from '@/constants';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {SplitViewListSkeleton} from '@/ui/components/record-skeleton';
 
 // ---- LOCAL IMPORTS ---- //
@@ -23,42 +16,21 @@ import type {Quotation} from '@/subapps/quotations/common/types/quotations';
 import {fetchQuotations} from '@/subapps/quotations/common/orm/quotations';
 
 async function Quotations({
-  params,
   searchParams,
 }: {
-  params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const {limit, page, search} = searchParams;
 
@@ -103,14 +75,12 @@ async function Quotations({
 }
 
 export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
   return (
     <Suspense fallback={<SplitViewListSkeleton />}>
-      <Quotations params={params} searchParams={searchParams} />
+      <Quotations searchParams={searchParams} />
     </Suspense>
   );
 }

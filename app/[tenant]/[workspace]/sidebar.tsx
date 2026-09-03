@@ -26,13 +26,12 @@ import {APP_TITLE, SUBAPP_CODES, SUBAPP_PAGE, CHAT_TYPE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
 import {useEnvironment} from '@/lib/core/environment';
-import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 import type {Subapp} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
-type WorkspaceListItem = {id: string; name: string | null; url: string | null};
+import type {WorkspaceLink} from './workspace-links';
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = (name?.trim() || email?.split('@')[0] || '').toUpperCase();
@@ -49,13 +48,13 @@ export function Sidebar({
   config,
 }: {
   subapps: Subapp[];
-  workspaces?: WorkspaceListItem[];
+  workspaces?: WorkspaceLink[];
   showHome: boolean | null;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const {workspaceURI, workspaceID} = useWorkspace();
+  const {scope, workspaceID} = useWorkspace();
   const env = useEnvironment();
   const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
   const pathname = usePathname();
@@ -86,11 +85,11 @@ export function Sidebar({
   // workspace — match it by id (fall back to URL), not the first in the list.
   const currentWorkspace =
     workspaces?.find(w => String(w.id) === String(workspaceID)) ??
-    workspaces?.find(w => toWorkspaceURI(w.url ?? '') === workspaceURI);
+    workspaces?.find(w => w.href === scope.forRouter());
   const workspaceName: string = currentWorkspace?.name || APP_TITLE;
 
-  const isHomeActive = pathname === workspaceURI;
-  const isAccountActive = pathname?.startsWith(`${workspaceURI}/account`);
+  const isHomeActive = pathname === scope.forRouter();
+  const isAccountActive = pathname?.startsWith(scope.forRouter('/account'));
 
   const initials = getInitials(user?.name, user?.email);
 
@@ -122,7 +121,7 @@ export function Sidebar({
         </button>
         {!collapsed &&
           (hasMultipleWorkspaces ? (
-            <Select defaultValue={workspaceURI} onValueChange={redirect}>
+            <Select defaultValue={scope.forRouter()} onValueChange={redirect}>
               <SelectTrigger className="grow max-w-full overflow-hidden p-0 border-0 !bg-transparent h-auto text-white hover:text-white focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="">
                   <div className="flex flex-col items-start leading-tight">
@@ -136,20 +135,15 @@ export function Sidebar({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {workspaces?.map((workspace: WorkspaceListItem) => (
-                  <SelectItem
-                    key={workspace.url}
-                    value={toWorkspaceURI(
-                      workspace.url ?? '',
-                      env.GOOVEE_PUBLIC_HOST,
-                    )}>
-                    {workspace.name || workspace.url}
+                {workspaces?.map((workspace: WorkspaceLink) => (
+                  <SelectItem key={workspace.href} value={workspace.href}>
+                    {workspace.name || workspace.href}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           ) : (
-            <Link href={workspaceURI} className="min-w-0">
+            <Link href={scope.forRouter()} className="min-w-0">
               <div className="flex flex-col leading-tight">
                 <span className="font-bold text-base text-white truncate">
                   {workspaceName}
@@ -167,7 +161,7 @@ export function Sidebar({
         <TooltipProvider>
           {showHome && (
             <NavItem
-              href={workspaceURI}
+              href={scope.forRouter()}
               icon="home"
               label={i18n.t('Home')}
               active={isHomeActive}
@@ -181,9 +175,9 @@ export function Sidebar({
               config?.chatDisplayTypeSelect === CHAT_TYPE.external;
             const href = isExternalChat
               ? mattermostUrl
-              : `${workspaceURI}/${code}${page}`;
+              : scope.forRouter(`/${code}${page}`);
             const active = !isExternalChat
-              ? (pathname?.startsWith(`${workspaceURI}/${code}`) ?? false)
+              ? (pathname?.startsWith(scope.forRouter(`/${code}`)) ?? false)
               : false;
             return (
               <NavItem
@@ -203,7 +197,7 @@ export function Sidebar({
 
       {/* Footer — user avatar */}
       <Link
-        href={`${workspaceURI}/account`}
+        href={scope.forRouter('/account')}
         className={cn(
           'flex items-center gap-2.5 border-t border-white/10',
           'transition hover:bg-white/[0.06]',

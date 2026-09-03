@@ -18,11 +18,12 @@ import {
 } from '@/orm/workspace';
 import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
+import {listTenantIds} from '@/tenant/config';
 import {withMattermostSync} from '@/lib/core/mattermost';
-import {APP_TITLE, RESET_PASSWORD} from '@/constants';
+import {APP_TITLE, RESET_PASSWORD, SEARCH_PARAMS} from '@/constants';
 import {findInviteById} from '@/app/auth/register/common/orm/register';
 import {registerByInvite} from '@/lib/core/auth/orm';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {
   EmailRegisterOTPSchema,
   InviteEmailRegisterOTPSchema,
@@ -133,6 +134,17 @@ const credentials = {
       },
       async ctx => {
         const {email, password, tenantId, rememberMe} = ctx.body;
+
+        const knownTenantIds = listTenantIds();
+        if (!knownTenantIds.includes(tenantId)) {
+          throw new APIError('UNAUTHORIZED', {
+            ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+            message: await getTranslation(
+              {tenant: tenantId},
+              'Invalid email or password',
+            ),
+          });
+        }
 
         const tenant = await manager.getTenant(tenantId);
         if (!tenant) {
@@ -565,13 +577,29 @@ const credentials = {
 
         const user = await findGooveeUserByEmail(email, client);
 
-        const link = `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
-          `/auth/reset-password/${email}?${searchQuery}`,
-        )}`;
+        /* The emailed address carries only what the reset screens read,
+         * rebuilt here parameter by parameter: the query arrives from the
+         * browser as one string, and echoing it whole would let a request
+         * write arbitrary parameters into a link sent to the address's owner.
+         * The tenant is the one this request already validated. */
+        const carried = new URLSearchParams(searchQuery);
+        const query = new URLSearchParams({
+          [SEARCH_PARAMS.TENANT_ID]: tenantId,
+        });
+
+        for (const name of ['workspaceURI', 'callbackurl']) {
+          const value = carried.get(name);
+          if (value) query.set(name, value);
+        }
+
+        const link = tenantURLs(tenantId).forExternal(
+          `/auth/reset-password/${encodeURIComponent(email)}?${query}`,
+        );
 
         if (user) {
           const mailService = NotificationManager.getService(
             NotificationType.mail,
+            tenant.config,
           );
           after(async () => {
             try {

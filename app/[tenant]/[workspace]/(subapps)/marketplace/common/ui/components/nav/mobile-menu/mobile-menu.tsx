@@ -17,10 +17,10 @@ function Menu({icon, color}: {icon: string; color?: string}) {
   const [open, setOpen] = useState(false);
   const openSidebar = useCallback(() => setOpen(true), []);
   const closeSidebar = useCallback(() => setOpen(false), []);
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const pathname = usePathname();
   const {data: session} = authClient.useSession();
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const links = useMemo(
     () => MARKETPLACE_LINKS.filter(item => !item.requiresAuth || session?.user),

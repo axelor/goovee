@@ -5,7 +5,6 @@ import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findPosts} from '@/subapps/forum/common/orm/forum';
@@ -22,13 +21,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {'post-id': postId, 'file-id': fileId} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) {

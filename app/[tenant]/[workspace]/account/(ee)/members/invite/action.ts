@@ -1,15 +1,12 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
-import {manager} from '@/tenant';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   findContactByEmail,
   findGooveeUserByEmail,
@@ -17,11 +14,10 @@ import {
   isAdminContact,
   isPartner,
 } from '@/orm/partner';
-import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
 import {APP_TITLE, SEARCH_PARAMS} from '@/constants';
 import {getPartnerId} from '@/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/lib/core/url/scope';
 
 // ---- LOCAL IMPORTS ---- //
 import {getAccountConfig} from '../../../common/orm/config';
@@ -47,39 +43,20 @@ function error(message: string) {
   };
 }
 
-export async function deleteInvite({
-  id,
-  workspaceURL,
-}: {
-  id: string;
-  workspaceURL: string;
-}) {
-  if (!(id && workspaceURL)) {
+export async function deleteInvite({id}: {id: string}) {
+  if (!id) {
     return error(await t('Bad request'));
   }
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureAccess();
 
-  if (!user) {
-    return error(await t('Unauthorized'));
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
+  const {user, tenant} = access;
   const {client} = tenant;
-
-  const workspace = await findWorkspace({url: workspaceURL, user, client});
-
-  if (!workspace) {
-    return error(await t('Bad request'));
-  }
+  const workspaceURL = access.workspace.url;
 
   const isPartnerUser = await isPartner();
   const isAdminContactUser = await isAdminContact({workspaceURL, client});
@@ -120,36 +97,17 @@ export async function sendInvites(input: SendInvites) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    emails: emailAddresses,
-    role,
-    apps,
-  } = validation.data;
+  const {emails: emailAddresses, role, apps} = validation.data;
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureAccess();
 
-  if (!user) {
-    return error(await t('Unauthorized'));
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Bad request'));
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({url: workspaceURL, user, client});
-
-  if (!workspace) {
-    return error(await t('Bad request'));
-  }
+  const {user, tenant, workspace} = access;
+  const {client, id: tenantId} = tenant;
+  const workspaceURL = access.workspace.url;
 
   const config = await getAccountConfig(workspace.config.id, client);
 
@@ -237,7 +195,10 @@ export async function sendInvites(input: SendInvites) {
   }
 
   function sendMail({email, link, subject}: any) {
-    const mailService = NotificationManager.getService(NotificationType.mail);
+    const mailService = NotificationManager.getService(
+      NotificationType.mail,
+      tenant.config,
+    );
 
     after(async () => {
       try {
@@ -343,9 +304,9 @@ export async function sendInvites(input: SendInvites) {
       sendMail({
         subject: workspace?.name || workspace.url,
         email,
-        link: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+        link: tenantURLs(tenantId).forExternal(
           `/auth/register/invite/${invite.id}/email?${SEARCH_PARAMS.TENANT_ID}=${tenantId}`,
-        )}`,
+        ),
       });
     } catch (err) {
       inviteError = true;
@@ -355,7 +316,7 @@ export async function sendInvites(input: SendInvites) {
   if (inviteError) {
     return error(await t('Error sending invites, try again.'));
   } else {
-    revalidatePath(`${workspaceURI}/account/members`);
+    access.scope.revalidate('/account/members');
 
     let message = '';
 

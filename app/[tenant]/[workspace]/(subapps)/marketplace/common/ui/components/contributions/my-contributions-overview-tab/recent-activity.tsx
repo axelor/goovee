@@ -1,4 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import {Link} from '@/ui/components/link';
@@ -17,11 +18,11 @@ const ACTIVITY_STYLE: Record<ActivityItem['kind'], {bgColor: string}> = {
 
 export async function RecentActivity({
   activity,
-  workspaceURI,
+  scope,
   tenantId,
 }: {
   activity: Promise<ActivityItem[]>;
-  workspaceURI: string;
+  scope: WorkspaceScope;
   tenantId: string;
 }) {
   const items = await activity;
@@ -39,7 +40,7 @@ export async function RecentActivity({
             <ActivityRow
               key={index}
               item={item}
-              workspaceURI={workspaceURI}
+              scope={scope}
               tenantId={tenantId}
             />
           ))}
@@ -51,11 +52,11 @@ export async function RecentActivity({
 
 async function ActivityRow({
   item,
-  workspaceURI,
+  scope,
   tenantId,
 }: {
   item: ActivityItem;
-  workspaceURI: string;
+  scope: WorkspaceScope;
   tenantId: string;
 }) {
   const action =
@@ -88,9 +89,11 @@ async function ActivityRow({
           <span className="font-bold">{name}</span>
           <span className="text-ink-500"> {action} </span>
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}${
-              item.kind === 'review' ? `?tab=${ProductTab.Reviews}` : ''
-            }`}
+            href={scope.forRouter(
+              `/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}${
+                item.kind === 'review' ? `?tab=${ProductTab.Reviews}` : ''
+              }`,
+            )}
             className="font-bold text-royal hover:underline">
             {item.marketplaceProduct.name}
           </Link>

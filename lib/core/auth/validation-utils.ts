@@ -74,7 +74,6 @@ export const SubscribeSchema = z.object({
     id: z.string().min(1, 'Workspace ID is required'),
     url: WorkspaceURLSchema,
   }),
-  tenantId: z.string().min(1, 'Tenant ID is required'),
 });
 
 export type Subscribe = z.infer<typeof SubscribeSchema>;
@@ -138,7 +137,6 @@ export type ResetPassword = z.infer<typeof ResetPasswordSchema>;
 
 export const EmailUpdateOTPSchema = z.object({
   email: z.email(),
-  workspaceURL: WorkspaceURLSchema,
 });
 
 export type EmailUpdateOTP = z.infer<typeof EmailUpdateOTPSchema>;

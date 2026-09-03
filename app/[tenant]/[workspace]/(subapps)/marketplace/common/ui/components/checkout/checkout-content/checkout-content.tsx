@@ -44,8 +44,8 @@ function formatPrice(
  * charged. */
 export function CheckoutContent({config}: Props) {
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const {scope} = useWorkspace();
+  const marketplaceBase = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
   const {cart, loaded, clearCart} = useMarketplaceCart();
   const {toast} = useToast();
   const productIds = cart.items.map(item => item.productId);
@@ -109,35 +109,29 @@ export function CheckoutContent({config}: Props) {
         disabled={false}
         onValidate={async () => true}
         onApprove={onApprove}
-        onPaypalCreatedOrder={async () =>
-          paypalCreateOrder({productIds, workspaceURL})
-        }
+        onPaypalCreatedOrder={async () => paypalCreateOrder({productIds})}
         onPaypalCaptureOrder={async orderID =>
           checkout({
             payment: {data: {id: orderID}, mode: PaymentOption.paypal},
-            workspaceURL,
           })
         }
         onStripeCreateCheckOutSession={async () =>
-          createStripeCheckoutSession({productIds, workspaceURL})
+          createStripeCheckoutSession({productIds})
         }
         onStripeValidateSession={async ({stripeSessionId}) =>
           checkout({
             payment: {data: {id: stripeSessionId}, mode: PaymentOption.stripe},
-            workspaceURL,
           })
         }
         onPayboxCreateOrder={async ({uri}) =>
           payboxCreateOrder({
             productIds,
-            workspaceURL,
             uri,
           })
         }
         onPayboxValidatePayment={async ({params}) =>
           checkout({
             payment: {data: {params}, mode: PaymentOption.paybox},
-            workspaceURL,
           })
         }
         successMessage="Purchase completed successfully."

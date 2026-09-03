@@ -1,14 +1,11 @@
 'use server';
 import type {ActionResponse} from '@/types/action';
-import {headers} from 'next/headers';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {t} from '@/lib/core/locale/server';
-import {TENANT_HEADER} from '@/proxy';
 import type {Cloned} from '@/types/util';
 import {clone} from '@/utils';
 
@@ -27,19 +24,9 @@ export async function searchEntries(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {search, workspaceURL} = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const {search} = parsed.data;
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok)

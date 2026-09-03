@@ -27,7 +27,7 @@ import {
   TableRow,
 } from '@/ui/components/table';
 import {useResponsive} from '@/ui/hooks';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
 import {
   ChevronDown,
@@ -55,7 +55,6 @@ type Column = {
 
 type Props = {
   purchases: Purchase[];
-  workspaceURI: string;
 };
 
 /* Download control for a taken-down purchase: the product is off the storefront,
@@ -108,7 +107,8 @@ function TakenDownDownload({
   );
 }
 
-export function MyPurchasesTable({purchases, workspaceURI}: Props) {
+export function MyPurchasesTable({purchases}: Props) {
+  const {scope} = useWorkspace();
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -144,7 +144,9 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
               product.moderationStatusSelect !==
                 PRODUCT_MODERATION_STATUS.TAKEN_DOWN ? (
                 <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                  href={scope.forRouter(
+                    `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
+                  )}
                   className="font-medium text-ink-900 truncate hover:underline">
                   {product.name}
                 </Link>
@@ -209,7 +211,9 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       content: purchase =>
         purchase.productOrder?.saleOrder?.id ? (
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.orders}/${purchase.productOrder.saleOrder.id}`}
+            href={scope.forRouter(
+              `/${SUBAPP_CODES.orders}/${purchase.productOrder.saleOrder.id}`,
+            )}
             className="text-sm text-royal hover:underline">
             {purchase.productOrder.saleOrder.saleOrderSeq ?? i18n.t('View')}
           </Link>
@@ -226,7 +230,9 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       content: purchase =>
         purchase.productOrder?.invoice?.id ? (
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.invoices}/${purchase.productOrder.invoice.id}`}
+            href={scope.forRouter(
+              `/${SUBAPP_CODES.invoices}/${purchase.productOrder.invoice.id}`,
+            )}
             className="text-sm text-royal hover:underline">
             {purchase.productOrder.invoice.invoiceId ?? i18n.t('View')}
           </Link>
@@ -309,15 +315,15 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                     {canDownload ? (
                       isTakenDown ? (
                         <TakenDownDownload
-                          downloadUrl={withBasePath(
-                            `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
+                          downloadUrl={scope.forBrowser(
+                            `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
                           )}
                           reason={product.moderationReason}
                         />
                       ) : (
                         <a
-                          href={withBasePath(
-                            `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
+                          href={scope.forBrowser(
+                            `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
                           )}
                           aria-label={i18n.t('Download')}
                           className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
@@ -329,7 +335,9 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                       product.moderationStatusSelect !==
                         PRODUCT_MODERATION_STATUS.TAKEN_DOWN && (
                         <Link
-                          href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                          href={scope.forRouter(
+                            `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
+                          )}
                           className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">
                           <ExternalLink className="w-3.5 h-3.5 text-ink-500" />
                         </Link>

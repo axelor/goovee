@@ -2,7 +2,8 @@ import path from 'path';
 import fs from 'fs/promises';
 import {createHash} from 'crypto';
 
-import {manager, type Tenant, type TenantClient} from '@/tenant';
+import {manager, type TenantClient, type TenantConfig} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import {LRUCache} from '@/tenant/lru';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findLocaleLanguage} from '@/locale/utils';
@@ -12,6 +13,9 @@ type Translations = Record<string, string | null | undefined>;
 type TranslationBundle = {
   translations: Translations;
   hash: string;
+  /* The tenant's own translations are missing because they could not be read,
+   * not because it has none. Such a bundle is served but never cached. */
+  partial: boolean;
 };
 
 const BUNDLE_CACHE_CAPACITY = 100;
@@ -21,16 +25,12 @@ const BUNDLE_CACHE_TTL_MS = 60 * 1000;
  * bundle share a single load instead of each hitting the DB. */
 const bundleCache = new LRUCache<string, Promise<TranslationBundle>>(
   BUNDLE_CACHE_CAPACITY,
-  BUNDLE_CACHE_TTL_MS,
+  {ttlMs: BUNDLE_CACHE_TTL_MS},
 );
 
 const tcache: Record<string, Translations> = {};
 const localesDir = path.resolve(process.cwd(), 'public', 'locales');
 const localesPromise = fs.readdir(localesDir).catch(() => [] as string[]);
-
-const includeLanguage = () => {
-  return process.env.INCLUDE_LANGUAGE === 'true';
-};
 
 async function findGeneralTranslations(locale: string): Promise<Translations> {
   if (!locale) {
@@ -64,10 +64,11 @@ async function findGeneralTranslations(locale: string): Promise<Translations> {
 
   const lang = findLocaleLanguage(locale);
 
-  /* INCLUDE_LANGUAGE governs the translations a tenant holds, not the ones
+  /* `includeLanguage` governs the translations a tenant holds, not the ones
    * shipped with the application: a shipped file keeps a language's
    * translations under the language alone, and the ones named for a region
-   * hold only what that region says differently. */
+   * hold only what that region says differently. So the language is always
+   * read here, whatever the acting tenant asked for. */
   const [langTranslations, localeTranslations] = await Promise.all([
     lang !== locale ? readwritecache(lang) : {},
     readwritecache(locale),
@@ -79,33 +80,33 @@ async function findGeneralTranslations(locale: string): Promise<Translations> {
 async function findTenantTranslations(
   locale: string,
   client: TenantClient,
+  includeLanguage: boolean,
 ): Promise<Translations> {
   if (!locale) {
     return {};
   }
 
+  /* A query failure is left to propagate rather than answered with an empty set.
+   * An unreachable database is not a tenant that has no translations, and only
+   * the second is worth keeping a bundle for. */
   const find = async (language: string): Promise<Translations> => {
-    try {
-      const rows = await client.aOSMetaTranslation.find({
-        where: {language},
-        select: {key: true, value: true},
-      });
-      return rows.reduce<Translations>((acc, row) => {
-        if (row.key) {
-          acc[row.key] = row.value;
-        }
-        return acc;
-      }, {});
-    } catch (err) {
-      console.error(err);
-      return {};
-    }
+    const rows = await client.aOSMetaTranslation.find({
+      where: {language},
+      select: {key: true, value: true},
+    });
+
+    return rows.reduce<Translations>((acc, row) => {
+      if (row.key) {
+        acc[row.key] = row.value;
+      }
+      return acc;
+    }, {});
   };
 
   const lang = findLocaleLanguage(locale);
 
   const [langTranslations, localeTranslations] = await Promise.all([
-    lang !== locale && includeLanguage() ? find(lang) : {},
+    lang !== locale && includeLanguage ? find(lang) : {},
     find(locale),
   ]);
 
@@ -121,28 +122,73 @@ function computeHash(translations: Translations): string {
   return createHash('sha1').update(JSON.stringify(entries)).digest('hex');
 }
 
+/**
+ * Load one locale's bundle for a tenant, or the general-only bundle when there
+ * is none.
+ *
+ * The config arrives already resolved, so the tenant is looked up here only for
+ * the client its own translations are read with — and only when a cold bundle is
+ * actually being built.
+ *
+ * A tenant whose own translations cannot be read still gets a bundle, in the
+ * shipped wording, marked `partial`: every page and every error message is built
+ * through here, so one query that fails must not be what takes the portal down.
+ * The mark is what stops it being kept, so the next request reads again instead
+ * of serving the shortfall for the life of the entry.
+ */
 async function loadTranslationBundle(
   locale: string,
-  tenant?: Tenant,
+  tenantId?: string,
+  config?: TenantConfig | null,
 ): Promise<TranslationBundle> {
+  /* Whether this tenant also holds its own translations under the base language
+   * (`fr` for `fr_FR`), which only its own rows are read for. A per-tenant
+   * setting; a context with no tenant has none to read either way. */
+  const includeLanguage = Boolean(config?.includeLanguage);
+
+  let partial = false;
+
+  const readTenantTranslations = async (): Promise<Translations> => {
+    if (!tenantId) return {};
+
+    try {
+      const client = await manager.getClient(tenantId);
+      return client
+        ? await findTenantTranslations(locale, client, includeLanguage)
+        : {};
+    } catch (error) {
+      console.error(
+        `Could not read translations for tenant "${tenantId}" (${locale}) — falling back to the shipped wording:`,
+        error,
+      );
+      partial = true;
+      return {};
+    }
+  };
+
   const [generalTranslations, tenantTranslations] = await Promise.all([
     findGeneralTranslations(locale),
-    tenant ? findTenantTranslations(locale, tenant.client) : {},
+    readTenantTranslations(),
   ]);
 
   const translations = {...generalTranslations, ...tenantTranslations};
 
-  return {translations, hash: computeHash(translations)};
+  return {translations, hash: computeHash(translations), partial};
 }
 
-/* The tenant id comes from the URL and no route validates it, so failing to
- * resolve one is an ordinary outcome rather than a fault worth reporting. It
- * is treated as no tenant at all, which yields the general-only bundle. */
-async function resolveTenant(tenantId: string): Promise<Tenant | undefined> {
+/* Reading the configuration throws when the document is missing or malformed.
+ * Every page and every error message is built through here, so that is reported
+ * and treated as no tenant rather than raised: the shipped wording still
+ * renders, where an exception would leave the reader an error page instead. */
+function readTenantConfig(tenantId: string): TenantConfig | null {
   try {
-    return await manager.getTenant(tenantId);
-  } catch {
-    return undefined;
+    return getTenantConfig(tenantId);
+  } catch (error) {
+    console.error(
+      `Could not read the configuration for tenant "${tenantId}":`,
+      error,
+    );
+    return null;
   }
 }
 
@@ -154,21 +200,32 @@ export async function findTranslations(
     locale = DEFAULT_LOCALE;
   }
 
-  const tenant = tenantId ? await resolveTenant(tenantId) : undefined;
+  /* The requested id is free input and no route validates it, so the key uses
+   * the id that actually resolves against the configuration. Ids resolving to
+   * nothing then share one general-only entry instead of each taking a slot,
+   * which is what stops a series of made-up ids evicting real tenants' bundles.
+   *
+   * Resolving through the config provider rather than the tenant manager keeps
+   * this a map read: computing a cache key must not connect a database, and an
+   * unknown id must not be indistinguishable from an unreachable one. */
+  const config = tenantId ? readTenantConfig(tenantId) : null;
+  const resolvedTenantId = config ? tenantId : undefined;
 
-  /* The requested id is free input, so the key uses the id the tenant
-   * actually resolved to. Ids resolving to nothing then share one
-   * general-only entry rather than each taking a slot of their own. */
-  const cacheKey = `${tenant?.id ?? ''}:${locale}`;
+  const cacheKey = `${resolvedTenantId ?? ''}:${locale}`;
 
   const cached = bundleCache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const bundle = loadTranslationBundle(locale, tenant);
+  const bundle = loadTranslationBundle(locale, resolvedTenantId, config);
   bundleCache.put(cacheKey, bundle);
-  bundle.catch(() => bundleCache.delete(cacheKey));
+
+  /* Held only once it proves complete. A bundle that fell back to the shipped
+   * wording, or failed outright, is dropped so the next request reads again. */
+  bundle
+    .then(loaded => loaded.partial && bundleCache.delete(cacheKey))
+    .catch(() => bundleCache.delete(cacheKey));
 
   return bundle;
 }

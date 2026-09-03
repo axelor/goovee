@@ -12,16 +12,26 @@ export class CacheNode<K, V> {
   }
 }
 
+export interface LRUCacheOptions<V> {
+  /* Entries expire this many ms after they are written. */
+  ttlMs?: number;
+  /* Called with the value whenever an entry leaves the cache — capacity
+   * eviction, TTL expiry, or explicit delete. */
+  onEvict?: (value: V) => void;
+}
+
 export class LRUCache<K, V> {
   private capacity: number;
   private ttlMs: number | null;
+  private onEvict?: (value: V) => void;
   private cache: Map<K, CacheNode<K, V>> = new Map();
   private head: CacheNode<K, V> | null = null;
   private tail: CacheNode<K, V> | null = null;
 
-  constructor(capacity: number, ttlMs?: number) {
+  constructor(capacity: number, options: LRUCacheOptions<V> = {}) {
     this.capacity = capacity;
-    this.ttlMs = ttlMs ?? null;
+    this.ttlMs = options.ttlMs ?? null;
+    this.onEvict = options.onEvict;
   }
 
   get(key: K): V | null {
@@ -31,6 +41,7 @@ export class LRUCache<K, V> {
     if (node.expiresAt != null && node.expiresAt <= Date.now()) {
       this.removeNode(node);
       this.cache.delete(key);
+      this.onEvict?.(node.value);
       return null;
     }
 
@@ -63,6 +74,7 @@ export class LRUCache<K, V> {
 
     this.removeNode(node);
     this.cache.delete(key);
+    this.onEvict?.(node.value);
   }
 
   private expiry(): number | null {
@@ -117,5 +129,6 @@ export class LRUCache<K, V> {
     }
 
     this.cache.delete(nodeToRemove.key);
+    this.onEvict?.(nodeToRemove.value);
   }
 }

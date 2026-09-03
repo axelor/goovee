@@ -1,4 +1,3 @@
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import type {ID} from '@/types';
@@ -21,7 +20,6 @@ export function RemoveLinkButton({
   linkId: ID;
   relatedTicketId: ID;
 }) {
-  const {workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const {submitFormWithAction, loading: isSubmitting} = useTicketDetails();
@@ -31,7 +29,6 @@ export function RemoveLinkButton({
     if (!loading && !isSubmitting) {
       try {
         const {error, message} = await deleteRelatedLink({
-          workspaceURL,
           data: {
             currentTicketId: ticketId,
             linkTicketId: relatedTicketId,
@@ -86,7 +83,6 @@ export function RemoveChildButton({
   ticketId: ID;
   relatedTicketId: ID;
 }) {
-  const {workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const {submitFormWithAction, loading: isSubmitting} = useTicketDetails();
@@ -96,7 +92,6 @@ export function RemoveChildButton({
     if (!loading && !isSubmitting) {
       try {
         const {error, message} = await deleteChildLink({
-          workspaceURL,
           data: {
             currentTicketId: ticketId,
             linkTicketId: relatedTicketId,
@@ -150,7 +145,6 @@ export function RemoveParentButton({
   ticketId: ID;
   relatedTicketId: ID;
 }) {
-  const {workspaceURL} = useWorkspace();
   const router = useRouter();
   const {submitFormWithAction, loading: isSubmitting} = useTicketDetails();
   const {toast} = useToast();
@@ -160,7 +154,6 @@ export function RemoveParentButton({
     if (!loading && !isSubmitting) {
       try {
         const {error, message} = await deleteParentLink({
-          workspaceURL,
           data: {
             currentTicketId: ticketId,
             linkTicketId: relatedTicketId,

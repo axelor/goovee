@@ -1,17 +1,20 @@
 import type {Metadata} from 'next';
-import {redirect} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
+import {Environment, getPublicEnvironment} from '@/environment';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {canRegisterForWorkspace} from '@/orm/workspace';
-import {DEFAULT_TENANT, SEARCH_PARAMS} from '@/constants';
-import {TenancyType, manager} from '@/tenant';
-import {isSameOrigin} from '@/utils/url';
+import {SEARCH_PARAMS} from '@/constants';
+import {manager} from '@/tenant';
+import {getTenantConfig, listTenantIds} from '@/tenant/config';
+import {isSameOrigin} from '@/utils/same-origin';
 import {withBasePath} from '@/lib/core/path/base-path';
 
+import {resolveAuthTenantId} from '../common/tenant';
 import {
   generateAuthMetadata,
   resolveAuthWorkspaceName,
@@ -40,18 +43,19 @@ export default async function Page(props: {
     ? decodeURIComponent(callbackurlSearchParam)
     : '';
 
-  const tenantIdSearchParam = searchParams?.[SEARCH_PARAMS.TENANT_ID];
+  const tenantId = await resolveAuthTenantId(searchParams);
 
-  let tenantId = tenantIdSearchParam
-    ? decodeURIComponent(tenantIdSearchParam)
-    : '';
+  const tenantConfig = tenantId ? getTenantConfig(tenantId) : null;
 
-  if (!tenantId && manager.getType() === TenancyType.single) {
-    tenantId = DEFAULT_TENANT;
-  }
+  const host = getPublicEnvironment(tenantConfig).GOOVEE_PUBLIC_HOST!;
 
-  if (session?.user) {
-    const host = process.env.GOOVEE_PUBLIC_HOST!;
+  /* A session belongs to a single tenant. Bounce away from the login form only
+   * when the active session already satisfies the request — no specific tenant
+   * was asked for, or the session's tenant matches it; otherwise render the form. */
+  const sessionMatchesTenant =
+    session?.user && (!tenantId || session.user.tenantId === tenantId);
+
+  if (sessionMatchesTenant) {
     redirect(
       (callbackurl && isSameOrigin(callbackurl, host) && callbackurl) ||
         (workspaceURI && isSameOrigin(workspaceURI, host) && workspaceURI) ||
@@ -60,12 +64,16 @@ export default async function Page(props: {
   }
 
   const workspaceURL = workspaceURI
-    ? `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`
+    ? `${host}${withBasePath(workspaceURI)}`
     : '';
 
   let canRegister;
 
   if (workspaceURL && tenantId) {
+    const knownTenantIds = listTenantIds();
+    if (!knownTenantIds.includes(tenantId)) {
+      return notFound();
+    }
     const tenant = await manager.getTenant(tenantId);
     if (tenant) {
       canRegister = await canRegisterForWorkspace({
@@ -75,16 +83,33 @@ export default async function Page(props: {
     }
   }
 
-  const showGoogleOauth = process.env.SHOW_GOOGLE_OAUTH === 'true';
+  /* OAuth is per-tenant: a tenant offers a provider only when its own config
+   * declares it (registered as the generic provider <provider>-<tenantId>).
+   * There is no global env-configured app. */
+  const tenantOauth = tenantConfig?.oauth;
 
-  const showKeycloakOauth = process.env.SHOW_KEYCLOAK_OAUTH === 'true';
+  const showGoogleOauth = Boolean(tenantOauth?.google);
 
+  const showKeycloakOauth = Boolean(tenantOauth?.keycloak);
+
+  /* Outside the [tenant] segment, so the tenant's browser variables (host,
+   * Keycloak button label/image consumed by Content) come from here, keyed by
+   * the ?tenant= param. No tenant ⇒ an empty set, by design (no fallback). */
   return (
-    <Content
-      canRegister={canRegister}
-      showGoogleOauth={showGoogleOauth}
-      showKeycloakOauth={showKeycloakOauth}
-      workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
-    />
+    <Environment value={getPublicEnvironment(tenantConfig)}>
+      <Content
+        tenantId={tenantId}
+        canRegister={canRegister}
+        showGoogleOauth={showGoogleOauth}
+        showKeycloakOauth={showKeycloakOauth}
+        workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
+        googleProviderId={
+          tenantOauth?.google ? `google-${tenantId}` : undefined
+        }
+        keycloakProviderId={
+          tenantOauth?.keycloak ? `keycloak-${tenantId}` : undefined
+        }
+      />
+    </Environment>
   );
 }

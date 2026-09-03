@@ -1,6 +1,9 @@
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY} from '@/constants';
 
+// ---- LOCAL IMPORTS ---- //
+import type {MenuItem} from '@/subapps/forum/common/types/forum';
+
 export const PUBLISHING = 'Publishing...';
 export const CLICK_HERE_DRAG_DROP =
   'Click here to select your image or drag & drop';
@@ -13,7 +16,7 @@ export const OUT_OF = 'out of';
 export const UPLOAD = 'Upload';
 export const FILE_TITLE = 'File Title';
 
-export const MENU = [
+export const MENU: MenuItem[] = [
   {id: 1, name: 'Homepage', link: ''},
   {
     id: 2,

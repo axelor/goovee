@@ -1,61 +1,37 @@
 'use server';
-import {getSession} from '@/lib/core/auth';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   findGooveeUserByEmail,
   isAdminContact,
   updatePartner,
 } from '@/orm/partner';
 import {ActionResponse} from '@/types/action';
-import {headers} from 'next/headers';
 import {
   DirectorySettingsFormValues,
   directorySettingsSchema,
   updateCompanyProfileImageSchema,
   type UpdateCompanyProfileImageValues,
 } from './schema';
-import {findWorkspace} from '@/orm/workspace';
-import {manager} from '@/lib/core/tenant';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {PARTNER_PICTURE_PURPOSE} from '../common/constants';
 
 export async function updateDirectorySettings({
   values,
-  workspaceURL,
 }: {
   values: DirectorySettingsFormValues;
-  workspaceURL: string;
 }): ActionResponse<null> {
   try {
-    const tenantId = (await headers()).get(TENANT_HEADER);
+    const access = await ensureAccess();
 
-    const session = await getSession();
-    if (!session || !session.user) {
-      return {error: true, message: await t('Unauthorized')};
-    }
-    const user = session.user;
-
-    if (!tenantId) {
-      return {error: true, message: await t('Tenant not found')};
+    if (!access.ok) {
+      return {error: true, message: await accessMessage(access.reason)};
     }
 
-    const tenant = await manager.getTenant(tenantId);
-    if (!tenant) return {error: true, message: await t('Tenant not found')};
+    const {user, tenant} = access;
     const {client} = tenant;
-
-    const workspace = await findWorkspace({
-      user,
-      url: workspaceURL,
-      client,
-    });
-
-    if (!workspace) {
-      return {
-        error: true,
-        message: await t('Invalid workspace'),
-      };
-    }
+    const workspaceURL = access.workspace.url;
 
     const {success, data} = directorySettingsSchema.safeParse(values);
 
@@ -71,7 +47,7 @@ export async function updateDirectorySettings({
       }),
     );
 
-    const partner = await findGooveeUserByEmail(session.user.email!, client);
+    const partner = await findGooveeUserByEmail(user.email!, client);
     if (!partner) {
       return {error: true, message: await t('Partner not found')};
     }
@@ -127,36 +103,17 @@ export async function updateCompanyProfileImage(
     return {error: true, message: await t('Invalid data')};
   }
 
-  const {token, workspaceURL} = parsed;
+  const {token} = parsed;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
+  const access = await ensureAccess();
 
-  const session = await getSession();
-  if (!session || !session.user) {
-    return {error: true, message: await t('Unauthorized')};
-  }
-  const user = session.user;
-
-  if (!tenantId) {
-    return {error: true, message: await t('Tenant not found')};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Tenant not found')};
+  const {user, tenant} = access;
   const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return {
-      error: true,
-      message: await t('Invalid workspace'),
-    };
-  }
+  const workspaceURL = access.workspace.url;
 
   const isAdminContactUser = Boolean(
     await isAdminContact({
@@ -169,7 +126,7 @@ export async function updateCompanyProfileImage(
     return {error: true, message: await t('Unauthorized')};
   }
 
-  const partner = await findGooveeUserByEmail(session.user.email!, client);
+  const partner = await findGooveeUserByEmail(user.email!, client);
   if (!partner) {
     return {error: true, message: await t('Partner not found')};
   }

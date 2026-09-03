@@ -1,7 +1,7 @@
 /*
  * Tunables for the staged-upload mechanism. The sweep cadences and TTL are fixed
- * constants here; only the record retention is env-overridable (in hours), read
- * at its calling site, so this file never touches process.env.
+ * constants here; the record retention is a per-tenant setting supplied by the
+ * caller, so this file reads no configuration of its own.
  */
 
 /** Hours → milliseconds. */
@@ -52,7 +52,7 @@ export const PRUNE_INTERVAL_MS = 24 * HOUR_MS; // 24h
 
 /*
  * Default retention for a terminal staged-upload record (consumed or reaped)
- * before the prune pass deletes it. Overridable in hours via
- * UPLOAD_RECORD_RETENTION_HOURS.
+ * before the prune pass deletes it. A tenant may set its own in hours via
+ * uploadRecordRetentionHours.
  */
 export const DEFAULT_RECORD_RETENTION_HOURS = 7 * 24; // 7d

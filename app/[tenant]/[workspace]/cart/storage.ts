@@ -1,3 +1,5 @@
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+
 /**
  * Collision-proof storage key for a per-app cart. Every cart in the workspace
  * lives under its own `cart:<appCode>:<workspaceURL>` namespace, so no two apps
@@ -21,7 +23,10 @@ export function cartStorageKey(
 export type CartSummary = {
   code: string;
   label: () => string;
-  href: (workspaceURI: string) => string;
+  href: (scope: WorkspaceScope) => string;
+  /* Keyed on the stored workspace URL rather than an address: this names a
+   * record in the browser's own store, via `@/storage/local`, and changing its
+   * spelling orphans every cart already saved under the old one. */
   storageKey: (workspaceURL: string, userId?: string) => string;
   /* Returns the badge count from the opaque stored blob. */
   getCount: (stored: unknown) => number;

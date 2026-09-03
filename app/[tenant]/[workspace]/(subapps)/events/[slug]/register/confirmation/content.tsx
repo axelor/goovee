@@ -24,9 +24,9 @@ type ContentProps = {
 };
 
 function Content({event}: ContentProps) {
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const category = event?.eventCategorySet?.[0];
-  const eventsRootHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
+  const eventsRootHref = scope.forRouter(`/${SUBAPP_CODES.events}`);
 
   return (
     <div className="bg-ink-25 min-h-full">

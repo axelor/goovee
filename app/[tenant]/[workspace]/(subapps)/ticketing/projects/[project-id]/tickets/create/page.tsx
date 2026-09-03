@@ -1,15 +1,14 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../../../../common/orm/config';
 import {t} from '@/locale/server';
 import {clone} from '@/utils';
-import {getCurrentPath} from '@/utils/current-path';
-import {encodeFilter, getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
+import {encode} from '@/utils/compressed-param';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -47,33 +46,12 @@ export default async function Page(props: {
   const params = await props.params;
   const projectId = params['project-id'];
   const {parentId} = searchParams;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;
@@ -104,9 +82,11 @@ export default async function Page(props: {
 
   if (!project) notFound();
 
-  const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
+  const ticketsURL = access.scope.forRouter(
+    `/ticketing/projects/${projectId}/tickets`,
+  );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   return (
     <div className="bg-ink-25 min-h-full">
@@ -117,7 +97,7 @@ export default async function Page(props: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate text-sm">
-                <Link href={`${workspaceURI}/ticketing`}>
+                <Link href={access.scope.forRouter('/ticketing')}>
                   {await t('Projects')}
                 </Link>
               </BreadcrumbLink>
@@ -129,7 +109,10 @@ export default async function Page(props: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[35ch] truncate text-sm">
-                <Link href={`${workspaceURI}/ticketing/projects/${projectId}`}>
+                <Link
+                  href={access.scope.forRouter(
+                    `/ticketing/projects/${projectId}`,
+                  )}>
                   {project.name}
                 </Link>
               </BreadcrumbLink>
@@ -173,7 +156,6 @@ export default async function Page(props: {
             contacts={contacts}
             userId={user.id}
             parentId={parentId}
-            workspaceURI={workspaceURI}
             formFields={clone(config.ticketingFormFieldSet)}
           />
         </div>

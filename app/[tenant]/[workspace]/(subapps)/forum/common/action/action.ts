@@ -1,9 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import {headers} from 'next/headers';
 import {after} from 'next/server';
-import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
 import {t, getTranslation} from '@/locale/server';
@@ -16,7 +14,7 @@ import {accessMessage} from '@/lib/core/access/denial';
 import {ID} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
-import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {filterPrivate} from '@/orm/filter';
 import {
   CreateComment,
@@ -101,35 +99,17 @@ async function redeemAttachments({
   return redeemed;
 }
 
-export async function exitGroup({
-  id,
-  groupID,
-  workspaceURL,
-  workspaceURI,
-}: ExitGroupInput) {
+export async function exitGroup({id, groupID}: ExitGroupInput) {
   const parsed = ExitGroupSchema.safeParse({
     id,
     groupID,
-    workspaceURL,
-    workspaceURI,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -161,7 +141,7 @@ export async function exitGroup({
         version: memberGroup.version,
       })
       .then(clone);
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -175,35 +155,17 @@ export async function exitGroup({
   }
 }
 
-export async function joinGroup({
-  groupID,
-  userId,
-  workspaceURL,
-  workspaceURI,
-}: JoinGroupInput) {
+export async function joinGroup({groupID, userId}: JoinGroupInput) {
   const parsed = JoinGroupSchema.safeParse({
     groupID,
     userId,
-    workspaceURL,
-    workspaceURI,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -241,7 +203,7 @@ export async function joinGroup({
       })
       .then(clone);
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -264,17 +226,10 @@ export async function saveGroupNotifications(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {prefs, workspaceURL, workspaceURI} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const {prefs} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -316,7 +271,7 @@ export async function saveGroupNotifications(
     }
   }
 
-  revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+  access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
 
   if (failedIds.length) {
     return {
@@ -334,28 +289,18 @@ export async function addPost(input: AddPostInput) {
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {group, title, content, workspaceURL, workspaceURI} = parsed.data;
+  const {group, title, content} = parsed.data;
   const attachments = parsed.data.attachments ?? [];
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.tenant.id;
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -426,13 +371,11 @@ export async function addPost(input: AddPostInput) {
       });
     }); // end $transaction
 
-    const subscribers = await getSubscribersByGroup({
-      groupID: group.id,
-      workspaceURL,
-    });
+    const subscribers = await getSubscribersByGroup({groupID: group.id});
 
     if (!('error' in subscribers)) {
-      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
+      const postSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.forum}/post/${post.id}`;
+      const postLink = access.scope.forExternal(postSubPath);
 
       const notificationRecievers = subscribers.filter(
         sub => sub.member?.id !== user.id, // exclude the post author
@@ -452,8 +395,8 @@ export async function addPost(input: AddPostInput) {
 
           return {
             userId: member.id,
-            tenantId,
-            workspaceURL,
+            tenantId: access.tenant.id,
+            workspaceURL: access.workspace.url,
             client,
             payload: {
               title: await tr(
@@ -461,7 +404,7 @@ export async function addPost(input: AddPostInput) {
                 user.simpleFullName || user.name || '',
               ),
               body: post?.title ?? '',
-              url: postLink,
+              link: postSubPath,
               tag: NotificationTag.forumNewPost(post.id),
             },
           };
@@ -481,11 +424,12 @@ export async function addPost(input: AddPostInput) {
             group: {name: post.forumGroup!.name ?? ''},
             subscribers: notificationRecievers,
             link: postLink,
+            tenantId,
           }),
         );
       }
     }
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
     return {success: true, data: clone(post)};
   } catch (error) {
     return {
@@ -505,23 +449,12 @@ export async function fetchPosts(input: FetchPostsInput) {
     limit,
     page,
     search = '',
-    workspaceURL,
     memberGroupIDs = [],
     groupIDs = [],
   } = parsed.data;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -574,31 +507,22 @@ export async function fetchPosts(input: FetchPostsInput) {
   return {posts: postsWithCounts, scoreByPost, pageInfo};
 }
 
-export async function findSearchPosts(input: {
-  workspaceURL: string;
-  search?: string;
-}) {
+export async function findSearchPosts(input: {search?: string}) {
   const parsed = FindSearchPostsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, search} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const {search} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const workspaceURL = access.workspace.url;
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -631,27 +555,21 @@ export async function findSearchPosts(input: {
 }
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const commentProps = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -675,7 +593,7 @@ export const createComment: CreateComment = async props => {
   }
 
   const {posts} = await findPosts({
-    whereClause: {id: rest.recordId},
+    whereClause: {id: commentProps.recordId},
     workspaceID: access.workspace.id,
     client,
     user,
@@ -714,7 +632,7 @@ export const createComment: CreateComment = async props => {
           commentField: 'note',
           trackingField: 'publicBody',
           subject: `${user.simpleFullName || user.name} added a comment`,
-          ...rest,
+          ...commentProps,
         }),
     );
 
@@ -724,11 +642,12 @@ export const createComment: CreateComment = async props => {
       if (post?.id) {
         const subscribers = await getSubscribersByGroup({
           groupID: post.forumGroup.id,
-          workspaceURL,
         });
 
         if (!('error' in subscribers)) {
-          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
+          const postLink = access.scope.forExternal(
+            `/${SUBAPP_CODES.forum}/post/${post.id}`,
+          );
 
           const notificationRecievers = subscribers.filter(
             sub => sub.member?.id !== user.id, // exclude the commenter
@@ -749,8 +668,8 @@ export const createComment: CreateComment = async props => {
               after(async () => {
                 await notifyUser({
                   userId: parentComment.partner!.id,
-                  tenantId,
-                  workspaceURL,
+                  tenantId: access.tenant.id,
+                  workspaceURL: access.workspace.url,
                   client,
                   payload: {
                     title: await tr(
@@ -758,7 +677,7 @@ export const createComment: CreateComment = async props => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
+                    link: `/${SUBAPP_CODES.forum}/post/${post.id}`,
                     tag: NotificationTag.forumReply(parentComment.id),
                   },
                   getReplacementTitle: count =>
@@ -790,6 +709,7 @@ export const createComment: CreateComment = async props => {
                     group: post.forumGroup,
                     subscribers: [replySubscriber],
                     link: postLink,
+                    tenantId,
                   }),
                 );
               }
@@ -809,8 +729,8 @@ export const createComment: CreateComment = async props => {
 
                 return {
                   userId: member.id,
-                  tenantId,
-                  workspaceURL,
+                  tenantId: access.tenant.id,
+                  workspaceURL: access.workspace.url,
                   client,
                   payload: {
                     title: await tr(
@@ -818,7 +738,7 @@ export const createComment: CreateComment = async props => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
+                    link: `/${SUBAPP_CODES.forum}/post/${post.id}`,
                     tag: NotificationTag.forumPostComment(post.id),
                   },
                   getReplacementTitle: (count: number) =>
@@ -847,6 +767,7 @@ export const createComment: CreateComment = async props => {
                 group: post.forumGroup,
                 subscribers: notificationRecievers,
                 link: postLink,
+                tenantId,
               }),
             );
           }
@@ -867,18 +788,10 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
+  const commentQuery = FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -903,7 +816,7 @@ export const fetchComments: FetchComments = async props => {
   }
 
   const {posts} = await findPosts({
-    whereClause: {id: rest.recordId},
+    whereClause: {id: commentQuery.recordId},
     workspaceID: access.workspace.id,
     client,
     user,
@@ -918,7 +831,7 @@ export const fetchComments: FetchComments = async props => {
       client,
       commentField: 'note',
       trackingField: 'publicBody',
-      ...rest,
+      ...commentQuery,
     });
     return {success: true, data: clone(data)};
   } catch (e) {
@@ -932,27 +845,14 @@ export const fetchComments: FetchComments = async props => {
   }
 };
 
-const getSubscribersByGroup = async ({
-  groupID,
-  workspaceURL,
-}: GetSubscribersByGroupInput) => {
-  const parsed = GetSubscribersByGroupSchema.safeParse({groupID, workspaceURL});
+const getSubscribersByGroup = async ({groupID}: GetSubscribersByGroupInput) => {
+  const parsed = GetSubscribersByGroupSchema.safeParse({groupID});
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -997,15 +897,9 @@ const getSubscribersByGroup = async ({
 // Forum reactions (up/down votes) + best answer / resolved status
 // ============================================================
 
-async function resolveForumContext(workspaceURL: string) {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId)
-    return {error: true as const, message: await t('TenantId is required')};
-
+async function resolveForumContext() {
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -1021,7 +915,6 @@ async function resolveForumContext(workspaceURL: string) {
 }
 
 export async function reactionSummary(input: {
-  workspaceURL?: string;
   postIds?: Array<string | number>;
   commentIds?: Array<string | number>;
 }) {
@@ -1029,15 +922,10 @@ export async function reactionSummary(input: {
 
   const parsed = ReactionSummarySchema.safeParse(input);
   if (!parsed.success) return empty;
-  const {workspaceURL, postIds, commentIds} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return empty;
+  const {postIds, commentIds} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) return empty;
@@ -1061,7 +949,6 @@ export async function reactionSummary(input: {
 }
 
 export async function toggleReaction(input: {
-  workspaceURL: string;
   target: 'post' | 'comment';
   id: string;
   value: 'like' | 'dislike';
@@ -1070,9 +957,9 @@ export async function toggleReaction(input: {
   if (!parsed.success) {
     return {error: true as const, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, target, id, value} = parsed.data;
+  const {target, id, value} = parsed.data;
 
-  const ctx = await resolveForumContext(workspaceURL);
+  const ctx = await resolveForumContext();
   if (ctx.error) return ctx;
   const {client, user, workspace} = ctx;
 
@@ -1152,7 +1039,6 @@ export async function toggleReaction(input: {
 }
 
 export async function setBestReply(input: {
-  workspaceURL: string;
   postId: string;
   commentId: string | null;
 }) {
@@ -1160,9 +1046,9 @@ export async function setBestReply(input: {
   if (!parsed.success) {
     return {error: true as const, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, postId, commentId} = parsed.data;
+  const {postId, commentId} = parsed.data;
 
-  const ctx = await resolveForumContext(workspaceURL);
+  const ctx = await resolveForumContext();
   if (ctx.error) return ctx;
   const {client, user, workspace} = ctx;
 
@@ -1214,7 +1100,6 @@ export async function setBestReply(input: {
 }
 
 export async function setPostStatus(input: {
-  workspaceURL: string;
   postId: string;
   resolved: boolean;
 }) {
@@ -1222,9 +1107,9 @@ export async function setPostStatus(input: {
   if (!parsed.success) {
     return {error: true as const, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, postId, resolved} = parsed.data;
+  const {postId, resolved} = parsed.data;
 
-  const ctx = await resolveForumContext(workspaceURL);
+  const ctx = await resolveForumContext();
   if (ctx.error) return ctx;
   const {client, user, workspace} = ctx;
 

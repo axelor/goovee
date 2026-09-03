@@ -34,7 +34,7 @@ type ShopPaymentsProps = {
 export function ShopPayments({config, orderSubapp}: ShopPaymentsProps) {
   const router = useRouter();
   const {toast} = useToast();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const {cart, clearCart} = useCart();
   const noAddress = !(cart?.invoicingAddress && cart?.deliveryAddress);
@@ -42,12 +42,14 @@ export function ShopPayments({config, orderSubapp}: ShopPaymentsProps) {
   const redirectOrder = useCallback(
     async (order: SuccessResponse<string>) => {
       if (orderSubapp) {
-        router.replace(`${workspaceURI}/${SUBAPP_CODES.orders}/${order.data}`);
+        router.replace(
+          scope.forRouter(`/${SUBAPP_CODES.orders}/${order.data}`),
+        );
       } else {
-        router.replace(`${workspaceURI}/shop?${ORDER_SUCCESS_PARAM}=true`);
+        router.replace(scope.forRouter(`/shop?${ORDER_SUCCESS_PARAM}=true`));
       }
     },
-    [workspaceURI, router, orderSubapp],
+    [scope, router, orderSubapp],
   );
 
   return (
@@ -65,36 +67,23 @@ export function ShopPayments({config, orderSubapp}: ShopPaymentsProps) {
           return true;
         }}
         onPaypalCreatedOrder={async () => {
-          return await paypalCreateOrder({cart, workspaceURL});
+          return await paypalCreateOrder({cart});
         }}
         onPaypalCaptureOrder={async orderID => {
-          return await paypalCaptureOrder({
-            orderId: orderID,
-            workspaceURL,
-          });
+          return await paypalCaptureOrder({orderId: orderID});
         }}
         onStripeCreateCheckOutSession={async () => {
-          return await createStripeCheckoutSession({
-            cart,
-            workspaceURL,
-          });
+          return await createStripeCheckoutSession({cart});
         }}
         onStripeValidateSession={async ({stripeSessionId}) => {
-          return validateStripePayment({
-            stripeSessionId,
-            workspaceURL,
-          });
+          return validateStripePayment({stripeSessionId});
         }}
         onPaymentSuccess={async () => clearCart()}
         onPayboxCreateOrder={async ({uri}) => {
-          return await payboxCreateOrder({
-            cart,
-            workspaceURL,
-            uri,
-          });
+          return await payboxCreateOrder({cart, uri});
         }}
         onPayboxValidatePayment={async ({params}) => {
-          return validatePayboxPayment({params, workspaceURL});
+          return validatePayboxPayment({params});
         }}
         onApprove={redirectOrder}
         successMessage="Order completed successfully."

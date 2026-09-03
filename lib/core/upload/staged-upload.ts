@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
@@ -8,7 +7,7 @@ import {
   COMMENT_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
 } from '@/lib/core/comments/constants';
-import {getStoragePath, resolveStoragePath} from '@/storage/index';
+import {resolveStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 import {
   DEFAULT_RECORD_RETENTION_HOURS,
@@ -23,6 +22,7 @@ import {
   promotePart,
   removePart,
   removeSessionFiles,
+  resolvePart,
 } from './file';
 
 // ---- LOCAL IMPORTS ---- //
@@ -308,11 +308,13 @@ async function reconcileLostAppend({
   sessionId,
   owner,
   client,
+  storagePath,
   partPath,
 }: {
   sessionId: string;
   owner: ID;
   client: Client;
+  storagePath: string;
   partPath: string;
 }): Promise<AppendOutcome> {
   const current = await client.stagedUpload.findOne({
@@ -331,7 +333,7 @@ async function reconcileLostAppend({
    * there is nothing here to undo. Best effort either way — the record is
    * whole, and a failure to tidy up is only a leak. */
   if (current?.metaFile) {
-    await removePart(partPath).catch(error => {
+    await removePart({partPath, storagePath}).catch(error => {
       console.error('Stage upload part cleanup failed:', error);
     });
     return {status: 'complete'};
@@ -346,7 +348,7 @@ async function reconcileLostAppend({
    * skips a released row, so the part is removed here or not at all — but a
    * failure to remove it must not turn a gone session into a server fault,
    * since the caller's answer is the same either way. */
-  await removePart(partPath).catch(error => {
+  await removePart({partPath, storagePath}).catch(error => {
     console.error('Stage upload part cleanup failed:', error);
   });
   return {status: 'not-found'};
@@ -363,19 +365,22 @@ async function reconcileLostAppend({
  * An entry lives only while something is queued behind it, so the map does not
  * grow with every upload the process has ever served.
  */
+/* Keyed by tenant and session, because `sessionId` is only unique within one
+ * tenant's own table — two tenants could otherwise serialise against each
+ * other's appends. */
 const appendQueue = new Map<string, Promise<unknown>>();
 
-function queueAppend<T>(sessionId: string, run: () => Promise<T>): Promise<T> {
-  const previous = appendQueue.get(sessionId) ?? Promise.resolve();
+function queueAppend<T>(key: string, run: () => Promise<T>): Promise<T> {
+  const previous = appendQueue.get(key) ?? Promise.resolve();
 
   /* `previous` is a tracked promise, which never rejects, so a failed append
    * cannot hold up the ones behind it. */
   const settled = previous.then(run);
   const tracked = settled.catch(() => undefined);
 
-  appendQueue.set(sessionId, tracked);
+  appendQueue.set(key, tracked);
   void tracked.then(() => {
-    if (appendQueue.get(sessionId) === tracked) appendQueue.delete(sessionId);
+    if (appendQueue.get(key) === tracked) appendQueue.delete(key);
   });
 
   return settled;
@@ -396,13 +401,17 @@ function queueAppend<T>(sessionId: string, run: () => Promise<T>): Promise<T> {
  * not is made to wait rather than allowed to corrupt its own file.
  */
 export function appendChunk(args: {
+  tenantId: string;
   sessionId: string;
   owner: ID;
   offset: number;
   stream: ReadableStream<Uint8Array>;
   client: Client;
+  storagePath: string;
 }): Promise<AppendOutcome> {
-  return queueAppend(args.sessionId, () => appendOneChunk(args));
+  return queueAppend(`${args.tenantId}:${args.sessionId}`, () =>
+    appendOneChunk(args),
+  );
 }
 
 async function appendOneChunk({
@@ -411,12 +420,14 @@ async function appendOneChunk({
   offset,
   stream,
   client,
+  storagePath,
 }: {
   sessionId: string;
   owner: ID;
   offset: number;
   stream: ReadableStream<Uint8Array>;
   client: Client;
+  storagePath: string;
 }): Promise<AppendOutcome> {
   const row = await client.stagedUpload.findOne({
     where: {
@@ -456,6 +467,7 @@ async function appendOneChunk({
 
   const written = await appendToPart({
     partPath: row.partPath,
+    storagePath,
     stream,
     offset: committed,
     maxBytes: Math.min(policy.maxBytes, length),
@@ -513,6 +525,7 @@ async function appendOneChunk({
         sessionId,
         owner,
         client,
+        storagePath,
         partPath: row.partPath,
       });
 
@@ -544,6 +557,7 @@ async function appendOneChunk({
       sessionId,
       owner,
       client,
+      storagePath,
       partPath: row.partPath,
     });
   }
@@ -575,10 +589,12 @@ export async function finalizeSession({
   sessionId,
   owner,
   client,
+  storagePath,
 }: {
   sessionId: string;
   owner: ID;
   client: GooveeClient;
+  storagePath: string;
 }): Promise<FinalizeOutcome> {
   const row = await client.stagedUpload.findOne({
     where: {
@@ -632,7 +648,7 @@ export async function finalizeSession({
      * size checks read only metadata and a content `.refine()` reads from disk
      * on demand rather than pulling the file into memory.
      */
-    const blob = await fs.openAsBlob(path.resolve(getStoragePath(), partPath), {
+    const blob = await fs.openAsBlob(resolvePart(storagePath, partPath), {
       type: fileType,
     });
     policy.file.parse(new File([blob], fileName, {type: fileType}));
@@ -640,7 +656,7 @@ export async function finalizeSession({
 
   /* The finished file takes a name of its own, so an append still running
    * against this session writes to a path that no longer exists. */
-  const filePath = await promotePart(partPath);
+  const filePath = await promotePart({partPath, storagePath});
 
   const uploaded = await client.$transaction(async txClient => {
     const metaFile = await createMetaFile(
@@ -686,10 +702,12 @@ export async function releaseSession({
   sessionId,
   owner,
   client,
+  storagePath,
 }: {
   sessionId: string;
   owner: ID;
   client: Client;
+  storagePath: string;
 }): Promise<void> {
   const row = await client.stagedUpload.findOne({
     where: {
@@ -726,7 +744,7 @@ export async function releaseSession({
 
   if (!Number(released)) return;
 
-  await removeSessionFiles(row.partPath);
+  await removeSessionFiles({partPath: row.partPath, storagePath});
 }
 
 /**
@@ -738,6 +756,7 @@ export async function releaseSessionQuietly(args: {
   sessionId: string;
   owner: ID;
   client: Client;
+  storagePath: string;
 }): Promise<void> {
   await releaseSession(args).catch(error => {
     console.error('Stage upload release error:', error);
@@ -816,8 +835,10 @@ export async function redeemUpload({
  */
 export async function reapExpiredUploads({
   client,
+  storagePath,
 }: {
   client: GooveeClient;
+  storagePath: string;
 }): Promise<{reaped: number; failed: number}> {
   const abandoned = await client.stagedUpload.find({
     where: {
@@ -866,12 +887,12 @@ export async function reapExpiredUploads({
       /* An unfinished session owns its files outright; once finalized the blob
        * belongs to the meta_file and is removed through that instead. */
       if (row.partPath) {
-        await removeSessionFiles(row.partPath);
+        await removeSessionFiles({partPath: row.partPath, storagePath});
       }
 
       const recordedPath = row.metaFile?.filePath;
       const filePath =
-        recordedPath && resolveStoragePath(getStoragePath(), recordedPath);
+        recordedPath && resolveStoragePath(storagePath, recordedPath);
 
       if (filePath) {
         await fs.promises.rm(filePath, {force: true});
@@ -908,20 +929,22 @@ export async function reapExpiredUploads({
  */
 export async function pruneStaleUploads({
   client,
+  retentionHours,
 }: {
   client: Client;
+  retentionHours?: number;
 }): Promise<{pruned: number}> {
   /*
-   * Retention overridable in hours via `UPLOAD_RECORD_RETENTION_HOURS`; unset,
-   * non-positive, or invalid falls back to the default — a negative value would
-   * otherwise push the cutoff into the future and prune every terminal record.
+   * Retention (hours) comes from the tenant's config; unset, non-positive, or
+   * invalid falls back to the default — a negative value would otherwise push
+   * the cutoff into the future and prune every terminal record.
    * `<field> < cutoff` excludes non-terminal rows for free: a NULL `consumedAt`
    * or `reapedAt` is never less than the cutoff, so it never matches.
    */
-  const retentionHours = Number(process.env.UPLOAD_RECORD_RETENTION_HOURS);
   const retentionMs =
-    (retentionHours > 0 ? retentionHours : DEFAULT_RECORD_RETENTION_HOURS) *
-    HOUR_MS;
+    (retentionHours && retentionHours > 0
+      ? retentionHours
+      : DEFAULT_RECORD_RETENTION_HOURS) * HOUR_MS;
   const cutoff = new Date(Date.now() - retentionMs);
 
   const pruned = await client.stagedUpload.deleteAll({

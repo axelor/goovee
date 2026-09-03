@@ -1,42 +1,23 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
-import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/lib/core/tenant';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 
 // ---- LOCAL IMPORTS ---- //
 import {getAccountConfig} from '../../../common/orm/config';
 import {findAvailableSubapps} from '../../../common/orm/members';
 import Form from './form';
 
-export default async function Page(props: {
-  params: Promise<{workspace: string; tenant: string}>;
-}) {
-  const params = await props.params;
-  const {tenant: tenantId, workspaceURL} = workspacePathname(params);
+export default async function Page() {
+  const access = await ensureAccess();
 
-  const tenant = await manager.getTenant(tenantId);
-
-  if (!tenant) {
+  if (!access.ok) {
     return notFound();
   }
 
+  const {tenant, workspace} = access;
   const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user!;
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    client,
-  });
-
-  if (!workspace) {
-    return notFound();
-  }
+  const workspaceURL = workspace.url;
 
   const config = await getAccountConfig(workspace.config.id, client);
 

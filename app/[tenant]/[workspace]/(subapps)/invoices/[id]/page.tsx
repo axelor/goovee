@@ -1,17 +1,17 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {SUBAPP_CODES} from '@/constants';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
+import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -31,17 +31,21 @@ async function Invoice({
   params: Params;
   searchParams: SearchParams;
 }) {
-  const {id, tenant} = params;
+  const {id} = params;
   const token = searchParams.token;
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   /* Token path: a capability scoped to one invoice. ensureTokenAccess only
      establishes the workspace; the token is fused into findInvoice below, which
-     is what actually authorizes this invoice. */
+     is what actually authorizes this invoice. The workspace is named from the
+     address the request arrived at, because there is no gate before it to
+     resolve one. */
   if (token) {
+    const scope = await currentWorkspace();
+    if (!scope) notFound();
+
     const access = await ensureTokenAccess({
-      url: workspaceURL,
-      tenantId: tenant,
+      url: scope.key(),
+      tenantId: scope.tenantId,
       token,
     });
     if (!access.ok) notFound();
@@ -50,7 +54,8 @@ async function Invoice({
       id,
       token: access.token,
       client: access.tenant.client,
-      workspaceURL,
+      workspaceURL: access.workspace.url,
+      tenantId: access.tenant.id,
     });
     if (!invoice) return <TokenInvalid />;
 
@@ -64,8 +69,10 @@ async function Invoice({
       <Content
         invoice={clone(invoice)}
         config={clone(config)}
-        workspaceURI={workspaceURI}
         token={access.token}
+        allowStripeBankTransfer={canSettleStripeBankTransfer(
+          access.tenant.config,
+        )}
       />
     );
   }
@@ -74,29 +81,10 @@ async function Invoice({
      invoices app, and only sees invoices their partner owns. */
   const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const invoicesWhereClause = getWhereClauseForEntity({
     user: access.user,
@@ -109,7 +97,8 @@ async function Invoice({
     id,
     params: {where: invoicesWhereClause},
     client: access.tenant.client,
-    workspaceURL,
+    workspaceURL: access.workspace.url,
+    tenantId: access.tenant.id,
   });
   if (!invoice) notFound();
 
@@ -123,7 +112,9 @@ async function Invoice({
     <Content
       invoice={clone(invoice)}
       config={clone(config)}
-      workspaceURI={workspaceURI}
+      allowStripeBankTransfer={canSettleStripeBankTransfer(
+        access.tenant.config,
+      )}
     />
   );
 }

@@ -1,15 +1,15 @@
-import {redirect} from 'next/navigation';
-import {workspacePathname} from '@/utils/workspace';
+import {notFound, redirect} from 'next/navigation';
+
+import {currentWorkspace} from '@/lib/core/url/current';
 
 // Legacy consolidated route — superseded by the per-tab rail.
 // Preserve quotation/checkout context when redirecting (used by the shop flow).
 export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await props.params;
   const searchParams = await props.searchParams;
-  const {workspaceURI} = workspacePathname(params);
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
   const sp = new URLSearchParams();
   for (const [key, value] of Object.entries(searchParams ?? {})) {
@@ -24,5 +24,5 @@ export default async function Page(props: {
     searchParams?.checkout != null || searchParams?.quotation != null;
   const target = hasAddressContext ? 'addresses' : 'password';
 
-  redirect(`${workspaceURI}/account/${target}${query ? `?${query}` : ''}`);
+  redirect(scope.forRouter(`/account/${target}${query ? `?${query}` : ''}`));
 }

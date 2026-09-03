@@ -38,7 +38,6 @@ type VersionOption = {id: string; versionNumber: string};
 
 type YourReviewCardProps = {
   productId: string;
-  workspaceURL: string;
   loginHref: string;
   tenantId: string;
   user?: User;
@@ -49,7 +48,6 @@ type YourReviewCardProps = {
 
 export function YourReviewCard({
   productId,
-  workspaceURL,
   loginHref,
   tenantId,
   user,
@@ -102,7 +100,6 @@ export function YourReviewCard({
         try {
           const result = await saveReview({
             productId,
-            workspaceURL,
             rating: values.rating,
             reviewComment: trimmedComment,
             reviewedVersionId: values.versionId,
@@ -160,7 +157,7 @@ export function YourReviewCard({
     startTransition(async () => {
       addOptimistic({kind: 'delete'});
       try {
-        const result = await deleteReview({productId, workspaceURL});
+        const result = await deleteReview({productId});
         if (!result.success) {
           toast({variant: 'destructive', title: result.message});
           return;

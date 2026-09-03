@@ -6,7 +6,6 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findNewsImageBySlug} from '@/subapps/news/common/orm/news';
@@ -25,13 +24,10 @@ export async function GET(
   const {searchParams} = new URL(request.url);
   const isFullView = searchParams.get('isFullView') === 'true';
 
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {slug} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) {

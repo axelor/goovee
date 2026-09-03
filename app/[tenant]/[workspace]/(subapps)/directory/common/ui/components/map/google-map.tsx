@@ -50,9 +50,11 @@ type MarkerProps = {
 
 export function Marker(props: MarkerProps) {
   const {small, item} = props;
-  const {workspaceURI, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
 
-  const url = `${workspaceURI}/${SUBAPP_CODES.directory}/entry/${item.id}`;
+  const entryHref = scope.forRouter(
+    `/${SUBAPP_CODES.directory}/entry/${item.id}`,
+  );
   const [markerRef, marker] = useMarkerRef();
 
   const [show, setShow] = useState(false);
@@ -73,7 +75,7 @@ export function Marker(props: MarkerProps) {
         <InfoWindow anchor={marker} onClose={handleClose} headerDisabled>
           <Card
             item={item}
-            url={url}
+            url={entryHref}
             compact={small}
             tenant={tenant}
             className="hover:bg-accent"

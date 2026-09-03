@@ -52,7 +52,7 @@ export default async function Page(props: {
     return notFound();
   }
 
-  const showGoogleOauth = process.env.SHOW_GOOGLE_OAUTH === 'true';
+  const showGoogleOauth = Boolean(tenant.config.oauth?.google);
 
   return (
     <Navigation

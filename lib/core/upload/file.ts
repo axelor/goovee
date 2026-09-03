@@ -6,8 +6,28 @@ import type {ReadableStream as WebReadableStream} from 'stream/web';
 
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
-import {getStoragePath} from '@/storage/index';
+import {resolveStoragePath} from '@/storage/index';
 import {getFileSizeText} from '@/utils/files';
+
+/* Every path below is resolved against the acting tenant's storage root, which
+ * the caller passes in. There is no process-wide storage path to fall back on:
+ * a tenant on a shared AOS keeps its files under its own subdirectory, so a part
+ * written against the wrong root assembles into a blob no tenant can read back.
+ *
+ * `partPath` is confined to that root exactly as a recorded `meta_file.filePath`
+ * is. It is a plain column reachable from outside this application, so a value
+ * carrying parent-directory segments would otherwise resolve into another
+ * tenant's storage — read by the validation step, renamed into this tenant's
+ * root on completion, or removed by the retention sweep. */
+export function resolvePart(storagePath: string, partPath: string): string {
+  const resolved = resolveStoragePath(storagePath, partPath);
+
+  if (!resolved) {
+    throw new Error(`Part path is outside the storage directory: ${partPath}`);
+  }
+
+  return resolved;
+}
 
 /*
  * AOP MetaFile store backend (meta_file.store_type, NOT NULL since AOP 8.0).
@@ -96,13 +116,18 @@ function promotedName(partPath: string): string {
  * this, so completing while one is still arriving remains the caller's to
  * avoid.
  */
-export async function promotePart(partPath: string): Promise<string> {
+export async function promotePart({
+  partPath,
+  storagePath,
+}: {
+  partPath: string;
+  storagePath: string;
+}): Promise<string> {
   const filePath = promotedName(partPath);
-  const storage = getStoragePath();
 
   await fs.promises.rename(
-    path.resolve(storage, partPath),
-    path.resolve(storage, filePath),
+    resolvePart(storagePath, partPath),
+    resolvePart(storagePath, filePath),
   );
 
   return filePath;
@@ -138,16 +163,18 @@ export type PartAppend =
  */
 export async function appendToPart({
   partPath,
+  storagePath,
   stream,
   offset,
   maxBytes,
 }: {
   partPath: string;
+  storagePath: string;
   stream: ReadableStream<Uint8Array>;
   offset: number;
   maxBytes: number;
 }): Promise<PartAppend> {
-  const absolute = path.resolve(getStoragePath(), partPath);
+  const absolute = resolvePart(storagePath, partPath);
 
   /* A part that is absent holds nothing, which is the same situation as one
    * that is short — both are answered with what is actually durable. */
@@ -235,10 +262,29 @@ export async function appendToPart({
 /**
  * Remove a part file. A part that is already gone is not an error; one that
  * could not be removed is, so callers do not record storage as reclaimed when
- * it was not.
+ * it was not. The one exception is a path that resolves outside the tenant's
+ * storage root: there is nothing here to reclaim, so it is reported and left.
  */
-export async function removePart(partPath: string): Promise<void> {
-  await fs.promises.rm(path.resolve(getStoragePath(), partPath), {force: true});
+export async function removePart({
+  partPath,
+  storagePath,
+}: {
+  partPath: string;
+  storagePath: string;
+}): Promise<void> {
+  /* Cleanup is best effort, and a path that does not belong to this tenant is
+   * simply not this sweep's to remove — reported rather than acted on, since a
+   * recorded value pointing outside the root is a fault worth seeing. */
+  const target = resolveStoragePath(storagePath, partPath);
+
+  if (!target) {
+    console.error(
+      `Refusing to remove a part outside the storage directory: ${partPath}`,
+    );
+    return;
+  }
+
+  await fs.promises.rm(target, {force: true});
 }
 
 /**
@@ -250,9 +296,15 @@ export async function removePart(partPath: string): Promise<void> {
  * file under a name nothing refers to. Clearing up after such a session means
  * looking for both.
  */
-export async function removeSessionFiles(partPath: string): Promise<void> {
-  await removePart(partPath);
-  await removePart(promotedName(partPath));
+export async function removeSessionFiles({
+  partPath,
+  storagePath,
+}: {
+  partPath: string;
+  storagePath: string;
+}): Promise<void> {
+  await removePart({partPath, storagePath});
+  await removePart({partPath: promotedName(partPath), storagePath});
 }
 
 /**

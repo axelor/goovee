@@ -6,7 +6,7 @@ import Image from 'next/image';
 import {useRouter, usePathname, useSearchParams} from 'next/navigation';
 import {MdExpandMore} from 'react-icons/md';
 import {useSignOut} from '@/ui/hooks';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -36,6 +36,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Icon} from '@/ui/components';
 import type {Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
+import type {WorkspaceLink} from './workspace-links';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
@@ -44,7 +45,6 @@ import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
 
@@ -55,14 +55,14 @@ function Logo({
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
-    ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
+    ? scope.forBrowser('/api/workspace/logo/image')
     : withBasePath(DEFAULT_LOGO_URL);
 
   return (
-    <Link href={workspaceURI}>
+    <Link href={scope.forRouter()}>
       <div className="flex items-center justify-start">
         <div className="w-24 aspect-[2/1] relative">
           <Image
@@ -186,7 +186,7 @@ export default function Header({
 }: {
   subapps: any;
   isTopNavigation?: boolean;
-  workspaces: {id: string; name: string | null; url: string | null}[];
+  workspaces: WorkspaceLink[];
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   cartCodes?: string[];
@@ -195,7 +195,7 @@ export default function Header({
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
-  const {workspaceURI, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {visible, loading} = useNavigationVisibility();
   const res: any = useResponsive();
   const env = useEnvironment();
@@ -291,7 +291,7 @@ export default function Header({
                       href={
                         isExternalChat
                           ? mattermostUrl
-                          : `${workspaceURI}/${code}${page}`
+                          : scope.forRouter(`/${code}${page}`)
                       }
                       target={isExternalChat ? '_blank' : undefined}
                       rel={isExternalChat ? 'noopener noreferrer' : undefined}
@@ -314,10 +314,10 @@ export default function Header({
             {user && (
               <>
                 <div className="w-px h-6 bg-ink-100 mx-1.5" />
-                <ProfilePill baseURL={workspaceURI} tenant={tenant} />
+                <ProfilePill baseURL={scope.forRouter()} tenant={tenant} />
               </>
             )}
-            {!user && <Account baseURL={workspaceURI} tenant={tenant} />}
+            {!user && <Account baseURL={scope.forRouter()} tenant={tenant} />}
           </div>
         )}
       </div>
@@ -326,19 +326,14 @@ export default function Header({
         <div className="bg-white text-ink-900 z-10 px-7 py-4 hidden lg:flex items-center justify-between border-b border-ink-100 max-w-full gap-10">
           <div>
             {Boolean(workspaces?.length) && user && (
-              <Select defaultValue={workspaceURI} onValueChange={redirect}>
+              <Select defaultValue={scope.forRouter()} onValueChange={redirect}>
                 <SelectTrigger className="grow max-w-100 overflow-hidden p-0 border-0 !bg-transparent h-auto">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces?.map(workspace => (
-                    <SelectItem
-                      key={workspace.url}
-                      value={toWorkspaceURI(
-                        workspace.url ?? '',
-                        env.GOOVEE_PUBLIC_HOST,
-                      )}>
-                      {workspace.name || workspace.url}
+                    <SelectItem key={workspace.href} value={workspace.href}>
+                      {workspace.name || workspace.href}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -364,7 +359,7 @@ export default function Header({
                         orientation="vertical"
                       />
                     )}
-                    <Link href={`${workspaceURI}/${code}${page}`}>
+                    <Link href={scope.forRouter(`/${code}${page}`)}>
                       <div className="font-medium text-ink-700 hover:text-royal transition-colors">
                         {i18n.t(name)}
                       </div>

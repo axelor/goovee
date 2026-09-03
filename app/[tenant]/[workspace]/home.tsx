@@ -23,6 +23,7 @@ import {Skeleton} from '@/ui/components/skeleton/skeleton';
 import {FileIcon} from '@/ui/components/file-icon';
 import {cn} from '@/utils/css';
 import {withBasePath} from '@/lib/core/path/base-path';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {Link} from '@/ui/components/link';
 import {HeroSearch} from '@/ui/components';
 
@@ -49,14 +50,14 @@ export async function Home({
   user,
   workspace,
   config,
-  workspaceURI,
+  scope,
   apps,
 }: {
   client: Client;
   user: User | undefined;
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
-  workspaceURI: string;
+  scope: WorkspaceScope;
   apps: HomeApps;
 }) {
   const showNews =
@@ -92,11 +93,11 @@ export async function Home({
   // Configurable hero banner (background image + overlay + logo), rendered via
   // the shared HeroSearch/Banner exactly as it was before the redesign.
   const heroImageURL = config.homepageHeroBgImage?.id
-    ? withBasePath(`${workspaceURI}/api/home/hero/background`)
+    ? scope.forBrowser('/api/home/hero/background')
     : withBasePath(IMAGE_URL);
   const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
-    ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
+    ? scope.forBrowser('/api/workspace/logo/image')
     : withBasePath(DEFAULT_LOGO_URL);
 
   return (
@@ -122,7 +123,7 @@ export async function Home({
               workspace={workspace}
               client={client}
               user={user}
-              workspaceURI={workspaceURI}
+              scope={scope}
             />
           </Suspense>
         )}
@@ -135,7 +136,7 @@ export async function Home({
                   workspace={workspace}
                   client={client}
                   user={user}
-                  workspaceURI={workspaceURI}
+                  scope={scope}
                 />
               </Suspense>
             )}
@@ -145,7 +146,7 @@ export async function Home({
                   workspace={workspace}
                   client={client}
                   user={user}
-                  workspaceURI={workspaceURI}
+                  scope={scope}
                 />
               </Suspense>
             )}
@@ -155,7 +156,7 @@ export async function Home({
                   workspace={workspace}
                   client={client}
                   user={user}
-                  workspaceURI={workspaceURI}
+                  scope={scope}
                 />
               </Suspense>
             )}
@@ -167,7 +168,7 @@ export async function Home({
            * exposed as a region, and this row used to be an aside. */
           <section className="mt-11" aria-label={usefulLinksTitle}>
             <SectionHeader title={usefulLinksTitle} />
-            <HyperlinkGrid config={config} workspaceURI={workspaceURI} />
+            <HyperlinkGrid config={config} scope={scope} />
           </section>
         )}
 
@@ -183,12 +184,12 @@ async function LatestNews({
   workspace,
   client,
   user,
-  workspaceURI,
+  scope,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const {news} = await findHomePageHeaderNews({
     workspace,
@@ -203,15 +204,11 @@ async function LatestNews({
     <section>
       <SectionHeader
         title={await t('Latest news')}
-        seeAllHref={`${workspaceURI}/${SUBAPP_CODES.news}`}
+        seeAllHref={scope.forRouter(`/${SUBAPP_CODES.news}`)}
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
         {news.slice(0, 3).map(article => (
-          <HeroNewsCard
-            key={article.id}
-            article={article}
-            workspaceURI={workspaceURI}
-          />
+          <HeroNewsCard key={article.id} article={article} scope={scope} />
         ))}
       </div>
     </section>
@@ -220,23 +217,25 @@ async function LatestNews({
 
 function HeroNewsCard({
   article,
-  workspaceURI,
+  scope,
 }: {
   article: HeroArticle;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const {slug, image, title, description, categorySet, publicationDateTime} =
     article;
   const category = categorySet?.[0];
   const imageURL = image?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
+    ? scope.forBrowser(
+        `/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
       )
     : withBasePath(NO_IMAGE_URL);
 
   return (
     <Link
-      href={`${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${slug}`}
+      href={scope.forRouter(
+        `/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${slug}`,
+      )}
       className={cn(
         'group relative block rounded-[14px] overflow-hidden cursor-pointer h-[360px]',
         'border border-ink-100',
@@ -294,12 +293,12 @@ async function EventsCard({
   workspace,
   client,
   user,
-  workspaceURI,
+  scope,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const {events} = await findEvents({
     limit: 3,
@@ -314,7 +313,7 @@ async function EventsCard({
     <ContentColumn
       title={await t('Events')}
       icon="event"
-      seeAllHref={`${workspaceURI}/${SUBAPP_CODES.events}`}
+      seeAllHref={scope.forRouter(`/${SUBAPP_CODES.events}`)}
       emptyLabel={await t('No upcoming events')}
       hasItems={Boolean(events?.length)}>
       <ul className="flex flex-col gap-3">
@@ -323,7 +322,7 @@ async function EventsCard({
           return (
             <li key={event.id}>
               <Link
-                href={`${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`}
+                href={scope.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`)}
                 className={cn(
                   'block p-3 rounded-[10px] border border-ink-100 bg-ink-25',
                   'transition-colors hover:bg-royal-pale',
@@ -358,12 +357,12 @@ async function ForumCard({
   workspace,
   client,
   user,
-  workspaceURI,
+  scope,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const posts = await findRecentlyActivePosts({
     workspaceID: workspace.id,
@@ -377,7 +376,7 @@ async function ForumCard({
     <ContentColumn
       title={await t('Forum')}
       icon="forum"
-      seeAllHref={`${workspaceURI}/${SUBAPP_CODES.forum}`}
+      seeAllHref={scope.forRouter(`/${SUBAPP_CODES.forum}`)}
       emptyLabel={await t('No recent discussions')}
       hasItems={Boolean(posts?.length)}>
       <ul className="flex flex-col gap-3.5">
@@ -392,7 +391,9 @@ async function ForumCard({
           return (
             <li key={post.id}>
               <Link
-                href={`${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`}
+                href={scope.forRouter(
+                  `/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                )}
                 className="block group">
                 <div className="text-[12.5px] text-ink-500 mb-1">
                   <strong className="text-ink-700 font-semibold">
@@ -423,12 +424,12 @@ async function ResourcesCard({
   workspace,
   client,
   user,
-  workspaceURI,
+  scope,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const files = await fetchLatestFiles({
     take: 5,
@@ -441,14 +442,14 @@ async function ResourcesCard({
     <ContentColumn
       title={await t('Resources')}
       icon="resource"
-      seeAllHref={`${workspaceURI}/${SUBAPP_CODES.resources}`}
+      seeAllHref={scope.forRouter(`/${SUBAPP_CODES.resources}`)}
       emptyLabel={await t('No recent resources')}
       hasItems={Boolean(files?.length)}>
       <ul className="flex flex-col gap-2 -mx-1">
         {files?.map(file => (
           <li key={file.id}>
             <Link
-              href={`${workspaceURI}/${SUBAPP_CODES.resources}/${file.id}`}
+              href={scope.forRouter(`/${SUBAPP_CODES.resources}/${file.id}`)}
               className={cn(
                 'flex items-center gap-2.5 px-2 py-2 rounded-lg',
                 'transition-colors hover:bg-ink-25',
@@ -483,10 +484,10 @@ async function ResourcesCard({
 
 function HyperlinkGrid({
   config,
-  workspaceURI,
+  scope,
 }: {
   config: ShellConfig | Cloned<ShellConfig>;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const hyperlinkList = config.hyperlinkList;
 
@@ -507,7 +508,7 @@ function HyperlinkGrid({
             'transition-transform duration-150 hover:scale-[1.04] hover:shadow-soft-md',
           )}>
           <Image
-            src={withBasePath(`${workspaceURI}/api/hyperlink/${item.id}/logo`)}
+            src={scope.forBrowser(`/api/hyperlink/${item.id}/logo`)}
             alt={`Related link`}
             width={120}
             height={120}

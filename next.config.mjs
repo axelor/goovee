@@ -34,6 +34,25 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  /*
+   * `next dev` allows only `localhost` and the address it was started on to ask
+   * for its own development resources, the hot-reload socket among them, and a
+   * page whose socket is refused never finishes rendering. Testing a tenant
+   * routed by host means reaching the dev server on a second address, so the
+   * addresses a checkout is reached at are named here. Every one of them resolves
+   * to this machine and reaches nothing else.
+   *
+   * `localtest.me` is a public zone whose every name, wildcards included,
+   * resolves to loopback. It earns its place by giving a checkout a second *name*
+   * rather than a second address, and a name is what a second tenant host has to
+   * be: Next rewrites every loopback address to `localhost` while parsing a URL
+   * (`server/web/next-url.js`), so a URL built on one of them comes back naming
+   * another host than it was given.
+   *
+   * Read by `next dev` alone — a built server serves no development resources and
+   * ignores this.
+   */
+  allowedDevOrigins: ['127.0.0.1', '[::1]', '*.localtest.me'],
   experimental: {
     taint: true,
     authInterrupts: true,

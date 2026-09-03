@@ -8,7 +8,6 @@ import {accessStatus} from '@/lib/core/access/denial';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEventIdForAccess} from '../../../../../common/orm/event';
@@ -25,13 +24,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {slug, 'file-id': fileId} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -40,6 +36,8 @@ export async function GET(
     });
   }
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   /* Workspace carries config as {id} only; fetch the heavy config so the
      shared isCommentEnabled helper can read the comment flags. */

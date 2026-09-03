@@ -75,7 +75,7 @@ export function ShopCart({
   displayPrices?: boolean;
 }) {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const pathname = usePathname() ?? '';
   const {cart, loaded: cartLoaded, removeItem, updateQuantity} = useCart();
   const {data: session} = authClient.useSession();
@@ -130,9 +130,7 @@ export function ShopCart({
 
       try {
         const results = await Promise.all(
-          items.map((i: CartItem) =>
-            findProduct({id: String(i.product), workspaceURL}),
-          ),
+          items.map((i: CartItem) => findProduct({id: String(i.product)})),
         );
         if (cancelled) return;
         const resolved = results.filter((p): p is ComputedProduct =>
@@ -158,7 +156,7 @@ export function ShopCart({
     return () => {
       cancelled = true;
     };
-  }, [cart, cartLoaded, workspaceURL, removeItem]);
+  }, [cart, cartLoaded, removeItem]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])
@@ -209,11 +207,11 @@ export function ShopCart({
     await removeItem(product.id);
   };
 
-  const catalogHref = `${workspaceURI}/${SUBAPP_CODES.shop}`;
-  const checkoutHref = `${workspaceURI}/${SUBAPP_CODES.shop}/cart/checkout`;
+  const catalogHref = scope.forRouter(`/${SUBAPP_CODES.shop}`);
+  const checkoutHref = scope.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`);
   const loginHref = `/auth/login?callbackurl=${encodeURIComponent(
     pathname,
-  )}&workspaceURI=${encodeURIComponent(workspaceURI)}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(
+  )}&workspaceURI=${encodeURIComponent(scope.forRouter())}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(
     tenant,
   )}`;
 
@@ -267,7 +265,6 @@ export function ShopCart({
                   key={item.computedProduct.product.id}
                   item={item}
                   tenant={tenant}
-                  workspaceURI={workspaceURI}
                   onQtyChange={q =>
                     handleQty(
                       item.computedProduct.product.id,
@@ -375,7 +372,6 @@ export function ShopCart({
 function CartLine({
   item,
   tenant,
-  workspaceURI,
   onQtyChange,
   onRemove,
   fmt,
@@ -385,7 +381,6 @@ function CartLine({
 }: {
   item: ResolvedCartItem;
   tenant: string;
-  workspaceURI: string;
   onQtyChange: (q: number) => Promise<void>;
   onRemove: () => Promise<void>;
   fmt: (n: number) => string;
@@ -393,6 +388,7 @@ function CartLine({
   removeLabel: string;
   displayPrices?: boolean;
 }) {
+  const {scope} = useWorkspace();
   const product = item.computedProduct.product;
   const price = item.computedProduct.price;
   const portalCat = product?.portalCategorySet?.[0];
@@ -404,7 +400,9 @@ function CartLine({
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
 
-  const productHref = `${workspaceURI}/${SUBAPP_CODES.shop}/product/${encodeURIComponent(product.slug)}`;
+  const productHref = scope.forRouter(
+    `/${SUBAPP_CODES.shop}/product/${encodeURIComponent(product.slug)}`,
+  );
 
   // Per-line total from the numeric unit price (locale-safe).
   const unitNum = Number(price?.primary ?? 0);

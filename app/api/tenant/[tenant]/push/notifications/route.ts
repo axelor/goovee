@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
+import {fromStoredLink} from '@/lib/core/url/persisted-link';
 import {NotificationDTO} from '@/lib/core/pwa/types';
 
 export async function GET(
@@ -13,6 +14,11 @@ export async function GET(
   const session = await getSession();
   if (!session?.user) {
     return new NextResponse('Unauthorized', {status: 401});
+  }
+
+  // Guard cross-tenant access: /api/* bypasses the proxy that switches sessions.
+  if (session.user.tenantId !== tenantId) {
+    return new NextResponse('Forbidden', {status: 403});
   }
 
   const tenant = await manager.getTenant(tenantId);
@@ -40,7 +46,16 @@ export async function GET(
       },
     );
 
-    return NextResponse.json(notifications);
+    /* Stored as route-tree paths; rendered here as the paths the visitor's
+     * address bar holds, per the tenant's routing of this moment. */
+    const rendered = notifications.map(notification => ({
+      ...notification,
+      url: notification.url
+        ? fromStoredLink(notification.url, tenantId)
+        : notification.url,
+    }));
+
+    return NextResponse.json(rendered);
   } catch (error: unknown) {
     console.error('Fetch notifications error:', error);
     if (error instanceof Error) {

@@ -55,7 +55,8 @@ import {runTenantScript, type TenantHandle} from '@/scripts/lib/tenant-script';
 import {BigDecimal} from '@goovee/orm';
 import {InvalidArgumentError} from 'commander';
 
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import type {TenantConfig} from '@/tenant';
+import {getAOSHeaders} from '@/tenant/auth';
 
 import {
   getDefaultPriceList,
@@ -292,7 +293,7 @@ async function fetchAosPrices({
   currencyId,
   unitId,
 }: {
-  config: {aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]}};
+  config: {aos: TenantConfig['aos']};
   productIds: string[];
   partnerId: string | null;
   companyId: string;
@@ -311,7 +312,7 @@ async function fetchAosPrices({
       companyId: Number(companyId),
       ...(currencyId ? {currencyId: Number(currencyId)} : {}),
     },
-    {headers: getAOSAuthHeaders(config.aos.auth)},
+    {headers: getAOSHeaders(config.aos)},
   );
   const entries: AosPriceEntry[] = res.data?.object ?? [];
   return new Map(entries.map(entry => [String(entry.productId), entry]));
@@ -346,7 +347,7 @@ async function fetchSaleOrderPrice({
   inAti,
   qty,
 }: {
-  config: {aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]}};
+  config: {aos: TenantConfig['aos']};
   productId: string;
   companyId: string;
   partnerId: string;
@@ -395,7 +396,7 @@ async function fetchSaleOrderPrice({
         },
       },
     },
-    {headers: getAOSAuthHeaders(config.aos.auth)},
+    {headers: getAOSHeaders(config.aos)},
   );
   const blocks = res.data?.data ?? [];
   for (const block of blocks) {
@@ -645,14 +646,18 @@ function renderRows(rows: Row[]): void {
   }
 }
 
-/** Up-front reachability check: the public app-info endpoint answers 200
- *  without auth when the back end is up. If it doesn't, tell the invoker
- *  plainly and stop — rather than failing deep in the sweep. After this passes
- *  the run assumes AOS is reachable and lets any later network error crash. */
-async function assertAosReachable(config: {aos: {url: string}}): Promise<void> {
+/** Up-front reachability check: the public app-info endpoint answers 200 when
+ *  the back end is up. If it doesn't, tell the invoker plainly and stop — rather
+ *  than failing deep in the sweep. After this passes the run assumes AOS is
+ *  reachable and lets any later network error crash.
+ *
+ *  Sent with the same headers as the calls it vouches for: an instance serving
+ *  several AOS tenants can refuse a request that selects none, which would
+ *  report a healthy back end as unreachable. */
+async function assertAosReachable(config: AosConfig): Promise<void> {
   const url = `${config.aos.url}/ws/public/app/info`;
   try {
-    await axios.get(url, {timeout: 10_000});
+    await axios.get(url, {timeout: 10_000, headers: getAOSHeaders(config.aos)});
   } catch (err) {
     const why = axios.isAxiosError(err)
       ? err.response
@@ -673,7 +678,7 @@ async function assertAosReachable(config: {aos: {url: string}}): Promise<void> {
 const APP_BASE_MODEL = 'com.axelor.studio.db.AppBase';
 
 type AosConfig = {
-  aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]};
+  aos: TenantConfig['aos'];
 };
 
 type AppBaseSettings = {
@@ -695,7 +700,7 @@ async function readAppBase(config: AosConfig): Promise<AppBaseRecord> {
       data: {},
       limit: 1,
     },
-    {headers: getAOSAuthHeaders(config.aos.auth)},
+    {headers: getAOSHeaders(config.aos)},
   );
   const record = res.data?.data?.[0];
   if (!record) {
@@ -721,7 +726,7 @@ async function writeAppBase(
   const res = await axios.post(
     `${config.aos.url}/ws/rest/${APP_BASE_MODEL}`,
     {data: {id: current.id, version: current.version, ...settings}},
-    {headers: getAOSAuthHeaders(config.aos.auth)},
+    {headers: getAOSHeaders(config.aos)},
   );
   const saved = res.data?.data?.[0];
   if (res.data?.status !== 0 || saved?.version == null) {

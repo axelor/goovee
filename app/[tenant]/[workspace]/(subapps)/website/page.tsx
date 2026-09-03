@@ -1,13 +1,11 @@
 import {headers} from 'next/headers';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {redirect} from 'next/navigation';
 import Link from 'next/link';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {denyPage} from '@/lib/core/access/denial';
+import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {findAllMainWebsites} from '@/subapps/website/common/orm/website';
@@ -18,38 +16,17 @@ import type {Website} from '@/types';
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
-  const params = await props.params;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   let locale = user?.locale;
 
@@ -69,10 +46,11 @@ export default async function Page(props: {
     locale,
   });
 
-  if (!mainWebsites?.length) return <NotFound homePageUrl={workspaceURI} />;
+  if (!mainWebsites?.length)
+    return <NotFound homePageUrl={access.scope.forRouter()} />;
 
   const getWebsiteURL = (website: Website) =>
-    `${workspaceURI}/${SUBAPP_CODES.website}/${website.slug}`;
+    access.scope.forRouter(`/${SUBAPP_CODES.website}/${website.slug}`);
 
   if (mainWebsites.length === 1) {
     return redirect(getWebsiteURL(mainWebsites?.[0]));

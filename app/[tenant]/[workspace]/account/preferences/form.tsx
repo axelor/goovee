@@ -61,7 +61,7 @@ export default function PreferencesForm() {
   const userId = user?.id;
 
   const {toast} = useToast();
-  const {tenant, workspaceURL} = useWorkspace();
+  const {tenant} = useWorkspace();
 
   const [loading, setLoading] = useState(true);
 
@@ -154,7 +154,7 @@ export default function PreferencesForm() {
     init().finally(() => {
       setLoading(false);
     });
-  }, [userId, tenant, workspaceURL, setFormValue]);
+  }, [userId, tenant, setFormValue]);
 
   if (loading) {
     return <Loader />;

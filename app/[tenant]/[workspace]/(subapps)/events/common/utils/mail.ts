@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
 import {getSession} from '@/lib/core/auth';
 import NotificationManager, {NotificationType} from '@/lib/core/notification';
 import {html} from '@/utils/template-string';
@@ -7,6 +8,7 @@ import {generateIcs} from './index';
 import {formatDate} from '@/lib/core/locale/server/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 
@@ -20,14 +22,18 @@ type MailEvent = {
   eventStartDateTime: string | Date | null;
   eventEndDateTime: string | Date | null;
   eventDescription: string | null;
-  eventLink: string;
 };
 
 export async function mailTemplate({
   event,
+  eventLink,
   participant,
 }: {
   event: MailEvent;
+  /* Absolute, and beside the event rather than in it: this lands in an inbox,
+   * where nothing resolves a path, and where the event is addressed is not an
+   * attribute of the event. */
+  eventLink: string;
   participant: Participant;
 }) {
   const {
@@ -37,7 +43,6 @@ export async function mailTemplate({
     eventStartDateTime,
     eventEndDateTime,
     eventDescription,
-    eventLink,
   } = event;
 
   const {name, surname, subscriptionSet = []} = participant;
@@ -163,12 +168,14 @@ export const generateRegistrationMailAction = async ({
   client,
   config,
   workspace,
+  scope,
 }: {
   participants: Participant[];
   eventId: string;
   client: Client;
   config: TenantConfig;
   workspace: Workspace | Cloned<Workspace>;
+  scope: WorkspaceScope;
 }) => {
   if (![eventId, participants?.length, workspace.url].every(Boolean)) {
     console.error(
@@ -193,7 +200,10 @@ export const generateRegistrationMailAction = async ({
     return;
   }
 
-  const mailService = NotificationManager.getService(NotificationType.mail);
+  const mailService = NotificationManager.getService(
+    NotificationType.mail,
+    config,
+  );
   if (!mailService) {
     console.error('[MAIL] Mail service is not available.');
     return;
@@ -205,7 +215,11 @@ export const generateRegistrationMailAction = async ({
   await mailService.notifyAll(participants, async participant => ({
     to: participant.emailAddress,
     subject,
-    html: await mailTemplate({event, participant}),
+    html: await mailTemplate({
+      event,
+      eventLink: scope.forExternal(`/${SUBAPP_CODES.events}/${event.slug}`),
+      participant,
+    }),
     icalEvent: {
       method: 'REQUEST',
       content: ics,

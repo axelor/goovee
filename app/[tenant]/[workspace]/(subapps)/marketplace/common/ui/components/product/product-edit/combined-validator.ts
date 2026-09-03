@@ -1,5 +1,4 @@
 import {z} from 'zod';
-import {WorkspaceURLSchema} from '@/utils/validators';
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
 import {VERSION_NUMBER_PATTERN} from '../../../../utils/version-number';
@@ -90,8 +89,6 @@ export type ProductEditBlock = z.infer<typeof productEditBlockSchema>;
  *   - `images` present → the full ordered screenshot list to reconcile (it's
  *     positional, so it's all-or-nothing); absent → screenshots untouched.
  *   - `versions`/`newVersions` are already upsert-only (only changed/new rows).
- *   - `workspaceURL` scopes the access check, so it is part of what the action
- *     validates rather than a separate hand-checked argument.
  */
 export const savePayloadSchema = z
   .object({
@@ -100,7 +97,6 @@ export const savePayloadSchema = z
     images: productSchema.shape.images.optional(),
     versions: z.array(versionRowSchema),
     newVersions: z.array(versionRowSchema),
-    workspaceURL: WorkspaceURLSchema,
   })
   .check(
     z.refine(data => Boolean(data.id || data.product), {

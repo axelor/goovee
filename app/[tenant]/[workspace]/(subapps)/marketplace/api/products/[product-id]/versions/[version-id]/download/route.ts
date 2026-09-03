@@ -8,7 +8,6 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getPartnerId} from '@/utils';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse, after} from 'next/server';
 
 export async function GET(
@@ -23,13 +22,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'product-id': productId, 'version-id': versionId} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {

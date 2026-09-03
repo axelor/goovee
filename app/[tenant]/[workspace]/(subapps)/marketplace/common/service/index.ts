@@ -1,6 +1,6 @@
 import {t} from '@/locale/server';
 import type {Tenant} from '@/tenant';
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import axios from 'axios';
 
 /* Triggers the AOS side to build the SaleOrder + Invoice for a marketplace order and link them onto
@@ -20,7 +20,10 @@ export async function createMarketplaceOrder({
   const res = await axios.post(
     ws,
     {marketplaceOrderId: orderId},
-    {headers: getAOSAuthHeaders(aos.auth)},
+    /* The full AOS headers, not the credentials alone: a tenant sharing an AOS
+     * instance selects itself with X-Tenant-ID, and without it the order would
+     * be built in whichever tenant that instance serves by default. */
+    {headers: getAOSHeaders(aos)},
   );
 
   if (res?.data?.status === -1) {

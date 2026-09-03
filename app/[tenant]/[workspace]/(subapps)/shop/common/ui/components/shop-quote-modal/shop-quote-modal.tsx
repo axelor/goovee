@@ -85,7 +85,7 @@ export function ShopQuoteModal({
   labels: ShopQuoteModalLabels;
   displayPrices?: boolean;
 }) {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
   const {cart, clearCart} = useCart();
   const {toast} = useToast();
   const router = useRouter();
@@ -134,15 +134,15 @@ export function ShopQuoteModal({
     }
     setSubmitting(true);
     try {
-      const res = (await requestQuotation({cart, workspaceURL})) as {
+      const res = (await requestQuotation({cart})) as {
         data?: string;
       };
       if (res?.data) {
         toast({variant: 'success', title: labels.successTitle});
         clearCart();
         const redirectURL = quotationSubapp
-          ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
-          : `${workspaceURI}/${SUBAPP_CODES.shop}`;
+          ? scope.forRouter(`/${SUBAPP_CODES.quotations}/${res.data}`)
+          : scope.forRouter(`/${SUBAPP_CODES.shop}`);
         onOpenChange(false);
         router.replace(redirectURL);
       } else {
@@ -161,9 +161,11 @@ export function ShopQuoteModal({
   /* Leaving for the addresses page closes this modal, so it comes back to the
    * cart and the request is started again from there. `checkout=true` is what
    * puts that page in picking mode and has it write the choice to the cart. */
-  const addressesHref = `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?checkout=true&callbackURL=${encodeURIComponent(
-    `${workspaceURI}/${SUBAPP_CODES.shop}/cart`,
-  )}`;
+  const addressesHref = scope.forRouter(
+    `/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?checkout=true&callbackURL=${encodeURIComponent(
+      scope.forRouter(`/${SUBAPP_CODES.shop}/cart`),
+    )}`,
+  );
 
   const addressesReady = Boolean(
     cart?.invoicingAddress && cart?.deliveryAddress,
@@ -423,7 +425,6 @@ function QuoteAddressPicker({
   addressesHref: string;
 }) {
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
-  const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
@@ -443,12 +444,8 @@ function QuoteAddressPicker({
       if (!cartLoaded) return;
       try {
         const [list, def] = await Promise.all([
-          isInvoicing
-            ? fetchInvoicingAddresses({workspaceURL})
-            : fetchDeliveryAddresses({workspaceURL}),
-          isInvoicing
-            ? findDefaultInvoicing({workspaceURL})
-            : findDefaultDelivery({workspaceURL}),
+          isInvoicing ? fetchInvoicingAddresses() : fetchDeliveryAddresses(),
+          isInvoicing ? findDefaultInvoicing() : findDefaultDelivery(),
         ]);
         if (cancelled) return;
         const all = (list as PartnerAddress[] | null) ?? [];

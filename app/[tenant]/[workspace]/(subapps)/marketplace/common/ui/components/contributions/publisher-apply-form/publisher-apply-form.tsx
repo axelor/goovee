@@ -10,10 +10,8 @@ import {useState, useTransition} from 'react';
 import {requestPublisherAccess} from '../../../../actions';
 
 export function PublisherApplyForm({
-  workspaceURL,
   contributionsHref,
 }: {
-  workspaceURL: string;
   contributionsHref: string;
 }) {
   const router = useRouter();
@@ -27,7 +25,6 @@ export function PublisherApplyForm({
     if (!trimmed) return;
     startTransition(async () => {
       const result = await requestPublisherAccess({
-        workspaceURL,
         publishingPlan: trimmed,
       });
       if (result.error) {

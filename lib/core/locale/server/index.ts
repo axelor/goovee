@@ -4,7 +4,11 @@ import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/proxy';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findTranslations} from '@/locale/api';
-import {translate} from '@/locale/utils';
+import {
+  getLocaleFromAcceptLanguage,
+  inverseTransformLocale,
+  translate,
+} from '@/locale/utils';
 
 export async function getTranslation(
   {
@@ -28,11 +32,19 @@ export async function getTranslation(
   }
 
   if (!locale) {
-    const acceptLanguage = (await headers()).get('Accept-Language')!;
-    const acceptLanguageLocale = acceptLanguage?.split(',')?.[0];
+    /* Read the way the browser reports it and written the way the rest of the
+     * portal names a locale: the header uses a hyphen (`fr-FR`) and carries
+     * quality values, while a locale is keyed with an underscore here and its
+     * language is taken by splitting on one. Left as the header sends it, a
+     * region locale would match no shipped file and find no language to fall
+     * back to, so the page would render untranslated while the browser — which
+     * does convert — asked for and received the full set. */
+    const preferred = getLocaleFromAcceptLanguage(
+      (await headers()).get('Accept-Language'),
+    );
 
-    if (acceptLanguageLocale) {
-      locale = acceptLanguageLocale;
+    if (preferred) {
+      locale = inverseTransformLocale(preferred);
     }
   }
 

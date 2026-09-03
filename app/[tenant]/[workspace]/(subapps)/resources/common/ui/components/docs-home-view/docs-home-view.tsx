@@ -3,6 +3,7 @@ import {MdArrowForward, MdStar} from 'react-icons/md';
 
 import {SUBAPP_CODES} from '@/constants';
 import {formatDateTime} from '@/lib/core/locale/formatters';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {cn} from '@/utils/css';
 
 import {FolderLogoIcon} from '../folder-logo-icon';
@@ -20,11 +21,11 @@ export interface DocsHomeViewLabels {
 
 export function DocsHomeView({
   pinnedFolders,
-  workspaceURI,
+  scope,
   labels,
 }: {
   pinnedFolders: PinnedFolder[];
-  workspaceURI: string;
+  scope: WorkspaceScope;
   labels: DocsHomeViewLabels;
 }) {
   return (
@@ -60,7 +61,7 @@ export function DocsHomeView({
               <PinnedFolderCard
                 key={folder.id}
                 folder={folder}
-                workspaceURI={workspaceURI}
+                scope={scope}
                 labels={labels}
               />
             ))}
@@ -73,11 +74,11 @@ export function DocsHomeView({
 
 function PinnedFolderCard({
   folder,
-  workspaceURI,
+  scope,
   labels,
 }: {
   folder: PinnedFolder;
-  workspaceURI: string;
+  scope: WorkspaceScope;
   labels: DocsHomeViewLabels;
 }) {
   const parentName = folder.parent?.fileName;
@@ -86,7 +87,7 @@ function PinnedFolderCard({
 
   return (
     <Link
-      href={`${workspaceURI}/${SUBAPP_CODES.resources}/folder/${folder.id}`}
+      href={scope.forRouter(`/${SUBAPP_CODES.resources}/folder/${folder.id}`)}
       className={cn(
         'group bg-white border border-ink-100 rounded-2xl p-5 shadow-xs',
         'flex flex-col gap-3.5 transition-all duration-150',

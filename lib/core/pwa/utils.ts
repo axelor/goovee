@@ -1,9 +1,12 @@
 import {createHash} from 'node:crypto';
 import https from 'node:https';
 import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
-import {taintSecret} from '@/lib/core/security/taint';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
+import {getGlobalConfig, getTenantConfig} from '@/tenant/config';
+import type {TenantConfig} from '@/tenant';
+import type {WorkspaceSubPath} from '@/lib/core/url';
+import {tenantURLs} from '@/lib/core/url/scope';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -61,31 +64,11 @@ const TEMPORARY_ERROR_CODES = new Set([
 // web-push destroys a timed-out request with this exact message and no code.
 const SOCKET_TIMEOUT_MESSAGE = 'Socket timeout';
 
-let reportedBadConnectionSetting = false;
-
-/* Reports a value it cannot use, once. Falling back silently is how a deployment
- * ends up believing it set three and running at ten. */
+/* One agent and one set of slots serve the whole process, so the ceiling is the
+ * deployment's and comes from "$global". A value it cannot use is refused when
+ * the document is read, named there, rather than corrected silently here. */
 export function getMaxConnections(): number {
-  const setting = process.env.PUSH_MAX_CONNECTIONS;
-
-  if (!setting) {
-    return DEFAULT_MAX_CONNECTIONS;
-  }
-
-  const configured = Number(setting);
-
-  if (!Number.isInteger(configured) || configured < 1) {
-    if (!reportedBadConnectionSetting) {
-      reportedBadConnectionSetting = true;
-      console.warn(
-        `[PUSH] PUSH_MAX_CONNECTIONS is "${setting}", which is not a whole number of connections — using ${DEFAULT_MAX_CONNECTIONS}`,
-      );
-    }
-
-    return DEFAULT_MAX_CONNECTIONS;
-  }
-
-  return configured;
+  return getGlobalConfig().pushMaxConnections ?? DEFAULT_MAX_CONNECTIONS;
 }
 
 /* One agent and one set of slots for the process, so devices on the same push
@@ -132,40 +115,55 @@ export type VapidDetails = {
   privateKey: string;
 };
 
-let reportedBadVapidConfig = false;
+/* Reported per tenant: one tenant's missing keys must not silence the report for
+ * the others, which is what a single flag would do — the tenant that happens to
+ * send first would be the only one ever named. */
+const reportedBadVapidConfig = new Set<string>();
 
-function reportBadVapidConfig(reason: string): null {
-  if (!reportedBadVapidConfig) {
-    reportedBadVapidConfig = true;
-    console.error(`[PUSH] ${reason} — no notification will reach any device`);
+function reportBadVapidConfig(tenantId: string, reason: string): null {
+  if (!reportedBadVapidConfig.has(tenantId)) {
+    reportedBadVapidConfig.add(tenantId);
+    console.error(
+      `[PUSH] tenant "${tenantId}": ${reason} — no notification will reach its devices`,
+    );
   }
 
   return null;
 }
 
-/* Exported so startup can report a bad configuration once instead of leaving
- * every send to discover it. */
-export function getVapidDetails(): VapidDetails | null {
-  const publicKey = process.env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT;
+/**
+ * The signing identity for a tenant's push messages.
+ *
+ * A browser subscribes against the public key its own tenant published, and a
+ * push service refuses a message signed by any other key pair — so this must come
+ * from the acting tenant's configuration, never from a process-wide value. A
+ * deployment-wide key would leave every subscription refused rather than merely
+ * unsigned.
+ *
+ * Exported so startup can report a bad configuration once per tenant instead of
+ * leaving every send to discover it.
+ */
+export function getVapidDetails(
+  tenantId: string,
+  config: TenantConfig | null,
+): VapidDetails | null {
+  const publicKey = config?.publicEnv?.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = config?.webPush?.privateKey;
+  const subject = config?.webPush?.subject;
 
   if (!publicKey || !privateKey || !subject) {
     return reportBadVapidConfig(
-      'GOOVEE_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT must all be set',
+      tenantId,
+      'publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY, webPush.privateKey and webPush.subject must all be set',
     );
   }
 
   if (!subject.startsWith('mailto:') && !subject.startsWith('https://')) {
     return reportBadVapidConfig(
-      'VAPID_SUBJECT must start with mailto: or https:',
+      tenantId,
+      'webPush.subject must start with mailto: or https:',
     );
   }
-
-  taintSecret(
-    'VAPID private key is a web push secret. Do not pass to Client Components.',
-    privateKey,
-  );
 
   return {subject, publicKey, privateKey};
 }
@@ -385,13 +383,27 @@ async function deliver({
 
 export type NotifyUserArgs = {
   userId: string;
+  /** The tenant the notification is signed and stored for. */
   tenantId: string;
-  workspaceURL?: string;
+  /**
+   * The stored `url` of the workspace the notification belongs to — its
+   * identity, not somewhere to send anyone. The addresses it needs are derived
+   * from it here, so an emitter passes the row it already holds.
+   */
+  workspaceURL: string;
   client: Client;
   payload: Omit<
     NotificationPayload,
-    'tenantId' | 'workspaceURL' | 'notification'
-  >;
+    'tenantId' | 'workspaceURL' | 'notification' | 'url'
+  > & {
+    /**
+     * Where the notification points, as a path below the workspace —
+     * `/forum/post/12`. An emitter names only that: how the workspace itself
+     * is addressed is decided here, once, for the stored row and again for
+     * each reader.
+     */
+    link: WorkspaceSubPath;
+  };
   /**
    * When provided, called with the total unread count for this tag (including
    * the notification being created). Use this to produce grouped titles like
@@ -437,6 +449,19 @@ async function prepare({
 }: NotifyUserArgs): Promise<PreparedDelivery | null> {
   if (!client) return null;
 
+  const {link, ...pushPayload} = payload;
+
+  /* Derived from the stored row rather than handed in, so an emitter passes the
+   * workspace it is acting on and the addresses for it are worked out in one
+   * place — here — for the row that is stored and the message that is sent. */
+  const scope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
+  /* Stored as a route-tree path — `/{tenant}/{workspace}{link}` — the one shape
+   * that survives the tenant getting a new host, a new base path or a move
+   * between path and host routing. Readers render it for the visitor against
+   * the configuration of their moment, not this one. */
+  const storedLink = scope.routePath(link);
+
   let unreadCount = 1; // +1 for the notification we are about to create
   if (getReplacementTitle && payload.tag) {
     try {
@@ -461,10 +486,10 @@ async function prepare({
     dbNotification = await client.pushNotification.create({
       data: {
         partner: {select: {id: userId}},
-        workspace: workspaceURL ? {select: {url: workspaceURL}} : undefined,
+        workspace: {select: {url: workspaceURL}},
         title: payload.title,
         body: payload.body,
-        url: payload.url,
+        url: storedLink,
         isRead: false,
         tag: payload.tag,
       },
@@ -478,7 +503,10 @@ async function prepare({
     console.error('Failed to store notification record:', error);
   }
 
-  const vapidDetails = getVapidDetails();
+  /* Signed with the acting tenant's own key pair. Captured here and carried on
+   * the prepared delivery, so a retry and a shortened resend both sign with the
+   * same tenant's keys as the first attempt. */
+  const vapidDetails = getVapidDetails(tenantId, getTenantConfig(tenantId));
 
   if (!vapidDetails) return null;
 
@@ -500,8 +528,12 @@ async function prepare({
    * worker merges them back into the record it hands open tabs. `title` appears
    * in both because they differ: the top-level one may be a grouped title
    * standing in for several notifications. */
+  /* The push message is read within its own lifetime, so its address is
+   * rendered for the visitor now — the service worker only adds the base path
+   * of the origin it runs on. */
   const payloadJson = serializeWithinLimit({
-    ...payload,
+    ...pushPayload,
+    url: scope.forRouter(link),
     title: pushTitle,
     tenantId,
     workspaceURL,

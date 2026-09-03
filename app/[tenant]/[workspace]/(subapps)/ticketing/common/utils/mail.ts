@@ -5,6 +5,7 @@ import type {Comment} from '@/comments';
 import type {Track} from '@/lib/core/comments';
 import {DEFAULT_LOCALE} from '@/lib/core/locale';
 import {getTranslation} from '@/lib/core/locale/server';
+import {getTenantConfig} from '@/tenant/config';
 import NotificationManager, {NotificationType} from '@/notification';
 import {html} from '@/utils/template-string';
 
@@ -29,7 +30,10 @@ export async function sendCommentMail(props: {
     ticketLink,
     tenant,
   } = props;
-  const mailService = NotificationManager.getService(NotificationType.mail);
+  const mailService = NotificationManager.getService(
+    NotificationType.mail,
+    getTenantConfig(tenant),
+  );
   if (!mailService) {
     console.error('[MAIL] Mail service is not available.');
     return;
@@ -122,7 +126,10 @@ export async function sendTrackMail(props: {
     reciepients,
     tenant,
   } = props;
-  const mailService = NotificationManager.getService(NotificationType.mail);
+  const mailService = NotificationManager.getService(
+    NotificationType.mail,
+    getTenantConfig(tenant),
+  );
   if (!mailService) {
     console.error('[MAIL] Mail service is not available.');
     return;

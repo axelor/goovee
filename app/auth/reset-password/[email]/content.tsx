@@ -8,7 +8,6 @@ import {MdArrowBack} from 'react-icons/md';
 import {useState, use, useRef, useEffect, useMemo} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {SEARCH_PARAMS} from '@/constants';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks';
@@ -24,6 +23,7 @@ import {authClient} from '@/lib/auth-client';
 import {PasswordSchema} from '@/utils/validators';
 
 // ---- LOCAL IMPORTS ---- //
+import {withTenantParam} from '../../common/tenant-param';
 import {
   AuthShell,
   AuthField,
@@ -140,15 +140,19 @@ const STRENGTH_TEXT = [
 
 export default function Page(props: {
   params: Promise<{email: string}>;
+  /* Empty only where the document declares no default tenant. */
+  tenantId: string;
   workspaceName: string | null;
 }) {
-  const {workspaceName} = props;
+  const {tenantId, workspaceName} = props;
   const params = use(props.params);
   const email = decodeURIComponent(params.email);
   const {data: session} = authClient.useSession();
   const searchParams = useSearchParams();
-  const searchQuery = new URLSearchParams(searchParams).toString();
-  const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
+  const searchQuery = useMemo(
+    () => withTenantParam(searchParams, tenantId),
+    [searchParams, tenantId],
+  );
 
   const {toast} = useToast();
   const router = useRouter();
@@ -169,6 +173,11 @@ export default function Page(props: {
   const strength = useMemo(() => passwordStrength(pwd || ''), [pwd]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!tenantId) {
+      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+      return;
+    }
+
     const {password, confirmPassword, otp} = values;
 
     try {
@@ -177,7 +186,7 @@ export default function Page(props: {
         password,
         confirmPassword,
         otp,
-        tenantId: tenantId!,
+        tenantId,
       });
 
       if (!res.error) {
@@ -203,10 +212,15 @@ export default function Page(props: {
 
   const onResend = async () => {
     if (seconds > 0) return;
+    if (!tenantId) {
+      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+      return;
+    }
+
     try {
       const res = await authClient.credentials.resetPassword.request({
         email,
-        tenantId: tenantId!,
+        tenantId,
         searchQuery,
       });
       if (!res.error) {

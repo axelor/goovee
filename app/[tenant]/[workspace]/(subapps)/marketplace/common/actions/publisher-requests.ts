@@ -1,9 +1,7 @@
 'use server';
 
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
-import {headers} from 'next/headers';
 import {z} from 'zod';
 import {PUBLISHER_REQUEST_STATUS} from '../constants/statuses';
 import {canManageProducts} from '../utils/auth-helper';
@@ -15,7 +13,6 @@ import {accessMessage} from '@/lib/core/access/denial';
 import {getPartnerId} from '@/utils';
 
 const requestPublisherAccessSchema = z.object({
-  workspaceURL: z.string().min(1),
   publishingPlan: z.string().trim().min(1).max(2000),
 });
 
@@ -30,21 +27,14 @@ type RequestPublisherAccessInput = z.infer<typeof requestPublisherAccessSchema>;
 export async function requestPublisherAccess(
   input: RequestPublisherAccessInput,
 ): ActionResponse<{status: number}> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = requestPublisherAccessSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, publishingPlan} = parsed.data;
+  const {publishingPlan} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};

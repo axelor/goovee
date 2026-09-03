@@ -4,6 +4,7 @@ import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
+import {Environment, getPublicEnvironment} from '@/environment';
 import {findWorkspaceForRegistration} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
@@ -47,5 +48,16 @@ export default async function Page(props: {
     return notFound();
   }
 
-  return <Form workspace={workspace} />;
+  /* Outside the [tenant] segment: provide the tenant's browser variables (the
+   * host Form reads) here, sourced from the resolved tenant config. */
+  return (
+    <Environment value={getPublicEnvironment(tenant.config)}>
+      <Form
+        workspace={workspace}
+        googleProviderId={
+          tenant.config.oauth?.google ? `google-${tenantId}` : undefined
+        }
+      />
+    </Environment>
+  );
 }

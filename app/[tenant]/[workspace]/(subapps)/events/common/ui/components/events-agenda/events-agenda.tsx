@@ -17,6 +17,7 @@ import {formatDate} from '@/locale/formatters';
 import {Button} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //
 import type {ListEvent} from '@/subapps/events/common/orm/event';
@@ -29,19 +30,12 @@ type QuickRange = {key: string; label: string; from: string; to: string};
 
 export function EventsAgenda({
   initialEvents,
-  workspaceURI,
-  workspaceURL,
   magazineHref,
   searchAction,
 }: {
   initialEvents: ListEvent[];
-  workspaceURI: string;
-  workspaceURL: string;
   magazineHref: string;
-  searchAction: (args: {
-    search: string;
-    workspaceURL: string;
-  }) => Promise<ListEvent[]>;
+  searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ListEvent[]>(initialEvents);
@@ -62,7 +56,7 @@ export function EventsAgenda({
     let active = true;
     setSearching(true);
     const handle = setTimeout(() => {
-      searchAction({search: q, workspaceURL})
+      searchAction({search: q})
         .then(res => {
           if (active) setResults(res);
         })
@@ -77,7 +71,7 @@ export function EventsAgenda({
       active = false;
       clearTimeout(handle);
     };
-  }, [query, searchAction, workspaceURL, initialEvents]);
+  }, [query, searchAction, initialEvents]);
 
   const quickRanges = useMemo<QuickRange[]>(() => buildQuickRanges(), []);
 
@@ -235,7 +229,6 @@ export function EventsAgenda({
                     <AgendaRow
                       key={event.id}
                       event={event}
-                      workspaceURI={workspaceURI}
                       last={i === group.events.length - 1}
                     />
                   ))}
@@ -251,15 +244,8 @@ export function EventsAgenda({
 
 // ---- Building blocks ---- //
 
-function AgendaRow({
-  event,
-  workspaceURI,
-  last,
-}: {
-  event: ListEvent;
-  workspaceURI: string;
-  last: boolean;
-}) {
+function AgendaRow({event, last}: {event: ListEvent; last: boolean}) {
+  const {scope} = useWorkspace();
   const start = new Date(event.eventStartDateTime ?? '');
   const day = start.getDate();
   const monthAbbr = monthAbbrev(start);
@@ -270,7 +256,7 @@ function AgendaRow({
   const dateRange = isMultiDay ? formatEventSchedule(event) : '';
   const time = isMultiDay || event.eventAllDay ? '' : formatHHmm(start);
   const cat = event.eventCategorySet?.[0];
-  const detailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
+  const detailHref = scope.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
 
   return (
     <Link

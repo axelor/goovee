@@ -1,15 +1,13 @@
 import {Suspense} from 'react';
 import type {Cloned} from '@/types/util';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {t} from '@/lib/core/locale/server';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
@@ -31,36 +29,13 @@ export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{type?: string; category?: string; page?: string}>;
 }) {
-  const params = await props.params;
   const searchParams = await props.searchParams;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
@@ -77,8 +52,6 @@ export default async function Page(props: {
           workspace={workspace}
           user={user}
           client={client}
-          workspaceURI={workspaceURI}
-          workspaceURL={workspaceURL}
           type={searchParams?.type === 'past' ? 'past' : 'active'}
           category={searchParams?.category || null}
           page={Number(searchParams?.page) || 1}
@@ -92,8 +65,6 @@ async function Magazine({
   workspace,
   user,
   client,
-  workspaceURI,
-  workspaceURL,
   type,
   category,
   page,
@@ -101,8 +72,6 @@ async function Magazine({
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
-  workspaceURI: string;
-  workspaceURL: string;
   type: 'active' | 'past';
   category: string | null;
   page: number;
@@ -230,8 +199,6 @@ async function Magazine({
       activeCount={activeTotal}
       pastCount={pastTotal}
       categories={categories ?? []}
-      workspaceURI={workspaceURI}
-      workspaceURL={workspaceURL}
       labels={labels}
       searchAction={searchEvents}
     />

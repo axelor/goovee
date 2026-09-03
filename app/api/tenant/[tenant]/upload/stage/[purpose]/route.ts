@@ -30,12 +30,24 @@ export const runtime = 'nodejs';
  * than any external convention.
  */
 
-/** A caller resolved against a tenant, holding an upload of their own. */
+/**
+ * A caller resolved against a tenant, holding an upload of their own.
+ *
+ * The client and the storage root travel together so the two can never be paired
+ * from different tenants: a part written under one tenant's root but recorded in
+ * another's database assembles into a blob neither can read back.
+ */
 interface FileCaller {
+  tenantId: string;
   sessionId: string;
   owner: string;
   client: GooveeClient;
+  storagePath: string;
 }
+
+/* Refused because the caller's session belongs to another tenant, as distinct
+ * from having no session at all. */
+const FORBIDDEN = 'forbidden';
 
 /**
  * Decode the client-supplied filename header, falling back to a default. The
@@ -63,13 +75,25 @@ async function resolveTenantClient(tenantId: string) {
   const session = await getSession();
   if (!session?.user) return null;
 
+  /* `/api/*` is excluded from the proxy, so nothing upstream has compared the
+   * session's tenant with the one in this path — the session belongs to whichever
+   * tenant the caller signed into, not necessarily this one. Refusing the
+   * mismatch in this one place is what keeps every method below covered, rather
+   * than the opening request only. */
+  if (session.user.tenantId !== tenantId) return FORBIDDEN;
+
   const tenant = await manager.getTenant(tenantId).catch(error => {
     console.error(`Stage upload could not resolve tenant ${tenantId}:`, error);
     return null;
   });
   if (!tenant) return null;
 
-  return {owner: session.user.id, client: tenant.client};
+  return {
+    tenantId,
+    owner: session.user.id,
+    client: tenant.client,
+    storagePath: tenant.config.aos.storage,
+  };
 }
 
 /**
@@ -80,12 +104,12 @@ async function resolveTenantClient(tenantId: string) {
 async function resolveFileCaller(
   request: NextRequest,
   tenantId: string,
-): Promise<FileCaller | null> {
+): Promise<FileCaller | typeof FORBIDDEN | null> {
   const fileId = fileIdHeader.safeParse(request.headers.get('x-file-id'));
   if (!fileId.success) return null;
 
   const resolved = await resolveTenantClient(tenantId);
-  if (!resolved) return null;
+  if (!resolved || resolved === FORBIDDEN) return resolved;
 
   return {sessionId: fileId.data, ...resolved};
 }
@@ -116,6 +140,9 @@ export async function POST(
   }
 
   const resolved = await resolveTenantClient(tenantId);
+  if (resolved === FORBIDDEN) {
+    return new NextResponse('Forbidden', {status: 403});
+  }
   if (!resolved) {
     return new NextResponse('Unauthorized', {status: 401});
   }
@@ -162,6 +189,7 @@ export async function PATCH(
   const {tenant: tenantId} = await props.params;
 
   const caller = await resolveFileCaller(request, tenantId);
+  if (caller === FORBIDDEN) return new NextResponse('Forbidden', {status: 403});
   if (!caller) return new NextResponse('Unauthorized', {status: 401});
 
   const offset = byteCountHeader.safeParse(
@@ -189,6 +217,7 @@ export async function HEAD(
   const {tenant: tenantId} = await props.params;
 
   const caller = await resolveFileCaller(request, tenantId);
+  if (caller === FORBIDDEN) return new NextResponse(null, {status: 403});
   if (!caller) return new NextResponse(null, {status: 401});
 
   const state = await findSession(caller);
@@ -216,6 +245,7 @@ export async function DELETE(
   const {tenant: tenantId} = await props.params;
 
   const caller = await resolveFileCaller(request, tenantId);
+  if (caller === FORBIDDEN) return new NextResponse(null, {status: 403});
   if (!caller) return new NextResponse(null, {status: 401});
 
   await releaseSessionQuietly(caller);

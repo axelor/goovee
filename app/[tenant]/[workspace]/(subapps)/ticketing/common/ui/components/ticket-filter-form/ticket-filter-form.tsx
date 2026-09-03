@@ -19,7 +19,7 @@ import {
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
 import {cn} from '@/utils/css';
-import {encodeFilter} from '@/utils/url';
+import {encode} from '@/utils/compressed-param';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {X as RemoveIcon} from 'lucide-react';
 import {useRouter} from 'next/navigation';
@@ -143,7 +143,7 @@ export function TicketFilterForm(props: TicketFilterFormProps) {
     const params = new URLSearchParams(searchParams);
     params.delete('page');
     if (encodedFilter) {
-      params.set('filter', encodeFilter<EncodedTicketFilter>(encodedFilter));
+      params.set('filter', encode<EncodedTicketFilter>(encodedFilter));
     } else {
       params.delete('filter');
     }

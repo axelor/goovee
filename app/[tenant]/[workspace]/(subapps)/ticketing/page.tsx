@@ -1,7 +1,7 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/locale/server';
 import {HeroSearch} from '@/ui/components';
@@ -15,12 +15,10 @@ import {
   PaginationPrevious,
 } from '@/ui/components/pagination';
 import {cn} from '@/utils/css';
-import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {notFound, redirect} from 'next/navigation';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getTicketingConfig} from './common/orm/config';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
@@ -35,36 +33,14 @@ export default async function Page(props: {
   searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const {limit = 8, page = 1} = searchParams;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;
@@ -83,16 +59,14 @@ export default async function Page(props: {
 
   const pages = getPages(projects, limit);
   if (pages == 1 && projects.length === 1) {
-    redirect(`${workspaceURI}/ticketing/projects/${projects[0].id}`);
+    redirect(access.scope.forRouter(`/ticketing/projects/${projects[0].id}`));
   }
   if (!projects.length) {
     <h3>{await t('No projects found')}</h3>;
   }
 
   const imageURL = config.ticketHeroBgImage?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/hero/background`,
-      )
+    ? access.scope.forBrowser(`/${SUBAPP_CODES.ticketing}/api/hero/background`)
     : withBasePath(IMAGE_URL);
 
   return (
@@ -126,7 +100,9 @@ export default async function Page(props: {
           {projects.map(async project => (
             <Link
               key={project.id}
-              href={`${workspaceURI}/ticketing/projects/${project.id}`}>
+              href={access.scope.forRouter(
+                `/ticketing/projects/${project.id}`,
+              )}>
               <div className="bg-card p-6 rounded-lg">
                 <p className="text-[1rem] font-semibold text-ellipsis whitespace-nowrap overflow-hidden">
                   {project.name}
@@ -151,7 +127,7 @@ export default async function Page(props: {
                     className={cn({['invisible']: +page <= 1})}
                     replace
                     href={{
-                      pathname: `${workspaceURI}/ticketing`,
+                      pathname: access.scope.forRouter('/ticketing'),
                       query: {...searchParams, page: +page - 1},
                     }}>
                     <ChevronLeft className="h-4 w-4" />
@@ -177,7 +153,7 @@ export default async function Page(props: {
                         scroll={false}
                         replace
                         href={{
-                          pathname: `${workspaceURI}/ticketing`,
+                          pathname: access.scope.forRouter('/ticketing'),
                           query: {...searchParams, page: value},
                         }}>
                         {value}
@@ -193,7 +169,7 @@ export default async function Page(props: {
                     replace
                     className={cn({['invisible']: +page >= pages})}
                     href={{
-                      pathname: `${workspaceURI}/ticketing`,
+                      pathname: access.scope.forRouter('/ticketing'),
                       query: {...searchParams, page: +page + 1},
                     }}>
                     <span className="sr-only">Next</span>

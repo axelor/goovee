@@ -1,12 +1,11 @@
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {cn} from '@/utils/css';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {CheckCircle2, Download} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound, redirect, unauthorized} from 'next/navigation';
@@ -27,26 +26,15 @@ export default async function CheckoutSuccessPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{orderId?: string}>;
 }) {
-  const [params, rawSearchParams] = await Promise.all([
-    props.params,
-    props.searchParams,
-  ]);
+  const rawSearchParams = await props.searchParams;
 
   const searchParamsResult =
     checkoutSuccessSearchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const {orderId} = searchParamsResult.data;
   if (!orderId) notFound();
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     if (
@@ -55,12 +43,19 @@ export default async function CheckoutSuccessPage(props: {
     ) {
       notFound();
     }
+    /* Not `denyPage`: a visitor who signs in from here is sent on to their
+     * purchases rather than back to a success page whose order is already
+     * recorded. */
     if (!access.user) {
+      const scope = await currentWorkspace();
+
       redirect(
         getLoginURL({
-          callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
-          workspaceURI,
-          tenant: tenantId,
+          callbackurl: scope?.forRouter(
+            `/${SUBAPP_CODES.marketplace}/my-account/purchases`,
+          ),
+          workspaceURI: scope?.forRouter(),
+          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
         }),
       );
     }
@@ -74,7 +69,9 @@ export default async function CheckoutSuccessPage(props: {
     orderId,
   });
 
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
@@ -126,8 +123,8 @@ export default async function CheckoutSuccessPage(props: {
                   {version?.id ? (
                     <Button asChild variant="ink-outline" size="sm">
                       <a
-                        href={withBasePath(
-                          `${marketplaceBase}/api/products/${product.id}/versions/${version.id}/download`,
+                        href={access.scope.forBrowser(
+                          `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
                         )}>
                         <Download size={14} className="mr-1" />
                         {t('Download')}

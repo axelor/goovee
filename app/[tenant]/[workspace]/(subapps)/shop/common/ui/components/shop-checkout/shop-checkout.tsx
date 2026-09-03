@@ -74,7 +74,7 @@ export function ShopCheckout({
   orderSubapp?: Subapp | null;
   labels: ShopCheckoutLabels;
 }) {
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {cart, loaded: cartLoaded} = useCart();
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
@@ -121,9 +121,7 @@ export function ShopCheckout({
 
       try {
         const results = await Promise.all(
-          items.map((i: CartItem) =>
-            findProduct({id: String(i.product), workspaceURL}),
-          ),
+          items.map((i: CartItem) => findProduct({id: String(i.product)})),
         );
         if (!cancelled) {
           const resolved = results.filter((p): p is ComputedProduct =>
@@ -139,7 +137,7 @@ export function ShopCheckout({
     return () => {
       cancelled = true;
     };
-  }, [cart, cartLoaded, workspaceURL]);
+  }, [cart, cartLoaded]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])
@@ -198,7 +196,7 @@ export function ShopCheckout({
       .format(n)
       .concat(' ', currency);
 
-  const cartHref = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
+  const cartHref = scope.forRouter(`/${SUBAPP_CODES.shop}/cart`);
   const confirmOrder = !!config?.confirmOrder;
   // Workspaces configured to hide prices must not surface any amount, even
   // inside the checkout summary (parity with the pre-redesign gate).
@@ -244,7 +242,6 @@ export function ShopCheckout({
               <SectionCard title={labels.addressCardTitle}>
                 <CheckoutAddressPicker
                   type={ADDRESS_TYPE.delivery}
-                  workspaceURI={workspaceURI}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   newActionLabel={labels.addressNewAction}
                   noneTitle={labels.addressNoneTitle}
@@ -255,7 +252,6 @@ export function ShopCheckout({
               <SectionCard title={i18n.t('Billing address')}>
                 <CheckoutAddressPicker
                   type={ADDRESS_TYPE.invoicing}
-                  workspaceURI={workspaceURI}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   newActionLabel={labels.addressNewAction}
                   noneTitle={labels.addressNoneTitle}
@@ -442,21 +438,19 @@ function TotalsRow({label, value}: {label: string; value: string | number}) {
 
 function CheckoutAddressPicker({
   type,
-  workspaceURI,
   defaultBadgeLabel,
   newActionLabel,
   noneTitle,
   loadingLabel,
 }: {
   type: ADDRESS_TYPE;
-  workspaceURI: string;
   defaultBadgeLabel: string;
   newActionLabel: string;
   noneTitle: string;
   loadingLabel: string;
 }) {
+  const {scope} = useWorkspace();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
-  const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
     null,
@@ -472,12 +466,8 @@ function CheckoutAddressPicker({
     (async () => {
       try {
         const [list, def] = await Promise.all([
-          isInvoicing
-            ? fetchInvoicingAddresses({workspaceURL})
-            : fetchDeliveryAddresses({workspaceURL}),
-          isInvoicing
-            ? findDefaultInvoicing({workspaceURL})
-            : findDefaultDelivery({workspaceURL}),
+          isInvoicing ? fetchInvoicingAddresses() : fetchDeliveryAddresses(),
+          isInvoicing ? findDefaultInvoicing() : findDefaultDelivery(),
         ]);
         if (cancelled) return;
         setAddresses((list as PartnerAddress[] | null) ?? []);
@@ -519,9 +509,11 @@ function CheckoutAddressPicker({
 
   // "Change address" opens the standard address-selection page in checkout
   // mode; on confirm it updates the cart and returns here via callbackURL.
-  const changeAddressHref = `${workspaceURI}/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
-    `${workspaceURI}/${SUBAPP_CODES.shop}/cart/checkout`,
-  )}`;
+  const changeAddressHref = scope.forRouter(
+    `/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
+      scope.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`),
+    )}`,
+  );
 
   if (loading) {
     return (

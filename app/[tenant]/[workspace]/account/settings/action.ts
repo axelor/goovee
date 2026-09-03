@@ -1,61 +1,23 @@
 'use server';
 
-import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
-import {z} from 'zod';
-
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
-import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/proxy';
-import {findWorkspace} from '@/orm/workspace';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
 import {SUBAPP_PAGE} from '@/constants';
-import {manager, type Tenant} from '@/tenant';
-import {
-  RemoveWorkspaceSchema,
-  type RemoveWorkspace,
-} from '../common/utils/validators';
 
-export async function removeWorkpace(data: RemoveWorkspace) {
-  const validation = RemoveWorkspaceSchema.safeParse(data);
+export async function removeWorkpace() {
+  const access = await ensureAccess();
 
-  if (!validation.success) {
-    return {
-      error: true,
-      message: z.prettifyError(validation.error),
-    };
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {workspaceURL, workspaceURI} = validation.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return {
-      error: true,
-      message: await t('Unauthorised user.'),
-    };
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
+  const {user, tenant, scope} = access;
   const {client} = tenant;
-
-  const workspace = await findWorkspace({url: workspaceURL, user, client});
-  if (!workspace) {
-    return {error: true, message: await t('Invalid workspace')};
-  }
+  const workspaceURL = access.workspace.url;
 
   const $user: any = await findGooveeUserByEmail(user.email, client);
 
@@ -139,7 +101,7 @@ export async function removeWorkpace(data: RemoveWorkspace) {
         })
         .then(clone);
     }
-    revalidatePath(`${workspaceURI}/${SUBAPP_PAGE.account}`);
+    scope.revalidate(`/${SUBAPP_PAGE.account}`);
     return {
       success: true,
     };

@@ -298,13 +298,23 @@ accounted for; pruning is what finally removes it.
 
 ## Configuration
 
-| Environment variable            | Default       | Controls                                                 |
-| ------------------------------- | ------------- | -------------------------------------------------------- |
-| `UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d)      | How long a terminal (consumed or reaped) record is kept. |
-| `DATA_STORAGE`                  | `cwd/storage` | Blob storage root.                                       |
+Both settings are per tenant, and come from that tenant's entry in the
+configuration document — nothing here is read from the environment.
 
-`UPLOAD_RECORD_RETENTION_HOURS` is read in hours, fractional allowed; unset,
+| Tenant setting               | Default  | Controls                                                 |
+| ---------------------------- | -------- | -------------------------------------------------------- |
+| `uploadRecordRetentionHours` | 168 (7d) | How long a terminal (consumed or reaped) record is kept. |
+| `aos.storage`                | —        | Blob storage root. Required.                             |
+
+`uploadRecordRetentionHours` is read in hours, fractional allowed; unset,
 non-positive or invalid falls back to the default.
+
+`aos.storage` is the AOS instance's `data.upload.dir` base. A tenant on a shared
+AOS (`aosTenantId` set) reads and writes under `<aos.storage>/<aosTenantId>`,
+matching AOP's own per-tenant subdirectory; a dedicated instance uses the path
+as-is. The resolved root is what every path in this module is taken against, and
+it travels with the tenant's database client so the two cannot be paired from
+different tenants.
 
 Everything else is fixed: per-purpose settings live in the registry, and the
 sweep cadences bound only the lag between expiry and deletion.
@@ -316,7 +326,11 @@ sweep cadences bound only the lag between expiry and deletion.
   two appends to one upload from interleaving is an in-process map. Scaling out
   needs shared storage or upload-pinned routing, an advisory lock per sweep, and
   a shared lock per upload.
-- **One storage root for all tenants.**
+- **Containment is lexical.** A recorded path is verified to resolve inside the
+  tenant's storage root, but a symlink inside that root pointing out of it is not
+  followed or detected. (A tenant's root resolving inside another's — the same
+  directory, or a subdirectory of it — is refused when the configuration is
+  read, so that is not a way in.)
 - **A failed delete leaks.** Storage is given up in the record before it is
   removed from disk, so an `unlink` that fails leaves a file no later sweep looks
   for. It is logged; nothing retries it.

@@ -9,6 +9,7 @@ import type {
   UpdateArgs,
 } from '@goovee/orm';
 import {SUBAPP_CODES} from '@/constants';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {NotificationAppCode} from '@/utils/validators';
@@ -34,7 +35,6 @@ export type PreferenceResponse = {
     slug?: string | null;
     fileName?: string | null;
     parent?: {id: string; version: number} | null;
-    route: string;
     config?: {id: string; name: string};
     activateNotification: boolean;
   }>;
@@ -231,24 +231,26 @@ export async function findOrCreatePartnerPreference(params: UpdateParams) {
   return preference;
 }
 
+/* Paths below the workspace: how the workspace itself is addressed is decided
+ * by the consumer, from the workspace's own addresses rather than from anything
+ * spelled here. */
 const routes = {
-  [SUBAPP_CODES.events]: ({url, id}: {url: string; id: string}) =>
-    `${url}/${[SUBAPP_CODES.events]}?category=${id}&page=1`,
-  [SUBAPP_CODES.news]: ({url, slug}: {url: string; slug: string}) =>
-    `${url}/${[SUBAPP_CODES.news]}/${slug}`,
-  [SUBAPP_CODES.resources]: ({url, id}: {url: string; id: string}) =>
-    `${url}/${[SUBAPP_CODES.resources]}/folder/${id}`,
-  [SUBAPP_CODES.forum]: ({url, id}: {url: string; id: string}) =>
-    `${url}/${[SUBAPP_CODES.forum]}/group/${id}`,
+  [SUBAPP_CODES.events]: ({id}: {id: string}): WorkspaceSubPath =>
+    `/${SUBAPP_CODES.events}?category=${id}&page=1`,
+  [SUBAPP_CODES.news]: ({slug}: {slug: string}): WorkspaceSubPath =>
+    `/${SUBAPP_CODES.news}/${slug}`,
+  [SUBAPP_CODES.resources]: ({id}: {id: string}): WorkspaceSubPath =>
+    `/${SUBAPP_CODES.resources}/folder/${id}`,
+  [SUBAPP_CODES.forum]: ({id}: {id: string}): WorkspaceSubPath =>
+    `/${SUBAPP_CODES.forum}/group/${id}`,
   [SUBAPP_CODES.ticketing]: ({
-    url,
     id,
     pid,
   }: {
-    url: string;
     id: string;
     pid: string;
-  }) => `${url}/${[SUBAPP_CODES.ticketing]}/projects/${pid}/tickets/${id}`,
+  }): WorkspaceSubPath =>
+    `/${SUBAPP_CODES.ticketing}/projects/${pid}/tickets/${id}`,
 };
 
 async function findEventsCategories(params: Params) {
@@ -269,7 +271,6 @@ async function findEventsCategories(params: Params) {
         id: c.id,
         version: c.version,
         name: c.name,
-        route: routes[SUBAPP_CODES.events]({url, id: c.id}),
       })),
     )
     .catch(() => []);
@@ -301,7 +302,6 @@ async function findEventsPreferences(
       id: c.id,
       version: c.version,
       name: c.name,
-      route: c.route,
       activateNotification: Boolean(
         getSubscription(c.id)?.activateNotification,
       ),
@@ -332,7 +332,6 @@ async function findNewsCategories(params: Params) {
             version: c.version,
             name: c.name,
             slug: c.slug || '',
-            route: routes[SUBAPP_CODES.news]({url, slug: c.slug || ''}),
           })) || [],
     )
     .catch(() => []);
@@ -366,7 +365,6 @@ async function findNewsPreferences(
       version: c.version,
       name: c.name,
       slug: c.slug,
-      route: c.route,
       activateNotification: Boolean(
         getSubscription(c.id)?.activateNotification,
       ),
@@ -400,7 +398,6 @@ async function findResourcesFolders(params: Params) {
           name: i.fileName || '',
           fileName: i.fileName,
           parent: i.parent,
-          route: routes[SUBAPP_CODES.resources]({url, id: i.id}),
         })) || [],
     )
     .catch(() => []);
@@ -435,7 +432,6 @@ async function findResourcesPreferences(
       name: c.name,
       fileName: c.fileName,
       parent: c.parent,
-      route: c.route,
       activateNotification: Boolean(
         getSubscription(c.id)?.activateNotification,
       ),
@@ -468,7 +464,6 @@ async function findForumGroups(params: Params) {
         id: i.forumGroup?.id || '',
         version: i.forumGroup?.version || 0,
         name: i.forumGroup?.name || '',
-        route: routes[SUBAPP_CODES.forum]({url, id: i.forumGroup?.id || ''}),
       })),
     )
     .catch(() => []);
@@ -501,7 +496,6 @@ async function findForumPreferences(
       id: c.id,
       version: c.version,
       name: c.name,
-      route: c.route,
       activateNotification: Boolean(
         getSubscription(c.id)?.activateNotification,
       ),
@@ -527,14 +521,13 @@ async function findTickets(params: Params) {
           {createdByContact: {id: user.id}},
         ],
       },
-      select: {id: true, fullName: true, name: true, project: {id: true}},
+      select: {id: true, fullName: true, name: true},
     })
     .then(result =>
-      result?.map(({id, version, fullName, name, project}) => ({
+      result?.map(({id, version, fullName, name}) => ({
         id,
         version,
         name: fullName || name,
-        route: routes[SUBAPP_CODES.ticketing]({url, id, pid: project?.id!}),
       })),
     )
     .catch(() => []);
@@ -561,7 +554,6 @@ async function findTicketingPreferences(
       id: t.id,
       version: t.version,
       name: t.name,
-      route: t.route,
       config: {
         id: t.id,
         name: t.name,
@@ -860,17 +852,23 @@ function partnerToUser(partner: Partner, tenantId: string): User {
   };
 }
 
-type Subscriber = {user: User; entity: {id: string; route: string}};
+/* `link` is the record's path below the workspace, and the only address form a
+ * subscriber carries: every consumer combines it with the workspace's own
+ * addresses, so an email and a push notification lead to the same place. */
+type Subscriber = {
+  user: User;
+  entity: {id: string; link: WorkspaceSubPath};
+};
 
 function partnersToSubscribers({
   partners,
   recordId,
-  route,
+  link,
   tenantId,
 }: {
   partners: ReadonlyArray<Partner>;
   recordId: string;
-  route: string;
+  link: WorkspaceSubPath;
   tenantId: string;
 }): Subscriber[] {
   return partners
@@ -878,7 +876,7 @@ function partnersToSubscribers({
       if (!partner.emailAddress?.address) return null;
       return {
         user: partnerToUser(partner, tenantId),
-        entity: {id: recordId, route},
+        entity: {id: recordId, link},
       };
     })
     .filter((r): r is Subscriber => r != null);
@@ -923,8 +921,13 @@ async function findEventCategorySubscribers(params: FindSubscribersParams) {
     select: partnerSelect,
   });
 
-  const route = routes[SUBAPP_CODES.events]({url: workspaceUrl, id: recordId});
-  return partnersToSubscribers({partners, recordId, route, tenantId});
+  const link = routes[SUBAPP_CODES.events]({id: recordId});
+  return partnersToSubscribers({
+    partners,
+    recordId,
+    link,
+    tenantId,
+  });
 }
 
 async function findNewsCategorySubscribers(params: FindSubscribersParams) {
@@ -959,11 +962,13 @@ async function findNewsCategorySubscribers(params: FindSubscribersParams) {
     select: partnerSelect,
   });
 
-  const route = routes[SUBAPP_CODES.news]({
-    url: workspaceUrl,
-    slug: record.slug || '',
+  const link = routes[SUBAPP_CODES.news]({slug: record.slug || ''});
+  return partnersToSubscribers({
+    partners,
+    recordId,
+    link,
+    tenantId,
   });
-  return partnersToSubscribers({partners, recordId, route, tenantId});
 }
 
 async function findResourceFolderSubscribers(params: FindSubscribersParams) {
@@ -997,11 +1002,13 @@ async function findResourceFolderSubscribers(params: FindSubscribersParams) {
     select: partnerSelect,
   });
 
-  const route = routes[SUBAPP_CODES.resources]({
-    url: workspaceUrl,
-    id: recordId,
+  const link = routes[SUBAPP_CODES.resources]({id: recordId});
+  return partnersToSubscribers({
+    partners,
+    recordId,
+    link,
+    tenantId,
   });
-  return partnersToSubscribers({partners, recordId, route, tenantId});
 }
 
 async function findForumGroupSubscribers(params: FindSubscribersParams) {
@@ -1035,8 +1042,13 @@ async function findForumGroupSubscribers(params: FindSubscribersParams) {
     select: partnerSelect,
   });
 
-  const route = routes[SUBAPP_CODES.forum]({url: workspaceUrl, id: recordId});
-  return partnersToSubscribers({partners, recordId, route, tenantId});
+  const link = routes[SUBAPP_CODES.forum]({id: recordId});
+  return partnersToSubscribers({
+    partners,
+    recordId,
+    link,
+    tenantId,
+  });
 }
 
 async function findTicketSubscribers(
@@ -1111,15 +1123,14 @@ async function findTicketSubscribers(
   }
 
   for (const partner of uniqueContacts.values()) {
-    const route = routes[SUBAPP_CODES.ticketing]({
-      url: workspaceUrl,
+    const link = routes[SUBAPP_CODES.ticketing]({
       id: recordId,
       pid: task.project?.id || '',
     });
 
     subscribers.push({
       user: partnerToUser(partner, tenantId),
-      entity: {id: recordId, route},
+      entity: {id: recordId, link},
     });
   }
 

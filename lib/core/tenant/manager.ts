@@ -1,142 +1,86 @@
-'server only';
-
-import {taintSecret} from '@/lib/core/security/taint';
-import {DEFAULT_TENANT} from '@/constants';
 import {createClient} from '@/goovee/.generated/client';
+import {ensureStorageDir} from '@/storage/index';
 import {LRUCache} from './lru';
+import {getTenantConfig} from './config';
 import type {Tenant, TenantConfig} from './types';
-import {getStoragePath} from '@/storage/index';
 
 const CACHE_CAPACITY = 20;
 
-function getAOSAuth() {
-  const apiKey = process.env.AOS_API_KEY;
-  const username = process.env.BASIC_AUTH_USERNAME;
-  const password = process.env.BASIC_AUTH_PASSWORD;
+async function connectTenant(
+  id: Tenant['id'],
+  config: TenantConfig,
+): Promise<Tenant> {
+  const client = createClient({
+    url: config.db.url,
+    features: {
+      normalization: {
+        lowerCase: true,
+        unaccent: true,
+      },
+    },
+  });
 
-  if (!apiKey && (!username || !password)) {
-    throw new Error(
-      'AOS auth not configured: set AOS_API_KEY or BASIC_AUTH_USERNAME/BASIC_AUTH_PASSWORD',
-    );
+  if (!client) {
+    throw new Error('Invalid configuration');
   }
 
-  taintSecret(
-    'AOS API key is a server secret. Do not pass to Client Components.',
-    apiKey,
-  );
-
-  taintSecret(
-    'AOS password is a server secret. Do not pass to Client Components.',
-    password,
-  );
-
-  return {username, password, apiKey};
-}
-
-export enum TenancyType {
-  single = 'single',
-  multi = 'multi',
-}
-
-interface TenantManager {
-  getType(): TenancyType;
-  getTenant(id?: Tenant['id']): Promise<Tenant>;
-  getConfig(id?: Tenant['id']): Promise<Tenant['config']>;
-  getClient(id?: Tenant['id']): Promise<Tenant['client']>;
-}
-
-export class SingleTenantManager implements TenantManager {
-  private tenant: Tenant | undefined = undefined;
-
-  getType() {
-    return TenancyType.single;
-  }
-
-  async getTenant() {
-    if (this.tenant) {
-      return this.tenant;
-    }
-
-    const dbUrl = process.env.DATABASE_URL;
-    const aosUrl = process.env.AOS_URL;
-    const webhookSecret = process.env.NOTIFICATION_WEBHOOK_SECRET;
-    const auth = getAOSAuth();
-
-    const config: Tenant['config'] = {
-      db: {
-        url: dbUrl!,
-      },
-      aos: {
-        url: aosUrl!,
-        storage: getStoragePath(),
-        auth,
-        webhookSecret,
-      },
-    };
-
-    taintSecret(
-      'Database URL is a server secret. Do not pass to Client Components.',
-      dbUrl,
-    );
-
-    taintSecret(
-      'Webhook secret is a server secret. Do not pass to Client Components.',
-      webhookSecret,
-    );
-
-    const client = createClient({
-      url: dbUrl!,
-      features: {
-        normalization: {
-          lowerCase: true,
-          unaccent: true,
-        },
-      },
-    });
-
-    if (!client) {
-      throw new Error('Invalid configuration');
-    }
-
+  try {
     await client.$connect();
     await client.$sync();
     // Create unaccent extension for PostgreSQL if it doesn't exist
     await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
 
-    const tenant = {
-      id: DEFAULT_TENANT,
-      config,
-      client,
-    };
+    /* Storage is per-tenant config; make sure the directory exists before any
+     * upload writes to it. */
+    ensureStorageDir(config.aos.storage);
+  } catch (err) {
+    await client.$disconnect().catch((disconnectError: unknown) => {
+      console.error(
+        `Failed to release tenant "${id}" after a failed connection:`,
+        disconnectError,
+      );
+    });
 
-    this.tenant = tenant;
-
-    return tenant;
+    throw err;
   }
 
-  async getConfig() {
-    return this.getTenant().then(tenant => tenant?.config);
-  }
-
-  async getClient() {
-    return this.getTenant().then(tenant => tenant?.client);
-  }
+  return {id, config, client};
 }
 
-export class MultiTenantManager implements TenantManager {
+/*
+ * One manager for every deployment. It serves the tenants the configuration
+ * document names, so a document with one entry fills one cache slot and never
+ * evicts anything.
+ *
+ * Connections only. Everything here returns a promise because it may open a
+ * Postgres pool, and the cache below then evicts another tenant to make room
+ * for it. Reading the configuration document is the other module's job
+ * (`./config`), which is what the request path imports — code that can reach
+ * this module can open a database, and the proxy must not be able to.
+ */
+export class TenantManager {
   private cache: LRUCache<Tenant['id'], Tenant>;
 
   constructor() {
-    this.cache = new LRUCache<Tenant['id'], Tenant>(CACHE_CAPACITY);
+    /* Evicted tenants must release their Postgres pool, or every eviction
+     * beyond CACHE_CAPACITY leaks connections. */
+    this.cache = new LRUCache<Tenant['id'], Tenant>(CACHE_CAPACITY, {
+      onEvict: tenant => {
+        tenant.client.$disconnect().catch((err: unknown) => {
+          console.error(
+            `Failed to disconnect evicted tenant "${tenant.id}":`,
+            err,
+          );
+        });
+      },
+    });
   }
 
-  getType() {
-    return TenancyType.multi;
-  }
-
-  async getTenant(id: Tenant['id']) {
+  /* Resolves to null for an unknown (or missing) tenant id — callers guard with
+   * `if (!tenant)` and return a 4xx. A genuine connection failure still throws. */
+  async getTenant(id: Tenant['id']): Promise<Tenant | null> {
     if (!id) {
-      throw new Error('Tenant id is required');
+      return null;
     }
 
     const cached = this.cache.get(id);
@@ -145,85 +89,31 @@ export class MultiTenantManager implements TenantManager {
       return cached;
     }
 
-    if (id !== DEFAULT_TENANT) {
-      throw new Error('Error getting tenant');
+    const config = getTenantConfig(id);
+
+    if (!config) {
+      /* Unknown tenant is not an error: callers guard with `if (!tenant)` and
+       * return a 4xx. Throwing here would turn attacker-controllable path
+       * values into 500s. A genuine connection failure below still throws. */
+      return null;
     }
 
     try {
-      const config: TenantConfig = {
-        db: {
-          url: process.env.DATABASE_URL!,
-        },
-        aos: {
-          url: process.env.AOS_URL!,
-          storage: getStoragePath(),
-          auth: getAOSAuth(),
-          webhookSecret: process.env.NOTIFICATION_WEBHOOK_SECRET,
-        },
-      };
-
-      taintSecret(
-        'Database URL is a server secret. Do not pass to Client Components.',
-        config.db.url,
-      );
-
-      taintSecret(
-        'Webhook secret is a server secret. Do not pass to Client Components.',
-        config.aos.webhookSecret,
-      );
-
-      const client = createClient({
-        url: config?.db?.url,
-        features: {
-          normalization: {
-            lowerCase: true,
-            unaccent: true,
-          },
-        },
-      });
-
-      if (!client) {
-        throw new Error('Invalid configuration');
-      }
-
-      await client.$connect();
-      await client.$sync();
-      // Create unaccent extension for PostgreSQL if it doesn't exist
-      await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
-
-      const tenant = {
-        id,
-        config,
-        client,
-      };
+      const tenant = await connectTenant(id, config);
 
       this.cache.put(id, tenant);
 
       return tenant;
     } catch (err) {
-      throw new Error('Error getting tenant');
+      throw new Error(`Error connecting tenant "${id}"`, {cause: err});
     }
   }
-  async getConfig(id: Tenant['id']) {
-    if (!id) {
-      throw new Error('Tenant id is required');
-    }
 
-    return this.getTenant(id).then(tenant => tenant?.config);
-  }
   async getClient(id: Tenant['id']) {
-    if (!id) {
-      throw new Error('Tenant id is required');
-    }
-
     return this.getTenant(id).then(tenant => tenant?.client);
   }
 }
 
-export const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
-
-export const manager: TenantManager = isMultiTenancy
-  ? new MultiTenantManager()
-  : new SingleTenantManager();
+export const manager = new TenantManager();
 
 export default manager;

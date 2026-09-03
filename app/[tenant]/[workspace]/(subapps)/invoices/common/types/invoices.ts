@@ -190,7 +190,7 @@ export type TotalProps = {
   isUnpaid?: boolean;
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoiceType: string;
-  workspaceURI: string;
   token?: string;
   onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
+  allowStripeBankTransfer: boolean;
 };

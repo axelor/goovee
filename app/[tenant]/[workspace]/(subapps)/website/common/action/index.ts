@@ -1,15 +1,12 @@
 'use server';
 
-import {headers} from 'next/headers';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
-import {findSubappAccess} from '@/orm/workspace';
-import {manager} from '@/tenant';
 import type {ActionResponse} from '@/types/action';
 
 // ---- LOCAL IMPORTS ---- //
@@ -37,36 +34,20 @@ export async function getLocaleRedirectionURL(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, workspaceURI, websiteSlug, websitePageSlug} =
-    parsed.data;
-  const session = await getSession();
-  const user = session?.user;
+  const {websiteSlug, websitePageSlug} = parsed.data;
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Bad request'),
-    };
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.website,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client, config} = tenant;
-
-  const subapp = await findSubappAccess({
-    code: SUBAPP_CODES.website,
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!subapp)
-    return {
-      error: true,
-      message: await t('Bad request'),
-    };
+  const {user} = access;
+  const {client, config} = access.tenant;
+  const workspaceURL = access.workspace.url;
+  const workspaceURI = access.scope.forRouter();
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -149,7 +130,7 @@ export async function getLocaleRedirectionURL(
   return {
     success: true,
     data: {
-      url: `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}`,
+      url: baseURL,
     },
   };
 }
@@ -161,36 +142,20 @@ export async function updateWikiContent(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {
-    workspaceURL,
-    websiteSlug,
-    websitePageSlug,
-    contentId,
-    contentVersion,
-    content,
-  } = parsed.data;
-  const session = await getSession();
-  const user = session?.user;
+  const {websiteSlug, websitePageSlug, contentId, contentVersion, content} =
+    parsed.data;
 
-  if (!user) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.website,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Bad request'),
-    };
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
+  const {user} = access;
+  const {client} = access.tenant;
+  const workspaceURL = access.workspace.url;
 
   if (!(await canEditWiki({userId: user.id, client}))) {
     return {
@@ -198,19 +163,6 @@ export async function updateWikiContent(
       message: await t('Unauthorized'),
     };
   }
-
-  const subapp = await findSubappAccess({
-    code: SUBAPP_CODES.website,
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!subapp)
-    return {
-      error: true,
-      message: await t('Bad request'),
-    };
 
   const websitePage = await findWebsitePageBySlug({
     websiteSlug,

@@ -100,7 +100,7 @@ export function GroupControls({
 }) {
   const userId = user?.id as string;
   const isLoggedIn = !!user?.id;
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
@@ -192,8 +192,6 @@ export function GroupControls({
       const response = await exitGroup({
         id: group.id,
         groupID: groupId,
-        workspaceURL,
-        workspaceURI,
       });
       pendingRef.current.delete(groupId);
       if (!response.success) {
@@ -218,8 +216,6 @@ export function GroupControls({
       const response = await joinGroup({
         groupID: groupId,
         userId,
-        workspaceURL,
-        workspaceURI,
       });
       pendingRef.current.delete(groupId);
       if (!response.success) {
@@ -243,7 +239,7 @@ export function GroupControls({
     onMemberCountChange?.(memberList.length);
   }, [memberList.length, onMemberCountChange]);
   const groupHref = (groupId: any) =>
-    `${workspaceURI}/${SUBAPP_CODES.forum}/group/${groupId}`;
+    scope.forRouter(`/${SUBAPP_CODES.forum}/group/${groupId}`);
 
   return (
     <div className="bg-white border border-ink-100 rounded-[14px] p-4">

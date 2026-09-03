@@ -13,7 +13,10 @@ import type {HubPispLocalInstrument} from './constants';
 import {pollPaymentRequestStatus} from './poll';
 import {manager} from '@/tenant';
 
-// Tracks scheduled expiry checks to avoid duplicate timers for the same link.
+/* Tracks scheduled expiry checks to avoid duplicate timers for the same link.
+ * Keyed per tenant, for the reason given on activePolls in poll.ts: sharing a
+ * key across tenants would leave the second one's link with no backstop, so a
+ * missed webhook would strand its context pending until a restart. */
 const scheduledExpiryChecks = new Set<string>();
 
 // Buffer added after the expiry instant so BPCE has flipped the link to EXPIRED.
@@ -47,7 +50,7 @@ export async function reconcilePaymentLinkStatus({
     });
     return;
   }
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const paymentContext = await findPaymentContext({
     id: contextId,
@@ -75,7 +78,7 @@ export async function reconcilePaymentLinkStatus({
 
   let linkStatusResult: Awaited<ReturnType<typeof getPaymentLinkStatus>>;
   try {
-    linkStatusResult = await getPaymentLinkStatus(resourceId);
+    linkStatusResult = await getPaymentLinkStatus(resourceId, config);
   } catch (err) {
     console.error(
       '[HUBPISP][RECONCILE_LINK] Failed to fetch payment link status',
@@ -163,14 +166,16 @@ export function scheduleLinkExpiryCheck({
   localInstrument?: HubPispLocalInstrument;
   delaySeconds: number;
 }): void {
-  if (scheduledExpiryChecks.has(resourceId)) {
+  const checkKey = `${tenantId}:${resourceId}`;
+
+  if (scheduledExpiryChecks.has(checkKey)) {
     return;
   }
   if (delaySeconds <= 0) {
     return;
   }
 
-  scheduledExpiryChecks.add(resourceId);
+  scheduledExpiryChecks.add(checkKey);
 
   console.log('[HUBPISP][EXPIRY_CHECK] Scheduling expiry backstop', {
     resourceId,
@@ -180,7 +185,7 @@ export function scheduleLinkExpiryCheck({
 
   const timer = setTimeout(
     () => {
-      scheduledExpiryChecks.delete(resourceId);
+      scheduledExpiryChecks.delete(checkKey);
       reconcilePaymentLinkStatus({
         resourceId,
         contextId,

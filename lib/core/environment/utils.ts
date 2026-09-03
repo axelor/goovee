@@ -1,12 +1,8 @@
-export function getPublicEnvironment() {
-  const prefix = 'GOOVEE_PUBLIC_';
+import type {PublicEnv, TenantConfig} from '@/tenant';
 
-  const variables = Object.entries(process.env)
-    .filter(([key]) => key.startsWith(prefix))
-    .reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {} as any);
-
-  return variables;
+/* A tenant's browser-exposed variables. There is no deployment-wide fallback:
+ * a context with no tenant (the tenant-less auth pages) has no browser
+ * variables, so callers pass that tenant's config — or null for an empty set. */
+export function getPublicEnvironment(config: TenantConfig | null): PublicEnv {
+  return config?.publicEnv ?? {};
 }

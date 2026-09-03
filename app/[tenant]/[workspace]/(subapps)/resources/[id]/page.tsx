@@ -1,16 +1,13 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import React from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {t} from '@/locale/server';
 import {fetchFile, fetchFiles} from '@/subapps/resources/common/orm/dms';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {NEW_FILE_CUTOFF_MS} from '@/subapps/resources/common/constants';
@@ -36,36 +33,17 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
   const {id} = params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const file = await fetchFile({
     id,
@@ -86,16 +64,14 @@ export default async function Page(props: {
   const Viewer = findFileViewer(file?.metaFile?.fileType || file?.contentType);
 
   const backHref = parentId
-    ? `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${parentId}`
-    : `${workspaceURI}/${SUBAPP_CODES.resources}`;
+    ? access.scope.forRouter(`/${SUBAPP_CODES.resources}/folder/${parentId}`)
+    : access.scope.forRouter(`/${SUBAPP_CODES.resources}`);
 
   // The download route resolves a DMS file by its own id (fetchFile), so the
   // URL must carry the DMS file id — not the metaFile id. We still gate on the
   // metaFile existing, since that is what actually gets streamed.
   const downloadHref = file?.metaFile?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${file.id}`,
-      )
+    ? access.scope.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${file.id}`)
     : null;
 
   const isNew = computeIsNew(file.createdOn, NEW_FILE_CUTOFF_MS);
@@ -103,7 +79,6 @@ export default async function Page(props: {
   return (
     <DocsViewerShell
       file={file}
-      workspaceURI={workspaceURI}
       backHref={backHref}
       downloadHref={downloadHref}
       siblings={siblings ?? []}

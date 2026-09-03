@@ -1,101 +1,56 @@
 export const dynamic = 'force-dynamic';
 
+import {headers} from 'next/headers';
 import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {
-  findWorkspaces,
-  findSubapps,
-  findDefaultPartnerWorkspace,
-} from '@/orm/workspace';
-import {getSession} from '@/auth';
-import {clone, getPartnerId} from '@/utils';
-import {TenancyType, manager} from '@/tenant';
-import {DEFAULT_TENANT} from '@/constants';
-import {getBasePath, withBasePath} from '@/lib/core/path/base-path';
+import {getSessionTenantId} from '@/lib/auth';
+import {getDefaultTenantId, getTenantConfig} from '@/tenant/config';
+
+import {resolveLanding} from './landing';
+
+/**
+ * The tenant `/` leads to.
+ *
+ * The address wins, then the tenant the visitor is signed in to, then the
+ * document's default. Preferring the session over the default is what makes `/`
+ * work for everyone: a session belongs to a single tenant, so sending a visitor
+ * signed in to one tenant to a different one only reaches the screen asking
+ * them to sign out.
+ *
+ * A session naming a tenant the document no longer holds is skipped, so `/`
+ * leads to the default tenant and the visitor is offered a way out there
+ * instead of not-found.
+ */
+async function resolveLandingTenantId(fromAddress: string): Promise<string> {
+  if (fromAddress) return fromAddress;
+
+  const sessionTenantId = await getSessionTenantId(await headers());
+
+  if (sessionTenantId && getTenantConfig(sessionTenantId)) {
+    return sessionTenantId;
+  }
+
+  return getDefaultTenantId() ?? '';
+}
 
 export default async function Page(props: {
   searchParams: Promise<{workspaceURI?: string; tenant?: string}>;
 }) {
   const searchParams = await props.searchParams;
-  const session = await getSession();
-  const user = session?.user;
 
-  let tenantId = decodeURIComponent(searchParams.tenant || '');
+  const tenantId = await resolveLandingTenantId(
+    decodeURIComponent(searchParams.tenant || ''),
+  );
 
-  if (!tenantId && manager.getType() === TenancyType.single) {
-    tenantId = DEFAULT_TENANT;
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-
-  if (!tenant) {
-    return notFound();
-  }
-
-  const {client} = tenant;
-
-  const host = process.env.GOOVEE_PUBLIC_HOST!;
-  const baseUrl = `${host}${getBasePath()}`;
-
-  const workspaces = await findWorkspaces({
-    url: baseUrl,
-    user,
-    client,
+  const destination = await resolveLanding({
+    tenantId,
+    workspaceURI: searchParams.workspaceURI,
   });
 
-  if (!workspaces?.length) {
-    return notFound();
-  }
-
-  const workspaceURI = decodeURIComponent(searchParams.workspaceURI || '');
-
-  if (workspaceURI) {
-    const url = `${host}${withBasePath(workspaceURI)}`;
-
-    const workspaceApps = await findSubapps({
-      user,
-      url,
-      client,
-    }).then(clone);
-
-    if (workspaceApps?.length) {
-      return redirect(`${url}/${workspaceApps[0].code}`);
-    }
-  }
-
-  let redirectURL;
-
-  if (user) {
-    const partnerId = getPartnerId(user);
-
-    const defaultWorkspace = await findDefaultPartnerWorkspace({
-      partnerId,
-      client,
-    });
-
-    if (defaultWorkspace?.workspace?.url) {
-      const url = defaultWorkspace.workspace.url;
-      const apps = await findSubapps({url, user, client});
-      if (apps?.length) {
-        redirectURL = `${url}/${apps[0].code}`;
-      }
-    }
-  }
-
-  if (!redirectURL) {
-    for (const w of workspaces) {
-      const apps = await findSubapps({url: w.url!, user, client});
-      if (apps?.length) {
-        redirectURL = `${w.url}/${apps[0].code}`;
-        break;
-      }
-    }
-  }
-
-  if (!redirectURL) {
+  if (!destination) {
     notFound();
   }
 
-  return redirect(redirectURL);
+  redirect(destination);
 }

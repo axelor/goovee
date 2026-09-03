@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
@@ -9,15 +9,15 @@ import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
 
 // ---- CORE IMPORTS ---- //
 import {i18n, l10n} from '@/locale';
-import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {useEnvironment} from '@/lib/core/environment';
-import {isSameOrigin} from '@/utils/url';
+import {isSameOrigin} from '@/utils/same-origin';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {isVectorImage} from '@/lib/core/image/vector';
+import {withTenantParam} from '../common/tenant-param';
 import {
   AuthShell,
   AuthField,
@@ -27,14 +27,21 @@ import {
 } from '../common/ui/auth-shell';
 
 export default function Content({
+  tenantId,
   canRegister,
   showGoogleOauth = true,
   showKeycloakOauth = true,
+  googleProviderId,
+  keycloakProviderId,
   workspaceName,
 }: {
+  /* Empty only where the document declares no default tenant. */
+  tenantId: string;
   canRegister?: boolean;
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
+  googleProviderId?: string;
+  keycloakProviderId?: string;
   workspaceName: string | null;
 }) {
   const [values, setValues] = useState({
@@ -45,9 +52,12 @@ export default function Content({
   const [submitting, setSubmitting] = useState(false);
   const {toast} = useToast();
   const searchParams = useSearchParams();
-  const searchQuery = new URLSearchParams(searchParams).toString();
-  const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
   const workspaceURI = searchParams.get('workspaceURI');
+
+  const searchQuery = useMemo(
+    () => withTenantParam(searchParams, tenantId),
+    [searchParams, tenantId],
+  );
   const {isPending} = authClient.useSession();
   const env = useEnvironment();
 
@@ -103,35 +113,42 @@ export default function Content({
   };
 
   const loginWithGoogle = async () => {
-    if (!tenantId) {
-      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+    if (!tenantId || !googleProviderId) {
+      toast({
+        title: i18n.t('TenantId is required'),
+        variant: 'destructive',
+      });
       return;
     }
-    await authClient.signIn.social({
-      provider: 'google',
+
+    /* OAuth is per-tenant: sign in through the generic provider registered
+     * under google-<tenantId>. The tenant is not sent along with the request —
+     * the provider signed in through is what tells the callback which tenant it
+     * is acting for. */
+    await authClient.signIn.oauth2({
+      providerId: googleProviderId,
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
       ),
-      additionalData: {
-        tenantId,
-      },
     });
   };
 
   const loginWithKeycloak = async () => {
-    if (!tenantId) {
-      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+    if (!tenantId || !keycloakProviderId) {
+      toast({
+        title: i18n.t('TenantId is required'),
+        variant: 'destructive',
+      });
       return;
     }
     await authClient.signIn.oauth2({
-      providerId: 'keycloak',
+      providerId: keycloakProviderId,
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
       ),
       additionalData: {
-        tenantId,
         workspaceURI,
         locale: l10n.getLocale(),
       },

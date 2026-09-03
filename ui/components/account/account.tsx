@@ -24,7 +24,7 @@ import {
   AvatarFallback,
 } from '@/ui/components';
 import type {ID} from '@/types';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {getInitials} from '@/utils/names';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';

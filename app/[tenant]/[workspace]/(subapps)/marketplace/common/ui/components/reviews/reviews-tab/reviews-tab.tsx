@@ -31,7 +31,6 @@ import {TooltipDate} from '../../shared/tooltip-date';
 
 interface ReviewsTabProps {
   product: SingleProduct;
-  workspaceURL: string;
   tenantId: string;
   client: Client;
   reviewPage: number;
@@ -45,7 +44,6 @@ interface ReviewsTabProps {
 
 export async function ReviewsTab({
   product,
-  workspaceURL,
   tenantId,
   client,
   reviewPage,
@@ -126,7 +124,6 @@ export async function ReviewsTab({
     preview || isPublisherMember ? null : (
       <YourReviewCard
         productId={product.id}
-        workspaceURL={workspaceURL}
         user={user}
         loginHref={loginHref}
         tenantId={tenantId}
@@ -234,10 +231,7 @@ export async function ReviewsTab({
                 {user &&
                   review.moderationStatusSelect !==
                     REVIEW_MODERATION_STATUS.HIDDEN && (
-                    <ReportReviewButton
-                      reviewId={review.id}
-                      workspaceURL={workspaceURL}
-                    />
+                    <ReportReviewButton reviewId={review.id} />
                   )}
               </div>
               {/* A hidden review keeps its rating but not its comment, so it reads

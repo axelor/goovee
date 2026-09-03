@@ -23,6 +23,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run format check
         run: pnpm format:check
+      - name: Check the generated configuration schema
+        run: pnpm config:schema:generate --check
 
   tag:
     needs: format

@@ -14,12 +14,10 @@ import {
 } from '@/ui/components/breadcrumb';
 import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/login-url';
 import {Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {
   MARKETPLACE_VERSION_STATUS_LABELS,
@@ -42,6 +40,7 @@ import {canManageProducts} from '../../common/utils/auth-helper';
 import {hasDirectoryAccess} from '../../common/utils/directory';
 import {PartnerProfileLink} from '../../common/ui/components/shared/partner-profile-link';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 import {getPartnerId} from '@/utils';
 import {
@@ -75,38 +74,17 @@ export default async function ProductPage(props: {
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
+
+  const workspaceURI = access.scope.forRouter();
+  const tenantId = access.tenant.id;
 
   const client = access.tenant.client;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
   if (!config) notFound();
   const partnerId = access.user ? getPartnerId(access.user) : undefined;
@@ -138,7 +116,9 @@ export default async function ProductPage(props: {
 
   if (!product) notFound();
 
-  const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceHref = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
 
   const buildQuery = (
     overrides: Partial<NullableValues<ProductSearchParams>> = {},
@@ -166,7 +146,9 @@ export default async function ProductPage(props: {
       Object.keys(params).length > 0
         ? `?${new URLSearchParams(params).toString()}`
         : '';
-    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}${queryStr}`;
+    return access.scope.forRouter(
+      `/${SUBAPP_CODES.marketplace}/products/${product.slug}${queryStr}`,
+    );
   };
 
   const tabNavLink = (tabValue: ProductTab) => productUrl({tab: tabValue});
@@ -232,8 +214,7 @@ export default async function ProductPage(props: {
           product={product}
           client={client}
           user={access.user}
-          workspaceURL={workspaceURL}
-          workspaceURI={workspaceURI}
+          scope={access.scope}
           tenantId={tenantId}
           preview={preview}
           canDownloadPromise={canDownloadPromise}
@@ -304,12 +285,12 @@ export default async function ProductPage(props: {
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
             {tab === ProductTab.Overview && (
-              <OverviewTab product={product} workspaceURI={workspaceURI} />
+              <OverviewTab product={product} scope={access.scope} />
             )}
             {tab === ProductTab.Versions && (
               <VersionsTab
                 product={product}
-                workspaceURI={workspaceURI}
+                scope={access.scope}
                 client={client}
                 versionPage={versionPage}
                 currentVersionId={product.currentVersion?.id}
@@ -321,7 +302,6 @@ export default async function ProductPage(props: {
             {tab === ProductTab.Reviews && (
               <ReviewsTab
                 product={product}
-                workspaceURL={workspaceURL}
                 tenantId={tenantId}
                 client={client}
                 reviewPage={reviewPage}
@@ -497,7 +477,9 @@ export default async function ProductPage(props: {
                     <PartnerProfileLink
                       client={client}
                       partnerId={product.publisher.id}
-                      href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`}
+                      href={access.scope.forRouter(
+                        `/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`,
+                      )}
                       label={await t('View profile')}
                       className="w-full"
                     />

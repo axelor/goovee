@@ -1,9 +1,10 @@
 import type {Client} from '@/goovee/.generated/client';
 import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
+import {getTenantConfig} from '@/tenant/config';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {getPortalRoot} from '@/utils/workspace';
+import {absoluteRoot} from '@/lib/core/url/absolute';
 
 export function extractSearchParams({
   searchParams,
@@ -19,8 +20,10 @@ export function extractSearchParams({
   const tenantId =
     searchParams?.tenant && decodeURIComponent(searchParams.tenant);
 
-  const workspaceURL = `${getPortalRoot(
-    getPublicEnvironment().GOOVEE_PUBLIC_HOST,
+  const config = tenantId ? getTenantConfig(tenantId) : null;
+
+  const workspaceURL = `${absoluteRoot(
+    getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
   )}${workspaceURI || ''}`;
 
   return {

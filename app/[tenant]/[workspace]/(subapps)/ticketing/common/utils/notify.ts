@@ -5,6 +5,8 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {DEFAULT_LOCALE} from '@/lib/core/locale';
 import {getTranslation} from '@/lib/core/locale/server';
+import type {WorkspaceSubPath} from '@/lib/core/url';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {notifyAll} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import type {ID} from '@/types';
@@ -26,8 +28,8 @@ export async function notifyTicketChange({
   contacts,
   user,
   workspaceUserId,
-  workspaceURL,
   tenantId,
+  workspaceURL,
   client,
 }: {
   type: 'create' | 'update';
@@ -40,11 +42,12 @@ export async function notifyTicketChange({
   contacts: Array<{id: string; localization: {code: string | null} | null}>;
   user: UserCtx;
   workspaceUserId?: ID;
-  workspaceURL: string;
   tenantId: string;
+  /** The workspace's stored `url` — its identity; the addresses come from it. */
+  workspaceURL: string;
   client: Client;
 }): Promise<void> {
-  const ticketLink = `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+  const ticketSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
 
   try {
     if (workspaceUserId) {
@@ -82,8 +85,8 @@ export async function notifyTicketChange({
     return {
       userId: contact.id,
       tenantId,
-      client,
       workspaceURL,
+      client,
       payload: {
         title:
           type === 'create'
@@ -101,7 +104,7 @@ export async function notifyTicketChange({
                 user.simpleFullName ?? '',
                 ticket.name,
               ),
-        url: ticketLink,
+        link: ticketSubPath,
         tag: NotificationTag.ticketUpdate(ticket.id),
       },
     };
@@ -109,6 +112,13 @@ export async function notifyTicketChange({
 
   const sendTracking = async () => {
     try {
+      /* `workspaceByKey` raises on a stored workspace whose last path segment
+       * cannot name a workspace. The mail is the only part of this function
+       * that needs an absolute address, so such a row costs the mail alone. */
+      const ticketLink = tenantURLs(tenantId)
+        .workspaceByKey(workspaceURL)
+        .forExternal(ticketSubPath);
+
       const reciepients = await getMailRecipients({
         contacts,
         client,

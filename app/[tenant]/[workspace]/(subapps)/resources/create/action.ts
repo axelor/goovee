@@ -1,17 +1,13 @@
 'use server';
 
 import path from 'path';
-import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
-import {toWorkspaceURI} from '@/utils/workspace';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
-import {TENANT_HEADER} from '@/proxy';
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import type {ID} from '@/types';
@@ -79,21 +75,10 @@ export async function upload(input: UploadInput) {
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL, parent: parentId, values} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('Invalid Tenant'),
-    };
-  }
+  const {parent: parentId, values} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -101,6 +86,7 @@ export async function upload(input: UploadInput) {
   }
   const {user} = access;
   const {client} = access.tenant;
+  const workspaceURL = access.workspace.url;
 
   const parent = await fetchFile({
     id: parentId,
@@ -172,9 +158,7 @@ export async function upload(input: UploadInput) {
       });
     });
 
-    revalidatePath(
-      `${toWorkspaceURI(workspaceURL, process.env.GOOVEE_PUBLIC_HOST)}/${SUBAPP_CODES.resources}/folder/${parentId}`,
-    );
+    access.scope.revalidate(`/${SUBAPP_CODES.resources}/folder/${parentId}`);
   } catch (err) {
     return {
       error: true,

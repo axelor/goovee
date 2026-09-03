@@ -26,7 +26,6 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {formatRelativeTime} from '@/locale/formatters';
 import {getPartnerImageURL, getFileSizeText} from '@/utils/files';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {ProgressFill, RichTextViewer} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -459,7 +458,7 @@ export function ForumDetail({
   isAuthor?: boolean;
   backHref: string;
 }) {
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   // Voting only needs membership; writing comments also needs the workspace's
   // comment feature to be enabled (mirrors server enforcement in createComment).
   const canWriteComment = canComment && commentsEnabled;
@@ -490,15 +489,15 @@ export function ForumDetail({
   const group = post.forumGroup?.name;
   const groupId = post.forumGroup?.id;
   const groupHref = groupId
-    ? `${workspaceURI}/${SUBAPP_CODES.forum}/group/${groupId}`
+    ? scope.forRouter(`/${SUBAPP_CODES.forum}/group/${groupId}`)
     : backHref;
   const date = post.postDateT || post.createdOn;
   const replyTotal = totalMainThread || replyCount;
 
   // Download URL for a comment attachment (streamed via the forum route).
   const commentAttUrl = (fileId: string) =>
-    withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}/${fileId}`,
+    scope.forBrowser(
+      `/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}/${fileId}`,
     );
 
   // ---- Reactions (up/down votes) ----
@@ -515,7 +514,7 @@ export function ForumDetail({
   useEffect(() => {
     let active = true;
     const commentIds = commentKey ? commentKey.split(',') : [];
-    reactionSummary({workspaceURL, postIds: [post.id], commentIds})
+    reactionSummary({postIds: [post.id], commentIds})
       .then(res => {
         if (!active) return;
         const summaries = res as ReactionSummaries;
@@ -538,7 +537,7 @@ export function ForumDetail({
     // `comments` is intentionally tracked via `commentKey` (its id list) to
     // avoid refetching/reordering on unrelated re-renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.id, commentKey, workspaceURL]);
+  }, [post.id, commentKey]);
 
   const postSummary = reactions.post[String(post.id)] ?? EMPTY_SUMMARY;
 
@@ -552,7 +551,7 @@ export function ForumDetail({
       if (votingRef.current.has(key)) return;
       votingRef.current.add(key);
       try {
-        const res = await toggleReaction({workspaceURL, target, id, value});
+        const res = await toggleReaction({target, id, value});
         if ('summary' in res && res.summary) {
           setReactions(prev => ({
             ...prev,
@@ -566,7 +565,7 @@ export function ForumDetail({
         votingRef.current.delete(key);
       }
     },
-    [workspaceURL],
+    [],
   );
 
   // ---- Best answer / resolved status ----
@@ -579,7 +578,6 @@ export function ForumDetail({
   const markBest = useCallback(
     async (commentId: string) => {
       const res = await setBestReply({
-        workspaceURL,
         postId: String(post.id),
         commentId,
       });
@@ -587,19 +585,18 @@ export function ForumDetail({
         setBestReplyId(res.bestReplyId ? String(res.bestReplyId) : null);
       }
     },
-    [workspaceURL, post.id],
+    [post.id],
   );
 
   const toggleResolved = useCallback(async () => {
     const res = await setPostStatus({
-      workspaceURL,
       postId: String(post.id),
       resolved: status !== 'resolved',
     });
     if ('success' in res && res.success) {
       setStatus(res.status);
     }
-  }, [workspaceURL, post.id, status]);
+  }, [post.id, status]);
 
   const postVotes = postSummary.score;
 
@@ -796,8 +793,8 @@ export function ForumDetail({
               post.attachmentList.length > 0 &&
               (() => {
                 const attUrl = (fileId: string) =>
-                  withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
+                  scope.forBrowser(
+                    `/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
                   );
                 // Skip attachments whose metaFile is missing (deleted/orphaned
                 // file) — dereferencing a.metaFile.id below would otherwise
