@@ -6,7 +6,7 @@ import Image from 'next/image';
 import {useRouter, usePathname, useSearchParams} from 'next/navigation';
 import {MdExpandMore} from 'react-icons/md';
 import {useSignOut} from '@/ui/hooks';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 
 // ---- CORE IMPORTS ---- //
 import {

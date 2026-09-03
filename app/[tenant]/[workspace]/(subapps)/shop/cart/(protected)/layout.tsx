@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {currentWorkspace} from '@/lib/core/url/current';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {SEARCH_PARAMS} from '@/constants';
 
 export default async function Layout(props: {

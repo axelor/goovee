@@ -11,7 +11,7 @@ import {canRegisterForWorkspace} from '@/orm/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 import {manager} from '@/tenant';
 import {getTenantConfig, listTenantIds} from '@/tenant/config';
-import {isSameOrigin} from '@/utils/url';
+import {isSameOrigin} from '@/utils/same-origin';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import {resolveAuthTenantId} from '../common/tenant';

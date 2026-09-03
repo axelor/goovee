@@ -34,7 +34,7 @@ import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons} from '@/utils/pagination';
-import {decodeFilter} from '@/utils/url';
+import {decode} from '@/utils/compressed-param';
 import type {ID} from '@/types';
 import {Link} from '@/ui/components/link';
 
@@ -104,7 +104,7 @@ export default async function Page(props: {
     projectId,
     take: +limit,
     skip: getSkip(limit, page),
-    where: getWhere(decodeFilter(filter), user.id),
+    where: getWhere(decode(filter), user.id),
     orderBy: getOrderBy(sort, sortKeyPathMap),
     client,
     user,

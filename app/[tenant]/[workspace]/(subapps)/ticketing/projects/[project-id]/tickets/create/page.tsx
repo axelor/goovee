@@ -8,7 +8,7 @@ import {denyPage} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../../../../common/orm/config';
 import {t} from '@/locale/server';
 import {clone} from '@/utils';
-import {encodeFilter} from '@/utils/url';
+import {encode} from '@/utils/compressed-param';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -86,7 +86,7 @@ export default async function Page(props: {
     `/ticketing/projects/${projectId}/tickets`,
   );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   return (
     <div className="bg-ink-25 min-h-full">

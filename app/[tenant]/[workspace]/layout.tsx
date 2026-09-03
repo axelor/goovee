@@ -8,7 +8,7 @@ import {currentWorkspace} from '@/lib/core/url/current';
 import {findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {tenantURLs} from '@/lib/core/url/scope';
 import {absoluteRoot} from '@/lib/core/url/absolute';

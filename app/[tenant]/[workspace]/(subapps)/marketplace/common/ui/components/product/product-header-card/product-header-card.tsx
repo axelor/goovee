@@ -7,7 +7,7 @@ import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
 import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {cn} from '@/utils/css';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {Download, FileText, Heart} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {Suspense} from 'react';

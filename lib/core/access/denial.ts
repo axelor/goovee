@@ -5,7 +5,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {SEARCH_PARAMS} from '@/constants';
 import {currentWorkspace, getCurrentPath} from '@/lib/core/url/current';
 import {t} from '@/locale/server';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import type {AccessReason} from './ensure-access';
 
 /**

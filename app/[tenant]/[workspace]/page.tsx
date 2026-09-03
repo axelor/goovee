@@ -4,7 +4,7 @@ import {notFound, redirect} from 'next/navigation';
 import {findSubapps} from '@/orm/workspace';
 import {currentWorkspace} from '@/lib/core/url/current';
 import {SEARCH_PARAMS} from '@/constants';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';

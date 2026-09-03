@@ -24,7 +24,7 @@ import {useToast} from '@/ui/hooks';
 import {useEnvironment} from '@/lib/core/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {toWorkspaceURI} from '@/lib/core/url/absolute';
-import {isSameOrigin} from '@/utils/url';
+import {isSameOrigin} from '@/utils/same-origin';
 
 // ---- LOCAL IMPORTS ----//
 

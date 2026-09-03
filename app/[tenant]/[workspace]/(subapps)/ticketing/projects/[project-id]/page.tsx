@@ -28,7 +28,7 @@ import {
 } from '@/ui/components';
 import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
-import {encodeFilter} from '@/utils/url';
+import {encode} from '@/utils/compressed-param';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -103,7 +103,7 @@ export default async function Page(props0: {
   );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
   const statusCompleted = statuses.filter(s => s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   const items = [
     config.isShowAllTickets && {
@@ -116,7 +116,7 @@ export default async function Page(props0: {
     config.isShowMyTickets && {
       label: await t(MY_TICKETS_TITLE),
       count: getMyTicketCount({projectId, client, user, subapp}),
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, myTickets: true})}&title=${encodeURIComponent(MY_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status, myTickets: true})}&title=${encodeURIComponent(MY_TICKETS_TITLE)}`,
       icon: MdPersonOutline,
       iconClassName: 'bg-royal-pale text-royal',
     },
@@ -124,21 +124,21 @@ export default async function Page(props0: {
       label: await t(MANAGED_TICKETS_TITLE),
       count: getManagedTicketCount({projectId, client, user, subapp}),
       icon: MdListAlt,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, managedBy: [user.id.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status, managedBy: [user.id.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
       iconClassName: 'bg-status-feedback-bg text-status-feedback-fg',
     },
     config.isShowCreatedTicket && {
       label: await t(CREATED_TICKETS_TITLE),
       count: getCreatedTicketCount({projectId, client, user, subapp}),
       icon: MdAdd,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, createdBy: [user.id.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status, createdBy: [user.id.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
       iconClassName: 'bg-status-pending-bg text-status-pending-fg',
     },
     config.isShowResolvedTicket && {
       label: await t(RESOLVED_TICKETS_TITLE),
       count: getResolvedTicketCount({projectId, client, user, subapp}),
       icon: MdCheckCircleOutline,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status: statusCompleted})}&title=${encodeURIComponent(RESOLVED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status: statusCompleted})}&title=${encodeURIComponent(RESOLVED_TICKETS_TITLE)}`,
       iconClassName: 'bg-status-delivered-bg text-status-delivered-fg',
     },
   ]

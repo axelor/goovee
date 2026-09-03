@@ -22,7 +22,7 @@ import {
 import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
-import {encodeFilter} from '@/utils/url';
+import {encode} from '@/utils/compressed-param';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -125,7 +125,7 @@ export default async function Page(props: {
     `/ticketing/projects/${projectId}/tickets`,
   );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   // Opening request = the client-authored first message of the conversation.
   const requesterName =

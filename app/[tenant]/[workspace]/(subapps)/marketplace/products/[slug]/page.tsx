@@ -14,7 +14,7 @@ import {
 } from '@/ui/components/breadcrumb';
 import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';

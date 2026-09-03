@@ -7,7 +7,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {currentWorkspace} from '@/lib/core/url/current';
 import {accessMessage} from '@/lib/core/access/denial';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 import {z} from 'zod';

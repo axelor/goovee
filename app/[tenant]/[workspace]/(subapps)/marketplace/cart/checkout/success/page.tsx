@@ -3,7 +3,7 @@ import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {getPartnerId} from '@/utils';
 import {currentWorkspace} from '@/lib/core/url/current';
 import {CheckCircle2, Download} from 'lucide-react';

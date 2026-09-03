@@ -1,5 +1,5 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import {encodeFilter as encode} from '@/utils/url';
+import {encode} from '@/utils/compressed-param';
 import {tenantURLs} from '@/lib/core/url/scope';
 import {formatAmountForPaybox, hasKeys, join} from './utils';
 import {createHMAC} from './crypto';

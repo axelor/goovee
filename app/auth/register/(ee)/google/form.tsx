@@ -11,7 +11,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {UserType} from '@/auth/types';
 import {i18n, l10n} from '@/locale';
 import {useEnvironment} from '@/lib/core/environment';
-import {isSameOrigin} from '@/utils/url';
+import {isSameOrigin} from '@/utils/same-origin';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {useToast} from '@/ui/hooks';
 import {

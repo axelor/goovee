@@ -14,7 +14,7 @@ import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {useEnvironment} from '@/lib/core/environment';
-import {isSameOrigin} from '@/utils/url';
+import {isSameOrigin} from '@/utils/same-origin';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {isVectorImage} from '@/lib/core/image/vector';
 import {withTenantParam} from '../common/tenant-param';
