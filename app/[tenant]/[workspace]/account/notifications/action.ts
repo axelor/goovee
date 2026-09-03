@@ -34,7 +34,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
 
   const {user, tenant, url} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = access.workspace.url;
 
   try {
     const result = await updatePreferences({

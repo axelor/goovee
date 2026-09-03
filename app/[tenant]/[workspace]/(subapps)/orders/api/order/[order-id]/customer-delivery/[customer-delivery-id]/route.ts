@@ -37,7 +37,7 @@ export async function GET(
   }
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const orderWhereClause = getWhereClauseForEntity({
     user: access.user,

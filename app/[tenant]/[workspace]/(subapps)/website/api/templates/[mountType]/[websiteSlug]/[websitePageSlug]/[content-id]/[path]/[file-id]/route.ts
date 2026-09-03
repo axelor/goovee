@@ -66,7 +66,7 @@ export async function GET(
   const {client} = access.tenant;
   const config = access.tenant.config;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   let attrs;
   if (mountType === MOUNT_TYPE.PAGE) {

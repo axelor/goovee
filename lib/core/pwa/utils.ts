@@ -6,7 +6,7 @@ import type {Client} from '@/goovee/.generated/client';
 import {getGlobalConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import {tenantURLs} from '@/lib/core/url/scope';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -383,15 +383,14 @@ async function deliver({
 
 export type NotifyUserArgs = {
   userId: string;
+  /** The tenant the notification is signed and stored for. */
+  tenantId: string;
   /**
-   * The workspace the notification belongs to, which also names the tenant it
-   * is signed and stored for.
-   *
-   * An action holds one from `ensureAccess`; a caller with no request — the
-   * notification webhook, a script — builds the same object with
-   * `tenantURLs(id).workspace(slug)`.
+   * The stored `url` of the workspace the notification belongs to — its
+   * identity, not somewhere to send anyone. The addresses it needs are derived
+   * from it here, so an emitter passes the row it already holds.
    */
-  url: ServerWorkspaceURLs;
+  workspaceURL: string;
   client: Client;
   payload: Omit<
     NotificationPayload,
@@ -442,23 +441,26 @@ function emptyReport(): PushDeliveryReport {
  * when there is nothing to deliver — the record is still stored. */
 async function prepare({
   userId,
-  url,
+  tenantId,
+  workspaceURL,
   client,
   payload,
   getReplacementTitle,
 }: NotifyUserArgs): Promise<PreparedDelivery | null> {
   if (!client) return null;
 
-  const {tenantId} = url;
-  const workspaceURL = url.key();
-
   const {link, ...pushPayload} = payload;
+
+  /* Derived from the stored row rather than handed in, so an emitter passes the
+   * workspace it is acting on and the addresses for it are worked out in one
+   * place — here — for the row that is stored and the message that is sent. */
+  const scope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
 
   /* Stored as a route-tree path — `/{tenant}/{workspace}{link}` — the one shape
    * that survives the tenant getting a new host, a new base path or a move
    * between path and host routing. Readers render it for the visitor against
    * the configuration of their moment, not this one. */
-  const storedLink = url.routePath(link);
+  const storedLink = scope.routePath(link);
 
   let unreadCount = 1; // +1 for the notification we are about to create
   if (getReplacementTitle && payload.tag) {
@@ -531,7 +533,7 @@ async function prepare({
    * of the origin it runs on. */
   const payloadJson = serializeWithinLimit({
     ...pushPayload,
-    url: url.forRouter(link),
+    url: scope.forRouter(link),
     title: pushTitle,
     tenantId,
     workspaceURL,

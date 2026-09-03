@@ -37,7 +37,7 @@ export async function create(formData: FormData) {
 
   const {user} = access;
   const {client} = access.tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const parent = await fetchFile({
     id: parentId,

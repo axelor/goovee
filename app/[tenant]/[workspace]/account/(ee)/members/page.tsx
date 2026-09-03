@@ -17,9 +17,9 @@ export default async function Page() {
     return notFound();
   }
 
-  const {user, tenant, workspace, url} = access;
+  const {user, tenant, workspace} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = workspace.url;
 
   const isAdmin =
     Boolean(await isPartner()) ||

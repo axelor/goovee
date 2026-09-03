@@ -410,6 +410,8 @@ export async function createStripeCheckoutSession({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.stripe);
 
   try {
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
     const session = await createStripeOrder({
       tenantId,
       client,
@@ -424,8 +426,12 @@ export async function createStripeCheckoutSession({
       amount: Number($amount),
       currency: currencyCode,
       url: {
-        success: `${workspaceURL}/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_session_id={CHECKOUT_SESSION_ID}&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
-        error: `${workspaceURL}/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_error=true${token ? `&token=${token}` : ''}`,
+        success: workspaceScope.forExternal(
+          `/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_session_id={CHECKOUT_SESSION_ID}&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
+        ),
+        error: workspaceScope.forExternal(
+          `/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_error=true${token ? `&token=${token}` : ''}`,
+        ),
       },
     });
 

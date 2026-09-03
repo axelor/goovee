@@ -49,7 +49,7 @@ export default async function Page(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   let locale = user?.locale;
 

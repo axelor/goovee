@@ -81,7 +81,7 @@ export const createComment: CreateComment = async props => {
     id: commentProps.recordId,
     client,
     params: {where: quotationWhereClause},
-    workspaceURL: access.url.key(),
+    workspaceURL: access.workspace.url,
   });
   if (!quotation) {
     return {error: true, message: await t('Record not found')};
@@ -108,12 +108,13 @@ export const createComment: CreateComment = async props => {
       const quotationLink: WorkspaceSubPath = `/${SUBAPP_CODES.quotations}/${commentProps.recordId}#comment-${comment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
-        tenant: access.url.tenantId,
+        tenant: access.tenant.id,
       });
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          url: access.url,
+          tenantId: access.tenant.id,
+          workspaceURL: access.workspace.url,
           client,
           payload: {
             title: await tr(
@@ -192,7 +193,7 @@ export const fetchComments: FetchComments = async props => {
     id: commentQuery.recordId,
     client,
     params: {where: quotationWhereClause},
-    workspaceURL: access.url.key(),
+    workspaceURL: access.workspace.url,
   });
   if (!quotation) {
     return {error: true, message: await t('Record not found')};

@@ -79,7 +79,7 @@ export async function updateInviteApplication(input: UpdateInviteApplication) {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const canUpdateInvite = await canUpdate({workspaceURL, client});
 
@@ -181,7 +181,7 @@ export async function updateInviteAuthentication(
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const canUpdateInvite = await canUpdate({workspaceURL, client});
 
@@ -271,7 +271,7 @@ export async function deleteMember(input: DeleteMember) {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const canUpdateInvite = await canUpdate({workspaceURL, client});
 
@@ -339,7 +339,7 @@ export async function updateMemberApplication(input: UpdateMemberApplication) {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const canUpdateInvite = await canUpdate({workspaceURL, client});
 
@@ -453,7 +453,7 @@ export async function updateMemberAuthentication(
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const canUpdateInvite = await canUpdate({workspaceURL, client});
 

@@ -116,7 +116,7 @@ export async function resolveInvoicePaymentAccess({
       config,
       user: access.user,
       invoiceFilter: {params: {where: invoicesWhereClause}},
-      workspaceURL: access.url.key(),
+      workspaceURL: access.workspace.url,
     },
   };
 }

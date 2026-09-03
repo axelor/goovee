@@ -54,7 +54,7 @@ async function Checkout({
   const {user} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) return notFound();

@@ -40,7 +40,7 @@ export async function GET(
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) {

@@ -51,7 +51,7 @@ async function Order({
 
   const {user} = access;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
   const {client} = access.tenant;
 
   const {role, isContactAdmin} = access.subapp;

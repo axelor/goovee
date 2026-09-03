@@ -37,7 +37,7 @@ export async function searchDocuments({
 
   const {user} = access;
   const {client} = access.tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const files = await searchFiles({
     search: q,

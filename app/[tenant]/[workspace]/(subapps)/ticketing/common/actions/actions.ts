@@ -183,7 +183,8 @@ export async function mutate(
           contacts,
           user,
           workspaceUserId: access.workspace.workspaceUser?.id,
-          url: access.url,
+          tenantId: access.tenant.id,
+          workspaceURL: access.workspace.url,
           client,
         }),
       );
@@ -242,7 +243,8 @@ export async function mutate(
           contacts,
           user: access.user,
           workspaceUserId: access.workspace.workspaceUser?.id,
-          url: access.url,
+          tenantId: access.tenant.id,
+          workspaceURL: access.workspace.url,
           client,
         }),
       );
@@ -333,7 +335,8 @@ export async function updateAssignment(
         contacts,
         user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
-        url: access.url,
+        tenantId: access.tenant.id,
+        workspaceURL: access.workspace.url,
         client,
       }),
     );
@@ -423,7 +426,8 @@ export async function closeTicket(
         contacts,
         user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
-        url: access.url,
+        tenantId: access.tenant.id,
+        workspaceURL: access.workspace.url,
         client,
       }),
     );
@@ -509,7 +513,8 @@ export async function cancelTicket(
         contacts,
         user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
-        url: access.url,
+        tenantId: access.tenant.id,
+        workspaceURL: access.workspace.url,
         client,
       }),
     );
@@ -856,8 +861,8 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
+  const tenantId = access.tenant.id;
+  const workspaceURL = access.workspace.url;
   const {user, subapp} = access;
   const {client} = access.tenant;
   const workspaceConfig = await getTicketingConfig(
@@ -950,7 +955,8 @@ export const createComment: CreateComment = async props => {
         after(async () => {
           await notifyUser({
             userId: partner.id,
-            url: access.url,
+            tenantId: access.tenant.id,
+            workspaceURL: access.workspace.url,
             client,
             payload: {
               title: await tr(
@@ -981,7 +987,8 @@ export const createComment: CreateComment = async props => {
 
           return {
             userId: contact.id,
-            url: access.url,
+            tenantId: access.tenant.id,
+            workspaceURL: access.workspace.url,
             client,
             payload: {
               title: await tr(
@@ -1015,7 +1022,9 @@ export const createComment: CreateComment = async props => {
           await sendCommentMail({
             comment,
             parentComment,
-            ticketLink: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
+            ticketLink: access.url.forExternal(
+              `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
+            ),
             projectName: ticket.project?.name || '',
             ticketName: ticket.name,
             reciepients,

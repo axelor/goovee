@@ -17,7 +17,7 @@ export async function removeWorkpace() {
 
   const {user, tenant, url} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = access.workspace.url;
 
   const $user: any = await findGooveeUserByEmail(user.email, client);
 

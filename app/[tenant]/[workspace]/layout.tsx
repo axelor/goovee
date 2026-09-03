@@ -78,7 +78,7 @@ export default async function Layout(props: {
   const {client} = tenant;
   const $workspace = clone(granted.workspace);
 
-  const tenantId = url.tenantId;
+  const tenantId = tenant.id;
   const workspaceURI = url.forRouter();
 
   const config = await getShellConfig($workspace.config.id, client);

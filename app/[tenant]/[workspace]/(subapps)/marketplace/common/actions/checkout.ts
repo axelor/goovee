@@ -57,7 +57,7 @@ async function prepare(input: {productIds: string[]}) {
     code: SUBAPP_CODES.marketplace,
   });
   if (!access.ok) return err(await accessMessage(access.reason));
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
   const {client, config} = access.tenant;
   const marketplaceConfig = await getMarketplaceConfig(
     access.workspace.config.id,
@@ -132,9 +132,12 @@ export async function createStripeCheckoutSession(props: {
      * `stripe_session_id` from the URL and calls `checkout()` to finalize,
      * then pushes the buyer to the success page. That is why this is not the
      * success URL, while `cancelUrl` below is a page of its own. */
-    const workspaceURL = access.url.key();
-    const successUrl = `${workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`;
+    const successUrl = access.url.forExternal(
+      `/${SUBAPP_CODES.marketplace}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
+    );
+    const cancelUrl = access.url.forExternal(
+      `/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`,
+    );
 
     const session = await createStripeOrder({
       customer: {id: payerId, email: emailAddress},
@@ -258,7 +261,7 @@ export async function checkout(
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {client, config} = access.tenant;
   const marketplaceConfig = await getMarketplaceConfig(
     access.workspace.config.id,

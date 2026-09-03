@@ -60,7 +60,7 @@ async function Quotation({params: paramsProm}: PageProps) {
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) return notFound();

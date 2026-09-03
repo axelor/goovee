@@ -44,7 +44,7 @@ export async function generateMetadata(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const website = await findWebsiteSeoBySlug({
     websiteSlug,
@@ -95,7 +95,7 @@ export default async function Layout(props: {
   const {user} = access;
   const {client, config} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const website = await findWebsiteBySlug({
     websiteSlug,

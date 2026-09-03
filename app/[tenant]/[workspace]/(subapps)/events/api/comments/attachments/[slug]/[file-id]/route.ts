@@ -37,7 +37,7 @@ export async function GET(
   }
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   /* Workspace carries config as {id} only; fetch the heavy config so the
      shared isCommentEnabled helper can read the comment flags. */

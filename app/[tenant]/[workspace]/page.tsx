@@ -39,8 +39,8 @@ export default async function Page(props: {
   const {user, tenant, workspace, url} = access;
   const {client} = tenant;
 
-  const tenantId = url.tenantId;
-  const workspaceURL = url.key();
+  const tenantId = tenant.id;
+  const workspaceURL = workspace.url;
   const workspaceURI = url.forRouter();
 
   const loginURL = getLoginURL({

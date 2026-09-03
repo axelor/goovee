@@ -31,7 +31,7 @@ export async function GET(
   const {client} = access.tenant;
   const storage = access.tenant.config.aos.storage;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const file = await fetchFile({
     id: fileId,

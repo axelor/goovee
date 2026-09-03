@@ -196,7 +196,6 @@ async function buildSystemNotification({
   app,
   entity,
   workspace,
-  url,
   client,
 }: {
   user: User;
@@ -204,15 +203,13 @@ async function buildSystemNotification({
   mail?: Mail | null;
   entity: {id: string; link: WorkspaceSubPath};
   app: App;
-  /* Only what the notification shows: `url` carries the addresses, so the
-   * stored key this workspace is identified by is not wanted here. */
-  workspace: {id: string; name: string | null};
-  url: ServerWorkspaceURLs;
+  workspace: {id: string; name: string | null; url: string};
   client: Client;
 }): Promise<NotifyUserArgs> {
   return {
     userId: user.id,
-    url,
+    tenantId,
+    workspaceURL: workspace.url,
     client,
     payload: {
       title:
@@ -263,9 +260,9 @@ async function sendNotifications(data: {
     const sender = workspace.name || APP_TITLE;
 
     /* No proxy headers on this route — it sits under /api — so the workspace is
-     * named from the row the webhook resolved. Resolved once and given to both
-     * channels, so the address in the email and the one the tray opens cannot
-     * disagree.
+     * named from the row the webhook resolved. The mail channel needs an
+     * address here; the push channel is handed the same row and works its own
+     * out, so the two agree by deriving from one value.
      *
      * A row whose last segment cannot name a workspace — one still carrying a
      * percent escape, say — is refused here. Every address for it would be
@@ -296,7 +293,6 @@ async function sendNotifications(data: {
           entity,
           app,
           workspace,
-          url,
           client,
         }),
       ),

@@ -44,7 +44,7 @@ export async function generateMetadata(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
@@ -105,7 +105,7 @@ export default async function Page(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const [canUserEditWiki, websitePage] = await Promise.all([
     canEditWiki({userId: user?.id, client}),

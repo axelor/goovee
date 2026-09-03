@@ -15,9 +15,9 @@ export default async function Page() {
     return notFound();
   }
 
-  const {tenant, workspace, url} = access;
+  const {tenant, workspace} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = workspace.url;
 
   const config = await getAccountConfig(workspace.config.id, client);
 

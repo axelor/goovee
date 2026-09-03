@@ -11,7 +11,7 @@ export default async function Layout(props: {children: React.ReactNode}) {
   if (!access.ok) return notFound();
 
   const {client} = access.tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const isAdmin =
     (await isPartner()) ||

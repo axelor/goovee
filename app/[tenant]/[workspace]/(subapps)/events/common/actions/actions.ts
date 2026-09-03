@@ -76,8 +76,8 @@ export async function register(
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const workspaceURL = access.url.key();
-  const tenantId = access.url.tenantId;
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -220,7 +220,8 @@ export async function register(
 
       return {
         userId: contact.id,
-        url: access.url,
+        tenantId: access.tenant.id,
+        workspaceURL: access.workspace.url,
         client,
         payload: {
           title: await tr('You have been registered for an event!'),
@@ -259,7 +260,7 @@ export async function fetchContacts(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
   const {client} = access.tenant;
 
   try {
@@ -290,7 +291,7 @@ export async function isValidParticipant(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
   const {client} = access.tenant;
 
   const workspaceConfig = await getEventsConfig(
@@ -344,7 +345,7 @@ export const createComment: CreateComment = async props => {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -410,7 +411,8 @@ export const createComment: CreateComment = async props => {
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          url: access.url,
+          tenantId: access.tenant.id,
+          workspaceURL: access.workspace.url,
           client,
           payload: {
             title: await tr(

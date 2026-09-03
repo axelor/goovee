@@ -307,9 +307,9 @@ export async function confirmAddresses(data: ConfirmAddresses) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {user, workspace, tenant, url} = access;
+  const {user, workspace, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = workspace.url;
 
   const subapp = await findSubappAccess({
     code: subAppCode,

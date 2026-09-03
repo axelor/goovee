@@ -17,7 +17,7 @@ export default async function Layout(props: {children: React.ReactNode}) {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const [partner, isPartnerUser, isAdminContactUser] = await Promise.all([
     findGooveeUserByEmail(user.email, client),

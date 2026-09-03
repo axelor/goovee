@@ -300,8 +300,7 @@ export async function addPost(input: AddPostInput) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
+  const tenantId = access.tenant.id;
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -376,7 +375,7 @@ export async function addPost(input: AddPostInput) {
 
     if (!('error' in subscribers)) {
       const postSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.forum}/post/${post.id}`;
-      const postLink = `${workspaceURL}${postSubPath}`;
+      const postLink = access.url.forExternal(postSubPath);
 
       const notificationRecievers = subscribers.filter(
         sub => sub.member?.id !== user.id, // exclude the post author
@@ -396,7 +395,8 @@ export async function addPost(input: AddPostInput) {
 
           return {
             userId: member.id,
-            url: access.url,
+            tenantId: access.tenant.id,
+            workspaceURL: access.workspace.url,
             client,
             payload: {
               title: await tr(
@@ -522,7 +522,7 @@ export async function findSearchPosts(input: {search?: string}) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
   const {user, workspace} = access;
   const {client} = access.tenant;
 
@@ -569,8 +569,7 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -646,7 +645,9 @@ export const createComment: CreateComment = async props => {
         });
 
         if (!('error' in subscribers)) {
-          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
+          const postLink = access.url.forExternal(
+            `/${SUBAPP_CODES.forum}/post/${post.id}`,
+          );
 
           const notificationRecievers = subscribers.filter(
             sub => sub.member?.id !== user.id, // exclude the commenter
@@ -667,7 +668,8 @@ export const createComment: CreateComment = async props => {
               after(async () => {
                 await notifyUser({
                   userId: parentComment.partner!.id,
-                  url: access.url,
+                  tenantId: access.tenant.id,
+                  workspaceURL: access.workspace.url,
                   client,
                   payload: {
                     title: await tr(
@@ -727,7 +729,8 @@ export const createComment: CreateComment = async props => {
 
                 return {
                   userId: member.id,
-                  url: access.url,
+                  tenantId: access.tenant.id,
+                  workspaceURL: access.workspace.url,
                   client,
                   payload: {
                     title: await tr(

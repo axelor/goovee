@@ -56,7 +56,7 @@ export async function deleteInvite({id}: {id: string}) {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const isPartnerUser = await isPartner();
   const isAdminContactUser = await isAdminContact({workspaceURL, client});
@@ -107,7 +107,7 @@ export async function sendInvites(input: SendInvites) {
 
   const {user, tenant, workspace} = access;
   const {client, id: tenantId} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const config = await getAccountConfig(workspace.config.id, client);
 

@@ -58,7 +58,7 @@ async function Quotations({
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const {limit, page, search} = searchParams;
 

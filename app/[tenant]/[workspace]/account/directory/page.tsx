@@ -14,9 +14,9 @@ export default async function Page() {
     return notFound();
   }
 
-  const {user, tenant, url} = access;
+  const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = access.workspace.url;
 
   const partner = await findGooveeUserByEmail(user.email, client);
 

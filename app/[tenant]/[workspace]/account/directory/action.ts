@@ -29,9 +29,9 @@ export async function updateDirectorySettings({
       return {error: true, message: await accessMessage(access.reason)};
     }
 
-    const {user, tenant, url} = access;
+    const {user, tenant} = access;
     const {client} = tenant;
-    const workspaceURL = url.key();
+    const workspaceURL = access.workspace.url;
 
     const {success, data} = directorySettingsSchema.safeParse(values);
 
@@ -111,9 +111,9 @@ export async function updateCompanyProfileImage(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {user, tenant, url} = access;
+  const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = url.key();
+  const workspaceURL = access.workspace.url;
 
   const isAdminContactUser = Boolean(
     await isAdminContact({

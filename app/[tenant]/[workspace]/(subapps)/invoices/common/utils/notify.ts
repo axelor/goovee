@@ -1,5 +1,4 @@
 import {notifyUser} from '@/pwa/utils';
-import {tenantURLs} from '@/lib/core/url/scope';
 import {NotificationTag} from '@/pwa/tags';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {SUBAPP_CODES} from '@/constants';
@@ -32,19 +31,16 @@ export async function notifyInvoicePaymentSuccess({
 
     if (!invoice?.portalWorkspace?.url) return;
 
-    /* This runs from a payment callback, which carries no proxy headers, so
-     * the workspace is named from the invoice's own row. */
-    const url = tenantURLs(tenantId).workspaceByKey(
-      invoice.portalWorkspace.url,
-    );
-
     const tr = getTranslation.bind(null, {
       locale: user.localization?.code || DEFAULT_LOCALE,
       tenant: tenantId,
     });
     await notifyUser({
       userId: user.id,
-      url,
+      tenantId,
+      /* This runs from a payment callback, which carries no proxy headers, so
+       * the workspace is named from the invoice's own row. */
+      workspaceURL: invoice.portalWorkspace.url,
       client,
       payload: {
         title: await tr(

@@ -40,7 +40,7 @@ export default async function Page(props: PageParams) {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const userId = getPartnerId(user);
 

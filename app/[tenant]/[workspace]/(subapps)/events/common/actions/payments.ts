@@ -43,8 +43,8 @@ export async function createStripeCheckoutSession(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const workspaceURL = access.url.key();
-  const tenantId = access.url.tenantId;
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -137,8 +137,12 @@ export async function createStripeCheckoutSession(props: {
       tenantId,
       client,
       url: {
-        success: `${workspaceURL}/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_session_id={CHECKOUT_SESSION_ID}`,
-        error: `${workspaceURL}/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_error=true`,
+        success: access.url.forExternal(
+          `/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_session_id={CHECKOUT_SESSION_ID}`,
+        ),
+        error: access.url.forExternal(
+          `/${SUBAPP_CODES.events}/${$event.slug}/register?stripe_error=true`,
+        ),
       },
     });
 
@@ -170,8 +174,8 @@ export async function paypalCreateOrder(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const workspaceURL = access.url.key();
-  const tenantId = access.url.tenantId;
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
@@ -284,8 +288,8 @@ export async function payboxCreateOrder(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const workspaceURL = access.url.key();
-  const tenantId = access.url.tenantId;
+  const workspaceURL = access.workspace.url;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;

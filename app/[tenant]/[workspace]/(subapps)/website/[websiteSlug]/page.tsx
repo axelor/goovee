@@ -55,7 +55,7 @@ export default async function Layout(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const website = await findWebsiteBySlug({
     websiteSlug,

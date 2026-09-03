@@ -46,7 +46,7 @@ export async function getLocaleRedirectionURL(
 
   const {user} = access;
   const {client, config} = access.tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -154,7 +154,7 @@ export async function updateWikiContent(
 
   const {user} = access;
   const {client} = access.tenant;
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   if (!(await canEditWiki({userId: user.id, client}))) {
     return {

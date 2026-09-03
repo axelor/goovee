@@ -19,7 +19,7 @@ export default async function Page() {
 
   const {user, tenant} = access;
   const {client} = tenant;
-  const url = access.url.key();
+  const url = access.workspace.url;
 
   const apps = await findSubapps({user, url, client});
 

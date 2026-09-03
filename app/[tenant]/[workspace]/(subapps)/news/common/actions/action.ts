@@ -142,7 +142,7 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -203,7 +203,8 @@ export const createComment: CreateComment = async props => {
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          url: access.url,
+          tenantId: access.tenant.id,
+          workspaceURL: access.workspace.url,
           client,
           payload: {
             title: await tr(

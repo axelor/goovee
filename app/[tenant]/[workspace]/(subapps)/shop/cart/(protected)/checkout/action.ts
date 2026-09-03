@@ -53,7 +53,7 @@ export async function paypalCaptureOrder({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {user, tenant} = access;
   const {client} = tenant;
 
@@ -179,7 +179,7 @@ export async function paypalCreateOrder({cart}: CartOrderInput) {
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -282,8 +282,7 @@ export async function createStripeCheckoutSession({cart}: CartOrderInput) {
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const tenantId = access.url.tenantId;
-  const workspaceURL = access.url.key();
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
 
@@ -369,8 +368,12 @@ export async function createStripeCheckoutSession({cart}: CartOrderInput) {
       currency: currencyCode,
       context: cart,
       url: {
-        success: `${workspaceURL}/${SUBAPP_CODES.shop}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
-        error: `${workspaceURL}/${SUBAPP_CODES.shop}/cart/checkout?stripe_error=true`,
+        success: access.url.forExternal(
+          `/${SUBAPP_CODES.shop}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
+        ),
+        error: access.url.forExternal(
+          `/${SUBAPP_CODES.shop}/cart/checkout?stripe_error=true`,
+        ),
       },
     });
 
@@ -407,7 +410,7 @@ export async function validateStripePayment({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {user, tenant} = access;
   const {client} = tenant;
 
@@ -535,7 +538,7 @@ export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const tenantId = access.url.tenantId;
+  const tenantId = access.tenant.id;
   const {user} = access;
   const {client} = access.tenant;
 

@@ -27,7 +27,7 @@ export async function searchEvents(props: {
   });
   if (!access.ok) return [];
 
-  const {user, url} = access;
+  const {user} = access;
   const {client} = access.tenant;
 
   const result = await findEvents({
@@ -36,7 +36,7 @@ export async function searchEvents(props: {
     categoryids: [],
     search: q,
     // No eventType filter: search must reach past events too, not just active.
-    workspaceURL: url.key(),
+    workspaceURL: access.workspace.url,
     client,
     user,
     orderBy: {eventStartDateTime: ORDER_BY.ASC},

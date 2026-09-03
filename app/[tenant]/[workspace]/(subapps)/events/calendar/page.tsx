@@ -57,7 +57,7 @@ export default async function Page(context: {
   const {client} = access.tenant;
   const workspace = clone(access.workspace);
 
-  const workspaceURL = access.url.key();
+  const workspaceURL = access.workspace.url;
 
   return (
     <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">
