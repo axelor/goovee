@@ -147,7 +147,7 @@ export async function ensureAccess({
     workspace != null ||
     Boolean(
       await client.aOSPortalWorkspace.findOne({
-        where: {url: {like: url}},
+        where: {url},
         select: {id: true},
       }),
     );

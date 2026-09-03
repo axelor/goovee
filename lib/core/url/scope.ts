@@ -148,17 +148,7 @@ function workspaceSlugOf(storedURL: string): string {
   return withoutQuery.split('/').filter(Boolean).pop() ?? '';
 }
 
-/* FIXME: RM-117842 - three lookups match the key as a LIKE pattern instead of
- * comparing it, so the exact-match property this guard rests on does not hold
- * for them: `findGuestWorkspace` and `findDefaultPartnerWorkspaceConfig` in
- * `orm/workspace.ts`, and the workspace-exists probe in `ensureAccess`. `_`
- * passes the check below and is a wildcard in those three, so a slug of
- * `franc_` resolves the workspace stored as `france` for a visitor with no
- * session, and tells any visitor whether a workspace of that spelling exists.
- * The lookups that resolve a signed-in partner or contact compare exactly and
- * miss, so they are unaffected.
- *
- * A workspace slug is interpolated into a lookup key that AOS compares by exact
+/* A workspace slug is interpolated into a lookup key that AOS compares by exact
  * string match, so a slug carrying a path separator would compose the key of a
  * different workspace — one that may exist and that the visitor may even be
  * granted. Refused rather than escaped, because there is no spelling of these
