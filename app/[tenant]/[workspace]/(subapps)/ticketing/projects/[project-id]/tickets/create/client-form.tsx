@@ -31,15 +31,15 @@ export function Form(props: {
     formFields,
   } = props;
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
   const handleSuccess = useCallback(
     (ticketId: string, projectId: string) => {
       router.replace(
-        url.forRouter(`/ticketing/projects/${projectId}/tickets/${ticketId}`),
+        scope.forRouter(`/ticketing/projects/${projectId}/tickets/${ticketId}`),
       );
     },
-    [url, router],
+    [scope, router],
   );
 
   return (

@@ -79,7 +79,7 @@ export function useNavigationVisibility() {
 
   const pathname = usePathname();
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {data: session} = authClient.useSession();
   const user = session?.user;
   const userId = user?.id;
@@ -89,7 +89,7 @@ export function useNavigationVisibility() {
 
     const handleVisibility = async () => {
       try {
-        const subPath = subPathOf(pathname, url.forRouter());
+        const subPath = subPathOf(pathname, scope.forRouter());
 
         let matchedHandler: Handler | undefined;
 
@@ -124,7 +124,7 @@ export function useNavigationVisibility() {
     return () => {
       mounted = false;
     };
-  }, [pathname, userId, url]);
+  }, [pathname, userId, scope]);
 
   return useMemo(() => ({visible, loading}), [visible, loading]);
 }

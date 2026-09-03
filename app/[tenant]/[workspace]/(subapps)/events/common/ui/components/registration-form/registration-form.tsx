@@ -76,7 +76,7 @@ export const RegistrationForm = ({
 
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const router = useRouter();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
 
   const {searchParams} = useSearchParams();
@@ -394,7 +394,7 @@ export const RegistrationForm = ({
           title: i18n.t(SUCCESS_REGISTER_MESSAGE),
         });
         router.push(
-          url.forRouter(
+          scope.forRouter(
             `/${SUBAPP_CODES.events}/${slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}`,
           ),
         );
@@ -407,7 +407,7 @@ export const RegistrationForm = ({
     }
   };
 
-  const eventDetailHref = url.forRouter(`/${SUBAPP_CODES.events}/${slug}`);
+  const eventDetailHref = scope.forRouter(`/${SUBAPP_CODES.events}/${slug}`);
 
   return (
     <div className="flex flex-col gap-[18px]">

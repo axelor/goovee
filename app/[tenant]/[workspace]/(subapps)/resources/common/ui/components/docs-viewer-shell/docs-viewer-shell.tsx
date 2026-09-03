@@ -270,7 +270,7 @@ function SameFolderCard({
   currentId: string;
   labels: DocsViewerShellLabels;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const others = siblings.filter(s => s.id !== currentId);
   return (
     <section className="bg-white rounded-2xl border border-ink-100 shadow-xs overflow-hidden">
@@ -286,7 +286,9 @@ function SameFolderCard({
           {others.slice(0, 8).map(sibling => (
             <li key={sibling.id}>
               <Link
-                href={url.forRouter(`/${SUBAPP_CODES.resources}/${sibling.id}`)}
+                href={scope.forRouter(
+                  `/${SUBAPP_CODES.resources}/${sibling.id}`,
+                )}
                 className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-ink-25 transition-colors">
                 <DocFileIcon
                   fileType={sibling.metaFile?.fileType}

@@ -67,7 +67,7 @@ export function VersionFields({
   compatibilityVersions,
   productId,
 }: VersionFieldsProps) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
   const {control, getValues, register} = useFormContext<CombinedEditValues>();
 
@@ -90,7 +90,7 @@ export function VersionFields({
 
   const downloadHref =
     rowId && existingBundle
-      ? url.forBrowser(
+      ? scope.forBrowser(
           `/${SUBAPP_CODES.marketplace}/api/products/${productId}/versions/${rowId}/download`,
         )
       : undefined;

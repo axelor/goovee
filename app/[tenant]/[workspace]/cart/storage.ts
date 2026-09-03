@@ -1,4 +1,4 @@
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 
 /**
  * Collision-proof storage key for a per-app cart. Every cart in the workspace
@@ -23,7 +23,7 @@ export function cartStorageKey(
 export type CartSummary = {
   code: string;
   label: () => string;
-  href: (url: WorkspaceURLs) => string;
+  href: (scope: WorkspaceScope) => string;
   /* Keyed on the stored workspace URL rather than an address: this names a
    * record in the browser's own store, via `@/storage/local`, and changing its
    * spelling orphans every cart already saved under the old one. */

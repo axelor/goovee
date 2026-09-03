@@ -37,8 +37,8 @@ export default async function Page(props: {
     categories as Array<{id: string | number; slug?: string | null}>
   )?.find(c => c.slug === slug);
 
-  if (!match) return redirect(access.url.forRouter('/shop'));
+  if (!match) return redirect(access.scope.forRouter('/shop'));
   return redirect(
-    access.url.forRouter(`/shop?cat=${encodeURIComponent(String(match.id))}`),
+    access.scope.forRouter(`/shop?cat=${encodeURIComponent(String(match.id))}`),
   );
 }

@@ -115,7 +115,8 @@ async function Detail({
   // Same guard as the metadata path: with no categories the slug lookup would
   // otherwise resolve any sellable product in the tenant and render its full
   // detail page, so send the reader back to the shop instead.
-  if (!portalCategoryIds.length) return redirect(access.url.forRouter('/shop'));
+  if (!portalCategoryIds.length)
+    return redirect(access.scope.forRouter('/shop'));
 
   const [computed, allProductsRes, labels, hidePriceAndPurchase] =
     await Promise.all([
@@ -144,7 +145,7 @@ async function Detail({
       shouldHidePricesAndPurchase({user, config: workspaceConfig, client}),
     ]);
 
-  if (!computed?.product) return redirect(access.url.forRouter('/shop'));
+  if (!computed?.product) return redirect(access.scope.forRouter('/shop'));
 
   const allProducts: ComputedProduct[] = Array.isArray(allProductsRes)
     ? (allProductsRes as ComputedProduct[])

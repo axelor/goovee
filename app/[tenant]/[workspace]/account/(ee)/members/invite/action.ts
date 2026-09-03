@@ -316,7 +316,7 @@ export async function sendInvites(input: SendInvites) {
   if (inviteError) {
     return error(await t('Error sending invites, try again.'));
   } else {
-    access.url.revalidate('/account/members');
+    access.scope.revalidate('/account/members');
 
     let message = '';
 

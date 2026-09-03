@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {
   Pagination,
@@ -28,7 +28,7 @@ import {MyProductsTable} from '../my-products-table';
 type ProductsListTabProps = {
   products: ListMyProduct[];
   title: string;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
@@ -43,7 +43,7 @@ type ProductsListTabProps = {
 export async function ProductsListTab({
   products,
   title,
-  url,
+  scope,
   categories,
   licenses,
   compatibilityVersions,
@@ -82,7 +82,7 @@ export async function ProductsListTab({
                       ['pointer-events-none opacity-50']: page <= 1,
                     })}
                     href={{
-                      pathname: url.forRouter(
+                      pathname: scope.forRouter(
                         `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                       ),
                       query: {
@@ -111,7 +111,7 @@ export async function ProductsListTab({
                           scroll={false}
                           replace
                           href={{
-                            pathname: url.forRouter(
+                            pathname: scope.forRouter(
                               `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                             ),
                             query: {
@@ -135,7 +135,7 @@ export async function ProductsListTab({
                       ['pointer-events-none opacity-50']: page >= totalPages,
                     })}
                     href={{
-                      pathname: url.forRouter(
+                      pathname: scope.forRouter(
                         `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                       ),
                       query: {

@@ -60,7 +60,7 @@ const Content = ({
     statusSelect,
   } = quotation;
 
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
 
   const {status} = getStatus(statusSelect);
   const statusKey = getStatusKey(Number(statusSelect));
@@ -101,12 +101,12 @@ const Content = ({
             </strong>
           </>
         }
-        backHref={url.forRouter(`/${SUBAPP_CODES.quotations}`)}
+        backHref={scope.forRouter(`/${SUBAPP_CODES.quotations}`)}
         primaryAction={
           isDraft ? (
             <Button asChild variant="royal" size="sm">
               <Link
-                href={url.forRouter(
+                href={scope.forRouter(
                   `/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?quotation=${id}`,
                 )}>
                 <MdEdit className="text-base mr-1" />
@@ -175,7 +175,7 @@ const Content = ({
                     showRepliesInMainThread
                     createComment={createComment}
                     fetchComments={fetchComments}
-                    attachmentDownloadUrl={url.forBrowser(
+                    attachmentDownloadUrl={scope.forBrowser(
                       `/${SUBAPP_CODES.quotations}/api/comments/attachments/${id}`,
                     )}
                     trackingField="body"

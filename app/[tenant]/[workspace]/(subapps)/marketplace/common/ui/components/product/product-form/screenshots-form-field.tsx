@@ -321,7 +321,7 @@ export function ScreenshotsFormField({
 }: {
   initial?: Cloned<MyProductForEdit>;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
   const {control, setValue, getValues} = useFormContext<ProductFormValues>();
   const images = useWatch({control, name: 'images'});
@@ -346,7 +346,9 @@ export function ScreenshotsFormField({
   const getImgSrc = (image: ProductImage) => {
     if (image.kind === 'existing') {
       const fileId = initialImageMap.get(image.id);
-      return fileId ? getProductScreenshotURL({url, productId, fileId}) : null;
+      return fileId
+        ? getProductScreenshotURL({scope, productId, fileId})
+        : null;
     }
     return previewByToken.current.get(image.token) ?? null;
   };

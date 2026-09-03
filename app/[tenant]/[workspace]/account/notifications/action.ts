@@ -32,7 +32,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
     return error(await accessMessage(access.reason));
   }
 
-  const {user, tenant, url} = access;
+  const {user, tenant, scope} = access;
   const {client} = tenant;
   const workspaceURL = access.workspace.url;
 
@@ -50,7 +50,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
       throw new Error();
     }
 
-    url.revalidate('/account/notifications');
+    scope.revalidate('/account/notifications');
 
     return {
       success: true,

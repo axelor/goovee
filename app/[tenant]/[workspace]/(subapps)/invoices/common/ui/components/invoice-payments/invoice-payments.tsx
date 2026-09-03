@@ -52,7 +52,7 @@ export function InvoicePayments({
   onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
   allowStripeBankTransfer: boolean;
 }) {
-  const {url, workspaceURL} = useWorkspace();
+  const {scope, workspaceURL} = useWorkspace();
 
   const router = useRouter();
   const {toast} = useToast();
@@ -65,13 +65,13 @@ export function InvoicePayments({
           resetForm();
         }
         router.replace(
-          url.forRouter(
+          scope.forRouter(
             `/${SUBAPP_CODES.invoices}/${invoice.id}${token ? `?token=${token}` : ''}`,
           ),
         );
       }
     },
-    [paymentType, router, resetPaymentType, resetForm, invoice, token, url],
+    [paymentType, router, resetPaymentType, resetForm, invoice, token, scope],
   );
 
   const handleInvoiceValidation = async () => {

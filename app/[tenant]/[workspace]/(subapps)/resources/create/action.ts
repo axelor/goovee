@@ -158,7 +158,7 @@ export async function upload(input: UploadInput) {
       });
     });
 
-    access.url.revalidate(`/${SUBAPP_CODES.resources}/folder/${parentId}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.resources}/folder/${parentId}`);
   } catch (err) {
     return {
       error: true,

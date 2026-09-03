@@ -45,7 +45,7 @@ export default async function PublisherApplyPage(props: {
     notFound();
   }
 
-  const contributionsHref = access.url.forRouter(
+  const contributionsHref = access.scope.forRouter(
     `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
   );
 
@@ -74,7 +74,7 @@ export default async function PublisherApplyPage(props: {
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
                 <Link
-                  href={access.url.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
+                  href={access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
                   {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>

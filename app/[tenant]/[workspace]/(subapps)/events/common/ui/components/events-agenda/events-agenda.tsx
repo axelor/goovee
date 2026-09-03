@@ -245,7 +245,7 @@ export function EventsAgenda({
 // ---- Building blocks ---- //
 
 function AgendaRow({event, last}: {event: ListEvent; last: boolean}) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const start = new Date(event.eventStartDateTime ?? '');
   const day = start.getDate();
   const monthAbbr = monthAbbrev(start);
@@ -256,7 +256,7 @@ function AgendaRow({event, last}: {event: ListEvent; last: boolean}) {
   const dateRange = isMultiDay ? formatEventSchedule(event) : '';
   const time = isMultiDay || event.eventAllDay ? '' : formatHHmm(start);
   const cat = event.eventCategorySet?.[0];
-  const detailHref = url.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
+  const detailHref = scope.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
 
   return (
     <Link

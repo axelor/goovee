@@ -71,7 +71,7 @@ export function ShopProductDetail({
   hidePriceAndPurchase = false,
   displayPrices = false,
 }: ShopProductDetailProps) {
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {loaded: cartLoaded, updateQuantity, getProductQuantity} = useCart();
   const {toast} = useToast();
 
@@ -168,7 +168,7 @@ export function ShopProductDetail({
     }
   };
 
-  const catalogHref = url.forRouter(`/${SUBAPP_CODES.shop}`);
+  const catalogHref = scope.forRouter(`/${SUBAPP_CODES.shop}`);
   const categoryHref = (id: string) =>
     `${catalogHref}?cat=${encodeURIComponent(id)}`;
 
@@ -179,10 +179,10 @@ export function ShopProductDetail({
 
   const productHref = (slug: string, categorySlug?: string | null) =>
     categorySlug
-      ? url.forRouter(
+      ? scope.forRouter(
           `/${SUBAPP_CODES.shop}/category/${categorySlug}/product/${slug}`,
         )
-      : url.forRouter(`/${SUBAPP_CODES.shop}/product/${slug}`);
+      : scope.forRouter(`/${SUBAPP_CODES.shop}/product/${slug}`);
 
   /* Related products are picked for sharing *any* category with this one, so
      this product's own category often does not contain them — routing them

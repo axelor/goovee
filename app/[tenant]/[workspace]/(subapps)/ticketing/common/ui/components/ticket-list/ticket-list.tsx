@@ -45,7 +45,7 @@ export function TicketList(props: TicketListProps) {
   const {tickets, fields} = props;
   const [sortedTickets, sort, toggleSort] = useSortBy(tickets);
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const columns = useMemo(() => {
@@ -56,12 +56,12 @@ export function TicketList(props: TicketListProps) {
     (record: Cloned<TicketListTicket>) => {
       if (!record.project?.id || !record.id) return;
       router.push(
-        url.forRouter(
+        scope.forRouter(
           `/ticketing/projects/${record.project.id}/tickets/${record.id}`,
         ),
       );
     },
-    [router, url],
+    [router, scope],
   );
 
   return (
@@ -101,7 +101,7 @@ export function ParentTicketList(props: {
 }) {
   const {tickets, ticketId, fields} = props;
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const columns = useMemo(() => {
@@ -112,12 +112,12 @@ export function ParentTicketList(props: {
     (record: Cloned<ParentTicket>) => {
       if (!record.project?.id || !record.id) return;
       router.push(
-        url.forRouter(
+        scope.forRouter(
           `/ticketing/projects/${record.project.id}/tickets/${record.id}`,
         ),
       );
     },
-    [router, url],
+    [router, scope],
   );
   const hasTickets = Boolean(tickets.length);
   return (
@@ -154,7 +154,7 @@ export function ChildTicketList(props: {
   const {tickets, ticketId, fields} = props;
   const hasTickets = Boolean(tickets?.length);
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const columns = useMemo(() => {
@@ -165,12 +165,12 @@ export function ChildTicketList(props: {
     (record: Cloned<ChildTicket>) => {
       if (!record.project?.id || !record.id) return;
       router.push(
-        url.forRouter(
+        scope.forRouter(
           `/ticketing/projects/${record.project.id}/tickets/${record.id}`,
         ),
       );
     },
-    [router, url],
+    [router, scope],
   );
 
   return (
@@ -211,19 +211,19 @@ export function RelatedTicketList(props: {
     return filterColumns(relatedColumns, fields);
   }, [fields]);
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const handleRowClick = useCallback(
     (record: Cloned<TicketLink>) => {
       if (!record.relatedTask?.project?.id || !record.relatedTask?.id) return;
       router.push(
-        url.forRouter(
+        scope.forRouter(
           `/ticketing/projects/${record.relatedTask.project.id}/tickets/${record.relatedTask.id}`,
         ),
       );
     },
-    [router, url],
+    [router, scope],
   );
 
   return (

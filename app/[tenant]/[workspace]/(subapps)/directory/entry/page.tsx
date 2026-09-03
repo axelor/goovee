@@ -4,8 +4,8 @@ import {SUBAPP_CODES} from '@/constants';
 import {currentWorkspace} from '@/lib/core/url/current';
 
 export default async function Page() {
-  const url = await currentWorkspace();
-  if (!url) notFound();
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
-  permanentRedirect(url.forRouter(`/${SUBAPP_CODES.directory}`));
+  permanentRedirect(scope.forRouter(`/${SUBAPP_CODES.directory}`));
 }

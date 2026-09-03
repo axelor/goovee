@@ -74,7 +74,7 @@ export function ShopCheckout({
   orderSubapp?: Subapp | null;
   labels: ShopCheckoutLabels;
 }) {
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {cart, loaded: cartLoaded} = useCart();
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
@@ -196,7 +196,7 @@ export function ShopCheckout({
       .format(n)
       .concat(' ', currency);
 
-  const cartHref = url.forRouter(`/${SUBAPP_CODES.shop}/cart`);
+  const cartHref = scope.forRouter(`/${SUBAPP_CODES.shop}/cart`);
   const confirmOrder = !!config?.confirmOrder;
   // Workspaces configured to hide prices must not surface any amount, even
   // inside the checkout summary (parity with the pre-redesign gate).
@@ -449,7 +449,7 @@ function CheckoutAddressPicker({
   noneTitle: string;
   loadingLabel: string;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
@@ -509,9 +509,9 @@ function CheckoutAddressPicker({
 
   // "Change address" opens the standard address-selection page in checkout
   // mode; on confirm it updates the cart and returns here via callbackURL.
-  const changeAddressHref = url.forRouter(
+  const changeAddressHref = scope.forRouter(
     `/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
-      url.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`),
+      scope.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`),
     )}`,
   );
 

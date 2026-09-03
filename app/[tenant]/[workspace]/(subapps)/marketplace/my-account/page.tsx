@@ -52,7 +52,7 @@ export default async function MyAccountPage(props: {
     canManageProducts({user: access.user, subapp: access.subapp});
   // Already resolved with the workspace, so this costs no extra query.
   const directoryAvailable = hasDirectoryAccess(access.workspace.apps);
-  const accountBase = access.url.forRouter(
+  const accountBase = access.scope.forRouter(
     `/${SUBAPP_CODES.marketplace}/my-account`,
   );
 
@@ -97,7 +97,7 @@ export default async function MyAccountPage(props: {
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
                 <Link
-                  href={access.url.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
+                  href={access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
                   {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>
@@ -133,7 +133,7 @@ export default async function MyAccountPage(props: {
               <PartnerProfileLink
                 client={access.tenant.client}
                 partnerId={partnerId}
-                href={access.url.forRouter(
+                href={access.scope.forRouter(
                   `/${SUBAPP_CODES.directory}/entry/${partnerId}`,
                 )}
                 label={await t('See partner profile')}

@@ -7,8 +7,8 @@ import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
 
 export default async function CheckoutCancelPage() {
-  const url = await currentWorkspace();
-  if (!url) notFound();
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
@@ -21,7 +21,7 @@ export default async function CheckoutCancelPage() {
           {await t('Your cart is still saved. You can resume any time.')}
         </p>
         <Button variant="royal" asChild>
-          <Link href={url.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}>
+          <Link href={scope.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}>
             {await t('Back to cart')}
           </Link>
         </Button>

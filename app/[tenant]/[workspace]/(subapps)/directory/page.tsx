@@ -66,7 +66,7 @@ export default async function Page(props: {
 
   const pages = getPages(partners, limit);
   const imageURL = config?.directoryHeroBgImage?.id
-    ? access.url.forBrowser(`/${SUBAPP_CODES.directory}/api/hero/background`)
+    ? access.scope.forBrowser(`/${SUBAPP_CODES.directory}/api/hero/background`)
     : withBasePath(IMAGE_URL);
 
   return (
@@ -98,7 +98,7 @@ export default async function Page(props: {
               {partners.map(item => (
                 <Card
                   item={item}
-                  url={access.url.forRouter(
+                  url={access.scope.forRouter(
                     `/${SUBAPP_CODES.directory}/entry/${item.id}`,
                   )}
                   key={item.id}
@@ -107,7 +107,7 @@ export default async function Page(props: {
               ))}
               {pages > 1 && (
                 <CardPagination
-                  url={access.url.forRouter(`/${SUBAPP_CODES.directory}`)}
+                  url={access.scope.forRouter(`/${SUBAPP_CODES.directory}`)}
                   pages={pages}
                   searchParams={searchParams}
                 />

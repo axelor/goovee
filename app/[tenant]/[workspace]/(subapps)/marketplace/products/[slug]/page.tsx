@@ -80,7 +80,7 @@ export default async function ProductPage(props: {
   });
   if (!access.ok) return denyPage(access);
 
-  const workspaceURI = access.url.forRouter();
+  const workspaceURI = access.scope.forRouter();
   const tenantId = access.tenant.id;
 
   const client = access.tenant.client;
@@ -116,7 +116,9 @@ export default async function ProductPage(props: {
 
   if (!product) notFound();
 
-  const marketplaceHref = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const marketplaceHref = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
 
   const buildQuery = (
     overrides: Partial<NullableValues<ProductSearchParams>> = {},
@@ -144,7 +146,7 @@ export default async function ProductPage(props: {
       Object.keys(params).length > 0
         ? `?${new URLSearchParams(params).toString()}`
         : '';
-    return access.url.forRouter(
+    return access.scope.forRouter(
       `/${SUBAPP_CODES.marketplace}/products/${product.slug}${queryStr}`,
     );
   };
@@ -212,7 +214,7 @@ export default async function ProductPage(props: {
           product={product}
           client={client}
           user={access.user}
-          url={access.url}
+          scope={access.scope}
           tenantId={tenantId}
           preview={preview}
           canDownloadPromise={canDownloadPromise}
@@ -283,12 +285,12 @@ export default async function ProductPage(props: {
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
             {tab === ProductTab.Overview && (
-              <OverviewTab product={product} url={access.url} />
+              <OverviewTab product={product} scope={access.scope} />
             )}
             {tab === ProductTab.Versions && (
               <VersionsTab
                 product={product}
-                url={access.url}
+                scope={access.scope}
                 client={client}
                 versionPage={versionPage}
                 currentVersionId={product.currentVersion?.id}
@@ -475,7 +477,7 @@ export default async function ProductPage(props: {
                     <PartnerProfileLink
                       client={client}
                       partnerId={product.publisher.id}
-                      href={access.url.forRouter(
+                      href={access.scope.forRouter(
                         `/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`,
                       )}
                       label={await t('View profile')}

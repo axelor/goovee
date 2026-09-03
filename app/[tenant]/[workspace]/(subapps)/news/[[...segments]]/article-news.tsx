@@ -9,7 +9,7 @@ import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
 import {CommentsSkeleton, isCommentEnabled} from '@/lib/core/comments';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -38,7 +38,7 @@ export async function ArticleNews({
   config,
   segments,
   client,
-  url,
+  scope,
   user,
   slug,
 }: {
@@ -46,7 +46,7 @@ export async function ArticleNews({
   config: NewsConfig | Cloned<NewsConfig>;
   segments: string[];
   client: Client;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   user?: User;
   slug: string;
 }) {
@@ -168,7 +168,7 @@ export async function ArticleNews({
                 news={newsObject}
                 config={config}
                 user={user}
-                url={url}
+                scope={scope}
               />
             </Suspense>
           </div>

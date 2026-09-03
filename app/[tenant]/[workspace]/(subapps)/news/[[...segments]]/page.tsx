@@ -59,7 +59,7 @@ export default async function Page(props: {
           config={clone(config)}
           segments={segments}
           client={client}
-          url={access.url}
+          scope={access.scope}
           user={user}
           slug={slug}
         />

@@ -63,7 +63,7 @@ export function EventDetails({
   eventDetails: Cloned<FullEvent>;
   config: EventsConfig | Cloned<EventsConfig>;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
@@ -117,11 +117,11 @@ export function EventDetails({
     : '';
   const isMultiDay = Boolean(endDay && endDay !== startDay);
 
-  const eventsRootHref = url.forRouter(`/${SUBAPP_CODES.events}`);
+  const eventsRootHref = scope.forRouter(`/${SUBAPP_CODES.events}`);
   const registerHref = `${eventsRootHref}/${eventDetails?.slug}/register`;
 
   const heroImageURL = eventDetails.eventImage?.id
-    ? url.forBrowser(
+    ? scope.forBrowser(
         `/${SUBAPP_CODES.events}/api/event/${eventDetails.slug}/image`,
       )
     : withBasePath(NO_IMAGE_URL);

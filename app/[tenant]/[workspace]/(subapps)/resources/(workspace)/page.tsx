@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
@@ -38,7 +38,7 @@ export default async function Page(props: {
         workspaceURL={workspaceURL}
         client={client}
         user={user}
-        url={access.url}
+        scope={access.scope}
       />
     </Suspense>
   );
@@ -48,12 +48,12 @@ async function HomeContent({
   workspaceURL,
   client,
   user,
-  url,
+  scope,
 }: {
   workspaceURL: string;
   client: Client;
   user?: User;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
 }) {
   const [pinnedFolders, labels] = await Promise.all([
     fetchPinnedFoldersWithMeta({workspaceURL, client, user}).then(clone),
@@ -63,7 +63,7 @@ async function HomeContent({
   return (
     <DocsHomeView
       pinnedFolders={pinnedFolders ?? []}
-      url={url}
+      scope={scope}
       labels={labels}
     />
   );

@@ -98,7 +98,7 @@ export default async function Page(props0: {
 
   if (!project) notFound();
 
-  const ticketsURL = access.url.forRouter(
+  const ticketsURL = access.scope.forRouter(
     `/ticketing/projects/${projectId}/tickets`,
   );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
@@ -161,7 +161,7 @@ export default async function Page(props0: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate text-sm">
-                <Link href={access.url.forRouter('/ticketing')}>
+                <Link href={access.scope.forRouter('/ticketing')}>
                   {await t('Projects')}
                 </Link>
               </BreadcrumbLink>

@@ -35,12 +35,12 @@ export default async function Page() {
     notFound();
   }
 
-  const {user, tenant, workspace, url} = access;
+  const {user, tenant, workspace, scope} = access;
   const {client} = tenant;
 
   const tenantId = tenant.id;
   const workspaceURL = workspace.url;
-  const workspaceURI = url.forRouter();
+  const workspaceURI = scope.forRouter();
 
   const loginURL = getLoginURL({
     callbackurl: workspaceURI,
@@ -67,7 +67,7 @@ export default async function Page() {
         user={user}
         workspace={workspace}
         config={config}
-        url={url}
+        scope={scope}
         apps={apps}
       />
     );
@@ -78,5 +78,5 @@ export default async function Page() {
   }
 
   const defaultApp = apps[0];
-  return <ClientRedirection url={url.forRouter(`/${defaultApp.code}`)} />;
+  return <ClientRedirection url={scope.forRouter(`/${defaultApp.code}`)} />;
 }

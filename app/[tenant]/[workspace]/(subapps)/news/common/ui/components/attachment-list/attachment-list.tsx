@@ -22,12 +22,12 @@ export const AttachmentList = ({
   items: Attachment[];
   width?: string;
 }) => {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const handleDownload = async (attachment: Attachment) => {
     const {metaFile} = attachment;
     if (!metaFile?.id) return;
-    const href = url.forBrowser(
+    const href = scope.forBrowser(
       `/${SUBAPP_CODES.news}/api/news/${slug}/attachment/${metaFile.id}`,
     );
     download(metaFile, href);

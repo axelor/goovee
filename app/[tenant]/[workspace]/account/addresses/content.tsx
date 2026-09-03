@@ -81,7 +81,7 @@ function Content({
 
   const [isPending, startTransition] = useTransition();
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
@@ -217,7 +217,7 @@ function Content({
           });
           router.refresh();
           router.push(
-            url.forRouter(`/${SUBAPP_CODES.quotations}/${quotation.id}`),
+            scope.forRouter(`/${SUBAPP_CODES.quotations}/${quotation.id}`),
           );
         }
       } catch (error) {
@@ -232,7 +232,7 @@ function Content({
   const handleConfirm = () => {
     if (fromCheckout) {
       router.refresh();
-      router.push(callbackURL || url.forRouter(`/${SUBAPP_PAGE.checkout}`));
+      router.push(callbackURL || scope.forRouter(`/${SUBAPP_PAGE.checkout}`));
     } else if (fromQuotation) {
       handleQuotationConfirm();
     }

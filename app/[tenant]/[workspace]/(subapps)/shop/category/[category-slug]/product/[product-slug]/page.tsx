@@ -122,7 +122,7 @@ async function Detail({
      which would leave the lookup unscoped and resolve any sellable product in
      the tenant. Send the reader back to the shop either way. */
   const category = allCategories.find(c => c?.slug === categorySlug);
-  if (!category) return redirect(access.url.forRouter('/shop'));
+  if (!category) return redirect(access.scope.forRouter('/shop'));
 
   const [computed, allProductsRes, labels, hidePriceAndPurchase] =
     await Promise.all([
@@ -151,7 +151,7 @@ async function Detail({
       shouldHidePricesAndPurchase({user, config: workspaceConfig, client}),
     ]);
 
-  if (!computed?.product) return redirect(access.url.forRouter('/shop'));
+  if (!computed?.product) return redirect(access.scope.forRouter('/shop'));
 
   const allProducts: ComputedProduct[] = Array.isArray(allProductsRes)
     ? (allProductsRes as ComputedProduct[])

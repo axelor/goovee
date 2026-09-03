@@ -368,10 +368,10 @@ export async function createStripeCheckoutSession({cart}: CartOrderInput) {
       currency: currencyCode,
       context: cart,
       url: {
-        success: access.url.forExternal(
+        success: access.scope.forExternal(
           `/${SUBAPP_CODES.shop}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
         ),
-        error: access.url.forExternal(
+        error: access.scope.forExternal(
           `/${SUBAPP_CODES.shop}/cart/checkout?stripe_error=true`,
         ),
       },
@@ -616,8 +616,8 @@ export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
       email: payerEmail,
       context: cart,
       url: {
-        success: access.url.fromClient(uri, {paybox_response: 'true'}),
-        failure: access.url.fromClient(uri, {paybox_error: 'true'}),
+        success: access.scope.fromClient(uri, {paybox_response: 'true'}),
+        failure: access.scope.fromClient(uri, {paybox_error: 'true'}),
       },
     });
 

@@ -75,7 +75,7 @@ export default function Content({
 }: ContentProps) {
   const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
 
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
 
@@ -148,12 +148,12 @@ export default function Content({
           // A token scopes the viewer to this one invoice — the list requires
           // a real session, so sending a token viewer there is a login wall.
           // Omit the back link entirely for token viewers.
-          token ? undefined : url.forRouter(`/${SUBAPP_CODES.invoices}`)
+          token ? undefined : scope.forRouter(`/${SUBAPP_CODES.invoices}`)
         }
         actions={
           <Button asChild variant="ink-outline" size="sm">
             <a
-              href={url.forBrowser(
+              href={scope.forBrowser(
                 `/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
               )}>
               <MdOutlineFileDownload className="text-base mr-1" />
@@ -169,7 +169,7 @@ export default function Content({
           <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
             <Invoice
               invoiceId={id}
-              downloadURL={url.forBrowser(
+              downloadURL={scope.forBrowser(
                 `/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
               )}
             />

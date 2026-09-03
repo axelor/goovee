@@ -14,7 +14,7 @@ import {revalidatePath} from 'next/cache';
  *
  * What the builders in ./scope call, so the lint exemption for
  * `revalidatePath` stays in this file alone. Callers that hold a workspace
- * should reach for `ServerWorkspaceURLs.revalidate`, which derives the path
+ * should reach for `ServerWorkspaceScope.revalidate`, which derives the path
  * instead of taking one.
  */
 export function revalidateRoutePath(

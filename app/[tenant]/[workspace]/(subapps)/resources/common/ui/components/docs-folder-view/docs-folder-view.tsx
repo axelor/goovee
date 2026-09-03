@@ -58,21 +58,21 @@ export function DocsFolderView({
   uploadParent?: {id: string; fileName?: string | null} | null;
   folderParent?: {id: string; fileName?: string | null} | null;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [folderOpen, setFolderOpen] = useState(false);
 
-  const docsRoot = url.forRouter(`/${SUBAPP_CODES.resources}`);
+  const docsRoot = scope.forRouter(`/${SUBAPP_CODES.resources}`);
   const folderHref = (id: string) =>
-    url.forRouter(`/${SUBAPP_CODES.resources}/folder/${id}`);
+    scope.forRouter(`/${SUBAPP_CODES.resources}/folder/${id}`);
   const viewHref = (id: string) =>
-    url.forRouter(`/${SUBAPP_CODES.resources}/${id}`);
+    scope.forRouter(`/${SUBAPP_CODES.resources}/${id}`);
   // Real download endpoint (streams the file), gated on the DMS file actually
   // having a metaFile — the row action used to just re-open the viewer.
   const downloadHref = (file: DmsFile) =>
     file.metaFile?.id
-      ? url.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${file.id}`)
+      ? scope.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${file.id}`)
       : null;
 
   const lastUpdated = useMemo(() => {

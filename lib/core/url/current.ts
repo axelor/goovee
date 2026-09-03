@@ -8,7 +8,7 @@ import {
   isUsableSlug,
   ownsAddressedOrigin,
   tenantURLs,
-  type ServerWorkspaceURLs,
+  type ServerWorkspaceScope,
 } from './scope';
 
 /**
@@ -32,7 +32,7 @@ import {
  *   Those have no address to read and must name the workspace themselves
  *   through `tenantURLs(id).workspace(slug)`.
  */
-export async function currentWorkspace(): Promise<ServerWorkspaceURLs | null> {
+export async function currentWorkspace(): Promise<ServerWorkspaceScope | null> {
   const requestHeaders = await headers();
 
   const tenantId = requestHeaders.get(TENANT_HEADER);

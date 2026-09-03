@@ -60,7 +60,7 @@ export function ForumFeed({
   canPost?: boolean;
   commentsEnabled: boolean;
 }) {
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
   const activeSort = searchParams.get('sort') || 'new';
@@ -74,7 +74,7 @@ export function ForumFeed({
     memberGroupIDs,
   });
 
-  const postBase = url.forRouter(`/${SUBAPP_CODES.forum}/post`);
+  const postBase = scope.forRouter(`/${SUBAPP_CODES.forum}/post`);
 
   return (
     <div className="flex flex-col gap-5">
@@ -89,7 +89,9 @@ export function ForumFeed({
           {/* Desktop path to the notification settings — the page was otherwise
               only reachable from the mobile menu. */}
           <Link
-            href={url.forRouter(`/${SUBAPP_CODES.forum}/manage-notifications`)}
+            href={scope.forRouter(
+              `/${SUBAPP_CODES.forum}/manage-notifications`,
+            )}
             className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] border border-ink-150 text-ink-700 text-[13.5px] font-bold hover:bg-ink-25 transition-colors">
             <MdOutlineNotifications className="size-4" />
             <span className="hidden sm:inline">{i18n.t('Notifications')}</span>
@@ -204,7 +206,7 @@ export function ForumFeed({
                     {stripHtml(post.content)}
                   </p>
                 )}
-                <PostImages post={post} workspaceURI={url.forRouter()} />
+                <PostImages post={post} workspaceURI={scope.forRouter()} />
                 <div className="mt-3 flex items-center gap-2.5 text-[12px] text-ink-500">
                   <span className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[10px] font-bold shrink-0">
                     {avatar ? (

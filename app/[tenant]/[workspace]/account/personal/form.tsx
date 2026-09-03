@@ -168,7 +168,7 @@ export default function Personal({
 }) {
   const pathname = usePathname();
   const {toast} = useToast();
-  const {tenant, url} = useWorkspace();
+  const {tenant, scope} = useWorkspace();
   const {
     uploads,
     upload,
@@ -255,7 +255,7 @@ export default function Personal({
 
           const loginURL = getLoginURL({
             callbackurl: pathname,
-            workspaceURI: url.forRouter(),
+            workspaceURI: scope.forRouter(),
             tenant,
           });
           window.location.href = withBasePath(loginURL);

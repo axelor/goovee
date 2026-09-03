@@ -75,7 +75,7 @@ export function ShopCart({
   displayPrices?: boolean;
 }) {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const pathname = usePathname() ?? '';
   const {cart, loaded: cartLoaded, removeItem, updateQuantity} = useCart();
   const {data: session} = authClient.useSession();
@@ -207,11 +207,11 @@ export function ShopCart({
     await removeItem(product.id);
   };
 
-  const catalogHref = url.forRouter(`/${SUBAPP_CODES.shop}`);
-  const checkoutHref = url.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`);
+  const catalogHref = scope.forRouter(`/${SUBAPP_CODES.shop}`);
+  const checkoutHref = scope.forRouter(`/${SUBAPP_CODES.shop}/cart/checkout`);
   const loginHref = `/auth/login?callbackurl=${encodeURIComponent(
     pathname,
-  )}&workspaceURI=${encodeURIComponent(url.forRouter())}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(
+  )}&workspaceURI=${encodeURIComponent(scope.forRouter())}&${SEARCH_PARAMS.TENANT_ID}=${encodeURIComponent(
     tenant,
   )}`;
 
@@ -388,7 +388,7 @@ function CartLine({
   removeLabel: string;
   displayPrices?: boolean;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const product = item.computedProduct.product;
   const price = item.computedProduct.price;
   const portalCat = product?.portalCategorySet?.[0];
@@ -400,7 +400,7 @@ function CartLine({
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
 
-  const productHref = url.forRouter(
+  const productHref = scope.forRouter(
     `/${SUBAPP_CODES.shop}/product/${encodeURIComponent(product.slug)}`,
   );
 

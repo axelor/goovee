@@ -33,7 +33,7 @@ export function Search({
   className?: string;
 }) {
   const router = useRouter();
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -83,7 +83,7 @@ export function Search({
   );
 
   const handleRedirection = (id: string) => {
-    router.push(url.forRouter(`/${SUBAPP_CODES.directory}/entry/${id}`));
+    router.push(scope.forRouter(`/${SUBAPP_CODES.directory}/entry/${id}`));
   };
 
   return (

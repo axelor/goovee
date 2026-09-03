@@ -55,14 +55,14 @@ function Logo({
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
-    ? url.forBrowser('/api/workspace/logo/image')
+    ? scope.forBrowser('/api/workspace/logo/image')
     : withBasePath(DEFAULT_LOGO_URL);
 
   return (
-    <Link href={url.forRouter()}>
+    <Link href={scope.forRouter()}>
       <div className="flex items-center justify-start">
         <div className="w-24 aspect-[2/1] relative">
           <Image
@@ -195,7 +195,7 @@ export default function Header({
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   const {visible, loading} = useNavigationVisibility();
   const res: any = useResponsive();
   const env = useEnvironment();
@@ -291,7 +291,7 @@ export default function Header({
                       href={
                         isExternalChat
                           ? mattermostUrl
-                          : url.forRouter(`/${code}${page}`)
+                          : scope.forRouter(`/${code}${page}`)
                       }
                       target={isExternalChat ? '_blank' : undefined}
                       rel={isExternalChat ? 'noopener noreferrer' : undefined}
@@ -314,10 +314,10 @@ export default function Header({
             {user && (
               <>
                 <div className="w-px h-6 bg-ink-100 mx-1.5" />
-                <ProfilePill baseURL={url.forRouter()} tenant={tenant} />
+                <ProfilePill baseURL={scope.forRouter()} tenant={tenant} />
               </>
             )}
-            {!user && <Account baseURL={url.forRouter()} tenant={tenant} />}
+            {!user && <Account baseURL={scope.forRouter()} tenant={tenant} />}
           </div>
         )}
       </div>
@@ -326,7 +326,7 @@ export default function Header({
         <div className="bg-white text-ink-900 z-10 px-7 py-4 hidden lg:flex items-center justify-between border-b border-ink-100 max-w-full gap-10">
           <div>
             {Boolean(workspaces?.length) && user && (
-              <Select defaultValue={url.forRouter()} onValueChange={redirect}>
+              <Select defaultValue={scope.forRouter()} onValueChange={redirect}>
                 <SelectTrigger className="grow max-w-100 overflow-hidden p-0 border-0 !bg-transparent h-auto">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
@@ -359,7 +359,7 @@ export default function Header({
                         orientation="vertical"
                       />
                     )}
-                    <Link href={url.forRouter(`/${code}${page}`)}>
+                    <Link href={scope.forRouter(`/${code}${page}`)}>
                       <div className="font-medium text-ink-700 hover:text-royal transition-colors">
                         {i18n.t(name)}
                       </div>

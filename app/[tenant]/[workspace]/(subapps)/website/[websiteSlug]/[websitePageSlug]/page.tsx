@@ -80,7 +80,7 @@ export default async function Page(props: {
 
   if (!access.ok) return denyPage(access);
 
-  const workspaceURI = access.url.forRouter();
+  const workspaceURI = access.scope.forRouter();
 
   const {user} = access;
   const {client} = access.tenant;
@@ -102,7 +102,7 @@ export default async function Page(props: {
   if (!websitePage) {
     return (
       <NotFound
-        homePageUrl={access.url.forRouter(`/${SUBAPP_CODES.website}`)}
+        homePageUrl={access.scope.forRouter(`/${SUBAPP_CODES.website}`)}
       />
     );
   }

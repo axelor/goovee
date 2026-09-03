@@ -39,7 +39,7 @@ async function Checkout({
   if (!config) return notFound();
 
   if (!config?.confirmOrder) {
-    redirect(access.url.forRouter('/shop/cart'));
+    redirect(access.scope.forRouter('/shop/cart'));
   }
 
   const [orderSubapp, hidePriceAndPurchase, labels] = await Promise.all([

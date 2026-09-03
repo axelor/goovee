@@ -9,6 +9,6 @@ import type {DmsFile} from '@/subapps/resources/common/types';
 
 /** Where the file behind a record is served from. */
 export function useFileURL(record: DmsFile): string {
-  const {url} = useWorkspace();
-  return url.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${record?.id}`);
+  const {scope} = useWorkspace();
+  return scope.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${record?.id}`);
 }

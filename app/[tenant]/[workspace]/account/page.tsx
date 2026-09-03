@@ -7,8 +7,8 @@ import {currentWorkspace} from '@/lib/core/url/current';
 import {ROUTES} from './common/constants';
 
 export default async function Page() {
-  const url = await currentWorkspace();
-  if (!url) notFound();
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
-  redirect(url.forRouter(`/account/${ROUTES.personal}`));
+  redirect(scope.forRouter(`/account/${ROUTES.personal}`));
 }

@@ -3,8 +3,8 @@ import {notFound, redirect} from 'next/navigation';
 import {currentWorkspace} from '@/lib/core/url/current';
 
 export default async function Page() {
-  const url = await currentWorkspace();
-  if (!url) notFound();
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
-  redirect(url.forRouter('/account/apps'));
+  redirect(scope.forRouter('/account/apps'));
 }

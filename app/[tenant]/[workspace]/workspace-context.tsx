@@ -10,7 +10,7 @@ import {type Workspace} from '@/orm/workspace';
 import {useEnvironment} from '@/environment';
 import {
   workspaceURLsFrom,
-  type WorkspaceURLs,
+  type WorkspaceScope,
 } from '@/lib/core/url/workspace-urls';
 
 export const WorkspaceContext = React.createContext<{
@@ -25,13 +25,13 @@ export const WorkspaceContext = React.createContext<{
   workspaceURL: string;
   workspaceID: Workspace['id'];
   /** Every address below this workspace. Reach for this, not the strings. */
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
 }>({
   tenant: '',
   workspace: DEFAULT_WORKSPACE,
   workspaceURL: '',
   workspaceID: '',
-  url: workspaceURLsFrom({
+  scope: workspaceURLsFrom({
     tenantId: '',
     workspace: DEFAULT_WORKSPACE,
     visitorPrefix: '',
@@ -69,7 +69,7 @@ export function WorkspaceProvider({
    * how its tenant is routed. `forExternal()` with no sub-path is the stored
    * workspace URL, which is why `workspaceURL` is read off it rather than
    * joined a second way. */
-  const url = useMemo(
+  const scope = useMemo(
     () =>
       workspaceURLsFrom({
         tenantId: tenant,
@@ -84,11 +84,11 @@ export function WorkspaceProvider({
     () => ({
       tenant,
       workspace,
-      workspaceURL: url.forExternal(),
+      workspaceURL: scope.forExternal(),
       workspaceID,
-      url,
+      scope,
     }),
-    [tenant, workspace, workspaceID, url],
+    [tenant, workspace, workspaceID, scope],
   );
 
   useEffect(() => {

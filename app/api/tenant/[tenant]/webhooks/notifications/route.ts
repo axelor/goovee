@@ -13,8 +13,8 @@ import NotificationManager, {
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import {tenantURLs} from '@/lib/core/url/scope';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import {tenantURLs, type ServerWorkspaceScope} from '@/lib/core/url/scope';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
@@ -155,7 +155,7 @@ async function buildNotificationMail({
   mail,
   app,
   entity,
-  url,
+  scope,
   sender,
 }: {
   user: User;
@@ -163,7 +163,7 @@ async function buildNotificationMail({
   mail?: Mail | null;
   entity: {id: string; link: WorkspaceSubPath};
   app: App;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   sender: string;
 }): Promise<MailNotificationData> {
   const html =
@@ -172,7 +172,7 @@ async function buildNotificationMail({
       user,
       tenantId,
       app,
-      route: url.forExternal(entity.link),
+      route: scope.forExternal(entity.link),
       sender,
     }));
 
@@ -270,9 +270,9 @@ async function sendNotifications(data: {
      * wrong, so both channels are dropped rather than sending a link to a
      * workspace the router will not resolve, and the row is named in the log
      * because only an operator can correct it. */
-    let url;
+    let scope: ServerWorkspaceScope;
     try {
-      url = tenantURLs(tenantId).workspaceByKey(workspace.url);
+      scope = tenantURLs(tenantId).workspaceByKey(workspace.url);
     } catch (err) {
       console.error(
         `[NOTIFICATIONS] Workspace '${workspace.url}' of tenant '${tenantId}' has no addressable slug; notifications for ${code}/${recordId} were not sent`,
@@ -284,7 +284,15 @@ async function sendNotifications(data: {
     /* Both bound their own concurrency and report their own failures. */
     await Promise.all([
       mailService?.notifyAll(subscribers, ({user, entity}) =>
-        buildNotificationMail({user, tenantId, mail, entity, app, url, sender}),
+        buildNotificationMail({
+          user,
+          tenantId,
+          mail,
+          entity,
+          app,
+          scope,
+          sender,
+        }),
       ),
       notifyAll(subscribers, ({user, entity}) =>
         buildSystemNotification({

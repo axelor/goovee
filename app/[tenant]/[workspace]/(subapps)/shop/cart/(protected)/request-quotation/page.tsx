@@ -30,7 +30,7 @@ export default async function Page(props: {
   if (!config) return notFound();
 
   if (!config?.requestQuotation) {
-    redirect(access.url.forRouter('/shop/cart'));
+    redirect(access.scope.forRouter('/shop/cart'));
   }
 
   const quotationSubapp = await findSubappAccess({

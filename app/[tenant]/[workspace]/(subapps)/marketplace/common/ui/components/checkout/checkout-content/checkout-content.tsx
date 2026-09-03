@@ -44,8 +44,8 @@ function formatPrice(
  * charged. */
 export function CheckoutContent({config}: Props) {
   const router = useRouter();
-  const {url} = useWorkspace();
-  const marketplaceBase = url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const {scope} = useWorkspace();
+  const marketplaceBase = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
   const {cart, loaded, clearCart} = useMarketplaceCart();
   const {toast} = useToast();
   const productIds = cart.items.map(item => item.productId);

@@ -10,7 +10,7 @@ import {SUBAPP_CODES} from '@/constants';
 import type {DmsFile} from '@/subapps/resources/common/types';
 
 export function ImageViewer({record}: {record: DmsFile}) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   /*
    * A vector image is one file at every size, so it is asked for as it is. The
@@ -24,7 +24,7 @@ export function ImageViewer({record}: {record: DmsFile}) {
     <div className="container">
       <Image
         className="object-cover max-w-100 w-full h-auto"
-        src={url.forBrowser(
+        src={scope.forBrowser(
           `/${SUBAPP_CODES.resources}/api/file/${record?.id}`,
         )}
         alt="Viewer"

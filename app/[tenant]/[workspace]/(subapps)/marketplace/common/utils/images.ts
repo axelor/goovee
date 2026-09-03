@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 
 /**
  * URL for a marketplace product screenshot, served by the marketplace image
@@ -11,15 +11,15 @@ import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
  * src, which Next.js does not rewrite.
  */
 export function getProductScreenshotURL({
-  url,
+  scope,
   productId,
   fileId,
 }: {
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   productId: string;
   fileId: string;
 }) {
-  return url.forBrowser(
+  return scope.forBrowser(
     `/${SUBAPP_CODES.marketplace}/api/products/${productId}/screenshots/${fileId}`,
   );
 }

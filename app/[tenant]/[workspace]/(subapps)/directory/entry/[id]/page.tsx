@@ -45,7 +45,7 @@ export default async function Page(props: {
     <div className="bg-ink-25 min-h-full">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <Link
-          href={access.url.forRouter(`/${SUBAPP_CODES.directory}`)}
+          href={access.scope.forRouter(`/${SUBAPP_CODES.directory}`)}
           className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700">
           <IoArrowBackOutline className="h-4 w-4" />
           {await t('Back to Directory')}

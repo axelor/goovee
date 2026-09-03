@@ -11,13 +11,13 @@ import {Link} from '@/ui/components/link';
 import {Badge} from '@/ui/components';
 export function Notification() {
   const {unreadNotifications} = usePushNotifications();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const count = unreadNotifications.length;
 
   return (
     <Link
-      href={url.forRouter('/notifications')}
+      href={scope.forRouter('/notifications')}
       className="inline-flex relative">
       <MdNotificationsNone className="cursor-pointer text-foreground text-2xl" />
       {count > 0 && (

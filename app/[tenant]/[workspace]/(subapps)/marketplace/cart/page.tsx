@@ -23,7 +23,9 @@ export default async function CartPage(props: {
   });
   if (!access.ok) return denyPage(access);
 
-  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const marketplaceBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
 
   return (
     <div className="container mx-auto px-4 py-6">

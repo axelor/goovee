@@ -7,7 +7,7 @@ import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import type {User} from '@/types';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsConfig} from '@/subapps/news/common/orm/config';
@@ -214,12 +214,12 @@ export async function CommentsWrapper({
   config,
   user,
   news,
-  url,
+  scope,
 }: {
   config: NewsConfig | Cloned<NewsConfig>;
   user?: User;
   news: NewsItem;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
 }) {
   const title = await t(COMMENTS);
   const isDisabled = !user ? true : false;
@@ -249,7 +249,7 @@ export async function CommentsWrapper({
         commentField="note"
         createComment={createComment}
         fetchComments={fetchComments}
-        attachmentDownloadUrl={url.forBrowser(
+        attachmentDownloadUrl={scope.forBrowser(
           `/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`,
         )}
       />

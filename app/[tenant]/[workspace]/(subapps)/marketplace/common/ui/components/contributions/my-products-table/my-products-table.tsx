@@ -76,7 +76,7 @@ export function MyProductsTable({
   newListingCurrency,
   inAti,
 }: Props) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -268,7 +268,7 @@ export function MyProductsTable({
                     />
                     {product.currentVersion ? (
                       <Link
-                        href={url.forRouter(
+                        href={scope.forRouter(
                           `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
                         )}
                         title={i18n.t('View live')}
@@ -277,7 +277,7 @@ export function MyProductsTable({
                       </Link>
                     ) : (
                       <Link
-                        href={url.forRouter(
+                        href={scope.forRouter(
                           `/${SUBAPP_CODES.marketplace}/products/${product.slug}?preview=1`,
                         )}
                         title={i18n.t('Preview')}

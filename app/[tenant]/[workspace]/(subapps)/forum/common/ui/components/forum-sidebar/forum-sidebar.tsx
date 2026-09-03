@@ -17,8 +17,8 @@ export function ForumSidebar({
   stats: {discussions?: number; groups?: number; myGroups?: number};
   trending?: Trending[];
 }) {
-  const {url} = useWorkspace();
-  const postBase = url.forRouter(`/${SUBAPP_CODES.forum}/post`);
+  const {scope} = useWorkspace();
+  const postBase = scope.forRouter(`/${SUBAPP_CODES.forum}/post`);
 
   const statItems = [
     {label: i18n.t('Discussions'), value: stats.discussions ?? 0},

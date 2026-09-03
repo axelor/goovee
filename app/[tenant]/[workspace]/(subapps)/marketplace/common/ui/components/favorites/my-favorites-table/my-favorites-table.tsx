@@ -53,7 +53,7 @@ export function MyFavoritesTable({
   marketplaceBase,
   filtered = false,
 }: Props) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -213,7 +213,7 @@ export function MyFavoritesTable({
                 <TableCell className="p-3">
                   <div className="flex justify-end items-center gap-1">
                     <Link
-                      href={url.forRouter(
+                      href={scope.forRouter(
                         `/${SUBAPP_CODES.marketplace}/products/${favorite.slug}`,
                       )}
                       title={i18n.t('View live')}

@@ -38,7 +38,7 @@ type Props = {
 const Content = ({quotations, pageInfo}: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const [input, setInput] = useSearchQuery();
 
@@ -99,7 +99,7 @@ const Content = ({quotations, pageInfo}: Props) => {
                     onSelect={() => setSelectedId(q.id)}
                     onOpen={() =>
                       router.push(
-                        url.forRouter(`/${SUBAPP_CODES.quotations}/${q.id}`),
+                        scope.forRouter(`/${SUBAPP_CODES.quotations}/${q.id}`),
                       )
                     }
                   />
@@ -137,7 +137,7 @@ const Content = ({quotations, pageInfo}: Props) => {
           {selected ? (
             <QuotationPreview
               quote={selected}
-              detailHref={url.forRouter(
+              detailHref={scope.forRouter(
                 `/${SUBAPP_CODES.quotations}/${selected.id}`,
               )}
             />

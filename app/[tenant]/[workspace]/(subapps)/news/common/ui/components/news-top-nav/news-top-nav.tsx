@@ -49,9 +49,9 @@ export function NewsTopNav({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
-  const newsBase = url.forRouter(`/${SUBAPP_CODES.news}`);
+  const newsBase = scope.forRouter(`/${SUBAPP_CODES.news}`);
   // Only look at the path *after* the news base, so a tenant or workspace segment
   // that happens to be "article" or equal to a category slug can't hide the nav
   // or light up the wrong pill.

@@ -59,8 +59,8 @@ export default async function Layout(props: {
 
   const registeredCount = (registeredResult?.events ?? []).length;
 
-  const allHref = access.url.forRouter(`/${SUBAPP_CODES.events}`);
-  const mineHref = access.url.forRouter(
+  const allHref = access.scope.forRouter(`/${SUBAPP_CODES.events}`);
+  const mineHref = access.scope.forRouter(
     `/${SUBAPP_CODES.events}/my-registrations`,
   );
 

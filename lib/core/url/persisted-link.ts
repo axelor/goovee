@@ -8,7 +8,7 @@ import {absoluteRoot} from './absolute';
 
 /*
  * The read half of a stored link. A row is written as the route-tree path that
- * `ServerWorkspaceURLs.routePath` produces, and is rendered for its reader
+ * `ServerWorkspaceScope.routePath` produces, and is rendered for its reader
  * here — so this file holds only the direction that has to tolerate the shapes
  * older rows were written in.
  */

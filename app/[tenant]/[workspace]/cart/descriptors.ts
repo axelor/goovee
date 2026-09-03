@@ -25,7 +25,7 @@ export const CART_DESCRIPTORS: CartSummary[] = [
   {
     code: SUBAPP_CODES.shop,
     label: () => i18n.t('Shop'),
-    href: url => url.forRouter('/shop/cart'),
+    href: scope => scope.forRouter('/shop/cart'),
     storageKey: (workspaceURL, userId) =>
       cartStorageKey(SUBAPP_CODES.shop, workspaceURL, userId),
     getCount: shopCartCount,
@@ -34,7 +34,7 @@ export const CART_DESCRIPTORS: CartSummary[] = [
   {
     code: SUBAPP_CODES.marketplace,
     label: () => i18n.t('Marketplace'),
-    href: url => url.forRouter(`/${SUBAPP_CODES.marketplace}/cart`),
+    href: scope => scope.forRouter(`/${SUBAPP_CODES.marketplace}/cart`),
     storageKey: (workspaceURL, userId) =>
       cartStorageKey(SUBAPP_CODES.marketplace, workspaceURL, userId),
     getCount: marketplaceCartCount,

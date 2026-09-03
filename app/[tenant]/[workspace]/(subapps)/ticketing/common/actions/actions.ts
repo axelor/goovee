@@ -252,7 +252,9 @@ export async function mutate(
     }
 
     if (ticket.project?.id) {
-      access.url.revalidate(`/ticketing/projects/${ticket.project.id}/tickets`);
+      access.scope.revalidate(
+        `/ticketing/projects/${ticket.project.id}/tickets`,
+      );
     }
 
     return {
@@ -1022,7 +1024,7 @@ export const createComment: CreateComment = async props => {
           await sendCommentMail({
             comment,
             parentComment,
-            ticketLink: access.url.forExternal(
+            ticketLink: access.scope.forExternal(
               `/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
             ),
             projectName: ticket.project?.name || '',

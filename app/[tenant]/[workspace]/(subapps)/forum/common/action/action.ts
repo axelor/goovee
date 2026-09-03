@@ -141,7 +141,7 @@ export async function exitGroup({id, groupID}: ExitGroupInput) {
         version: memberGroup.version,
       })
       .then(clone);
-    access.url.revalidate(`/${SUBAPP_CODES.forum}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -203,7 +203,7 @@ export async function joinGroup({groupID, userId}: JoinGroupInput) {
       })
       .then(clone);
 
-    access.url.revalidate(`/${SUBAPP_CODES.forum}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -271,7 +271,7 @@ export async function saveGroupNotifications(
     }
   }
 
-  access.url.revalidate(`/${SUBAPP_CODES.forum}`);
+  access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
 
   if (failedIds.length) {
     return {
@@ -375,7 +375,7 @@ export async function addPost(input: AddPostInput) {
 
     if (!('error' in subscribers)) {
       const postSubPath: WorkspaceSubPath = `/${SUBAPP_CODES.forum}/post/${post.id}`;
-      const postLink = access.url.forExternal(postSubPath);
+      const postLink = access.scope.forExternal(postSubPath);
 
       const notificationRecievers = subscribers.filter(
         sub => sub.member?.id !== user.id, // exclude the post author
@@ -429,7 +429,7 @@ export async function addPost(input: AddPostInput) {
         );
       }
     }
-    access.url.revalidate(`/${SUBAPP_CODES.forum}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.forum}`);
     return {success: true, data: clone(post)};
   } catch (error) {
     return {
@@ -645,7 +645,7 @@ export const createComment: CreateComment = async props => {
         });
 
         if (!('error' in subscribers)) {
-          const postLink = access.url.forExternal(
+          const postLink = access.scope.forExternal(
             `/${SUBAPP_CODES.forum}/post/${post.id}`,
           );
 

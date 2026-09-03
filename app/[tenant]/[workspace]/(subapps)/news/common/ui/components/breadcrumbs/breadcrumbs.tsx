@@ -31,7 +31,7 @@ export const Breadcrumbs = ({
   items: BreadcrumbItem[];
   title: string;
 }) => {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const generateRoute = (index: number) => {
     return items
@@ -46,7 +46,7 @@ export const Breadcrumbs = ({
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={url.forBrowser('/news')}
+              href={scope.forBrowser('/news')}
               className="text-xs font-normal text-stone-400">
               {i18n.t(NEWS)}
             </BreadcrumbLink>
@@ -57,7 +57,7 @@ export const Breadcrumbs = ({
               <React.Fragment key={item.id}>
                 <BreadcrumbItem>
                   <BreadcrumbLink
-                    href={url.forBrowser(`/news/${generateRoute(i)}`)}
+                    href={scope.forBrowser(`/news/${generateRoute(i)}`)}
                     className="text-xs font-normal text-stone-400">
                     {item.title}
                   </BreadcrumbLink>

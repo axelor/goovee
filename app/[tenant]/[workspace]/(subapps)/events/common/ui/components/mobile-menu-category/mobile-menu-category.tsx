@@ -36,7 +36,7 @@ export function MobileCategories({
   const openSidebar = useCallback(() => setOpen(true), []);
   const closeSidebar = useCallback(() => setOpen(false), []);
   const router = useRouter();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {update} = useSearchParams();
 
   const EventItems: AccordionMenu[] = [
@@ -84,7 +84,7 @@ export function MobileCategories({
   }) => {
     if (level !== 0) {
       router.push(
-        url.forRouter(
+        scope.forRouter(
           `/${SUBAPP_CODES.events}/${EVENTS.MY_REGISTRATIONS}?filter=${item.url}`,
         ),
       );

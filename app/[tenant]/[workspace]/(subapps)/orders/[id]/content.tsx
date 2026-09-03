@@ -64,7 +64,7 @@ const Content = ({order}: {order: DetailOrder}) => {
     deliveredAt: undefined,
   });
 
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
 
   const hideDiscount = saleOrderLineList?.every(
     item => parseFloat(String(item.discountAmount)) === 0,
@@ -87,12 +87,12 @@ const Content = ({order}: {order: DetailOrder}) => {
             <strong className="text-ink-900 tabular-nums">{inTaxTotal}</strong>
           </>
         }
-        backHref={url.forRouter(`/${SUBAPP_CODES.orders}`)}
+        backHref={scope.forRouter(`/${SUBAPP_CODES.orders}`)}
         actions={
           orderReport ? (
             <Button asChild variant="ink-outline" size="sm">
               <a
-                href={url.forBrowser(
+                href={scope.forBrowser(
                   `/${SUBAPP_CODES.orders}/api/order/${id}/attachment`,
                 )}>
                 <MdOutlineFileDownload className="text-base mr-1" />
@@ -201,7 +201,7 @@ const Content = ({order}: {order: DetailOrder}) => {
                   id: record.id,
                   label: record.invoiceId,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
-                  downloadURL: url.forBrowser(
+                  downloadURL: scope.forBrowser(
                     `/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`,
                   ),
                 }))}
@@ -215,7 +215,7 @@ const Content = ({order}: {order: DetailOrder}) => {
                   id: record.id,
                   label: record.stockMoveSeq,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
-                  downloadURL: url.forBrowser(
+                  downloadURL: scope.forBrowser(
                     `/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`,
                   ),
                 }))}

@@ -75,12 +75,12 @@ export default async function Layout(props: {
     notFound();
   }
 
-  const {user, tenant, url} = granted;
+  const {user, tenant, scope} = granted;
   const {client} = tenant;
   const $workspace = clone(granted.workspace);
 
   const tenantId = tenant.id;
-  const workspaceURI = url.forRouter();
+  const workspaceURI = scope.forRouter();
 
   const config = await getShellConfig($workspace.config.id, client);
 
@@ -165,7 +165,7 @@ export default async function Layout(props: {
   return (
     <WorkspaceProvider
       id={$workspace.id}
-      workspace={url.workspace}
+      workspace={scope.workspace}
       workspaceURI={workspaceURI}
       tenant={tenantId}
       theme={theme}>

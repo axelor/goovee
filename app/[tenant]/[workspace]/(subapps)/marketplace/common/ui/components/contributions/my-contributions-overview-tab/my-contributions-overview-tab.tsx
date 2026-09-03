@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import type {ID} from '@/types';
 import {Suspense} from 'react';
 import {
@@ -29,7 +29,7 @@ interface OverviewTabProps {
   client: Client;
   workspace: Workspace;
   config: MarketplaceConfig;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   tenantId: string;
 }
 
@@ -45,7 +45,7 @@ export function OverviewTab({
   client,
   workspace,
   config,
-  url,
+  scope,
   tenantId,
 }: OverviewTabProps) {
   const ctx = {client, workspace, config, mainPartnerId};
@@ -84,12 +84,12 @@ export function OverviewTab({
         </Suspense>
 
         <Suspense fallback={<PendingActionsSkeleton />}>
-          <PendingActions pending={pending} url={url} />
+          <PendingActions pending={pending} scope={scope} />
         </Suspense>
       </div>
 
       <Suspense fallback={<RecentActivitySkeleton />}>
-        <RecentActivity activity={activity} url={url} tenantId={tenantId} />
+        <RecentActivity activity={activity} scope={scope} tenantId={tenantId} />
       </Suspense>
     </div>
   );

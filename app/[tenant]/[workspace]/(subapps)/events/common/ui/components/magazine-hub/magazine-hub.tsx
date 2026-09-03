@@ -23,7 +23,7 @@ import {Link} from '@/ui/components/link';
 import {useSearchParams} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {withBasePath} from '@/lib/core/path/base-path';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import type {PageInfo} from '@/types';
 import type {ListEvent} from '@/subapps/events/common/orm/event';
 import {formatEventSchedule} from '@/subapps/events/common/utils/schedule';
@@ -82,7 +82,7 @@ export function MagazineHub({
   labels: MagazineHubLabels;
   searchAction: (args: {search: string}) => Promise<ListEvent[]>;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {update} = useSearchParams();
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -131,7 +131,7 @@ export function MagazineHub({
   const featured = page <= 1 ? (events[0] ?? null) : null;
   const grid = page <= 1 ? events.slice(1) : events;
 
-  const agendaHref = url.forRouter(`/${SUBAPP_CODES.events}/calendar`);
+  const agendaHref = scope.forRouter(`/${SUBAPP_CODES.events}/calendar`);
 
   const selectTab = (key: Tab) =>
     update(
@@ -250,7 +250,7 @@ export function MagazineHub({
                     {searchResults.map(event => (
                       <li key={event.id}>
                         <Link
-                          href={url.forRouter(
+                          href={scope.forRouter(
                             `/${SUBAPP_CODES.events}/${event.slug}`,
                           )}
                           onClick={() => setSearchOpen(false)}
@@ -461,18 +461,18 @@ export function MagazineHub({
 
 // ---- Helpers ---- //
 
-function getEventImageURL(event: ListEvent, url: WorkspaceURLs): string {
+function getEventImageURL(event: ListEvent, scope: WorkspaceScope): string {
   if (!event) return withBasePath(NO_IMAGE_URL);
   const categoryWithImage = event.eventCategorySet?.find(
     cat => cat.thumbnailImage?.id || cat.image?.id,
   );
   if (categoryWithImage) {
-    return url.forBrowser(
+    return scope.forBrowser(
       `/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`,
     );
   }
   if (event.eventImage?.id) {
-    return url.forBrowser(
+    return scope.forBrowser(
       `/${SUBAPP_CODES.events}/api/event/${event.slug}/image`,
     );
   }
@@ -512,11 +512,11 @@ function FeaturedCard({
   registeredBadge: string;
   isPast: boolean;
 }) {
-  const {url} = useWorkspace();
-  const imageURL = getEventImageURL(event, url);
+  const {scope} = useWorkspace();
+  const imageURL = getEventImageURL(event, scope);
   const days = daysUntil(event.eventStartDateTime);
   const category = event.eventCategorySet?.[0];
-  const detailHref = url.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
+  const detailHref = scope.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
 
   return (
     <Link
@@ -634,11 +634,11 @@ function MagazineCard({
   registeredBadge: string;
   isPast: boolean;
 }) {
-  const {url} = useWorkspace();
-  const imageURL = getEventImageURL(event, url);
+  const {scope} = useWorkspace();
+  const imageURL = getEventImageURL(event, scope);
   const days = daysUntil(event.eventStartDateTime);
   const category = event.eventCategorySet?.[0];
-  const detailHref = url.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
+  const detailHref = scope.forRouter(`/${SUBAPP_CODES.events}/${event.slug}`);
   const price = getPrice(event);
 
   return (

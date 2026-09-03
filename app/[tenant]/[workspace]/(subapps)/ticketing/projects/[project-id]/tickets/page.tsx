@@ -115,7 +115,9 @@ export default async function Page(props: {
 
   const hasFilter = FILTER_FIELDS.some(field => allowedFields.has(field));
 
-  const url = access.url.forRouter(`/ticketing/projects/${projectId}/tickets`);
+  const url = access.scope.forRouter(
+    `/ticketing/projects/${projectId}/tickets`,
+  );
   const pages = getPages(tickets, limit);
   return (
     <div className="bg-ink-25 min-h-full">
@@ -128,7 +130,7 @@ export default async function Page(props: {
                   <BreadcrumbLink
                     asChild
                     className="text-ink-500 cursor-pointer truncate text-sm">
-                    <Link href={access.url.forRouter('/ticketing')}>
+                    <Link href={access.scope.forRouter('/ticketing')}>
                       {await t('Projects')}
                     </Link>
                   </BreadcrumbLink>
@@ -141,7 +143,7 @@ export default async function Page(props: {
                     asChild
                     className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-sm">
                     <Link
-                      href={access.url.forRouter(
+                      href={access.scope.forRouter(
                         `/ticketing/projects/${projectId}`,
                       )}>
                       {project.name}
@@ -164,7 +166,7 @@ export default async function Page(props: {
           </div>
           <Button variant="royal" className="flex items-center gap-1.5" asChild>
             <Link
-              href={access.url.forRouter(
+              href={access.scope.forRouter(
                 `/ticketing/projects/${projectId}/tickets/create`,
               )}>
               <MdAdd className="size-5" />

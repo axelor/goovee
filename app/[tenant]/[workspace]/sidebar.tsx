@@ -54,7 +54,7 @@ export function Sidebar({
 }) {
   const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const {url, workspaceID} = useWorkspace();
+  const {scope, workspaceID} = useWorkspace();
   const env = useEnvironment();
   const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
   const pathname = usePathname();
@@ -85,11 +85,11 @@ export function Sidebar({
   // workspace — match it by id (fall back to URL), not the first in the list.
   const currentWorkspace =
     workspaces?.find(w => String(w.id) === String(workspaceID)) ??
-    workspaces?.find(w => w.href === url.forRouter());
+    workspaces?.find(w => w.href === scope.forRouter());
   const workspaceName: string = currentWorkspace?.name || APP_TITLE;
 
-  const isHomeActive = pathname === url.forRouter();
-  const isAccountActive = pathname?.startsWith(url.forRouter('/account'));
+  const isHomeActive = pathname === scope.forRouter();
+  const isAccountActive = pathname?.startsWith(scope.forRouter('/account'));
 
   const initials = getInitials(user?.name, user?.email);
 
@@ -121,7 +121,7 @@ export function Sidebar({
         </button>
         {!collapsed &&
           (hasMultipleWorkspaces ? (
-            <Select defaultValue={url.forRouter()} onValueChange={redirect}>
+            <Select defaultValue={scope.forRouter()} onValueChange={redirect}>
               <SelectTrigger className="grow max-w-full overflow-hidden p-0 border-0 !bg-transparent h-auto text-white hover:text-white focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="">
                   <div className="flex flex-col items-start leading-tight">
@@ -143,7 +143,7 @@ export function Sidebar({
               </SelectContent>
             </Select>
           ) : (
-            <Link href={url.forRouter()} className="min-w-0">
+            <Link href={scope.forRouter()} className="min-w-0">
               <div className="flex flex-col leading-tight">
                 <span className="font-bold text-base text-white truncate">
                   {workspaceName}
@@ -161,7 +161,7 @@ export function Sidebar({
         <TooltipProvider>
           {showHome && (
             <NavItem
-              href={url.forRouter()}
+              href={scope.forRouter()}
               icon="home"
               label={i18n.t('Home')}
               active={isHomeActive}
@@ -175,9 +175,9 @@ export function Sidebar({
               config?.chatDisplayTypeSelect === CHAT_TYPE.external;
             const href = isExternalChat
               ? mattermostUrl
-              : url.forRouter(`/${code}${page}`);
+              : scope.forRouter(`/${code}${page}`);
             const active = !isExternalChat
-              ? (pathname?.startsWith(url.forRouter(`/${code}`)) ?? false)
+              ? (pathname?.startsWith(scope.forRouter(`/${code}`)) ?? false)
               : false;
             return (
               <NavItem
@@ -197,7 +197,7 @@ export function Sidebar({
 
       {/* Footer — user avatar */}
       <Link
-        href={url.forRouter('/account')}
+        href={scope.forRouter('/account')}
         className={cn(
           'flex items-center gap-2.5 border-t border-white/10',
           'transition hover:bg-white/[0.06]',

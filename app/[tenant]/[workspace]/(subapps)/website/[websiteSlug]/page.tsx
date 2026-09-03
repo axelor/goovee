@@ -31,7 +31,7 @@ export default async function Layout(props: {
 
   if (!access.ok) return denyPage(access);
 
-  const workspaceURI = access.url.forRouter();
+  const workspaceURI = access.scope.forRouter();
 
   const {user} = access;
   const {client} = access.tenant;
@@ -67,13 +67,15 @@ export default async function Layout(props: {
 
   if (websitePageSlug) {
     redirect(
-      access.url.forRouter(
+      access.scope.forRouter(
         `/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
       ),
     );
   }
 
   return (
-    <NotFound homePageUrl={access.url.forRouter(`/${SUBAPP_CODES.website}`)} />
+    <NotFound
+      homePageUrl={access.scope.forRouter(`/${SUBAPP_CODES.website}`)}
+    />
   );
 }

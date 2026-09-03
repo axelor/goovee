@@ -19,7 +19,7 @@ export function MobileCategories({categories = []}: {categories?: Category[]}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const openSidebar = useCallback(() => setOpen(true), []);
   const closeSidebar = useCallback(() => setOpen(false), []);
@@ -49,7 +49,7 @@ export function MobileCategories({categories = []}: {categories?: Category[]}) {
     if (isCatalog) {
       router.replace(query ? `?${query}` : '?', {scroll: false});
     } else {
-      const shopHref = url.forRouter(`/${SUBAPP_CODES.shop}`);
+      const shopHref = scope.forRouter(`/${SUBAPP_CODES.shop}`);
       router.push(query ? `${shopHref}?${query}` : shopHref);
     }
     closeSidebar();

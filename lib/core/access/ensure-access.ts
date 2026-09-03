@@ -4,7 +4,7 @@ import 'server-only';
 import {getSession} from '@/auth';
 import {manager, type Tenant} from '@/tenant';
 import {currentWorkspace} from '@/lib/core/url/current';
-import type {ServerWorkspaceURLs} from '@/lib/core/url/scope';
+import type {ServerWorkspaceScope} from '@/lib/core/url/scope';
 import {findWorkspace, type Subapp, type Workspace} from '@/orm/workspace';
 import type {User} from '@/types';
 
@@ -35,7 +35,7 @@ type Granted<TAllowGuest extends boolean> = {
    * `tenantURLs(id).workspace(slug)` returns, reached without naming the
    * workspace a second time.
    */
-  url: ServerWorkspaceURLs;
+  scope: ServerWorkspaceScope;
 };
 
 type Denied = {
@@ -127,7 +127,7 @@ export async function ensureAccess({
       user,
       workspace,
       tenant,
-      url: scope,
+      scope,
     };
 
     return subapp ? {...granted, subapp} : granted;

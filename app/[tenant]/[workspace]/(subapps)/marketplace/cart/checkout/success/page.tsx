@@ -69,7 +69,9 @@ export default async function CheckoutSuccessPage(props: {
     orderId,
   });
 
-  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const marketplaceBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
@@ -121,7 +123,7 @@ export default async function CheckoutSuccessPage(props: {
                   {version?.id ? (
                     <Button asChild variant="ink-outline" size="sm">
                       <a
-                        href={access.url.forBrowser(
+                        href={access.scope.forBrowser(
                           `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
                         )}>
                         <Download size={14} className="mr-1" />

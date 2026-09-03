@@ -47,7 +47,7 @@ export async function getLocaleRedirectionURL(
   const {user} = access;
   const {client, config} = access.tenant;
   const workspaceURL = access.workspace.url;
-  const workspaceURI = access.url.forRouter();
+  const workspaceURI = access.scope.forRouter();
 
   const website = await findWebsiteBySlug({
     websiteSlug,

@@ -458,7 +458,7 @@ export function ForumDetail({
   isAuthor?: boolean;
   backHref: string;
 }) {
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
   // Voting only needs membership; writing comments also needs the workspace's
   // comment feature to be enabled (mirrors server enforcement in createComment).
   const canWriteComment = canComment && commentsEnabled;
@@ -489,14 +489,14 @@ export function ForumDetail({
   const group = post.forumGroup?.name;
   const groupId = post.forumGroup?.id;
   const groupHref = groupId
-    ? url.forRouter(`/${SUBAPP_CODES.forum}/group/${groupId}`)
+    ? scope.forRouter(`/${SUBAPP_CODES.forum}/group/${groupId}`)
     : backHref;
   const date = post.postDateT || post.createdOn;
   const replyTotal = totalMainThread || replyCount;
 
   // Download URL for a comment attachment (streamed via the forum route).
   const commentAttUrl = (fileId: string) =>
-    url.forBrowser(
+    scope.forBrowser(
       `/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}/${fileId}`,
     );
 
@@ -793,7 +793,7 @@ export function ForumDetail({
               post.attachmentList.length > 0 &&
               (() => {
                 const attUrl = (fileId: string) =>
-                  url.forBrowser(
+                  scope.forBrowser(
                     `/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
                   );
                 // Skip attachments whose metaFile is missing (deleted/orphaned

@@ -35,10 +35,10 @@ export default async function EditProductPage(props: {
   const {type} = await props.searchParams;
   const ctx = await loadEditContext({tenant, workspace});
 
-  const returnHref = ctx.access.url.forRouter(
+  const returnHref = ctx.access.scope.forRouter(
     `/${SUBAPP_CODES.marketplace}/my-account/contributions?tab=products`,
   );
-  const base = ctx.access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const base = ctx.access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const isNew = id === 'new';
   const defaultType =

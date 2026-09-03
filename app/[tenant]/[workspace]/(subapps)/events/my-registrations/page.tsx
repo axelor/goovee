@@ -13,7 +13,7 @@ import {
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
@@ -131,7 +131,7 @@ export default async function Page(context: {
           workspace={workspace}
           user={user}
           client={client}
-          url={access.url}
+          scope={access.scope}
           filter={filter}
         />
       </Suspense>
@@ -143,14 +143,14 @@ async function MyRegistrations({
   workspace,
   user,
   client,
-  url,
+  scope,
   filter,
   filters,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   filter: FilterKey;
   filters: Filters;
 }) {
@@ -202,8 +202,8 @@ async function MyRegistrations({
   const next =
     filter === 'upcoming' && filters.page === 1 ? list[0] : undefined;
 
-  const baseHref = url.forRouter(`/${SUBAPP_CODES.events}/my-registrations`);
-  const allEventsHref = url.forRouter(`/${SUBAPP_CODES.events}`);
+  const baseHref = scope.forRouter(`/${SUBAPP_CODES.events}/my-registrations`);
+  const allEventsHref = scope.forRouter(`/${SUBAPP_CODES.events}`);
 
   /* Links keep whatever the user is filtering by. Switching tab returns to the
    * first page, since a page number only means something within one tab. */
@@ -274,7 +274,7 @@ async function MyRegistrations({
       {next && (
         <NextEventSpotlight
           event={next}
-          detailHref={url.forRouter(`/${SUBAPP_CODES.events}/${next.slug}`)}
+          detailHref={scope.forRouter(`/${SUBAPP_CODES.events}/${next.slug}`)}
         />
       )}
 
@@ -350,7 +350,7 @@ async function MyRegistrations({
             <RegistrationCard
               key={event.id}
               event={event}
-              detailHref={url.forRouter(
+              detailHref={scope.forRouter(
                 `/${SUBAPP_CODES.events}/${event.slug}`,
               )}
               past={filter === 'past'}

@@ -112,7 +112,7 @@ export async function create(formData: FormData) {
       })
       .then(clone);
 
-    access.url.revalidate(`/${SUBAPP_CODES.resources}`);
+    access.scope.revalidate(`/${SUBAPP_CODES.resources}`);
 
     return {
       success: true,

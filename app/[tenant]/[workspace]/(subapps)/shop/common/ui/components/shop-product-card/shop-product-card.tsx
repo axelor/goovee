@@ -49,7 +49,7 @@ export function ShopProductCard({
   hidePriceAndPurchase?: boolean;
   displayPrices?: boolean;
 }) {
-  const {tenant, url} = useWorkspace();
+  const {tenant, scope} = useWorkspace();
   const {loaded: cartLoaded, updateQuantity, getProductQuantity} = useCart();
   const {toast} = useToast();
 
@@ -76,8 +76,8 @@ export function ShopProductCard({
   const hue = getCategoryHue(categoryName);
 
   const href = category?.slug
-    ? url.forRouter(`/shop/category/${category.slug}/product/${p.slug}`)
-    : url.forRouter(`/shop/product/${p.slug}`);
+    ? scope.forRouter(`/shop/category/${category.slug}/product/${p.slug}`)
+    : scope.forRouter(`/shop/product/${p.slug}`);
 
   const handleAdd = async (e: React.MouseEvent) => {
     // Card is wrapped in <Link> — stop the click from navigating to the

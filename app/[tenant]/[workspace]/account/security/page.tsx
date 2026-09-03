@@ -8,8 +8,8 @@ export default async function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const searchParams = await props.searchParams;
-  const url = await currentWorkspace();
-  if (!url) notFound();
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
   const sp = new URLSearchParams();
   for (const [key, value] of Object.entries(searchParams ?? {})) {
@@ -24,5 +24,5 @@ export default async function Page(props: {
     searchParams?.checkout != null || searchParams?.quotation != null;
   const target = hasAddressContext ? 'addresses' : 'password';
 
-  redirect(url.forRouter(`/account/${target}${query ? `?${query}` : ''}`));
+  redirect(scope.forRouter(`/account/${target}${query ? `?${query}` : ''}`));
 }

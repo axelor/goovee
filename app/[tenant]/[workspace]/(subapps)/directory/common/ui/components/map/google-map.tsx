@@ -50,9 +50,9 @@ type MarkerProps = {
 
 export function Marker(props: MarkerProps) {
   const {small, item} = props;
-  const {url, tenant} = useWorkspace();
+  const {scope, tenant} = useWorkspace();
 
-  const entryHref = url.forRouter(
+  const entryHref = scope.forRouter(
     `/${SUBAPP_CODES.directory}/entry/${item.id}`,
   );
   const [markerRef, marker] = useMarkerRef();

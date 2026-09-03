@@ -43,9 +43,9 @@ export function DocsSidebarContent({
   categoriesLabel,
   searchAction,
 }: DocsSidebarProps) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const pathname = usePathname() ?? '';
-  const homeHref = url.forRouter(`/${SUBAPP_CODES.resources}`);
+  const homeHref = scope.forRouter(`/${SUBAPP_CODES.resources}`);
   const isHomeActive = pathname === homeHref;
 
   const [search, setSearch] = useState('');
@@ -180,7 +180,9 @@ export function DocsSidebarContent({
                 {fileResults.map(f => (
                   <li key={f.id}>
                     <Link
-                      href={url.forRouter(`/${SUBAPP_CODES.resources}/${f.id}`)}
+                      href={scope.forRouter(
+                        `/${SUBAPP_CODES.resources}/${f.id}`,
+                      )}
                       className="flex items-center gap-2.5 px-3 py-2 hover:bg-ink-25 transition-colors">
                       <DocFileIcon
                         fileType={f.metaFile?.fileType}
@@ -280,7 +282,7 @@ function CategoryNode({
   toggleCat: (id: string) => void;
   isSearching: boolean;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const hasChildren = (node.children?.length ?? 0) > 0;
   const open = isSearching || !!openCats[node.id];
   const isActive = activeFolderId === node.id;
@@ -313,7 +315,7 @@ function CategoryNode({
           <span className="shrink-0 w-6 h-7" aria-hidden />
         )}
         <Link
-          href={url.forRouter(`/${SUBAPP_CODES.resources}/folder/${node.id}`)}
+          href={scope.forRouter(`/${SUBAPP_CODES.resources}/folder/${node.id}`)}
           className={cn(
             'flex-1 min-w-0 flex items-center gap-2 px-1 py-1.5 font-semibold',
             textSize,

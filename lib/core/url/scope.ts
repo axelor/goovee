@@ -10,7 +10,7 @@ import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 import {absoluteRoot} from './absolute';
 import type {WorkspaceSubPath} from './index';
 import {revalidateRoutePath} from './revalidate';
-import {workspaceURLsFrom, type WorkspaceURLs} from './workspace-urls';
+import {workspaceURLsFrom, type WorkspaceScope} from './workspace-urls';
 
 /**
  * Whether the origin a request arrived on is the one this tenant holds to
@@ -96,7 +96,7 @@ type RootPath = `/${string}`;
  * capability: a browser could compute either from what it already holds, and
  * nothing running in one should act on them.
  */
-export type ServerWorkspaceURLs = WorkspaceURLs & {
+export type ServerWorkspaceScope = WorkspaceScope & {
   /**
    * The coordinate the route tree resolves: `/{tenant}/{workspace}{sub}`,
    * always carrying the tenant segment because the proxy puts it back on a
@@ -163,8 +163,10 @@ type TenantURLs = {
    * origin root where the tenant holds that origin, its path segment anywhere
    * else, with a trailing slash and the base path in front.
    *
-   * The trailing slash is required: this is both the service worker's scope and
-   * the manifest's `scope`/`start_url`/`id`, scopes are matched by path prefix,
+   * The trailing slash is required: this is both the service worker's
+   * registration scope and the manifest's `scope`/`start_url`/`id` — a
+   * different sense of the word from this module's own — those scopes are
+   * matched by path prefix,
    * and `/acme` does not enclose `/acme/…`. A browser installs an app only
    * where the page's worker encloses the manifest's scope, so a drift between
    * the two shows up as the install prompt silently not appearing.
@@ -185,7 +187,7 @@ type TenantURLs = {
    * @throws when `slug` could compose a key naming another workspace — see
    *   `assertSlug`.
    */
-  workspace(slug: string): ServerWorkspaceURLs;
+  workspace(slug: string): ServerWorkspaceScope;
 
   /**
    * The same, for a caller holding a workspace's stored `url` rather than its
@@ -199,7 +201,7 @@ type TenantURLs = {
    *
    * @throws when the value ends in no usable segment.
    */
-  workspaceByKey(storedURL: string): ServerWorkspaceURLs;
+  workspaceByKey(storedURL: string): ServerWorkspaceScope;
 };
 
 /**
@@ -267,7 +269,7 @@ export function tenantURLs(tenantId: string): TenantURLs {
   const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
   const hostRouted = Boolean(config && isHostRouted(config));
 
-  const workspaceURLs = (slug: string): ServerWorkspaceURLs => {
+  const workspaceURLs = (slug: string): ServerWorkspaceScope => {
     const workspace = assertSlug(slug);
 
     /* The tenant segment is absent from a host-routed tenant's addresses,

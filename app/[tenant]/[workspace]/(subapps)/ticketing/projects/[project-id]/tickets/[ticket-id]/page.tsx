@@ -121,7 +121,7 @@ export default async function Page(props: {
 
   if (!ticket) notFound();
 
-  const ticketsURL = access.url.forRouter(
+  const ticketsURL = access.scope.forRouter(
     `/ticketing/projects/${projectId}/tickets`,
   );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
@@ -147,7 +147,7 @@ export default async function Page(props: {
                   <BreadcrumbLink
                     asChild
                     className="text-ink-500 cursor-pointer truncate text-sm">
-                    <Link href={access.url.forRouter('/ticketing')}>
+                    <Link href={access.scope.forRouter('/ticketing')}>
                       {await t('Projects')}
                     </Link>
                   </BreadcrumbLink>
@@ -160,7 +160,7 @@ export default async function Page(props: {
                     asChild
                     className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-sm">
                     <Link
-                      href={access.url.forRouter(
+                      href={access.scope.forRouter(
                         `/ticketing/projects/${projectId}`,
                       )}>
                       {ticket.project?.name}
@@ -251,7 +251,7 @@ export default async function Page(props: {
                   commentField="note"
                   createComment={createComment}
                   fetchComments={fetchComments}
-                  attachmentDownloadUrl={access.url.forBrowser(
+                  attachmentDownloadUrl={access.scope.forBrowser(
                     `/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
                   )}
                 />

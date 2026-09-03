@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {denyPage} from '@/lib/core/access/denial';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
@@ -42,7 +42,7 @@ export default async function Page(context: {
           workspace={workspace}
           user={user}
           client={client}
-          url={access.url}
+          scope={access.scope}
           workspaceURL={workspaceURL}
         />
       </Suspense>
@@ -54,13 +54,13 @@ async function AgendaData({
   workspace,
   user,
   client,
-  url,
+  scope,
   workspaceURL,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user: User | null | undefined;
   client: Client;
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   workspaceURL: string;
 }) {
   const result = await findEvents({
@@ -76,7 +76,7 @@ async function AgendaData({
 
   const events = (result?.events ?? []).filter(e => e.eventStartDateTime);
 
-  const magazineHref = url.forRouter(`/${SUBAPP_CODES.events}`);
+  const magazineHref = scope.forRouter(`/${SUBAPP_CODES.events}`);
 
   return (
     <EventsAgenda

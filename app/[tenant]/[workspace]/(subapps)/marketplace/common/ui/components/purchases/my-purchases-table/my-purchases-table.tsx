@@ -108,7 +108,7 @@ function TakenDownDownload({
 }
 
 export function MyPurchasesTable({purchases}: Props) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -144,7 +144,7 @@ export function MyPurchasesTable({purchases}: Props) {
               product.moderationStatusSelect !==
                 PRODUCT_MODERATION_STATUS.TAKEN_DOWN ? (
                 <Link
-                  href={url.forRouter(
+                  href={scope.forRouter(
                     `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
                   )}
                   className="font-medium text-ink-900 truncate hover:underline">
@@ -211,7 +211,7 @@ export function MyPurchasesTable({purchases}: Props) {
       content: purchase =>
         purchase.productOrder?.saleOrder?.id ? (
           <Link
-            href={url.forRouter(
+            href={scope.forRouter(
               `/${SUBAPP_CODES.orders}/${purchase.productOrder.saleOrder.id}`,
             )}
             className="text-sm text-royal hover:underline">
@@ -230,7 +230,7 @@ export function MyPurchasesTable({purchases}: Props) {
       content: purchase =>
         purchase.productOrder?.invoice?.id ? (
           <Link
-            href={url.forRouter(
+            href={scope.forRouter(
               `/${SUBAPP_CODES.invoices}/${purchase.productOrder.invoice.id}`,
             )}
             className="text-sm text-royal hover:underline">
@@ -315,14 +315,14 @@ export function MyPurchasesTable({purchases}: Props) {
                     {canDownload ? (
                       isTakenDown ? (
                         <TakenDownDownload
-                          downloadUrl={url.forBrowser(
+                          downloadUrl={scope.forBrowser(
                             `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
                           )}
                           reason={product.moderationReason}
                         />
                       ) : (
                         <a
-                          href={url.forBrowser(
+                          href={scope.forBrowser(
                             `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`,
                           )}
                           aria-label={i18n.t('Download')}
@@ -335,7 +335,7 @@ export function MyPurchasesTable({purchases}: Props) {
                       product.moderationStatusSelect !==
                         PRODUCT_MODERATION_STATUS.TAKEN_DOWN && (
                         <Link
-                          href={url.forRouter(
+                          href={scope.forRouter(
                             `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
                           )}
                           className="p-1.5 rounded-full hover:bg-ink-50 transition-colors">

@@ -132,10 +132,10 @@ export async function createStripeCheckoutSession(props: {
      * `stripe_session_id` from the URL and calls `checkout()` to finalize,
      * then pushes the buyer to the success page. That is why this is not the
      * success URL, while `cancelUrl` below is a page of its own. */
-    const successUrl = access.url.forExternal(
+    const successUrl = access.scope.forExternal(
       `/${SUBAPP_CODES.marketplace}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
     );
-    const cancelUrl = access.url.forExternal(
+    const cancelUrl = access.scope.forExternal(
       `/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`,
     );
 
@@ -230,10 +230,10 @@ export async function payboxCreateOrder(props: {
       tenantId: access.tenant.id,
       client: access.tenant.client,
       url: {
-        success: access.url.fromClient(parsed.data.uri, {
+        success: access.scope.fromClient(parsed.data.uri, {
           paybox_response: 'true',
         }),
-        failure: access.url.fromClient(parsed.data.uri, {
+        failure: access.scope.fromClient(parsed.data.uri, {
           paybox_error: 'true',
         }),
       },

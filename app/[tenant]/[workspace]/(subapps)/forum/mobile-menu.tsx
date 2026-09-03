@@ -23,7 +23,7 @@ import styles from './styles.module.scss';
 
 export default function MobileMenu({items}: {items: MenuItem[]}) {
   const router = useRouter();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function MobileMenu({items}: {items: MenuItem[]}) {
    * starts with a slash, so a separator here would address
    * `/forum//manage-notifications`, which matches no route. */
   const handleMenuClick = (link: MenuItem['link']) => {
-    router.push(url.forRouter(`/${SUBAPP_CODES.forum}${link}`));
+    router.push(scope.forRouter(`/${SUBAPP_CODES.forum}${link}`));
     closeSidebar();
   };
 

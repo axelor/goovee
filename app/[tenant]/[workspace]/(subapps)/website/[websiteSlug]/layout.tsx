@@ -94,7 +94,7 @@ export default async function Layout(props: {
   const {client, config} = access.tenant;
 
   const workspaceURL = access.workspace.url;
-  const workspaceURI = access.url.forRouter();
+  const workspaceURI = access.scope.forRouter();
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -109,7 +109,7 @@ export default async function Layout(props: {
   if (!website) {
     return (
       <NotFound
-        homePageUrl={access.url.forRouter(`/${SUBAPP_CODES.website}`)}
+        homePageUrl={access.scope.forRouter(`/${SUBAPP_CODES.website}`)}
       />
     );
   }

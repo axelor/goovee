@@ -5,7 +5,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-import type {WorkspaceURLs} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/login-url';
 import {Download, FileText, Heart} from 'lucide-react';
@@ -26,7 +26,7 @@ export interface ProductHeaderCardProps {
   product: SingleProduct;
   client: Client;
   user?: {id: ID; mainPartnerId?: ID};
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   tenantId: string;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
   preview?: boolean;
@@ -37,7 +37,7 @@ export async function ProductHeaderCard({
   product,
   client,
   user,
-  url,
+  scope,
   tenantId,
   preview = false,
   canDownloadPromise,
@@ -55,7 +55,7 @@ export async function ProductHeaderCard({
   const categoryNames = await Promise.all(
     categories.map(category => tattr(category.name)),
   );
-  const marketplaceHref = url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const marketplaceHref = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const priceScale = product.price.currency.numberOfDecimals;
   const {ati: priceAti} = product.price;
@@ -211,7 +211,7 @@ export async function ProductHeaderCard({
           <CTAButton
             product={product}
             user={user}
-            url={url}
+            scope={scope}
             tenantId={tenantId}
             paid={paid}
             priceAti={priceAti}
@@ -236,7 +236,7 @@ export async function ProductHeaderCard({
 async function CTAButton({
   product,
   user,
-  url,
+  scope,
   tenantId,
   paid,
   priceAti,
@@ -247,7 +247,7 @@ async function CTAButton({
 }: {
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
-  url: WorkspaceURLs;
+  scope: WorkspaceScope;
   tenantId: string;
   paid: boolean;
   priceAti: number;
@@ -304,7 +304,7 @@ async function CTAButton({
         <a
           href={
             product.currentVersion?.id
-              ? url.forBrowser(
+              ? scope.forBrowser(
                   `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`,
                 )
               : '#'
@@ -322,10 +322,10 @@ async function CTAButton({
       <Button variant="royal" size="lg" className="gap-2" asChild>
         <Link
           href={getLoginURL({
-            callbackurl: url.forRouter(
+            callbackurl: scope.forRouter(
               `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
             ),
-            workspaceURI: url.forRouter(),
+            workspaceURI: scope.forRouter(),
             tenant: tenantId,
           })}>
           {await t('Sign in to buy')}
@@ -350,7 +350,7 @@ async function CTAButton({
           ? formatVersionNumber(product.currentVersion)
           : null
       }
-      cartHref={url.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}
+      cartHref={scope.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}
       addToCartLabel={await t('Add to cart')}
       buyNowLabel={await t('Buy now')}
       inCartLabel={await t('In cart — view cart')}

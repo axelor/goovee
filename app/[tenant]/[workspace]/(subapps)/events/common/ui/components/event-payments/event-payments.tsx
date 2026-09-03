@@ -52,18 +52,18 @@ export function EventPayments({
 
   const {toast} = useToast();
   const router = useRouter();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const redirectToEvents = useCallback(
     async (result: SuccessResponse<Registration>) => {
       if (!result.data.event?.slug) return;
       router.replace(
-        url.forRouter(
+        scope.forRouter(
           `/${SUBAPP_CODES.events}/${result.data.event.slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}?${URL_PARAMS.isPaid}=true`,
         ),
       );
     },
-    [url, router],
+    [scope, router],
   );
 
   function getMappedParticipants(

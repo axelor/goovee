@@ -64,7 +64,7 @@ export default function Content({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const [input, setInput] = useSearchQuery();
 
@@ -168,7 +168,9 @@ export default function Content({
                       onSelect={() => setSelectedId(inv.id)}
                       onOpen={() =>
                         router.push(
-                          url.forRouter(`/${SUBAPP_CODES.invoices}/${inv.id}`),
+                          scope.forRouter(
+                            `/${SUBAPP_CODES.invoices}/${inv.id}`,
+                          ),
                         )
                       }
                     />
@@ -207,7 +209,7 @@ export default function Content({
           {selected ? (
             <InvoicePreview
               invoice={selected}
-              detailHref={url.forRouter(
+              detailHref={scope.forRouter(
                 `/${SUBAPP_CODES.invoices}/${selected.id}`,
               )}
               allowInvoicePayment={allowInvoicePayment}

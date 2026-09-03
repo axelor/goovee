@@ -15,7 +15,7 @@ export async function removeWorkpace() {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {user, tenant, url} = access;
+  const {user, tenant, scope} = access;
   const {client} = tenant;
   const workspaceURL = access.workspace.url;
 
@@ -101,7 +101,7 @@ export async function removeWorkpace() {
         })
         .then(clone);
     }
-    url.revalidate(`/${SUBAPP_PAGE.account}`);
+    scope.revalidate(`/${SUBAPP_PAGE.account}`);
     return {
       success: true,
     };

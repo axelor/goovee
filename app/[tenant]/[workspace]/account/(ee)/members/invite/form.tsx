@@ -57,7 +57,7 @@ export default function InviteForm({
     authorization?: boolean;
   }>;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
 
@@ -92,7 +92,7 @@ export default function InviteForm({
         title: result.message || i18n.t('Invites send successfully'),
         variant: 'success',
       });
-      router.replace(url.forRouter('/account/members'));
+      router.replace(scope.forRouter('/account/members'));
     } else {
       toast({
         title: result.message || i18n.t('Error sending invites'),

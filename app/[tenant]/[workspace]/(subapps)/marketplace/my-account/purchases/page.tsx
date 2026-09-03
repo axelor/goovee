@@ -85,7 +85,9 @@ export default async function MyPurchasesPage(props: {
 
   const totalPages = getPages(purchases, limit);
 
-  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const marketplaceBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
   const purchasesHref = `${marketplaceBase}/my-account/purchases`;
 
   return (

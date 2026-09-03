@@ -68,7 +68,7 @@ export default async function Page(props: {
   });
   if (!access.ok) return denyPage(access);
 
-  const listingHref = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const listingHref = access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const {limit, page, category, sort, priceType, type: rawType} = searchParams;
   const client = access.tenant.client;
@@ -251,7 +251,7 @@ export default async function Page(props: {
               <ProductCard
                 key={product.id}
                 product={product}
-                url={access.url}
+                scope={access.scope}
               />
             ))}
           </div>

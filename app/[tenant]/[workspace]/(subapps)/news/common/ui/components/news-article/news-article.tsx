@@ -37,8 +37,8 @@ export function NewsArticleHero({
   article: NewsItem;
   config: NewsConfig | Cloned<NewsConfig>;
 }) {
-  const {url, tenant} = useWorkspace();
-  const newsBase = url.forRouter(`/${SUBAPP_CODES.news}`);
+  const {scope, tenant} = useWorkspace();
+  const newsBase = scope.forRouter(`/${SUBAPP_CODES.news}`);
   const {
     isShowPublicationAuthor,
     isShowPublicationDate,
@@ -46,7 +46,7 @@ export function NewsArticleHero({
   } = config;
 
   const src = article?.image?.id
-    ? url.forBrowser(
+    ? scope.forBrowser(
         `/${SUBAPP_CODES.news}/api/news/${article.slug}/image?isFullView=true`,
       )
     : withBasePath(NO_IMAGE_URL);

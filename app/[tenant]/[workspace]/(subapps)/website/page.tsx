@@ -47,10 +47,10 @@ export default async function Page(props: {
   });
 
   if (!mainWebsites?.length)
-    return <NotFound homePageUrl={access.url.forRouter()} />;
+    return <NotFound homePageUrl={access.scope.forRouter()} />;
 
   const getWebsiteURL = (website: Website) =>
-    access.url.forRouter(`/${SUBAPP_CODES.website}/${website.slug}`);
+    access.scope.forRouter(`/${SUBAPP_CODES.website}/${website.slug}`);
 
   if (mainWebsites.length === 1) {
     return redirect(getWebsiteURL(mainWebsites?.[0]));

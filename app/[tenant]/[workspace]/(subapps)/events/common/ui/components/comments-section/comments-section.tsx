@@ -14,7 +14,7 @@ import {
 } from '@/subapps/events/common/actions/actions';
 
 export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   return (
     <Card className="rounded-2xl border-none shadow-none p-4 w-full space-y-4 ">
       <Comments
@@ -34,7 +34,7 @@ export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
         fetchComments={fetchComments}
         trackingField="publicBody"
         commentField="note"
-        attachmentDownloadUrl={url.forBrowser(
+        attachmentDownloadUrl={scope.forBrowser(
           `/${SUBAPP_CODES.events}/api/comments/attachments/${slug}`,
         )}
       />

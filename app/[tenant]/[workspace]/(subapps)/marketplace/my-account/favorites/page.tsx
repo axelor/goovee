@@ -72,7 +72,9 @@ export default async function FavoritesPage(props: {
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
   if (!config) notFound();
 
-  const marketplaceBase = access.url.forRouter(`/${SUBAPP_CODES.marketplace}`);
+  const marketplaceBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}`,
+  );
   const favoritesHref = `${marketplaceBase}/my-account/favorites`;
 
   const products = await findFavoriteProducts({

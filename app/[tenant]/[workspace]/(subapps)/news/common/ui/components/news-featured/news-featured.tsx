@@ -35,18 +35,18 @@ export function NewsFeatured({
   articles?: Article[];
   config: NewsConfig | Cloned<NewsConfig>;
 }) {
-  const {url} = useWorkspace();
+  const {scope} = useWorkspace();
   const {isShowPublicationAuthor, isShowPublicationDate} = config;
   const railRef = useRef<HTMLDivElement>(null);
 
   if (!articles.length) return null;
 
-  const newsBase = url.forRouter(`/${SUBAPP_CODES.news}`);
+  const newsBase = scope.forRouter(`/${SUBAPP_CODES.news}`);
   const articleHref = (a: Article) =>
     `${newsBase}/${SUBAPP_PAGE.article}/${a.slug}`;
   const imageURL = (a: Article) =>
     a?.image?.id
-      ? url.forBrowser(`/${SUBAPP_CODES.news}/api/news/${a.slug}/image`)
+      ? scope.forBrowser(`/${SUBAPP_CODES.news}/api/news/${a.slug}/image`)
       : withBasePath(NO_IMAGE_URL);
   const catLabel = (a: Article) => a?.categorySet?.[0]?.name || '';
   const meta = (a: Article) =>
