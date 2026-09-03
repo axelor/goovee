@@ -240,6 +240,7 @@ export async function register(
       client,
       config,
       workspace: access.workspace,
+      url: access.url,
     }),
   );
 
