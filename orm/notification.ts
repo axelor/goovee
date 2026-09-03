@@ -232,8 +232,8 @@ export async function findOrCreatePartnerPreference(params: UpdateParams) {
 }
 
 /* Paths below the workspace: how the workspace itself is addressed is decided
- * by the consumer — an email joins them to the stored `workspace.url`, a push
- * notification hands them to the pwa layer as its `link`. */
+ * by the consumer, from the workspace's own addresses rather than from anything
+ * spelled here. */
 const routes = {
   [SUBAPP_CODES.events]: ({id}: {id: string}): WorkspaceSubPath =>
     `/${SUBAPP_CODES.events}?category=${id}&page=1`,
@@ -852,26 +852,23 @@ function partnerToUser(partner: Partner, tenantId: string): User {
   };
 }
 
-/* `link` is the record's path below the workspace; `route` is the same address
- * joined to the stored workspace URL, for consumers that need it absolute (an
- * email link). A push notification takes `link` and leaves the joining to the
- * pwa layer. */
+/* `link` is the record's path below the workspace, and the only address form a
+ * subscriber carries: every consumer combines it with the workspace's own
+ * addresses, so an email and a push notification lead to the same place. */
 type Subscriber = {
   user: User;
-  entity: {id: string; route: string; link: WorkspaceSubPath};
+  entity: {id: string; link: WorkspaceSubPath};
 };
 
 function partnersToSubscribers({
   partners,
   recordId,
   link,
-  workspaceUrl,
   tenantId,
 }: {
   partners: ReadonlyArray<Partner>;
   recordId: string;
   link: WorkspaceSubPath;
-  workspaceUrl: string;
   tenantId: string;
 }): Subscriber[] {
   return partners
@@ -879,7 +876,7 @@ function partnersToSubscribers({
       if (!partner.emailAddress?.address) return null;
       return {
         user: partnerToUser(partner, tenantId),
-        entity: {id: recordId, route: `${workspaceUrl}${link}`, link},
+        entity: {id: recordId, link},
       };
     })
     .filter((r): r is Subscriber => r != null);
@@ -929,7 +926,6 @@ async function findEventCategorySubscribers(params: FindSubscribersParams) {
     partners,
     recordId,
     link,
-    workspaceUrl,
     tenantId,
   });
 }
@@ -971,7 +967,6 @@ async function findNewsCategorySubscribers(params: FindSubscribersParams) {
     partners,
     recordId,
     link,
-    workspaceUrl,
     tenantId,
   });
 }
@@ -1012,7 +1007,6 @@ async function findResourceFolderSubscribers(params: FindSubscribersParams) {
     partners,
     recordId,
     link,
-    workspaceUrl,
     tenantId,
   });
 }
@@ -1053,7 +1047,6 @@ async function findForumGroupSubscribers(params: FindSubscribersParams) {
     partners,
     recordId,
     link,
-    workspaceUrl,
     tenantId,
   });
 }
@@ -1137,7 +1130,7 @@ async function findTicketSubscribers(
 
     subscribers.push({
       user: partnerToUser(partner, tenantId),
-      entity: {id: recordId, route: `${workspaceUrl}${link}`, link},
+      entity: {id: recordId, link},
     });
   }
 

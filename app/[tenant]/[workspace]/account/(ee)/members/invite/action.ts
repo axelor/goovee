@@ -4,7 +4,6 @@ import {z} from 'zod';
 import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {getPublicEnvironment} from '@/environment';
 import {t} from '@/locale/server';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ensureWorkspaceAccess} from '@/lib/core/access/ensure-workspace-access';
@@ -18,7 +17,7 @@ import {
 import NotificationManager, {NotificationType} from '@/notification';
 import {APP_TITLE, SEARCH_PARAMS} from '@/constants';
 import {getPartnerId} from '@/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/lib/core/url/scope';
 
 // ---- LOCAL IMPORTS ---- //
 import {getAccountConfig} from '../../../common/orm/config';
@@ -305,9 +304,9 @@ export async function sendInvites(input: SendInvites) {
       sendMail({
         subject: workspace?.name || workspace.url,
         email,
-        link: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(
+        link: tenantURLs(tenantId).forExternal(
           `/auth/register/invite/${invite.id}/email?${SEARCH_PARAMS.TENANT_ID}=${tenantId}`,
-        )}`,
+        ),
       });
     } catch (err) {
       inviteError = true;

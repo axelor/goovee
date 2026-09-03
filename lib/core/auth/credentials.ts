@@ -5,7 +5,6 @@ import {after} from 'next/server';
 import {z} from 'zod';
 
 import {compare, hash} from '@/auth/utils';
-import {getPublicEnvironment} from '@/environment';
 import {getTranslation} from '@/locale/server';
 import {register} from '@/lib/core/auth/orm';
 import {generateOTP as coreGenerateOTP} from '@/otp/actions';
@@ -24,7 +23,7 @@ import {withMattermostSync} from '@/lib/core/mattermost';
 import {APP_TITLE, RESET_PASSWORD, SEARCH_PARAMS} from '@/constants';
 import {findInviteById} from '@/app/auth/register/common/orm/register';
 import {registerByInvite} from '@/lib/core/auth/orm';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {
   EmailRegisterOTPSchema,
   InviteEmailRegisterOTPSchema,
@@ -593,9 +592,9 @@ const credentials = {
           if (value) query.set(name, value);
         }
 
-        const link = `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(
+        const link = tenantURLs(tenantId).forExternal(
           `/auth/reset-password/${encodeURIComponent(email)}?${query}`,
-        )}`;
+        );
 
         if (user) {
           const mailService = NotificationManager.getService(

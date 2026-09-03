@@ -13,7 +13,7 @@ import NotificationManager, {
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {WorkspaceSubPath} from '@/lib/core/url';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {tenantURLs, type ServerWorkspaceURLs} from '@/lib/core/url/scope';
 import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
@@ -66,13 +66,14 @@ async function notificationTemplate({
   user,
   tenantId,
   app,
-  entity,
+  route,
   sender,
 }: {
   user: User;
   tenantId: string;
   app: App;
-  entity: any;
+  /* Absolute, because this lands in an inbox: nothing resolves a path there. */
+  route: string;
   sender: string;
 }) {
   return `<!DOCTYPE html>
@@ -128,8 +129,8 @@ async function notificationTemplate({
                 )}
                 </h1>
             </div>
-            <a href="${entity?.route}" target="_blank" class="link">
-              ${entity?.route}
+            <a href="${route}" target="_blank" class="link">
+              ${route}
             </a>
             <div class="footer">
                 <p>${await getTranslation(
@@ -153,18 +154,26 @@ async function buildNotificationMail({
   mail,
   app,
   entity,
+  url,
   sender,
 }: {
   user: User;
   tenantId: string;
   mail?: Mail | null;
-  entity: {id: string; route: string};
+  entity: {id: string; link: WorkspaceSubPath};
   app: App;
+  url: ServerWorkspaceURLs;
   sender: string;
 }): Promise<MailNotificationData> {
   const html =
     mail?.content ||
-    (await notificationTemplate({user, tenantId, app, entity, sender}));
+    (await notificationTemplate({
+      user,
+      tenantId,
+      app,
+      route: url.forExternal(entity.link),
+      sender,
+    }));
 
   return {
     to: user.email,
@@ -187,26 +196,23 @@ async function buildSystemNotification({
   app,
   entity,
   workspace,
+  url,
   client,
 }: {
   user: User;
   tenantId: string;
   mail?: Mail | null;
-  entity: {id: string; route: string; link: WorkspaceSubPath};
+  entity: {id: string; link: WorkspaceSubPath};
   app: App;
-  workspace: {
-    id: string;
-    version: number;
-    name: string | null;
-    url: string;
-  };
+  /* Only what the notification shows: `url` carries the addresses, so the
+   * stored key this workspace is identified by is not wanted here. */
+  workspace: {id: string; name: string | null};
+  url: ServerWorkspaceURLs;
   client: Client;
 }): Promise<NotifyUserArgs> {
   return {
     userId: user.id,
-    /* No proxy headers on this route — it sits under /api — so the workspace is
-     * named from the row the webhook resolved. */
-    url: tenantURLs(tenantId).workspaceByKey(workspace.url),
+    url,
     client,
     payload: {
       title:
@@ -256,10 +262,31 @@ async function sendNotifications(data: {
     );
     const sender = workspace.name || APP_TITLE;
 
+    /* No proxy headers on this route — it sits under /api — so the workspace is
+     * named from the row the webhook resolved. Resolved once and given to both
+     * channels, so the address in the email and the one the tray opens cannot
+     * disagree.
+     *
+     * A row whose last segment cannot name a workspace — one still carrying a
+     * percent escape, say — is refused here. Every address for it would be
+     * wrong, so both channels are dropped rather than sending a link to a
+     * workspace the router will not resolve, and the row is named in the log
+     * because only an operator can correct it. */
+    let url;
+    try {
+      url = tenantURLs(tenantId).workspaceByKey(workspace.url);
+    } catch (err) {
+      console.error(
+        `[NOTIFICATIONS] Workspace '${workspace.url}' of tenant '${tenantId}' has no addressable slug; notifications for ${code}/${recordId} were not sent`,
+        err,
+      );
+      return;
+    }
+
     /* Both bound their own concurrency and report their own failures. */
     await Promise.all([
       mailService?.notifyAll(subscribers, ({user, entity}) =>
-        buildNotificationMail({user, tenantId, mail, entity, app, sender}),
+        buildNotificationMail({user, tenantId, mail, entity, app, url, sender}),
       ),
       notifyAll(subscribers, ({user, entity}) =>
         buildSystemNotification({
@@ -269,6 +296,7 @@ async function sendNotifications(data: {
           entity,
           app,
           workspace,
+          url,
           client,
         }),
       ),

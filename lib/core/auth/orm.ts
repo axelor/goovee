@@ -27,7 +27,7 @@ import {revalidateEverything} from '@/lib/core/url/revalidate';
 import {getTranslation} from '../locale/server';
 import {UserType} from './types';
 import {getPortalRoot} from '@/utils/workspace-url';
-import {toWorkspaceURI} from '@/utils/workspace-url';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {type Tenant, type TenantConfig} from '../tenant';
 import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
@@ -153,10 +153,7 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
-    const uri = toWorkspaceURI(
-      workspace.url,
-      getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
-    );
+    const scope = tenantURLs(tenantId).workspaceByKey(workspace.url);
 
     revalidateEverything();
 
@@ -168,7 +165,7 @@ export async function registerByInvite({
     });
 
     return {
-      query: `?callbackurl=${encodeURIComponent(`${workspace.url}/`)}&workspaceURI=${encodeURIComponent(`${uri}/`)}&tenant=${tenantId}`,
+      query: `?callbackurl=${encodeURIComponent(`${scope.forExternal()}/`)}&workspaceURI=${encodeURIComponent(`${scope.forRouter()}/`)}&tenant=${tenantId}`,
     };
   } catch (err) {
     throw new Error(
