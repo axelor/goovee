@@ -32,7 +32,6 @@ export type ExitGroupInput = z.infer<typeof ExitGroupSchema>;
 
 export const JoinGroupSchema = z.object({
   groupID: IdSchema,
-  userId: IdSchema,
   workspaceURL: WorkspaceURLSchema,
   workspaceURI: WorkspaceURISchema,
 });
