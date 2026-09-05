@@ -1,5 +1,9 @@
 import {BetterAuthPlugin, defineErrorCodes} from 'better-auth';
-import {APIError, createAuthEndpoint} from 'better-auth/api';
+import {
+  APIError,
+  createAuthEndpoint,
+  createAuthMiddleware,
+} from 'better-auth/api';
 import {setSessionCookie} from 'better-auth/cookies';
 import {after} from 'next/server';
 import {z} from 'zod';
@@ -18,7 +22,12 @@ import {
 } from '@/orm/workspace';
 import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
-import {listTenantIds} from '@/tenant/config';
+import {getRoutingIndex, getTenantConfig, listTenantIds} from '@/tenant/config';
+import {
+  addressedHost,
+  canonicalHost,
+  isHostRouted,
+} from '@/lib/core/tenant/routing';
 import {withMattermostSync} from '@/lib/core/mattermost';
 import {APP_TITLE, RESET_PASSWORD, SEARCH_PARAMS} from '@/constants';
 import {findInviteById} from '@/app/auth/register/common/orm/register';
@@ -43,6 +52,49 @@ const ERROR_CODES = defineErrorCodes({
   USER_NOT_FOUND: 'User not found',
   PASSWORD_RESET_FAILED: 'Error resetting password. Try again.',
 });
+
+/**
+ * Whether a tenant is served on the origin a request arrived at.
+ *
+ * A host-routed tenant is served on its own origin and nowhere else. Every other
+ * tenant is served on the origins the document declares that no host-routed
+ * tenant holds — except on a deployment that declares no host-routed tenant at
+ * all, which resolves every tenant from the path and is reached on any address.
+ *
+ * The three answers are the ones `proxy.ts` gives a page request: it refuses an
+ * undeclared host whenever the document names a host-routed tenant, and moves a
+ * host-routed tenant's addresses onto its own origin. This says the same for the
+ * route handlers, which the proxy's matcher does not cover.
+ *
+ * The session cookie carries no domain, so it is written for whichever host
+ * answered. Authenticating a tenant on an origin it is not served on therefore
+ * leaves the session where that tenant is never reached, and on a shared origin
+ * it also displaces the session of the tenant that does live there.
+ */
+function servedOnAddressedOrigin(
+  tenantId: string,
+  headers: Headers | undefined,
+): boolean {
+  const config = getTenantConfig(tenantId);
+
+  if (!config || !headers) return false;
+
+  const host = addressedHost(headers);
+
+  if (!host) return false;
+
+  const {routesByHost, tenantByHost, declaredHosts} = getRoutingIndex();
+
+  /* Only where the document gives a host a meaning, which is the same condition
+   * the proxy reads one under. A deployment with every tenant under a path
+   * segment answers on any address, and comparing against the declared set would
+   * refuse every alias of a working one. */
+  if (routesByHost && !declaredHosts.has(host)) return false;
+
+  return isHostRouted(config)
+    ? host === canonicalHost(new URL(config.publicEnv.GOOVEE_PUBLIC_HOST).host)
+    : tenantByHost.get(host) === undefined;
+}
 
 const resetPasswordEmailHTML = ({
   otp,
@@ -737,6 +789,46 @@ const credentials = {
       },
     ),
   },
+
+  hooks: {
+    before: [
+      {
+        /* Every endpoint above names its tenant in the body, and none of them
+         * is reached through the proxy — `/api` sits outside its matcher — so
+         * this is the only place the pair can be checked. */
+        matcher: context => Boolean(context.path?.startsWith('/credentials/')),
+        handler: createAuthMiddleware(async ctx => {
+          const tenantId = (ctx.body as {tenantId?: unknown} | undefined)
+            ?.tenantId;
+
+          if (typeof tenantId !== 'string') return;
+
+          if (servedOnAddressedOrigin(tenantId, ctx.headers)) return;
+
+          /* Answered the way the endpoint behind this one answers a tenant it
+           * cannot use, so that running earlier changes no reply. Signing in
+           * reports every failure as the same bad-credentials one, which is
+           * what keeps it from telling a caller which tenants exist; the rest
+           * name the tenant as the thing that was wrong. */
+          if (ctx.path === '/credentials/sign-in') {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid email or password',
+              ),
+            });
+          }
+
+          throw new APIError('NOT_FOUND', {
+            ...ERROR_CODES.INVALID_TENANT,
+            message: await getTranslation({tenant: tenantId}, 'Invalid tenant'),
+          });
+        }),
+      },
+    ],
+  },
+
   rateLimit: [
     {
       pathMatcher: (path: string) => path === '/credentials/sign-in',

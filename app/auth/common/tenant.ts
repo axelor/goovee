@@ -47,5 +47,10 @@ export async function resolveAuthTenantId(
   const host = addressedHost(await headers());
   const fromHost = host && getRoutingIndex().tenantByHost.get(host);
 
-  return fromHost || named || getDefaultTenantId() || '';
+  /* Only names the document holds. A requested one it does not hold is dropped
+   * rather than fallen back on: the screens put this value in the form as it
+   * stands, and sign-in reports every failure as bad credentials, so carrying an
+   * unknown name through answers correct credentials with "Invalid email or
+   * password" and leaves the visitor with no way to tell why. */
+  return fromHost || getDefaultTenantId() || '';
 }
