@@ -17,6 +17,8 @@ import {TenantProvider} from '@/lib/core/url/tenant-context';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
+import Locale from '@/app/locale';
+import {AuthClientProvider} from '@/lib/auth-client';
 
 /* Point the manifest link at this tenant's manifest, so installing from one of
  * its pages installs an app that launches into this tenant; overrides the root
@@ -67,19 +69,32 @@ export default async function TenantLayout(props: {
    * place the worker below is scoped to. */
   const visitorPrefix = urls.visitorPrefix(requestHeaders);
 
+  /* The authentication endpoint and the translations are both one tenant's, so
+   * both are bound here rather than in the shell above: a page below this point
+   * always has a tenant, and no client navigation can carry it out to a shell
+   * that chose neither. `AuthClientProvider` wraps `Locale` because `Locale`
+   * reads the session to pick a locale.
+   *
+   * `TenantProvider` is above them because `Locale` takes the tenant's addresses
+   * from it — a scope carries methods, and those do not cross from a server
+   * component to a client one, so the prefix is passed and the scope rebuilt. */
   return (
     <Environment value={env}>
       <TenantProvider
         tenantId={tenant}
         visitorPrefix={visitorPrefix}
         host={env.GOOVEE_PUBLIC_HOST}>
-        <Theme theme={theme}>
-          <SerwistProvider
-            swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
-            options={{scope: urls.entry(requestHeaders)}}>
-            <PushProvider tenant={tenant}>{props.children}</PushProvider>
-          </SerwistProvider>
-        </Theme>
+        <AuthClientProvider visitorPrefix={visitorPrefix}>
+          <Locale>
+            <Theme theme={theme}>
+              <SerwistProvider
+                swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
+                options={{scope: urls.entry(requestHeaders)}}>
+                <PushProvider tenant={tenant}>{props.children}</PushProvider>
+              </SerwistProvider>
+            </Theme>
+          </Locale>
+        </AuthClientProvider>
       </TenantProvider>
     </Environment>
   );

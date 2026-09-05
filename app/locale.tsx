@@ -6,33 +6,22 @@ import {useAuthSession} from '@/lib/auth-client';
 // ---- CORE IMPORTS ---- //
 import {useAppLang} from '@/ui/hooks';
 import {i18n, l10n} from '@/locale';
-import {buildTenantScope, type TenantScope} from '@/lib/core/url/tenant-urls';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
-export default function Locale({
-  children,
-  tenant,
-}: {
-  children: React.ReactNode;
-  /* What the addressed tenant's own addresses are built from, or null where the
-   * address names none. Resolved in the root layout, which sits above the
-   * tenant shell that would otherwise provide the scope. */
-  tenant: {id: string; visitorPrefix: string; host: string | undefined} | null;
-}) {
+/**
+ * Loads the tenant's translations and holds the tree back until they are in.
+ *
+ * Mounted inside the tenant shell, so the tenant is always known here: the
+ * addresses come from the scope that shell provides, and the locale from the
+ * session, which belongs to the same tenant. The screens the deployment renders
+ * for an address resolving no tenant sit above this and are written in English
+ * instead.
+ */
+export default function Locale({children}: {children: React.ReactNode}) {
   const [loading, setLoading] = useState<number>(0);
 
-  /* Built here rather than taken from context: this sits above the tenant shell
-   * that provides one, and a scope carries methods, which do not cross from a
-   * server component to a client one. The prefix is the part that does. */
-  const scope = useMemo(
-    () =>
-      tenant &&
-      buildTenantScope({
-        tenantId: tenant.id,
-        visitorPrefix: tenant.visitorPrefix,
-        host: tenant.host,
-      }),
-    [tenant],
-  );
+  const scope = useTenantScope();
 
   const {data: session, isPending} = useAuthSession();
   const user = session?.user;
@@ -41,7 +30,7 @@ export default function Locale({
   const {dir, lang} = useAppLang({locale});
 
   const init = useCallback(
-    async (locale?: string | null, tenantScope?: TenantScope | null) => {
+    async (locale: string | null | undefined, tenantScope: TenantScope) => {
       setLoading(l => l + 1);
       await l10n.init(locale);
       await i18n.load(l10n.getLocale(), tenantScope);

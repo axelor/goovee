@@ -19,7 +19,6 @@ import {getRoutingIndex} from '@/tenant/config';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
-import Locale from './locale';
 import {
   APP_DESCRIPTION,
   APP_TITLE,
@@ -33,11 +32,6 @@ import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
-import {TENANT_HEADER} from '@/proxy';
-import {tenantURLs} from '@/lib/core/url/scope';
-import {getPublicEnvironment} from '@/environment';
-import {getTenantConfig} from '@/tenant/config';
-import {AuthClientProvider} from '@/lib/auth-client';
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -107,29 +101,13 @@ export default async function RootLayout({
     host && getRoutingIndex().tenantByHost.has(host),
   );
 
-  /* What the root shell needs to address the tenant this request names, for the
-   * one thing it fetches on the tenant's behalf: its translations. Resolved
-   * here because `Locale` sits above the tenant layout, and so above the scope
-   * that layout provides.
-   *
-   * Null where the address names no tenant — the entry page, which the proxy
-   * passes through without a tenant header — and those translations come from
-   * the deployment's own route instead. */
-  const addressedTenant = requestHeaders.get(TENANT_HEADER);
-  const tenant = addressedTenant
-    ? {
-        id: addressedTenant,
-        visitorPrefix:
-          tenantURLs(addressedTenant).visitorPrefix(requestHeaders),
-        host: getPublicEnvironment(getTenantConfig(addressedTenant))
-          .GOOVEE_PUBLIC_HOST,
-      }
-    : null;
-
-  /* The tenant's theme and browser variables are injected further down, by
-   * app/[tenant]/layout.tsx, which is where a page below the tenant segment
-   * gets them. What this shell resolves is only what it renders itself: the
-   * addresses `Locale` fetches translations from. */
+  /* Nothing tenant-shaped is resolved here. The authentication endpoint and the
+   * translations both belong to one tenant, so both are mounted by
+   * app/[tenant]/layout.tsx, where a tenant is known — and where a client
+   * navigation cannot carry a page out from under the shell that chose them.
+   * What is left above the tenant is what belongs to no tenant: the document,
+   * the fonts, and the two screens the deployment renders for an address that
+   * resolved none. */
   return (
     <html lang="en">
       <head>
@@ -137,9 +115,7 @@ export default async function RootLayout({
       </head>
       <body
         className={`${fontSans.variable} ${fontMono.variable} ${fontSans.className}`}>
-        <AuthClientProvider visitorPrefix={tenant?.visitorPrefix ?? null}>
-          <Locale tenant={tenant}>{children}</Locale>
-        </AuthClientProvider>
+        {children}
         <Toaster />
         {!servesHostRoutedTenant && <LegacyServiceWorkerCleanup />}
       </body>
