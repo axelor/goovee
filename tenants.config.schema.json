@@ -6,21 +6,16 @@
     "$global": {
       "type": "object",
       "properties": {
-        "betterAuthSecret": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Better Auth signing/encryption secret (the BETTER_AUTH_SECRET equivalent)."
-        },
         "betterAuthUrl": {
           "type": "string",
           "minLength": 1,
-          "description": "Origin serving the addresses that name no tenant — \"/\" and the sign-in screens — e.g. https://portal.example.com, scheme and host only with no trailing slash. Every tenant's own origin (publicEnv.GOOVEE_PUBLIC_HOST) is trusted for authentication alongside it, and a request arriving on a host none of them names is answered under this one. Its scheme decides whether the deployment's session cookies are written as __Secure-, so every origin in the document has to share it. Required: left out, Better Auth resolves an origin from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
+          "description": "Origin serving the addresses that name no tenant — \"/\" and the deployment's own routes under /deployment — e.g. https://portal.example.com, scheme and host only with no trailing slash. Every tenant's own origin (publicEnv.GOOVEE_PUBLIC_HOST) is trusted for authentication alongside it, and a request arriving on a host none of them names is answered under this one. Its scheme decides whether the deployment's session cookies are written as __Secure-, so every origin in the document has to share it. Required: left out, Better Auth resolves an origin from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
           "pattern": "^https?://[^/?#]+$"
         },
         "defaultTenant": {
           "type": "string",
           "minLength": 1,
-          "description": "Tenant serving the addresses that name none of their own: \"/\" and the sign-in screens, which sit outside the tenant path segment, and a script run with no --tenant. Must name an entry of this document. Left out, those addresses resolve no tenant: \"/\" answers not-found, and a visitor reaches the sign-in screen by naming a tenant in the URL."
+          "description": "Tenant serving the addresses that name none of their own: \"/\", and a script run with no --tenant. Must name an entry of this document. Left out, \"/\" answers not-found and a visitor has to open an address naming a tenant."
         },
         "pushMaxConnections": {
           "type": "integer",
@@ -35,7 +30,7 @@
           "description": "Bytes the resized-image cache may occupy. One cache directory serves every tenant, so the budget is the deployment's."
         }
       },
-      "required": ["betterAuthSecret", "betterAuthUrl"],
+      "required": ["betterAuthUrl"],
       "additionalProperties": false,
       "description": "Deployment-wide settings, shared by every tenant because they are bound to the single origin / process."
     }
@@ -44,6 +39,11 @@
   "additionalProperties": {
     "type": "object",
     "properties": {
+      "betterAuthSecret": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Signing and encryption secret for this tenant's sessions. Per tenant, not per deployment: each tenant authenticates through an instance of its own, so a secret that leaks forges sessions for that tenant alone. Generate a distinct long random value for every tenant — reusing one across tenants gives back exactly the isolation this separates."
+      },
       "db": {
         "type": "object",
         "properties": {
@@ -194,7 +194,7 @@
               "certsDir"
             ],
             "additionalProperties": false,
-            "description": "Register this tenant's BPCE webhook under the tenant-scoped path /api/tenant/<tenantId>/webhooks/hubpisp/... so the webhook uses this tenant's credentials."
+            "description": "Register this tenant's BPCE webhook under this tenant's own path — /<tenantId>/api/webhooks/hubpisp/..., without the <tenantId> segment for a tenant reached on an origin of its own — so the webhook uses this tenant's credentials."
           }
         },
         "additionalProperties": false,
@@ -263,7 +263,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "Per-tenant OAuth applications. Each provider is registered at startup under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/api/auth/oauth2/callback/<provider>-<tenantId>) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here."
+        "description": "Per-tenant OAuth applications. Each provider is registered at startup under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>, without the <tenantId> segment for a tenant reached on an origin of its own) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here."
       },
       "webPush": {
         "type": "object",
@@ -316,7 +316,7 @@
         "description": "Browser-exposed variables for this tenant (declared in full; not inherited from the environment)."
       }
     },
-    "required": ["db", "aos", "publicEnv"],
+    "required": ["betterAuthSecret", "db", "aos", "publicEnv"],
     "additionalProperties": false
   },
   "title": "Goovee configuration",

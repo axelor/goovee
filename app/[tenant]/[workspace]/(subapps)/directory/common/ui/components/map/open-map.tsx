@@ -42,7 +42,7 @@ export const Map = memo((props: MapContentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [popup, setPopup] = useState<Popup | null>(null);
   const {className, center, zoom, items, small} = props;
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   useLayoutEffect(() => {
     if (!mapRef.current) return;
@@ -88,7 +88,7 @@ export const Map = memo((props: MapContentProps) => {
               `/${SUBAPP_CODES.directory}/entry/${popup.item.id}`,
             )}
             compact={small}
-            tenant={tenant}
+            tenantScope={tenantScope}
             className="hover:bg-accent"
           />,
           popup.el,

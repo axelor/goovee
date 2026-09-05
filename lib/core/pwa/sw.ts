@@ -34,14 +34,29 @@ declare const self: ServiceWorkerGlobalScope;
  * with esbuild rather than Next, so nothing substitutes `process` and reading it
  * throws while the worker is evaluated, which fails the install and leaves the
  * previously installed worker in place. Not `registration.scope` either: that
- * may carry the tenant, while the paths built below are origin-level assets or
- * already name the tenant they belong to. */
+ * carries the tenant where the tenant shares an origin, and what this prefixes
+ * are the deployment's own assets. `withTenantRoot` below is the one for an
+ * address belonging to the tenant. */
 const basePath = normalizePathPrefix(
   new URL(self.location.href).pathname.replace(/\/[^/]*$/, ''),
 );
 
 function withDeploymentBasePath(path: string) {
   return withPathPrefix(basePath, path);
+}
+
+/**
+ * An address of the tenant this worker serves, measured from the address it was
+ * registered at.
+ *
+ * That registration scope is where the tenant's addresses start — the base path,
+ * and the tenant segment where the tenant shares an origin — so joining onto it
+ * produces the shape the origin actually serves. Reading the scope rather than
+ * composing the tenant id keeps the worker from having to know which of the two
+ * shapes its tenant is reached by.
+ */
+function withTenantRoot(path: string) {
+  return new URL(path.replace(/^\//, ''), self.registration.scope).pathname;
 }
 
 /**
@@ -112,15 +127,13 @@ const serwist = new Serwist({
      * HTTP cache unless translations actually changed. Must be listed before
      * defaultCache to override the default NetworkFirst rule for /api/**.
      *
-     * Both addresses are matched because which one is asked for follows the scope
-     * this worker was registered at. Registered under a tenant's path it controls
-     * only the pages beneath it, and those always name their tenant; the entry,
-     * sign-in and error pages ask without one and no registration covers them, so
-     * their translations revalidate through the browser's own cache. Registered at
-     * the root of an origin a single tenant holds, it controls those pages too,
-     * and the tenant-less address is the one they ask for. */
+     * Only a tenant's own address is matched, and that is the only one a worker
+     * ever sees: every page a registration controls sits under that tenant. `/`
+     * asks the deployment for its translations instead, and it is served either
+     * on a shared origin, where no worker is registered, or on a tenant's own
+     * origin, where the proxy has already made it that tenant's page. */
     {
-      matcher: /\/api\/(tenant\/[^/]+\/)?locales\//,
+      matcher: /\/api\/locales\//,
       handler: new StaleWhileRevalidate({
         cacheName: tenantCacheName('locale-translations'),
       }),
@@ -227,14 +240,14 @@ self.addEventListener('notificationclick', event => {
      * was never stored. Interpolating a missing id would ask the server to read
      * a notification called "undefined". */
     const readPath = tag
-      ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
+      ? `/api/push/notifications/read/tag/${encodeURIComponent(tag)}`
       : notification?.id
-        ? `/api/tenant/${tenantId}/push/notifications/read/${notification.id}`
+        ? `/api/push/notifications/read/${notification.id}`
         : null;
 
     if (tenantId && readPath) {
       try {
-        await fetch(withDeploymentBasePath(readPath), {method: 'POST'});
+        await fetch(withTenantRoot(readPath), {method: 'POST'});
         // Notify all tabs to remove this notification from their unread state
         channel.postMessage({type: MSG_TYPE.READ, notification, tag});
       } catch (err) {

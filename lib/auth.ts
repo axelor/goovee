@@ -1,7 +1,14 @@
+import {randomUUID} from 'node:crypto';
+
 import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
-import {getGlobalConfig, getRoutingIndex} from '@/tenant/config';
+import {
+  getGlobalConfig,
+  getRoutingIndex,
+  getTenantConfig,
+  listTenantIds,
+} from '@/tenant/config';
 import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
@@ -16,17 +23,19 @@ import {
 } from 'better-auth/cookies';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
-import oauthProviders, {
+import {
+  buildOAuthProviders,
   findOAuthRegistration,
 } from './core/auth/(ee)/oauth-providers';
-import credentials from './core/auth/credentials';
+import {buildCredentials} from './core/auth/credentials';
 import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
 import {
   KeycloakRegisterSchema,
   OAuthInviteRegisterSchema,
   OAuthRegisterSchema,
 } from './core/auth/validation-utils';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {deploymentRootPath, withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/lib/core/url/scope';
 
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
@@ -46,9 +55,6 @@ const ERROR_CODES = defineErrorCodes({
 const OAUTH_CALLBACK_PATH = '/oauth2/callback/:providerId';
 
 const options = {
-  onAPIError: {
-    errorURL: withBasePath('/auth/error'),
-  },
   databaseHooks: {
     user: {
       create: {
@@ -93,7 +99,6 @@ const options = {
                 const registrationData = {
                   ...data,
                   email: user.email,
-                  tenantId,
                 };
 
                 const {success: inviteSuccess, data: inviteData} =
@@ -104,6 +109,9 @@ const options = {
                     await client.$transaction(async txClient => {
                       await registerByInvite({
                         ...inviteData,
+                        /* From the provider this callback arrived through, not
+                         * from the body it carried. */
+                        tenantId,
                         client: txClient,
                         config,
                       });
@@ -134,6 +142,9 @@ const options = {
                     await client.$transaction(async txClient => {
                       await register({
                         ...registerData,
+                        /* From the provider this callback arrived through, not
+                         * from the body it carried. */
+                        tenantId,
                         client: txClient,
                         config,
                       });
@@ -159,7 +170,6 @@ const options = {
                 } = KeycloakRegisterSchema.safeParse({
                   email: user.email,
                   name: user.name,
-                  tenantId,
                   workspaceURI: data?.workspaceURI,
                   locale: data?.locale,
                 });
@@ -174,6 +184,9 @@ const options = {
                   await client.$transaction(async txClient => {
                     await registerByKeycloak({
                       ...keycloakData,
+                      /* From the provider this callback arrived through, not
+                       * from the body it carried. */
+                      tenantId,
                       client: txClient,
                     });
                   });
@@ -264,14 +277,14 @@ const options = {
         /* Create-only: a session's tenant is settled by the sign-in that
          * authenticated the user against that tenant. Any session field
          * better-auth accepts as input can be rewritten through
-         * POST /api/auth/update-session, which is gated on nothing but a valid
+         * the tenant's own POST …/api/auth/update-session, which is gated on nothing but a valid
          * session — so a signed-in user could move their session to another
          * tenant and be resolved there as whoever holds their email. */
         input: false,
       },
     },
   },
-  plugins: [credentials, ...(oauthProviders ? [oauthProviders] : [])],
+  plugins: [],
 } satisfies BetterAuthOptions;
 
 /* Deployment-wide auth settings come from the document's "$global" section
@@ -310,153 +323,291 @@ function authOrigins(): string[] {
   return [...getRoutingIndex().declaredOrigins];
 }
 
-export const auth = betterAuth({
-  ...options,
-  secret: globalConfig.betterAuthSecret,
-  baseURL: {
-    allowedHosts: authOrigins(),
-    /* Where a request arriving on a host the list does not hold is answered: the
-     * addresses carrying no tenant of their own are served on this origin. Given
-     * one, because an unmatched host throws when there is none. */
-    fallback: globalConfig.betterAuthUrl,
-    /* Stated rather than derived. Given as "auto" or left out, the `__Secure-`
-     * prefix on the session cookie names follows NODE_ENV rather than the scheme
-     * the deployment is served on, and a production build behind plain http would
-     * then name cookies the browser refuses to store, so nobody could sign in.
-     * Every origin above shares this scheme; the document refuses a tenant whose
-     * does not. */
-    protocol: deploymentOrigin.protocol === 'https:' ? 'https' : 'http',
-  },
-  advanced: {
-    /* Resolving an origin per request reads `x-forwarded-host` ahead of the
-     * `host` header, and the library trusts it unless told otherwise. Stated
-     * here because leaving it implicit hides an obligation on the deployment:
-     * the proxy in front has to overwrite that header rather than pass a
-     * client's own through, since whoever sets it chooses which of the origins
-     * above the request is answered under. `x-forwarded-proto` is never read —
-     * the protocol above is fixed. */
-    trustedProxyHeaders: true,
-  },
-  basePath: withBasePath('/api/auth'),
-  plugins: [
-    ...options.plugins,
-    customSession(async ({user, session}, ctx) => {
-      const {tenantId} = session;
-      const tenant = tenantId ? await manager.getTenant(tenantId) : null;
-      const partner =
-        tenant &&
-        user.email &&
-        (await findGooveeUserByEmail(user.email, tenant.client));
+/*
+ * One authentication instance per tenant, built when the tenant is first
+ * addressed and held from then on.
+ *
+ * Per tenant rather than one for the deployment, because the tenant is part of
+ * every address authentication answers on: the instance is mounted under the
+ * tenant's own segment, so which tenant a request authenticates against is
+ * settled by where it arrived and nothing a caller sends can name another. The
+ * cookie name carries the tenant too, so two tenants sharing an origin hold two
+ * sessions in one browser rather than evicting each other.
+ *
+ * Built on first use rather than at module scope: `next build` evaluates this
+ * file with a placeholder document that names no tenant, so a map composed up
+ * front would be baked empty into the image. Held on `globalThis` because a
+ * module is evaluated once per bundler layer and again on every recompile, and
+ * a second set of instances would mint sessions the first set cannot read.
+ */
+declare global {
+  var __tenantAuth: Map<string, ReturnType<typeof buildAuth>> | undefined;
+}
 
-      if (!partner) {
-        // Session cookie exists but partner no longer found — clear cookies and treat as no session
-        // customSession types don't accept null but better-auth handles it as unauthenticated
-        const cookies = ctx.context.authCookies;
-        ctx.setCookie(cookies.sessionToken.name, '', {maxAge: 0});
-        ctx.setCookie(cookies.sessionData.name, '', {maxAge: 0});
-        ctx.setCookie(cookies.accountData.name, '', {maxAge: 0});
-        ctx.setCookie(cookies.dontRememberToken.name, '', {maxAge: 0});
-        // Cast to `never` so this branch is excluded from the function’s inferred return type.
-        return null as never;
-      }
+/* For a tenant the document does not name. Random per process, so nothing it
+ * signs survives a restart and no cookie written under a real tenant's secret
+ * decrypts under it: an address naming an unknown tenant is answered as
+ * unauthenticated rather than by an error a caller must tell apart from a
+ * refusal. */
+const UNKNOWN_TENANT_SECRET = randomUUID();
 
-      const {
-        id,
-        emailAddress,
-        fullName: name = '',
-        simpleFullName = '',
-        isContact,
-        mainPartner,
-        partnerCategory,
-        localization,
-        picture,
-      } = partner;
+/**
+ * The prefix a tenant's cookies are named with, giving `auth-acme.session_token`.
+ *
+ * One definition, because two sides depend on it: the instance writes cookies
+ * under it, and `sessionTenantIds` reads them back. Deriving it twice is how
+ * they come to disagree, and a disagreement is silent — a name nobody looks for
+ * simply reads as no session at all.
+ *
+ * A change here renames every tenant's cookies, so every session in every
+ * browser is dropped at once: the new names carry nothing and the old ones are
+ * no longer read. That is the deliberate way out of a cookie whose attributes
+ * have to change — a rename cannot be shadowed by what a browser already holds,
+ * while reusing the name can.
+ */
+function cookiePrefixFor(tenantId: string): string {
+  return `auth-${tenantId}`;
+}
 
-      return {
-        user: {
+function buildAuth(tenantId: string) {
+  const oauthProviders = buildOAuthProviders(tenantId);
+
+  return betterAuth({
+    ...options,
+    secret:
+      getTenantConfig(tenantId)?.betterAuthSecret ?? UNKNOWN_TENANT_SECRET,
+    baseURL: {
+      allowedHosts: authOrigins(),
+      /* Where a request arriving on a host the list does not hold is answered: the
+       * addresses carrying no tenant of their own are served on this origin. Given
+       * one, because an unmatched host throws when there is none. */
+      fallback: globalConfig.betterAuthUrl,
+      /* Stated rather than derived. Given as "auto" or left out, the `__Secure-`
+       * prefix on the session cookie names follows NODE_ENV rather than the scheme
+       * the deployment is served on, and a production build behind plain http would
+       * then name cookies the browser refuses to store, so nobody could sign in.
+       * Every origin above shares this scheme; the document refuses a tenant whose
+       * does not. */
+      protocol: deploymentOrigin.protocol === 'https:' ? 'https' : 'http',
+    },
+    advanced: {
+      /* Resolving an origin per request reads `x-forwarded-host` ahead of the
+       * `host` header, and the library trusts it unless told otherwise. Stated
+       * here because leaving it implicit hides an obligation on the deployment:
+       * the proxy in front has to overwrite that header rather than pass a
+       * client's own through, since whoever sets it chooses which of the origins
+       * above the request is answered under. `x-forwarded-proto` is never read —
+       * the protocol above is fixed. */
+      trustedProxyHeaders: true,
+
+      /* The tenant's own cookie names. Session cookies carry no domain and are
+       * written for whichever host answered, so two tenants sharing an origin
+       * would otherwise write the same name and each sign-in would evict the
+       * other's session. Named per tenant, both are held at once and a browser
+       * can be signed in to several tenants of one deployment.
+       *
+       * `sessionTenantIds` reads these names to tell whose sessions a request
+       * carries, and derives them the same way; changing this shape obliges it. */
+      cookiePrefix: cookiePrefixFor(tenantId),
+
+      /* Confine the session cookies to the deployment. Better Auth writes them
+       * at `/` — it knows nothing of the base path, whose only meaning to it is
+       * that the endpoints happen to sit under one — so on a deployment served
+       * under a base path they would be sent to every other address on that
+       * host, including whatever else it serves.
+       *
+       * The deployment root and not the tenant's segment, so that `/` still
+       * receives them: `sessionTenantIds` reads the cookies a request carries to
+       * land a signed-in visitor on their own tenant, and an address above the
+       * tenant is sent nothing scoped below it. It also keeps the path fixed for
+       * the life of a deployment — a path that followed the tenant would move
+       * when its routing did, and a cookie left at the old path outlives the
+       * change and is read in preference to the new one, since a browser sends
+       * the longer path first and the last value of a name is the one taken. */
+      defaultCookieAttributes: {path: deploymentRootPath()},
+    },
+    /* Under the tenant's own segment, so the address names the tenant it
+     * authenticates against. `tenantURLs` shapes it for how the tenant is routed:
+     * no segment on an origin it holds to itself, its segment on one it shares. */
+    basePath: withBasePath(tenantURLs(tenantId).forRouter('/api/auth')),
+
+    /* The tenant's own error screen, under the tenant's segment like every
+     * other address here. */
+    onAPIError: {
+      errorURL: withBasePath(tenantURLs(tenantId).forRouter('/auth/error')),
+    },
+    plugins: [
+      ...options.plugins,
+      /* This tenant's credentials endpoints. Built per instance so each closes
+       * over the tenant it authenticates against, taken from the address the
+       * instance is mounted at. */
+      buildCredentials(tenantId),
+      /* This tenant's own identity providers, and no other tenant's — see
+       * `buildOAuthProviders`. Built per instance rather than shared, which is
+       * what keeps a callback naming another tenant's provider from resolving
+       * here at all. */
+      ...(oauthProviders ? [oauthProviders] : []),
+      customSession(async ({user, session}, ctx) => {
+        const {tenantId} = session;
+        const tenant = tenantId ? await manager.getTenant(tenantId) : null;
+        const partner =
+          tenant &&
+          user.email &&
+          (await findGooveeUserByEmail(user.email, tenant.client));
+
+        if (!partner) {
+          // Session cookie exists but partner no longer found — clear cookies and treat as no session
+          // customSession types don't accept null but better-auth handles it as unauthenticated
+          const cookies = ctx.context.authCookies;
+          ctx.setCookie(cookies.sessionToken.name, '', {maxAge: 0});
+          ctx.setCookie(cookies.sessionData.name, '', {maxAge: 0});
+          ctx.setCookie(cookies.accountData.name, '', {maxAge: 0});
+          ctx.setCookie(cookies.dontRememberToken.name, '', {maxAge: 0});
+          // Cast to `never` so this branch is excluded from the function’s inferred return type.
+          return null as never;
+        }
+
+        const {
           id,
-          name,
-          email: emailAddress?.address || user.email,
+          emailAddress,
+          fullName: name = '',
+          simpleFullName = '',
           isContact,
-          simpleFullName,
-          mainPartnerId: isContact ? mainPartner?.id : undefined,
-          partnerCategoryId: isContact
-            ? mainPartner?.partnerCategory?.id
-            : partnerCategory?.id,
-          tenantId,
-          locale: localization?.code,
-          image:
-            picture?.id && tenantId
-              ? getPartnerImageURL(picture.id, tenantId)
-              : undefined,
-        },
-        session: session,
-      };
-    }, options),
-    nextCookies(),
-  ],
-});
+          mainPartner,
+          partnerCategory,
+          localization,
+          picture,
+        } = partner;
 
-export type Auth = typeof auth;
+        return {
+          user: {
+            id,
+            name,
+            email: emailAddress?.address || user.email,
+            isContact,
+            simpleFullName,
+            mainPartnerId: isContact ? mainPartner?.id : undefined,
+            partnerCategoryId: isContact
+              ? mainPartner?.partnerCategory?.id
+              : partnerCategory?.id,
+            tenantId,
+            locale: localization?.code,
+            image:
+              picture?.id && tenantId
+                ? getPartnerImageURL(picture.id, tenantURLs(tenantId))
+                : undefined,
+          },
+          session: session,
+        };
+      }, options),
+      nextCookies(),
+    ],
+  });
+}
+
+/**
+ * The authentication instance for a tenant, built once and reused.
+ *
+ * @throws nothing for a tenant the document does not name — an instance is
+ *   still returned, and every lookup through it resolves no tenant, so a
+ *   request naming an unknown tenant is answered as unauthenticated rather than
+ *   by an error a caller would have to tell apart from a refusal.
+ */
+export function getAuth(tenantId: string): Auth {
+  const instances = (global.__tenantAuth ??= new Map());
+
+  /* The id reaching here is a path segment, and nothing upstream checks it
+   * against the document: a route handler takes it from `params`, and
+   * `getSession` takes it from the tenant header. Keying on the id that
+   * resolves means made-up ids share one instance instead of each taking a
+   * slot in a map that is never evicted from — otherwise a series of requests
+   * naming nothing builds a full authentication instance apiece and the heap
+   * grows with them.
+   *
+   * That shared instance signs nothing and opens nothing: it carries a secret
+   * no cookie was written under, so a session read through it is absent, which
+   * is the answer an unknown tenant should give. */
+  const key = getTenantConfig(tenantId) ? tenantId : '';
+
+  let instance = instances.get(key);
+
+  if (!instance) {
+    instance = buildAuth(tenantId);
+    instances.set(key, instance);
+  }
+
+  return instance;
+}
+
+export type Auth = ReturnType<typeof buildAuth>;
 
 let cookieReadFailureReported = false;
 
-/* The tenant a session belongs to. Read from the encrypted (JWE) session-data
- * cookie rather than through `auth.api.getSession()`, which runs the
- * customSession enrichment — a partner lookup in the session's tenant — on
- * every call, including every <Link> prefetch, while the tenant id is already
- * in the cookie and cannot change for the life of a session.
+/**
+ * The tenants a request carries a signed-in session for.
  *
- * The secret, the token cookie's name and the session-data cookie's `__Secure-`
- * prefix all come from the auth instance, since a cookie reader left to itself
- * resolves them from things that do not describe this deployment: the secret
- * from BETTER_AUTH_SECRET, which is not where this deployment keeps it — the
- * configuration document is — and the prefix from the build mode, while the
- * cookie is written with it or without it according to the scheme the configured
- * origins are served on. Both mistakes are invisible: a cookie looked for under
- * the wrong name reads as absent, and every request then takes the expensive
- * path in silence. Giving better-auth a `cookiePrefix` or a custom cookie name
- * under `advanced` obliges an update here — the read below still assumes its
- * default names. */
-export async function getSessionTenantId(
-  headers: Headers,
-): Promise<string | undefined> {
-  const {secret, authCookies} = await auth.$context;
-
-  /* Nothing to read for a visitor holding no session token. Matched by the
-   * instance's own name for it: a name this failed to recognise would make
-   * every request look anonymous, and a caller checking a session against the
-   * tenant it is reaching would let all of them through. */
+ * Two steps, and the order is the point. Cookie *names* carry the tenant, so
+ * they say which of a deployment's tenants a request might be signed in to —
+ * but a name is whatever the browser sends, so that is a lookup key and nothing
+ * more. What is returned comes from inside the cookie: each candidate is opened
+ * with that tenant's own secret, and the tenant is read from the payload. A name
+ * whose cookie will not open under the secret it claims yields nothing, so an
+ * invented cookie buys no answer.
+ *
+ * Usually empty or one entry, and one decryption. Several are legitimate:
+ * tenants sharing an origin write different names, so one browser holds a
+ * session for each tenant it signed in to.
+ *
+ * Read from the cookie rather than through `getSession()`, which runs the
+ * customSession enrichment — a partner lookup — on every call, while the tenant
+ * is already in the cookie and cannot change for the life of a session.
+ *
+ */
+export async function sessionTenantIds(headers: Headers): Promise<string[]> {
   const cookies = parseCookies(headers.get('cookie') ?? '');
 
-  if (!cookies.has(authCookies.sessionToken.name)) {
-    return undefined;
+  const candidates = listTenantIds().filter(tenantId => {
+    const prefix = cookiePrefixFor(tenantId);
+
+    return (
+      cookies.has(`${prefix}.session_token`) ||
+      cookies.has(`${SECURE_COOKIE_PREFIX}${prefix}.session_token`)
+    );
+  });
+
+  const confirmed: string[] = [];
+
+  for (const candidate of candidates) {
+    try {
+      const {secret, authCookies} = await getAuth(candidate).$context;
+
+      const cached = await getCookieCache(headers, {
+        secret,
+        /* Named, because this defaults to better-auth's own prefix while every
+         * cookie here is written under the tenant's. Left out, the read finds
+         * nothing and every request looks signed out. */
+        cookiePrefix: cookiePrefixFor(candidate),
+        strategy: options.session.cookieCache.strategy,
+        isSecure: authCookies.sessionData.name.startsWith(SECURE_COOKIE_PREFIX),
+      });
+
+      const tenantId: unknown = cached?.session.tenantId;
+
+      if (typeof tenantId === 'string') confirmed.push(tenantId);
+    } catch (err) {
+      /* Not expected: an undecodable cookie, or one written under another
+       * secret, reads as absent rather than throwing. Caught so a library that
+       * starts throwing costs this answer rather than the request, and reported
+       * once — it would be the same failure every time. */
+      if (!cookieReadFailureReported) {
+        cookieReadFailureReported = true;
+        console.error(
+          'Failed to read the tenant from the session cookie:',
+          err,
+        );
+      }
+    }
   }
 
-  try {
-    const cached = await getCookieCache(headers, {
-      secret,
-      strategy: options.session.cookieCache.strategy,
-      isSecure: authCookies.sessionData.name.startsWith(SECURE_COOKIE_PREFIX),
-    });
-
-    const cachedTenantId: unknown = cached?.session.tenantId;
-
-    if (typeof cachedTenantId === 'string') {
-      return cachedTenantId;
-    }
-  } catch (err) {
-    /* Not expected: no cookie makes the read throw, since an undecodable one,
-     * or one written under another secret, reads as absent. Caught so that a
-     * library that starts throwing costs a full session lookup rather than the
-     * request, and reported once — it would be the same failure every time. */
-    if (!cookieReadFailureReported) {
-      cookieReadFailureReported = true;
-      console.error('Failed to read the tenant from the session cookie:', err);
-    }
-  }
-
-  const session = await auth.api.getSession({headers});
-
-  return session?.user.tenantId ?? undefined;
+  return confirmed;
 }

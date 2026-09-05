@@ -108,7 +108,7 @@ not yours. A part that could not be stored answers `500`, and may be sent again.
 ### Open
 
 ```
-POST   /api/tenant/{tenant}/upload/stage/{purpose}
+POST   /{tenant}/api/upload/stage/{purpose}
 X-File-Name: <percent-encoded name>
 X-File-Type: <mime type>
 X-File-Size: <total bytes>
@@ -141,7 +141,7 @@ and send every part as an append.
 ### Ask where to resume
 
 ```
-HEAD   /api/tenant/{tenant}/upload/stage/{purpose}
+HEAD   /{tenant}/api/upload/stage/{purpose}
 X-File-Id: <id>
 
 200 → X-File-Offset, X-File-Size
@@ -151,7 +151,7 @@ X-File-Id: <id>
 ### Append
 
 ```
-PATCH  /api/tenant/{tenant}/upload/stage/{purpose}
+PATCH  /{tenant}/api/upload/stage/{purpose}
 X-File-Id: <id>
 X-File-Offset: <where this part starts>
 Content-Type: application/octet-stream
@@ -180,7 +180,7 @@ answer may simply ask again.
 ### Give up
 
 ```
-DELETE /api/tenant/{tenant}/upload/stage/{purpose}
+DELETE /{tenant}/api/upload/stage/{purpose}
 X-File-Id: <id>
 
 204

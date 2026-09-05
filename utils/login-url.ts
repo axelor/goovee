@@ -1,23 +1,29 @@
-import type {Tenant} from '@/tenant';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 /**
- * The address of the sign-in screen, carrying what the visitor should be
+ * The address of a tenant's sign-in screen, carrying what the visitor should be
  * returned to once signed in.
  *
- * Every parameter is optional and a falsy one is left out rather than sent
- * empty, so an empty string drops along with the nullish values. The sign-in
- * screen returns the visitor to `callbackurl` only if it lands on the tenant's
- * own origin.
+ * The tenant is named by the address rather than by a parameter: the screen is
+ * one of the tenant's own pages, so the scope that builds every other address
+ * below the tenant builds this one too. A screen reached this way cannot be
+ * shown for a tenant other than the one whose address it was reached at.
+ *
+ * `callbackurl` and `workspaceURI` are left out when falsy, so an empty string
+ * drops along with the nullish values. The screen returns the visitor to
+ * `callbackurl` only if it lands on the tenant's own origin.
  */
-export function getLoginURL(params: {
-  callbackurl?: string;
-  workspaceURI?: string;
-  tenant?: Tenant['id'] | number | null;
-}) {
-  const sp = new URLSearchParams();
+export function getLoginURL(
+  scope: TenantScope,
+  params: {callbackurl?: string; workspaceURI?: string} = {},
+) {
+  const search = new URLSearchParams();
+
   Object.entries(params).forEach(
-    ([key, value]) => key && value && sp.append(key, String(value)),
+    ([key, value]) => key && value && search.append(key, String(value)),
   );
 
-  return `/auth/login?${sp.toString()}`;
+  const query = search.toString();
+
+  return scope.forRouter(`/auth/login${query ? `?${query}` : ''}`);
 }

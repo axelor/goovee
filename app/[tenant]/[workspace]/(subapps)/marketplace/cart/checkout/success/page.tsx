@@ -1,4 +1,4 @@
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
@@ -17,6 +17,7 @@ import {findPurchases} from '../../../common/orm';
 import {ProductIcon} from '../../../common/ui/components/shared/product-icon';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 /* Reached after payment with the new order's id in `?orderId=`. The order is
  * re-read partner-scoped, so a tampered id cannot surface someone else's
@@ -50,12 +51,11 @@ export default async function CheckoutSuccessPage(props: {
       const scope = await currentWorkspace();
 
       redirect(
-        getLoginURL({
+        getLoginURL(await currentTenantScope(), {
           callbackurl: scope?.forRouter(
             `/${SUBAPP_CODES.marketplace}/my-account/purchases`,
           ),
           workspaceURI: scope?.forRouter(),
-          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
         }),
       );
     }

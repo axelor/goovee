@@ -168,14 +168,14 @@ export default function Personal({
 }) {
   const pathname = usePathname();
   const {toast} = useToast();
-  const {tenant, scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {
     uploads,
     upload,
     pause,
     resume,
     remove: removeUpload,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
   const signOut = useSignOut();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<string | undefined>(pictureProp);
@@ -253,10 +253,9 @@ export default function Personal({
         if (editEmail || isMainPartnerUpdated) {
           await signOut();
 
-          const loginURL = getLoginURL({
+          const loginURL = getLoginURL(tenantScope, {
             callbackurl: pathname,
             workspaceURI: scope.forRouter(),
-            tenant,
           });
           window.location.href = withBasePath(loginURL);
         } else {
@@ -452,7 +451,7 @@ export default function Personal({
                 <div className="relative size-[72px] shrink-0">
                   <Avatar className="size-[72px] rounded-2xl">
                     <AvatarImage
-                      src={getPartnerImageURL(picture, tenant, {
+                      src={getPartnerImageURL(picture, tenantScope, {
                         noimage: true,
                         noimageSrc: '/images/profile.png',
                       })}

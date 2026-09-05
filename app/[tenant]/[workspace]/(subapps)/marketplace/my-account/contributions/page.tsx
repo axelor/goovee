@@ -40,6 +40,7 @@ import {
   myContributionsSearchParamsSchema,
   type MyContributionsSearchParams,
 } from '../../common/utils/validators';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -57,6 +58,8 @@ export default async function MyContributionsPage(props: {
     myContributionsSearchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
+  const tenantScope = await currentTenantScope();
+
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
   });
@@ -279,7 +282,7 @@ export default async function MyContributionsPage(props: {
                 workspace={access.workspace}
                 config={config}
                 scope={access.scope}
-                tenantId={access.tenant.id}
+                tenantScope={tenantScope}
               />
             )}
             {tab === MyContributionsTab.Products && (

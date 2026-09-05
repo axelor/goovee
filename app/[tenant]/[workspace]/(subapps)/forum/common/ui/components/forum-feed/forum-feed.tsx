@@ -60,7 +60,7 @@ export function ForumFeed({
   canPost?: boolean;
   commentsEnabled: boolean;
 }) {
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
   const activeSort = searchParams.get('sort') || 'new';
@@ -182,7 +182,7 @@ export function ForumFeed({
             const author = post.author?.simpleFullName;
             const date = post.postDateT || post.createdOn;
             const avatar = post.author?.picture?.id
-              ? getPartnerImageURL(post.author.picture.id, tenant, {
+              ? getPartnerImageURL(post.author.picture.id, tenantScope, {
                   noimage: true,
                 })
               : null;
@@ -206,7 +206,7 @@ export function ForumFeed({
                     {stripHtml(post.content)}
                   </p>
                 )}
-                <PostImages post={post} workspaceURI={scope.forRouter()} />
+                <PostImages post={post} />
                 <div className="mt-3 flex items-center gap-2.5 text-[12px] text-ink-500">
                   <span className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[10px] font-bold shrink-0">
                     {avatar ? (

@@ -4,10 +4,10 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentTenantScope, currentWorkspace} from '@/lib/core/url/current';
 import {findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
-import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {NAVIGATION, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/login-url';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {tenantURLs} from '@/lib/core/url/scope';
@@ -51,6 +51,10 @@ export default async function Layout(props: {
 }) {
   const {children} = props;
 
+  /* Read from the address rather than from the gate, because a denial below
+   * carries no addresses of its own and still has to name where to sign in. */
+  const tenantScope = await currentTenantScope();
+
   const granted = await ensureAccess({allowGuest: true});
 
   if (!granted.ok) {
@@ -64,10 +68,9 @@ export default async function Layout(props: {
       const workspaceURI = scope?.forRouter();
 
       redirect(
-        getLoginURL({
+        getLoginURL(tenantScope, {
           callbackurl: workspaceURI,
           workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
         }),
       );
     }
@@ -88,10 +91,9 @@ export default async function Layout(props: {
     return user
       ? notFound()
       : redirect(
-          getLoginURL({
+          getLoginURL(tenantScope, {
             callbackurl: workspaceURI,
             workspaceURI,
-            [SEARCH_PARAMS.TENANT_ID]: tenantId,
           }),
         );
   }
@@ -112,13 +114,12 @@ export default async function Layout(props: {
    * browser has no reason to hold the value AOS identifies a workspace by. A
    * workspace with no stored url cannot be addressed at all, so it is left out
    * instead of offered as a link to nowhere. */
-  const tenantScope = tenantURLs(tenantId);
   const workspaces: WorkspaceLink[] = found
     .filter(w => Boolean(w.url))
     .map(w => ({
       id: w.id,
       name: w.name,
-      href: tenantScope.workspaceByKey(w.url!).forRouter(),
+      href: tenantURLs(tenantId).workspaceByKey(w.url!).forRouter(),
     }));
 
   let theme: any;

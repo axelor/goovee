@@ -23,7 +23,7 @@ import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {Link} from '@/ui/components/link';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import type {Subapp, Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
@@ -40,12 +40,12 @@ function MobileSidebar({
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const pathname = usePathname();
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const [open, setOpen] = useState(false);
 
   const user = session?.user;
 
-  const {scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const env = useEnvironment();
   const router = useRouter();
 
@@ -192,11 +192,11 @@ export function MobileMenu({
   config: ShellConfig | Cloned<ShellConfig>;
   cartCodes?: string[];
 }) {
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const user = session?.user;
 
   const {loading, visible} = useNavigationVisibility();
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const canDisplayContent = !loading && visible;
 
@@ -217,7 +217,7 @@ export function MobileMenu({
         {cartCodes.length > 0 && <CartIcon enabledCodes={cartCodes} />}
 
         {user && <Notification />}
-        <Account baseURL={scope.forRouter()} tenant={tenant} />
+        <Account baseURL={scope.forRouter()} tenantScope={tenantScope} />
       </div>
     </nav>
   );

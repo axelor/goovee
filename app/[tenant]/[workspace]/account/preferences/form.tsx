@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from 'react';
 import {z} from 'zod';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useToast} from '@/ui/hooks/use-toast';
@@ -56,7 +56,7 @@ const isFulfilled = <T,>(
 ): result is PromiseFulfilledResult<T> => result.status === 'fulfilled';
 
 export default function PreferencesForm() {
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const user = session?.user;
   const userId = user?.id;
 

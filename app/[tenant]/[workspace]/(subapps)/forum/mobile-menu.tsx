@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {MdOutlineForum} from 'react-icons/md';
 import {useRouter} from 'next/navigation';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -31,7 +31,7 @@ export default function MobileMenu({items}: {items: MenuItem[]}) {
   const openSidebar = useCallback(() => setOpen(true), []);
   const closeSidebar = useCallback(() => setOpen(false), []);
 
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
 
   const filteredItems = session ? items : items.filter(item => item.id === 1);
 

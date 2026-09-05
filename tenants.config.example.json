@@ -1,13 +1,13 @@
 {
   "$schema": "./tenants.config.schema.json",
   "$global": {
-    "betterAuthSecret": "<better-auth-secret>",
     "betterAuthUrl": "https://portal.example.com",
     "defaultTenant": "acme",
     "pushMaxConnections": 10,
     "imageCacheMaxBytes": 2147483648
   },
   "acme": {
+    "betterAuthSecret": "<better-auth-secret-acme>",
     "db": {
       "url": "postgres://user:password@localhost:5432/goovee-acme"
     },
@@ -63,6 +63,7 @@
     }
   },
   "beta": {
+    "betterAuthSecret": "<better-auth-secret-beta>",
     "db": {
       "url": "postgres://user:password@localhost:5432/goovee-beta"
     },

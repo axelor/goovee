@@ -33,7 +33,7 @@ export function Search({
   className?: string;
 }) {
   const router = useRouter();
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -116,7 +116,7 @@ export function Search({
                     value={result.id}
                     onSelect={handleRedirection}
                     className="block cursor-pointer">
-                    <Card item={result} tenant={tenant} compact />
+                    <Card item={result} tenantScope={tenantScope} compact />
                   </CommandItem>
                 ))
               : null}

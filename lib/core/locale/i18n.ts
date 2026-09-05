@@ -2,6 +2,7 @@ import axios from 'axios';
 import {translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
 import {withBasePath} from '@/lib/core/path/base-path';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const rest = axios.create();
 
@@ -26,16 +27,19 @@ function asTranslations(data: unknown): Record<string, string> {
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
-  async function load(locale: string = DEFAULT_LOCALE, tenant?: string) {
+  /* `scope` addresses the tenant the request named. Null where it named none —
+   * the entry page — whose translations the deployment answers itself. */
+  async function load(
+    locale: string = DEFAULT_LOCALE,
+    scope?: TenantScope | null,
+  ) {
     if (!locale) {
       return {};
     }
 
-    const url = withBasePath(
-      tenant
-        ? `/api/tenant/${tenant}/locales/${locale}`
-        : `/api/locales/${locale}`,
-    );
+    const url = scope
+      ? scope.forBrowser(`/api/locales/${locale}`)
+      : withBasePath(`/deployment/locales/${locale}`);
 
     translations = await rest
       .get(url)

@@ -7,6 +7,7 @@ import type {ActivityItem} from '../../../../orm';
 import {ProductTab} from '../../../../constants/tabs';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const CARD = 'bg-white rounded-lg border border-ink-100 p-4 md:p-6';
 
@@ -19,11 +20,11 @@ const ACTIVITY_STYLE: Record<ActivityItem['kind'], {bgColor: string}> = {
 export async function RecentActivity({
   activity,
   scope,
-  tenantId,
+  tenantScope,
 }: {
   activity: Promise<ActivityItem[]>;
   scope: WorkspaceScope;
-  tenantId: string;
+  tenantScope: TenantScope;
 }) {
   const items = await activity;
 
@@ -41,7 +42,7 @@ export async function RecentActivity({
               key={index}
               item={item}
               scope={scope}
-              tenantId={tenantId}
+              tenantScope={tenantScope}
             />
           ))}
         </div>
@@ -53,11 +54,11 @@ export async function RecentActivity({
 async function ActivityRow({
   item,
   scope,
-  tenantId,
+  tenantScope,
 }: {
   item: ActivityItem;
   scope: WorkspaceScope;
-  tenantId: string;
+  tenantScope: TenantScope;
 }) {
   const action =
     item.kind === 'review'
@@ -74,7 +75,7 @@ async function ActivityRow({
       {item.actor ? (
         <PartnerAvatar
           partner={item.actor}
-          tenantId={tenantId}
+          tenantScope={tenantScope}
           size={28}
           fallbackClassName={ACTIVITY_STYLE[item.kind].bgColor}
         />

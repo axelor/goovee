@@ -19,11 +19,15 @@ import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
+import {currentTenantScope} from '@/lib/core/url/current';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;
 }) {
   const params = await props.params;
   const {id} = params;
+
+  const tenantScope = await currentTenantScope();
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
@@ -51,7 +55,7 @@ export default async function Page(props: {
           {await t('Back to Directory')}
         </Link>
         <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
-          <Details entryDetail={entry} tenant={access.tenant.id} />
+          <Details entryDetail={entry} tenantScope={tenantScope} />
           <div className="px-4 sm:px-6 lg:px-8 pb-6">
             <Map
               className="h-96 w-full rounded-lg"
@@ -75,7 +79,7 @@ export default async function Page(props: {
               {entry.mainPartnerContacts.map(contact => (
                 <Contact
                   key={contact.id}
-                  tenant={access.tenant.id}
+                  tenantScope={tenantScope}
                   contact={contact}
                 />
               ))}
@@ -89,10 +93,10 @@ export default async function Page(props: {
 
 async function Details({
   entryDetail,
-  tenant,
+  tenantScope,
 }: {
   entryDetail: Entry;
-  tenant: string;
+  tenantScope: TenantScope;
 }) {
   const {
     mainAddress,
@@ -113,7 +117,7 @@ async function Details({
             width={192}
             height={192}
             className="rounded-xl object-contain w-36 h-36 sm:w-48 sm:h-48 bg-ink-50 p-3"
-            src={getPartnerImageURL(picture?.id, tenant, {
+            src={getPartnerImageURL(picture?.id, tenantScope, {
               noimage: true,
               noimageSrc: NO_IMAGE_URL,
             })}
@@ -226,10 +230,10 @@ async function Details({
 }
 
 async function Contact({
-  tenant,
+  tenantScope,
   contact,
 }: {
-  tenant: string;
+  tenantScope: TenantScope;
   contact: NonNullable<Entry['mainPartnerContacts']>[number];
 }) {
   const {
@@ -256,7 +260,9 @@ async function Contact({
           <Avatar className="h-16 w-16 bg-royal-pale rounded-xl">
             <AvatarImage
               className="object-cover"
-              src={getPartnerImageURL(picture?.id, tenant, {noimage: true})}
+              src={getPartnerImageURL(picture?.id, tenantScope, {
+                noimage: true,
+              })}
               alt={displayName}
               size={64}
             />

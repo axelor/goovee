@@ -15,7 +15,7 @@ import {
   isPartner,
 } from '@/orm/partner';
 import NotificationManager, {NotificationType} from '@/notification';
-import {APP_TITLE, SEARCH_PARAMS} from '@/constants';
+import {APP_TITLE} from '@/constants';
 import {getPartnerId} from '@/utils';
 import {tenantURLs} from '@/lib/core/url/scope';
 
@@ -305,7 +305,7 @@ export async function sendInvites(input: SendInvites) {
         subject: workspace?.name || workspace.url,
         email,
         link: tenantURLs(tenantId).forExternal(
-          `/auth/register/invite/${invite.id}/email?${SEARCH_PARAMS.TENANT_ID}=${tenantId}`,
+          `/auth/register/invite/${invite.id}/email`,
         ),
       });
     } catch (err) {

@@ -50,7 +50,7 @@ type MarkerProps = {
 
 export function Marker(props: MarkerProps) {
   const {small, item} = props;
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const entryHref = scope.forRouter(
     `/${SUBAPP_CODES.directory}/entry/${item.id}`,
@@ -77,7 +77,7 @@ export function Marker(props: MarkerProps) {
             item={item}
             url={entryHref}
             compact={small}
-            tenant={tenant}
+            tenantScope={tenantScope}
             className="hover:bg-accent"
           />
         </InfoWindow>

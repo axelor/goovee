@@ -3,12 +3,12 @@ import {notFound, redirect} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {findSubapps} from '@/orm/workspace';
 import {currentWorkspace} from '@/lib/core/url/current';
-import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/login-url';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';
 import {Home} from './home';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 export default async function Page() {
   const access = await ensureAccess({allowGuest: true});
@@ -24,10 +24,9 @@ export default async function Page() {
       const workspaceURI = scope?.forRouter();
 
       redirect(
-        getLoginURL({
+        getLoginURL(await currentTenantScope(), {
           callbackurl: workspaceURI,
           workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
         }),
       );
     }
@@ -42,10 +41,9 @@ export default async function Page() {
   const workspaceURL = workspace.url;
   const workspaceURI = scope.forRouter();
 
-  const loginURL = getLoginURL({
+  const loginURL = getLoginURL(await currentTenantScope(), {
     callbackurl: workspaceURI,
     workspaceURI,
-    [SEARCH_PARAMS.TENANT_ID]: tenantId,
   });
 
   const config = await getShellConfig(workspace.config.id, client);

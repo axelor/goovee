@@ -5,7 +5,7 @@ import Image from 'next/image';
 import {usePathname, useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {cn} from '@/utils/css';
 import {Icon} from '@/ui/components';
 import {
@@ -52,7 +52,7 @@ export function Sidebar({
   showHome: boolean | null;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const [collapsed, setCollapsed] = useState(false);
   const {scope, workspaceID} = useWorkspace();
   const env = useEnvironment();

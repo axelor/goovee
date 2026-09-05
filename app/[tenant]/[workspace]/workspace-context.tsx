@@ -8,6 +8,8 @@ import {useTheme} from '@/app/theme';
 import {Theme} from '@/types/theme';
 import {type Workspace} from '@/orm/workspace';
 import {useEnvironment} from '@/environment';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {buildTenantScope, type TenantScope} from '@/lib/core/url/tenant-urls';
 import {
   buildWorkspaceScope,
   type WorkspaceScope,
@@ -26,6 +28,12 @@ export const WorkspaceContext = React.createContext<{
   workspaceID: Workspace['id'];
   /** Every address below this workspace. Reach for this, not the strings. */
   scope: WorkspaceScope;
+  /**
+   * Every address below the tenant — the route handlers, and the screens that
+   * sit beside this workspace rather than under it. Carried here so a component
+   * that already holds the workspace does not reach for a second hook.
+   */
+  tenantScope: TenantScope;
 }>({
   tenant: '',
   workspace: DEFAULT_WORKSPACE,
@@ -34,6 +42,11 @@ export const WorkspaceContext = React.createContext<{
   scope: buildWorkspaceScope({
     tenantId: '',
     workspace: DEFAULT_WORKSPACE,
+    visitorPrefix: '',
+    host: undefined,
+  }),
+  tenantScope: buildTenantScope({
+    tenantId: '',
     visitorPrefix: '',
     host: undefined,
   }),
@@ -62,6 +75,7 @@ export function WorkspaceProvider({
   const {updateTheme} = useTheme();
   const prevTheme = useRef<any>(undefined);
   const env = useEnvironment();
+  const tenantScope = useTenantScope();
 
   const workspaceID = id;
 
@@ -87,8 +101,9 @@ export function WorkspaceProvider({
       workspaceURL: scope.forExternal(),
       workspaceID,
       scope,
+      tenantScope,
     }),
-    [tenant, workspace, workspaceID, scope],
+    [tenant, workspace, workspaceID, scope, tenantScope],
   );
 
   useEffect(() => {

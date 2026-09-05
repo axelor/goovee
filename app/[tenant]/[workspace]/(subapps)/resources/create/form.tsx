@@ -73,7 +73,7 @@ export default function ResourceForm({
 }) {
   const {toast} = useToast();
   const router = useRouter();
-  const {tenant, scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -85,7 +85,7 @@ export default function ResourceForm({
     remove: removeUpload,
     reset: resetUploads,
     isStaged,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

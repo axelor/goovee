@@ -9,7 +9,7 @@ import {withBasePath} from '@/lib/core/path/base-path';
  * origin/base-scoped service worker. The new per-tenant worker is scoped to
  * `/<tenant>/`, which does NOT replace the old registration (registrations are
  * keyed by scope), so an upgraded browser keeps the legacy worker controlling
- * `/` and `/auth` plus its origin-wide push subscription.
+ * `/` plus its origin-wide push subscription.
  *
  * Unregister any service worker that is NOT tenant-scoped — i.e. whose scope
  * is the origin/base root (or anything outside `<basePath>/<tenant>/`) — while

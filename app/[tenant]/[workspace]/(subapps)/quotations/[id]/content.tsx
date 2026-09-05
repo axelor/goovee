@@ -36,6 +36,7 @@ import {
   getQuoteJourney,
   getQuoteTone,
 } from '@/subapps/quotations/common/utils/quotations';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const Content = ({
   quotation,
@@ -60,7 +61,7 @@ const Content = ({
     statusSelect,
   } = quotation;
 
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const {status} = getStatus(statusSelect);
   const statusKey = getStatusKey(Number(statusSelect));
@@ -151,7 +152,11 @@ const Content = ({
                   </li>
                 )}
                 {saleOrderLineList.map(line => (
-                  <ProductRow key={line.id} line={line} tenant={tenant} />
+                  <ProductRow
+                    key={line.id}
+                    line={line}
+                    tenantScope={tenantScope}
+                  />
                 ))}
               </ul>
             </Card>
@@ -426,8 +431,14 @@ function AddressBlock({
   );
 }
 
-function ProductRow({line, tenant}: {line: Product; tenant: string}) {
-  const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
+function ProductRow({
+  line,
+  tenantScope,
+}: {
+  line: Product;
+  tenantScope: TenantScope;
+}) {
+  const imageURL = getProductImageURL(line.product?.picture?.id, tenantScope, {
     noimage: true,
   });
   const taxValue = line.taxLineSet?.[0]?.value;

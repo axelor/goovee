@@ -23,6 +23,7 @@ import {
   SalesStatCard,
   StatCardInnerSkeleton,
 } from './stats-cards';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 interface OverviewTabProps {
   mainPartnerId: ID;
@@ -30,7 +31,7 @@ interface OverviewTabProps {
   workspace: Workspace;
   config: MarketplaceConfig;
   scope: WorkspaceScope;
-  tenantId: string;
+  tenantScope: TenantScope;
 }
 
 const PENDING_ACTIONS_LIMIT = 5;
@@ -46,7 +47,7 @@ export function OverviewTab({
   workspace,
   config,
   scope,
-  tenantId,
+  tenantScope,
 }: OverviewTabProps) {
   const ctx = {client, workspace, config, mainPartnerId};
   const sales = getSalesStat(ctx);
@@ -89,7 +90,11 @@ export function OverviewTab({
       </div>
 
       <Suspense fallback={<RecentActivitySkeleton />}>
-        <RecentActivity activity={activity} scope={scope} tenantId={tenantId} />
+        <RecentActivity
+          activity={activity}
+          scope={scope}
+          tenantScope={tenantScope}
+        />
       </Suspense>
     </div>
   );

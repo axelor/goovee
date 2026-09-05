@@ -69,14 +69,14 @@ export default function Form({
 }) {
   const {toast} = useToast();
   const router = useRouter();
-  const {tenant} = useWorkspace();
+  const {tenantScope} = useWorkspace();
   const {
     uploads,
     upload,
     pause,
     resume,
     remove: removeUpload,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
   const mainPartner = partner.mainPartner;
   const companyDataSource = isAdminContact
     ? mainPartner
@@ -337,7 +337,7 @@ export default function Form({
     setPictureUploadId(null);
   };
 
-  const logoSrc = getPartnerImageURL(picture, tenant, {
+  const logoSrc = getPartnerImageURL(picture, tenantScope, {
     noimage: true,
     noimageSrc: NO_IMAGE_URL,
   });

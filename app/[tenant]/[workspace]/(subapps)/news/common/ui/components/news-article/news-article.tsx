@@ -37,7 +37,7 @@ export function NewsArticleHero({
   article: NewsItem;
   config: NewsConfig | Cloned<NewsConfig>;
 }) {
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const newsBase = scope.forRouter(`/${SUBAPP_CODES.news}`);
   const {
     isShowPublicationAuthor,
@@ -92,7 +92,7 @@ export function NewsArticleHero({
                       <Image
                         src={getPartnerImageURL(
                           article.author.picture.id,
-                          tenant,
+                          tenantScope,
                           {noimage: true},
                         )}
                         alt={article.author.simpleFullName ?? ''}

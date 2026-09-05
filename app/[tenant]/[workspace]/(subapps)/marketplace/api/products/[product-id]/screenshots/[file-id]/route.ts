@@ -11,7 +11,7 @@ import {getProductScreenshot} from '../../../../../common/orm';
  * so the workspace is in the path — the access check is in the query and
  * workspace-scoped: the product must be the caller's own or published. The
  * shared
- * `/api/tenant/[tenant]/product/image/[id]` route only resolves metafiles
+ * `/[tenant]/api/product/image/[id]` route only resolves metafiles
  * owned by a base AOSProduct, which marketplace pictures are not.
  */
 export async function GET(

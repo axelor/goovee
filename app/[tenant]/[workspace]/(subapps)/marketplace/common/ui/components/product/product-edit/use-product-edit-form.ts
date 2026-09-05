@@ -138,9 +138,9 @@ export function useProductEditForm({
    * dialog's product-collapse (both unmount the leaves, which would otherwise
    * give up the upload). Only opaque tokens land in the form; bytes never
    * do. */
-  const {tenant} = useWorkspace();
-  const screenshotUpload = useStagedUpload({tenant});
-  const bundleUpload = useStagedUpload({tenant});
+  const {tenantScope} = useWorkspace();
+  const screenshotUpload = useStagedUpload({tenantScope});
+  const bundleUpload = useStagedUpload({tenantScope});
   /* Each version row's in-flight bundle item, keyed by its stable field-array
    * id (rhfId), so the per-version dropzone re-finds its progress after the
    * remount on navigation. */

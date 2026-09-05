@@ -2,6 +2,8 @@ import 'server-only';
 
 import {headers} from 'next/headers';
 
+import {getPublicEnvironment} from '@/environment/utils';
+import {getTenantConfig} from '@/tenant/config';
 import {CURRENT_PATH_HEADER, TENANT_HEADER} from '@/proxy';
 
 import {
@@ -10,6 +12,7 @@ import {
   tenantURLs,
   type ServerWorkspaceScope,
 } from './scope';
+import {buildTenantScope, type TenantScope} from './tenant-urls';
 
 /**
  * The workspace the request being handled is addressed to, read from the
@@ -22,15 +25,15 @@ import {
  * one they merely have access to.
  *
  * Null where the address names no workspace, which is an ordinary shape rather
- * than a fault: a tenant's own landing address and its sign-out screen are both
- * matched by the proxy and carry both headers, and so is an address whose
- * workspace segment could name a different workspace once decoded. A caller
+ * than a fault: a tenant's own landing address is matched by the proxy and
+ * carries both headers, and so is an address whose workspace segment could name
+ * a different workspace once decoded. A caller
  * turns that into whatever "no such workspace" means for it.
  *
  * @throws only when the headers are absent, which means this ran outside a
- *   request the proxy matched — a route under `/api`, a script, a cron job.
- *   Those have no address to read and must name the workspace themselves
- *   through `tenantURLs(id).workspace(slug)`.
+ *   request the proxy matched — a deployment route under `/deployment`, a
+ *   script, a cron job. Those have no address to read and must name the
+ *   workspace themselves through `tenantURLs(id).workspace(slug)`.
  */
 export async function currentWorkspace(): Promise<ServerWorkspaceScope | null> {
   const requestHeaders = await headers();
@@ -52,6 +55,36 @@ export async function currentWorkspace(): Promise<ServerWorkspaceScope | null> {
 }
 
 /**
+ * The addresses of the tenant the request being handled is addressed to.
+ *
+ * Measured from the origin the request arrived at rather than from the tenant's
+ * configured routing, so a page served under the tenant's segment on an origin
+ * it used to share builds its own addresses the way that origin serves them.
+ * `tenantURLs(id)` answers from the configuration instead, which is what a
+ * webhook address or an emailed link needs.
+ *
+ * @throws where the proxy did not run, for the reason `currentWorkspace` gives.
+ */
+export async function currentTenantScope(): Promise<TenantScope> {
+  const requestHeaders = await headers();
+
+  const tenantId = requestHeaders.get(TENANT_HEADER);
+
+  if (!tenantId) {
+    throw new Error(
+      'No tenant in the request: the proxy sets x-tenant-id only for the ' +
+        'addresses it matches. Outside one, name the tenant with tenantURLs(id).',
+    );
+  }
+
+  return buildTenantScope({
+    tenantId,
+    visitorPrefix: tenantURLs(tenantId).visitorPrefix(requestHeaders),
+    host: getPublicEnvironment(getTenantConfig(tenantId)).GOOVEE_PUBLIC_HOST,
+  });
+}
+
+/**
  * The path being rendered, query string included, as the proxy captured it.
  *
  * Used as the post-login callback, so a denied visitor returns to exactly
@@ -70,13 +103,13 @@ export async function getCurrentPath(): Promise<string> {
  * The workspace segment of a visitor address, or null where it holds none.
  *
  * Whether the address opens with the workspace or with the tenant follows the
- * origin the request arrived on, not the tenant's configured routing. A tenant
- * given an origin of its own is still reached under its path segment on the
- * origin it used to share — that is where the screen ending a session made
- * before the move is served — and there the address opens with the tenant like
- * any other. Deciding from the configuration alone reads that address as though
- * it began with a workspace, and a tenant whose workspace is named after it
- * would then resolve itself.
+ * origin the request arrived on, not the tenant's configured routing. The two
+ * agree while the proxy sends every address of a host-routed tenant to that
+ * tenant's own origin; reading the request rather than the configuration is
+ * what keeps this right if an exception is ever added there, since such an
+ * address opens with the tenant like any other and deciding from configuration
+ * alone would read it as though it began with a workspace — and a tenant whose
+ * workspace is named after it would then resolve itself.
  *
  * A path-routed address whose first segment is not the tenant names no
  * workspace of this tenant, and is refused rather than read from an offset that

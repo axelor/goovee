@@ -1,7 +1,7 @@
 import {type OAuthInviteRegister, type OAuthRegister} from './validation-utils';
 
 import {deleteInviteById} from '@/app/[tenant]/[workspace]/account/common/orm/invites';
-import {findInviteById} from '@/app/auth/register/common/orm/register';
+import {findInviteById} from '@/app/[tenant]/auth/register/common/orm/register';
 import {
   ALLOW_ALL_REGISTRATION,
   ALLOW_AOS_ONLY_REGISTRATION,
@@ -38,6 +38,9 @@ import {withMattermostSync} from '../mattermost/user-api';
 import type {Client} from '@/goovee/.generated/client';
 
 export type RegisterInviteDTO = OAuthInviteRegister & {
+  /* Required here though the request schema leaves it out: the tenant is
+   * supplied by whichever endpoint or hook resolved it, never by the caller. */
+  tenantId: string;
   password?: string;
   client: Client;
   config: TenantConfig;
@@ -165,7 +168,7 @@ export async function registerByInvite({
     });
 
     return {
-      query: `?callbackurl=${encodeURIComponent(`${scope.forExternal()}/`)}&workspaceURI=${encodeURIComponent(`${scope.forRouter()}/`)}&tenant=${tenantId}`,
+      query: `?callbackurl=${encodeURIComponent(`${scope.forExternal()}/`)}&workspaceURI=${encodeURIComponent(`${scope.forRouter()}/`)}`,
     };
   } catch (err) {
     throw new Error(
@@ -178,6 +181,9 @@ export async function registerByInvite({
 }
 
 export type RegisterDTO = OAuthRegister & {
+  /* Required here though the request schema leaves it out: the tenant is
+   * supplied by whichever endpoint or hook resolved it, never by the caller. */
+  tenantId: string;
   password?: string;
   client: Client;
   config: TenantConfig;

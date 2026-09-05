@@ -10,16 +10,19 @@ import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 import {absoluteRoot} from './absolute';
 import type {WorkspaceSubPath} from './index';
 import {revalidateRoutePath} from './revalidate';
+import {buildTenantScope, type TenantScope} from './tenant-urls';
 import {buildWorkspaceScope, type WorkspaceScope} from './workspace-urls';
 
 /**
  * Whether the origin a request arrived on is the one this tenant holds to
  * itself.
  *
- * The tenant's declared routing is the wrong question: a tenant given an
- * origin of its own is still served under its path segment on an origin it
- * shares — where the screen ending a session made before the move lives — and
- * its addresses there begin with that segment like any other tenant's.
+ * Read from the request rather than from the tenant's declared routing, so the
+ * prefix handed to a browser is one that works on the origin the page was
+ * actually served on. The two answers agree as long as the proxy sends every
+ * address of a host-routed tenant to that tenant's own origin; an exception
+ * added there would part them, and `buildAuth` would have to stop deriving its
+ * `basePath` from the configuration alone.
  *
  * Lives here rather than beside `isHostRouted` in `tenant/routing.ts`, which
  * documents itself as reading nothing from the configuration document so that
@@ -72,20 +75,9 @@ function workspaceVisitorPathSchema(workspaceURI: string) {
  * Two scopes, because the application has two: some addresses belong to a
  * workspace and some belong only to the tenant. Which one you hold decides what
  * a path argument means, so no method takes a flag saying how deep it is —
- * `tenantURLs(id)` takes paths from the deployment root, and
+ * `tenantURLs(id)` takes paths from the tenant's own root, and
  * `tenantURLs(id).workspace(slug)` takes paths below that workspace.
  */
-
-/**
- * A path from the deployment root, starting with a slash: `/auth/login`,
- * `/api/tenant/acme/partner/image/3`, `/sw.js`.
- *
- * Distinct from `WorkspaceSubPath` only in what it is measured from. Both are
- * the same type underneath, so the compiler will not stop one being passed
- * where the other belongs: the name records the measurement base for a reader
- * and nothing more.
- */
-type RootPath = `/${string}`;
 
 /**
  * A workspace's addresses, plus the forms that are not addresses.
@@ -143,20 +135,24 @@ export type ServerWorkspaceScope = WorkspaceScope & {
  * A tenant's addresses: the ones that name no workspace, and the way down to
  * one that does.
  *
- * There is deliberately no `forRouter` here. A root path needs nothing added
- * for the router — `/auth/login` is already what `redirect` wants — so a method
- * returning its own argument would only invite the question of whether it does
- * something.
+ * `TenantScope` carries the three a browser or an outside reader needs; this
+ * adds the forms that take configuration or the database.
  */
-type TenantURLs = {
-  readonly tenantId: string;
-
+type TenantURLs = TenantScope & {
   /**
-   * A root path as an absolute address on this tenant's own origin — the
-   * password-reset and invitation links, whose screens sit outside every tenant
-   * segment but are served per tenant.
+   * Where this tenant's addresses start on the origin the request arrived at:
+   * empty on an origin the tenant holds to itself, its path segment anywhere
+   * else. No base path and no trailing slash — what a browser measures its own
+   * addresses from.
+   *
+   * The origin the request arrived on decides it, not the tenant's configured
+   * routing, for the reason `entry` gives: a tenant given an origin of its own
+   * is still served under its segment on the origin it used to share, and a
+   * page there must build its addresses the way that origin serves them.
+   * `forBrowser` on this type is measured from the configured routing instead,
+   * since it answers without a request in hand.
    */
-  forExternal(path: RootPath): string;
+  visitorPrefix(headers: Headers): string;
 
   /**
    * Where this tenant's app enters on the origin the request arrived at: the
@@ -269,15 +265,19 @@ export function tenantURLs(tenantId: string): TenantURLs {
   const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
   const hostRouted = Boolean(config && isHostRouted(config));
 
+  /* Empty for a tenant named by its host, whose addresses carry no segment of
+   * its own. Everything below is measured from here. */
+  const tenantPrefix = hostRouted ? '' : `/${tenantId}`;
+
+  const base = buildTenantScope({tenantId, visitorPrefix: tenantPrefix, host});
+
   const buildServerScope = (slug: string): ServerWorkspaceScope => {
     const workspace = assertSlug(slug);
 
     /* The tenant segment is absent from a host-routed tenant's addresses,
      * where the host names it instead. Everything a caller asks for is
      * measured from this. */
-    const visitorPrefix = hostRouted
-      ? `/${workspace}`
-      : `/${tenantId}/${workspace}`;
+    const visitorPrefix = `${tenantPrefix}/${workspace}`;
 
     const base = buildWorkspaceScope({
       tenantId,
@@ -307,9 +307,10 @@ export function tenantURLs(tenantId: string): TenantURLs {
   };
 
   return {
-    tenantId,
+    ...base,
 
-    forExternal: path => `${absoluteRoot(host)}${path}`,
+    visitorPrefix: headers =>
+      ownsAddressedOrigin(tenantId, headers) ? '' : `/${tenantId}`,
 
     entry: headers =>
       withBasePath(

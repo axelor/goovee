@@ -17,6 +17,7 @@ function taintTenantConfig(config: TenantConfig) {
     ['PayPal secret key', config.payments?.paypal?.clientSecret],
     ['Stripe secret key', config.payments?.stripe?.clientSecret],
     ['Stripe webhook secret', config.payments?.stripe?.webhookSecret],
+    ['Better Auth secret', config.betterAuthSecret],
     ['Paybox secret key', config.payments?.paybox?.secret],
     ['Up2Pay secret key', config.payments?.up2pay?.secret],
     ['Hub PISP client secret', config.payments?.hubpisp?.clientSecret],
@@ -37,13 +38,6 @@ function taintTenantConfig(config: TenantConfig) {
       value,
     );
   }
-}
-
-function taintGlobalConfig(global: GlobalConfig) {
-  taintSecret(
-    'Better Auth secret is a server secret. Do not pass to Client Components.',
-    global.betterAuthSecret,
-  );
 }
 
 type ParsedDocument = {
@@ -87,8 +81,8 @@ function tenantMap(
  * operator's editor checks the document against.
  *
  * Loading is synchronous (readFileSync at first access) so config is also
- * available to module-init consumers — the better-auth instance needs the
- * "$global" secret and the per-tenant OAuth entries before any request. The
+ * available to module-init consumers — the auth module reads "$global"'s origin
+ * as it is evaluated, where there is nowhere to await. The
  * exported readers below are the whole public surface; the document itself
  * stays private to this module, which is where another source — a registry
  * database, say — would slot in without a caller noticing. */
@@ -115,8 +109,8 @@ function read(): ParsedDocument {
     : tenantsConfigInline;
 
   if (!source) {
-    /* `next build` evaluates module-init code (the better-auth instance, the
-     * OAuth provider list) with no runtime config present — env is absent
+    /* `next build` evaluates module-init code (the auth module's origin read)
+     * with no runtime config present — env is absent
      * during an image build, and so is the document. Return a minimal
      * placeholder so the build can analyse routes; real configuration is
      * required at runtime and for CLI scripts, where NEXT_PHASE is unset and
@@ -124,7 +118,6 @@ function read(): ParsedDocument {
     if (process.env.NEXT_PHASE === 'phase-production-build') {
       return {
         global: {
-          betterAuthSecret: 'build-time-placeholder',
           /* An origin, because the auth instance parses this one as it is
            * constructed. `.invalid` is reserved and resolves nowhere, so a
            * build that reached the network with it would fail rather than
@@ -169,7 +162,6 @@ function read(): ParsedDocument {
 
   const tenants = tenantMap(entries);
 
-  taintGlobalConfig(global);
   for (const config of Object.values(tenants)) {
     taintTenantConfig(config);
   }
@@ -178,9 +170,9 @@ function read(): ParsedDocument {
 }
 
 /* The document is read from disk once and kept, so every reader here answers
- * without waiting. Module setup depends on that: the better-auth instance reads
- * the "$global" secret and the per-tenant OAuth entries while it is being
- * constructed, where there is nowhere to await. */
+ * without waiting. Module setup depends on that: the auth module reads
+ * "$global"'s origin while it is being evaluated, where there is nowhere to
+ * await. */
 
 /**
  * Null for an id the document does not name. This is what refuses a tenant
@@ -213,9 +205,9 @@ export function getRoutingIndex(): RoutingIndex {
 }
 
 /**
- * The tenant used by addresses that name none: `/`, the auth screens, and a
- * script run without `--tenant`. Null unless the document declares one, and
- * then those addresses have to be told which tenant they are for.
+ * The tenant used by addresses that name none: `/`, and a script run without
+ * `--tenant`. Null unless the document declares one, and then those addresses
+ * have to be told which tenant they are for.
  *
  * The document is checked at load, so any name returned here is one it names.
  */

@@ -13,6 +13,7 @@ import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
 import {getTenantConfig, listTenantIds} from '@/tenant/config';
 import {tenantURLs} from '@/lib/core/url/scope';
+import {TenantProvider} from '@/lib/core/url/tenant-context';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
@@ -58,17 +59,28 @@ export default async function TenantLayout(props: {
    * The tenant is named in the worker's own address, since a scope of `/` names
    * none, and the worker needs it to keep its caches and its notification channel
    * to itself. */
-  const scope = tenantURLs(tenant).entry(await headers());
+  const requestHeaders = await headers();
+  const urls = tenantURLs(tenant);
+
+  /* Where this tenant's addresses start on the origin this request arrived at.
+   * Handed to the browser so every address it builds is measured from the same
+   * place the worker below is scoped to. */
+  const visitorPrefix = urls.visitorPrefix(requestHeaders);
 
   return (
     <Environment value={env}>
-      <Theme theme={theme}>
-        <SerwistProvider
-          swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
-          options={{scope}}>
-          <PushProvider tenant={tenant}>{props.children}</PushProvider>
-        </SerwistProvider>
-      </Theme>
+      <TenantProvider
+        tenantId={tenant}
+        visitorPrefix={visitorPrefix}
+        host={env.GOOVEE_PUBLIC_HOST}>
+        <Theme theme={theme}>
+          <SerwistProvider
+            swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
+            options={{scope: urls.entry(requestHeaders)}}>
+            <PushProvider tenant={tenant}>{props.children}</PushProvider>
+          </SerwistProvider>
+        </Theme>
+      </TenantProvider>
     </Environment>
   );
 }

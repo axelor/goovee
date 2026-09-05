@@ -54,6 +54,7 @@ import type {
   ReactionSummary,
   VoteValue,
 } from '@/subapps/forum/common/orm/reaction';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const EMPTY_SUMMARY: ReactionSummary = {
   likes: 0,
@@ -75,15 +76,15 @@ function initialsOf(name?: string | null): string {
 function Avatar({
   name,
   pictureId,
-  tenant,
+  tenantScope,
   size = 34,
 }: {
   name?: string | null;
   pictureId?: string | null;
-  tenant: string;
+  tenantScope: TenantScope;
   size?: number;
 }) {
-  const url = pictureId ? getPartnerImageURL(pictureId, tenant) : null;
+  const url = pictureId ? getPartnerImageURL(pictureId, tenantScope) : null;
   return (
     <span
       className="rounded-full overflow-hidden bg-gradient-to-br from-royal to-royal-dark grid place-items-center text-white font-bold shrink-0"
@@ -152,12 +153,12 @@ function CommentFiles({
 function NestedReplyItem({
   child,
   parentName,
-  tenant,
+  tenantScope,
   attachmentUrl,
 }: {
   child: AnyRec;
   parentName?: string | null;
-  tenant: string;
+  tenantScope: TenantScope;
   attachmentUrl?: (fileId: string) => string;
 }) {
   const author =
@@ -173,7 +174,7 @@ function NestedReplyItem({
         <Avatar
           name={author}
           pictureId={child.partner?.picture?.id}
-          tenant={tenant}
+          tenantScope={tenantScope}
           size={28}
         />
         <span className="text-[13px] font-bold text-ink-900">{author}</span>
@@ -203,7 +204,7 @@ function ForumMessage({
   author,
   meta,
   pictureId,
-  tenant,
+  tenantScope,
   body,
   score,
   myVote = null,
@@ -223,7 +224,7 @@ function ForumMessage({
   author?: string | null;
   meta?: string | null;
   pictureId?: string | null;
-  tenant: string;
+  tenantScope: TenantScope;
   body?: string | null;
   score: number;
   myVote?: VoteValue | null;
@@ -313,7 +314,11 @@ function ForumMessage({
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5 mb-2">
-              <Avatar name={author} pictureId={pictureId} tenant={tenant} />
+              <Avatar
+                name={author}
+                pictureId={pictureId}
+                tenantScope={tenantScope}
+              />
               <div className="min-w-0">
                 <div className="text-[13.5px] font-bold text-ink-900 flex items-center gap-2">
                   <span className="truncate">{author}</span>
@@ -382,7 +387,7 @@ function ForumMessage({
               key={child.id}
               child={child}
               parentName={author}
-              tenant={tenant}
+              tenantScope={tenantScope}
               attachmentUrl={attachmentUrl}
             />
           ))}
@@ -458,7 +463,7 @@ export function ForumDetail({
   isAuthor?: boolean;
   backHref: string;
 }) {
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   // Voting only needs membership; writing comments also needs the workspace's
   // comment feature to be enabled (mirrors server enforcement in createComment).
   const canWriteComment = canComment && commentsEnabled;
@@ -470,7 +475,7 @@ export function ForumDetail({
     resume,
     remove: removeUpload,
     isStaged,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
   const [draft, setDraft] = useState('');
   const [files, setFiles] = useState<{file: File; uploadId: string}[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -776,7 +781,7 @@ export function ForumDetail({
               author={post.author?.simpleFullName}
               meta={date ? formatRelativeTime(date) : null}
               pictureId={post.author?.picture?.id}
-              tenant={tenant}
+              tenantScope={tenantScope}
               body={post.content}
               score={postSummary.score}
               myVote={postSummary.myVote}
@@ -873,7 +878,7 @@ export function ForumDetail({
                           c.createdOn ? formatRelativeTime(c.createdOn) : null
                         }
                         pictureId={c.partner?.picture?.id}
-                        tenant={tenant}
+                        tenantScope={tenantScope}
                         body={c.note || c.body}
                         score={
                           (reactions.comment[String(c.id)] ?? EMPTY_SUMMARY)
@@ -922,7 +927,7 @@ export function ForumDetail({
                     <Avatar
                       name={currentUser?.name}
                       pictureId={currentUser?.pictureId}
-                      tenant={tenant}
+                      tenantScope={tenantScope}
                       size={36}
                     />
                     <div className="flex-1 min-w-0">

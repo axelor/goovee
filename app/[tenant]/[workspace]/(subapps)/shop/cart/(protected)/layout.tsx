@@ -5,7 +5,7 @@ import {redirect} from 'next/navigation';
 import {getSession} from '@/auth';
 import {currentWorkspace} from '@/lib/core/url/current';
 import {getLoginURL} from '@/utils/login-url';
-import {SEARCH_PARAMS} from '@/constants';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 export default async function Layout(props: {
   children: React.ReactNode;
@@ -19,9 +19,8 @@ export default async function Layout(props: {
     const scope = await currentWorkspace();
 
     redirect(
-      getLoginURL({
+      getLoginURL(await currentTenantScope(), {
         workspaceURI: scope?.forRouter(),
-        [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
       }),
     );
   }

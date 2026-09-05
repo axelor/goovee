@@ -85,7 +85,7 @@ export function ShopQuoteModal({
   labels: ShopQuoteModalLabels;
   displayPrices?: boolean;
 }) {
-  const {scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {cart, clearCart} = useCart();
   const {toast} = useToast();
   const router = useRouter();
@@ -352,7 +352,7 @@ function QuoteItemRow({
   fmt: (n: number) => string;
   displayPrices?: boolean;
 }) {
-  const {tenant} = useWorkspace();
+  const {tenantScope} = useWorkspace();
   const product = item.computedProduct.product;
   const portalCat = product?.portalCategorySet?.[0];
   const productCat = product?.productCategory;
@@ -361,7 +361,7 @@ function QuoteItemRow({
   const hue = getCategoryHue(catName);
 
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
-  const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
+  const imageURL = imageId ? getProductImageURL(imageId, tenantScope) : null;
 
   const unitNum = Number(item.computedProduct?.price?.primary ?? 0);
   const qty = Number(item.quantity ?? 0);

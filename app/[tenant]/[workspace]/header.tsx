@@ -46,7 +46,8 @@ import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
 
 function Logo({
   workspace,
@@ -55,7 +56,7 @@ function Logo({
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
-  const {scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
     ? scope.forBrowser('/api/workspace/logo/image')
@@ -87,28 +88,22 @@ function getInitials(name?: string | null, email?: string | null) {
   return source.slice(0, 2);
 }
 
-function ProfilePill({
-  baseURL,
-  tenant,
-}: {
-  baseURL: string;
-  tenant: string | undefined | null;
-}) {
-  const {data: session} = authClient.useSession();
+function ProfilePill({baseURL}: {baseURL: string}) {
+  const {data: session} = useAuthSession();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const signOut = useSignOut();
+  const tenantScope = useTenantScope();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const user = session?.user as
     | {name?: string; email?: string; image?: string}
     | undefined;
 
-  const loginURL = getLoginURL({
+  const loginURL = getLoginURL(tenantScope, {
     callbackurl: pathname + (searchParams.toString() ? `?${searchParams}` : ''),
     workspaceURI: baseURL,
-    tenant,
   });
 
   const handleLogout = async () => {
@@ -192,10 +187,10 @@ export default function Header({
   cartCodes?: string[];
 }) {
   const router = useRouter();
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const user = session?.user;
 
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {visible, loading} = useNavigationVisibility();
   const res: any = useResponsive();
   const env = useEnvironment();
@@ -314,10 +309,12 @@ export default function Header({
             {user && (
               <>
                 <div className="w-px h-6 bg-ink-100 mx-1.5" />
-                <ProfilePill baseURL={scope.forRouter()} tenant={tenant} />
+                <ProfilePill baseURL={scope.forRouter()} />
               </>
             )}
-            {!user && <Account baseURL={scope.forRouter()} tenant={tenant} />}
+            {!user && (
+              <Account baseURL={scope.forRouter()} tenantScope={tenantScope} />
+            )}
           </div>
         )}
       </div>

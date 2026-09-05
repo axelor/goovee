@@ -20,8 +20,8 @@ import {resolveLanding} from '@/app/landing';
  * `serviceWorker.ready` forever. Redirecting first means the document is created
  * at the workspace, inside the scope.
  *
- * The tenant comes from the path rather than a query parameter, which is the form
- * the proxy checks against the tenant of an existing session. */
+ * The tenant comes from the path rather than a query parameter, so the address
+ * alone settles which tenant this lands in. */
 export async function GET(
   request: Request,
   {params}: {params: Promise<{tenant: string}>},

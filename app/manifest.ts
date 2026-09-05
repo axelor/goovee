@@ -4,8 +4,9 @@ import type {MetadataRoute} from 'next';
 import {buildManifest} from '@/lib/core/pwa/manifest';
 import {withBasePath} from '@/lib/core/path/base-path';
 
-/* The deployment-level manifest, linked from the pages that name no tenant (`/`
- * and `/auth/*`). Tenant pages link their own `/<tenant>/manifest.webmanifest`.
+/* The deployment-level manifest, linked from the pages that name no tenant —
+ * `/`, not-found and unauthorized. Tenant pages link their own
+ * `/<tenant>/manifest.webmanifest`.
  * Where an origin carries several tenants that installs as a separate app, each
  * launching into its own tenant; on an origin holding one tenant reached by host
  * the two are the same app, because an app is identified by the address it

@@ -32,6 +32,7 @@ import {MapSkeleton} from './common/ui/components/map/map-skeleton';
 import {getOrderBy} from './common/utils';
 import Hero from './hero';
 import {Client} from '@/goovee/.generated/client';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 const ITEMS_PER_PAGE = 7;
 
@@ -40,6 +41,8 @@ export default async function Page(props: {
   searchParams: Promise<SearchParams>;
 }) {
   const searchParams = await props.searchParams;
+
+  const tenantScope = await currentTenantScope();
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
@@ -102,7 +105,7 @@ export default async function Page(props: {
                     `/${SUBAPP_CODES.directory}/entry/${item.id}`,
                   )}
                   key={item.id}
-                  tenant={access.tenant.id}
+                  tenantScope={tenantScope}
                 />
               ))}
               {pages > 1 && (

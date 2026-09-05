@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {
   MdArrowForward,
   MdOutlineCalendarToday,
@@ -64,7 +64,7 @@ export function EventDetails({
   config: EventsConfig | Cloned<EventsConfig>;
 }) {
   const {scope} = useWorkspace();
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const user = session?.user;
 
   const enableComment = isCommentEnabled({

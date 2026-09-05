@@ -143,26 +143,20 @@ const ORIGIN_PATTERN = '^https?://[^/?#]+$';
 
 export const globalConfigSchema = z
   .strictObject({
-    betterAuthSecret: z
-      .string()
-      .min(1)
-      .describe(
-        'Better Auth signing/encryption secret (the BETTER_AUTH_SECRET equivalent).',
-      ),
     betterAuthUrl: z
       .string()
       .min(1)
       .refine(isDeploymentOrigin, {error: ORIGIN_ERROR})
       .meta({
         description:
-          "Origin serving the addresses that name no tenant — \"/\" and the sign-in screens — e.g. https://portal.example.com, scheme and host only with no trailing slash. Every tenant's own origin (publicEnv.GOOVEE_PUBLIC_HOST) is trusted for authentication alongside it, and a request arriving on a host none of them names is answered under this one. Its scheme decides whether the deployment's session cookies are written as __Secure-, so every origin in the document has to share it. Required: left out, Better Auth resolves an origin from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
+          "Origin serving the addresses that name no tenant — \"/\" and the deployment's own routes under /deployment — e.g. https://portal.example.com, scheme and host only with no trailing slash. Every tenant's own origin (publicEnv.GOOVEE_PUBLIC_HOST) is trusted for authentication alongside it, and a request arriving on a host none of them names is answered under this one. Its scheme decides whether the deployment's session cookies are written as __Secure-, so every origin in the document has to share it. Required: left out, Better Auth resolves an origin from the environment instead, where an unrelated BASE_URL becomes this deployment's auth origin and its only trusted origin.",
         pattern: ORIGIN_PATTERN,
       }),
     defaultTenant: z
       .string()
       .min(1)
       .describe(
-        'Tenant serving the addresses that name none of their own: "/" and the sign-in screens, which sit outside the tenant path segment, and a script run with no --tenant. Must name an entry of this document. Left out, those addresses resolve no tenant: "/" answers not-found, and a visitor reaches the sign-in screen by naming a tenant in the URL.',
+        'Tenant serving the addresses that name none of their own: "/", and a script run with no --tenant. Must name an entry of this document. Left out, "/" answers not-found and a visitor has to open an address naming a tenant.',
       )
       .optional(),
     pushMaxConnections: positiveInteger()
@@ -348,7 +342,7 @@ const paymentsSchema = z
           ),
       })
       .describe(
-        "Register this tenant's BPCE webhook under the tenant-scoped path /api/tenant/<tenantId>/webhooks/hubpisp/... so the webhook uses this tenant's credentials.",
+        "Register this tenant's BPCE webhook under this tenant's own path — /<tenantId>/api/webhooks/hubpisp/..., without the <tenantId> segment for a tenant reached on an origin of its own — so the webhook uses this tenant's credentials.",
       )
       .optional(),
   })
@@ -404,10 +398,16 @@ const oauthSchema = z
       .optional(),
   })
   .describe(
-    "Per-tenant OAuth applications. Each provider is registered at startup under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/api/auth/oauth2/callback/<provider>-<tenantId>) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here.",
+    "Per-tenant OAuth applications. Each provider is registered at startup under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>, without the <tenantId> segment for a tenant reached on an origin of its own) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here.",
   );
 
 export const tenantConfigSchema = z.strictObject({
+  betterAuthSecret: z
+    .string()
+    .min(1)
+    .describe(
+      "Signing and encryption secret for this tenant's sessions. Per tenant, not per deployment: each tenant authenticates through an instance of its own, so a secret that leaks forges sessions for that tenant alone. Generate a distinct long random value for every tenant — reusing one across tenants gives back exactly the isolation this separates.",
+    ),
   db: z.strictObject({
     url: z
       .string()

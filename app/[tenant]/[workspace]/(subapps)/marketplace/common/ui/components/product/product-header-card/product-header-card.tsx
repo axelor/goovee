@@ -21,13 +21,14 @@ import {ProductIcon} from '../../shared/product-icon';
 import {ProductTypeBadge} from '../../shared/product-type-badge';
 import {Rating} from '../../shared/rating';
 import {TooltipDate} from '../../shared/tooltip-date';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 export interface ProductHeaderCardProps {
   product: SingleProduct;
   client: Client;
   user?: {id: ID; mainPartnerId?: ID};
   scope: WorkspaceScope;
-  tenantId: string;
+  tenantScope: TenantScope;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
   preview?: boolean;
   canDownloadPromise: Promise<boolean>;
@@ -38,7 +39,7 @@ export async function ProductHeaderCard({
   client,
   user,
   scope,
-  tenantId,
+  tenantScope,
   preview = false,
   canDownloadPromise,
 }: ProductHeaderCardProps) {
@@ -212,7 +213,7 @@ export async function ProductHeaderCard({
             product={product}
             user={user}
             scope={scope}
-            tenantId={tenantId}
+            tenantScope={tenantScope}
             paid={paid}
             priceAti={priceAti}
             priceScale={priceScale}
@@ -237,7 +238,7 @@ async function CTAButton({
   product,
   user,
   scope,
-  tenantId,
+  tenantScope,
   paid,
   priceAti,
   priceScale,
@@ -248,7 +249,7 @@ async function CTAButton({
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
   scope: WorkspaceScope;
-  tenantId: string;
+  tenantScope: TenantScope;
   paid: boolean;
   priceAti: number;
   priceScale: number;
@@ -321,12 +322,11 @@ async function CTAButton({
     return (
       <Button variant="royal" size="lg" className="gap-2" asChild>
         <Link
-          href={getLoginURL({
+          href={getLoginURL(tenantScope, {
             callbackurl: scope.forRouter(
               `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
             ),
             workspaceURI: scope.forRouter(),
-            tenant: tenantId,
           })}>
           {await t('Sign in to buy')}
         </Link>

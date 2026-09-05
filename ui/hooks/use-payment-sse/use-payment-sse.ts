@@ -1,10 +1,9 @@
 'use client';
 
 import {useEffect, useLayoutEffect, useRef} from 'react';
-import {useParams} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
 import {PaymentSource} from '@/lib/core/payment/common/type';
 import {
   PaymentUpdateStatus,
@@ -24,10 +23,9 @@ export function usePaymentSSE({
   contextId,
   onUpdate,
 }: UsePaymentSSEOptions) {
-  /* The SSE endpoint is tenant-scoped; these components only ever render
-   * within the [tenant] route, so the active tenant comes from the params. */
-  const params = useParams();
-  const tenant = typeof params?.tenant === 'string' ? params.tenant : undefined;
+  /* The stream is one of the tenant's own addresses, and these components only
+   * ever render inside its shell, so the scope that builds it is in context. */
+  const scope = useTenantScope();
 
   const onUpdateRef = useRef(onUpdate);
   useLayoutEffect(() => {
@@ -35,10 +33,10 @@ export function usePaymentSSE({
   });
 
   useEffect(() => {
-    if (!entityId || !source || !contextId || !tenant) return;
+    if (!entityId || !source || !contextId) return;
 
-    const url = withBasePath(
-      `/api/tenant/${tenant}/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`,
+    const url = scope.forBrowser(
+      `/api/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`,
     );
     const es = new EventSource(url);
 
@@ -65,7 +63,7 @@ export function usePaymentSSE({
     return () => {
       es.close();
     };
-  }, [source, entityId, contextId, tenant]);
+  }, [source, entityId, contextId, scope]);
 }
 
 export default usePaymentSSE;

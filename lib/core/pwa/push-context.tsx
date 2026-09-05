@@ -10,9 +10,9 @@ import React, {
 } from 'react';
 import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {pushChannelName, MSG_TYPE} from './sw-constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
 
 interface PushContextType {
   permission: NotificationPermission;
@@ -70,7 +70,8 @@ export function PushProvider({
   tenant: string;
 }) {
   const env = useEnvironment();
-  const {data: session, isPending} = authClient.useSession();
+  const scope = useTenantScope();
+  const {data: session, isPending} = useAuthSession();
   const user = session?.user;
   const userId = user?.id;
 
@@ -89,9 +90,7 @@ export function PushProvider({
   const fetchNotifications = useCallback(async () => {
     if (!tenant || !userId) return;
     try {
-      const response = await fetch(
-        withBasePath(`/api/tenant/${tenant}/push/notifications`),
-      );
+      const response = await fetch(scope.forBrowser('/api/push/notifications'));
       if (response.ok) {
         const data: NotificationDTO[] = await response.json();
         setUnreadNotifications(data);
@@ -99,14 +98,14 @@ export function PushProvider({
     } catch (error) {
       console.error('Failed to fetch unread notifications:', error);
     }
-  }, [tenant, userId]);
+  }, [scope, tenant, userId]);
 
   const markAsRead = useCallback(
     async (id: string) => {
       if (!tenant) return;
       try {
         const response = await fetch(
-          withBasePath(`/api/tenant/${tenant}/push/notifications/read/${id}`),
+          scope.forBrowser(`/api/push/notifications/read/${id}`),
           {method: 'POST'},
         );
         if (response.ok) {
@@ -120,14 +119,14 @@ export function PushProvider({
         console.error('Failed to mark notification as read:', error);
       }
     },
-    [tenant],
+    [scope, tenant],
   );
 
   const markAllAsRead = useCallback(async () => {
     if (!tenant) return;
     try {
       const response = await fetch(
-        withBasePath(`/api/tenant/${tenant}/push/notifications/read/all`),
+        scope.forBrowser('/api/push/notifications/read/all'),
         {method: 'POST'},
       );
       if (response.ok) {
@@ -139,13 +138,13 @@ export function PushProvider({
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
     }
-  }, [tenant]);
+  }, [scope, tenant]);
 
   const syncSubscription = useCallback(
     async (sub: PushSubscription) => {
       if (!tenant) return;
       try {
-        await fetch(withBasePath(`/api/tenant/${tenant}/push/subscribe`), {
+        await fetch(scope.forBrowser('/api/push/subscribe'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -156,7 +155,7 @@ export function PushProvider({
         console.error('Failed to sync push subscription:', error);
       }
     },
-    [tenant],
+    [scope, tenant],
   );
 
   const refreshPushNotifications = useCallback(async () => {
@@ -255,7 +254,7 @@ export function PushProvider({
     if (subscription && tenant) {
       try {
         await subscription.unsubscribe();
-        await fetch(withBasePath(`/api/tenant/${tenant}/push/unsubscribe`), {
+        await fetch(scope.forBrowser('/api/push/unsubscribe'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -268,7 +267,7 @@ export function PushProvider({
         console.error('Failed to unsubscribe from push notifications:', error);
       }
     }
-  }, [subscription, tenant]);
+  }, [scope, subscription, tenant]);
 
   useEffect(() => {
     refreshPushNotifications();

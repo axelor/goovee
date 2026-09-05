@@ -38,8 +38,8 @@ export async function notifyInvoicePaymentSuccess({
     await notifyUser({
       userId: user.id,
       tenantId,
-      /* This runs from a payment callback, which carries no proxy headers, so
-       * the workspace is named from the invoice's own row. */
+      /* A payment callback's address names no workspace, so it is named from
+       * the invoice's own row. */
       workspaceURL: invoice.portalWorkspace.url,
       client,
       payload: {

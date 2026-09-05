@@ -2,8 +2,11 @@ import 'server-only';
 import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {SEARCH_PARAMS} from '@/constants';
-import {currentWorkspace, getCurrentPath} from '@/lib/core/url/current';
+import {
+  currentTenantScope,
+  currentWorkspace,
+  getCurrentPath,
+} from '@/lib/core/url/current';
 import {t} from '@/locale/server';
 import {getLoginURL} from '@/utils/login-url';
 import type {AccessReason} from './ensure-access';
@@ -75,10 +78,9 @@ export async function denyPage(access: {reason: AccessReason}): Promise<never> {
     const scope = await currentWorkspace();
 
     redirect(
-      getLoginURL({
+      getLoginURL(await currentTenantScope(), {
         callbackurl: await getCurrentPath(),
         workspaceURI: scope?.forRouter(),
-        [SEARCH_PARAMS.TENANT_ID]: scope?.tenantId,
       }),
     );
   }

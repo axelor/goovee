@@ -1,7 +1,7 @@
 import {genericOAuth} from 'better-auth/plugins';
 import type {GenericOAuthConfig} from 'better-auth/plugins';
 
-import {listTenantConfigs} from '@/tenant/config';
+import {getTenantConfig} from '@/tenant/config';
 
 const GOOGLE_DISCOVERY_URL =
   'https://accounts.google.com/.well-known/openid-configuration';
@@ -11,63 +11,70 @@ export type OAuthRegistration = {
   tenantId: string;
 };
 
-const registrations = new Map<string, OAuthRegistration>();
+/*
+ * Every provider any tenant has registered, keyed by provider id.
+ *
+ * One map across tenants, because the ids carry the tenant and so cannot
+ * collide, and because each tenant's entries are written once — when its own
+ * auth instance is first built — and never rewritten. Nothing clears it: a
+ * tenant addressed later would otherwise wipe the entries of one addressed
+ * earlier, leaving that tenant's callbacks resolving no registration.
+ *
+ * Held on `globalThis` for the reason the instance cache is: a module is
+ * evaluated once per bundler layer and again on every recompile, and the
+ * instances that filled this survive that. A fresh map beside surviving
+ * instances would answer every callback with no registration at all.
+ */
+declare global {
+  var __oauthRegistrations: Map<string, OAuthRegistration> | undefined;
+}
+
+const registrations = (global.__oauthRegistrations ??= new Map<
+  string,
+  OAuthRegistration
+>());
 
 /* A generic provider sends a code challenge only when it is asked to, where a
  * built-in one always does. Carrying pkce in the type is what keeps the next
  * provider added here from being registered without one. */
 type TenantOAuthConfig = GenericOAuthConfig & {pkce: true};
 
-function buildConfigs(): TenantOAuthConfig[] {
+function buildConfigs(tenantId: string): TenantOAuthConfig[] {
+  const oauth = getTenantConfig(tenantId)?.oauth;
+
+  if (!oauth) return [];
+
   const configs: TenantOAuthConfig[] = [];
 
-  /* One pass fills both the list returned here and the lookup it is paired
-   * with, and the plugin keeps the list it is handed, so which providers are
-   * served changes only when the whole auth instance is built again. Emptying
-   * first is what keeps a second pass from leaving a lookup entry behind for a
-   * provider it did not register. */
-  registrations.clear();
+  if (oauth.google) {
+    const providerId = `google-${tenantId}`;
+    configs.push({
+      providerId,
+      discoveryUrl: GOOGLE_DISCOVERY_URL,
+      clientId: oauth.google.clientId,
+      clientSecret: oauth.google.clientSecret,
+      scopes: ['openid', 'email', 'profile'],
+      pkce: true,
+      authorizationUrlParams: {prompt: 'select_account'},
+    });
+    registrations.set(providerId, {provider: 'google', tenantId});
+  }
 
-  /* Tenants bring their own OAuth applications: each is registered under the
-   * provider id <provider>-<tenantId>, and the matching redirect URI
-   * (/api/auth/oauth2/callback/<provider>-<tenantId>) must be registered
-   * with the identity provider. */
-  for (const [tenantId, config] of listTenantConfigs()) {
-    const oauth = config.oauth;
-    if (!oauth) continue;
-
-    if (oauth.google) {
-      const providerId = `google-${tenantId}`;
-      configs.push({
-        providerId,
-        discoveryUrl: GOOGLE_DISCOVERY_URL,
-        clientId: oauth.google.clientId,
-        clientSecret: oauth.google.clientSecret,
-        scopes: ['openid', 'email', 'profile'],
-        pkce: true,
-        authorizationUrlParams: {prompt: 'select_account'},
-      });
-      registrations.set(providerId, {provider: 'google', tenantId});
-    }
-
-    if (oauth.keycloak) {
-      const providerId = `keycloak-${tenantId}`;
-      configs.push({
-        providerId,
-        discoveryUrl: `${oauth.keycloak.issuer}/.well-known/openid-configuration`,
-        clientId: oauth.keycloak.clientId,
-        clientSecret: oauth.keycloak.clientSecret,
-        scopes: ['openid', 'email', 'profile'],
-        pkce: true,
-      });
-      registrations.set(providerId, {provider: 'keycloak', tenantId});
-    }
+  if (oauth.keycloak) {
+    const providerId = `keycloak-${tenantId}`;
+    configs.push({
+      providerId,
+      discoveryUrl: `${oauth.keycloak.issuer}/.well-known/openid-configuration`,
+      clientId: oauth.keycloak.clientId,
+      clientSecret: oauth.keycloak.clientSecret,
+      scopes: ['openid', 'email', 'profile'],
+      pkce: true,
+    });
+    registrations.set(providerId, {provider: 'keycloak', tenantId});
   }
 
   return configs;
 }
-
-const configs = buildConfigs();
 
 /**
  * The tenant and the identity provider a callback belongs to, read from the
@@ -86,6 +93,23 @@ export function findOAuthRegistration(
   return (providerId ? registrations.get(providerId) : null) ?? null;
 }
 
-const oauthProviders = configs.length ? genericOAuth({config: configs}) : null;
+/**
+ * The OAuth providers one tenant offers, or null where it offers none.
+ *
+ * A tenant's own and nothing else. An instance carrying every tenant's
+ * providers would answer a callback naming another tenant's provider id, and
+ * the identity it vouched for would be created in that other tenant while the
+ * session cookie was written for this one. Registering only this tenant's
+ * leaves such a callback resolving no provider at all.
+ *
+ * Tenants bring their own OAuth applications: each provider is registered under
+ * the id `<provider>-<tenantId>`, and the matching redirect URI —
+ * `/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>`, without the
+ * tenant segment where the tenant holds an origin of its own — must be
+ * registered with the identity provider.
+ */
+export function buildOAuthProviders(tenantId: string) {
+  const configs = buildConfigs(tenantId);
 
-export default oauthProviders;
+  return configs.length ? genericOAuth({config: configs}) : null;
+}

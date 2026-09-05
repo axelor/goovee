@@ -16,9 +16,8 @@ import {buildManifest} from '@/lib/core/pwa/manifest';
  * own push subscription. A browser only installs an app whose scope and
  * start_url the page's service worker encloses, and scopes match by path prefix
  * — so under a shared origin `/` would be too broad, and even `/<tenant>` (no
- * trailing slash) falls outside `/<tenant>/`. Signing in stays outside the
- * installed app there, since `/auth` is not under the tenant; on a tenant's own
- * origin the scope is the whole origin and it is included.
+ * trailing slash) falls outside `/<tenant>/`. Signing in sits under the tenant
+ * either way, so it stays inside the installed app.
  *
  * The identity is the entry address, so moving a tenant from a shared origin to
  * one of its own makes this a different app: an install made before the move

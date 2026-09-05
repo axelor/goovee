@@ -33,13 +33,13 @@ import {
   deriveDisplayReview,
   type OptimisticAction,
 } from './shared';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 type VersionOption = {id: string; versionNumber: string};
 
 type YourReviewCardProps = {
   productId: string;
   loginHref: string;
-  tenantId: string;
   user?: User;
   initial: Cloned<MyReview> | null;
   versions: VersionOption[];
@@ -49,12 +49,12 @@ type YourReviewCardProps = {
 export function YourReviewCard({
   productId,
   loginHref,
-  tenantId,
   user,
   initial,
   versions,
   defaultVersionId,
 }: YourReviewCardProps) {
+  const {tenantScope} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -184,7 +184,10 @@ export function YourReviewCard({
       <div className={cn(REVIEW_CARD_SHELL, 'space-y-3')}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
-            <PartnerAvatar partner={displayReview.author} tenantId={tenantId} />
+            <PartnerAvatar
+              partner={displayReview.author}
+              tenantScope={tenantScope}
+            />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-bold text-ink-900 text-sm">

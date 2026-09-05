@@ -49,7 +49,7 @@ export function ShopProductCard({
   hidePriceAndPurchase?: boolean;
   displayPrices?: boolean;
 }) {
-  const {tenant, scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {loaded: cartLoaded, updateQuantity, getProductQuantity} = useCart();
   const {toast} = useToast();
 
@@ -70,7 +70,7 @@ export function ShopProductCard({
   const [justAdded, setJustAdded] = useState(false);
 
   const imageId = p?.thumbnailImage?.id || p?.images?.[0];
-  const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
+  const imageURL = imageId ? getProductImageURL(imageId, tenantScope) : null;
 
   const categoryName = category?.name ?? null;
   const hue = getCategoryHue(categoryName);

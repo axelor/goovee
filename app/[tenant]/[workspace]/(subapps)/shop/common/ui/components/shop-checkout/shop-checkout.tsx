@@ -36,6 +36,7 @@ import {
 } from '@/subapps/shop/common/utils/category-style';
 import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 import {findProduct} from '@/subapps/shop/common/actions/cart';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 export interface ShopCheckoutLabels {
   backToCart: string;
@@ -74,7 +75,7 @@ export function ShopCheckout({
   orderSubapp?: Subapp | null;
   labels: ShopCheckoutLabels;
 }) {
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {cart, loaded: cartLoaded} = useCart();
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
@@ -273,7 +274,7 @@ export function ShopCheckout({
                     <SummaryRow
                       key={item.computedProduct.product.id}
                       item={item}
-                      tenant={String(tenant)}
+                      tenantScope={tenantScope}
                       qtyPrefix={labels.qtyPrefix}
                       fmt={fmt}
                       displayPrices={displayPrices}
@@ -364,13 +365,13 @@ function SectionCard({
 
 function SummaryRow({
   item,
-  tenant,
+  tenantScope,
   qtyPrefix,
   fmt,
   displayPrices,
 }: {
   item: ResolvedCartItem;
-  tenant: string;
+  tenantScope: TenantScope;
   qtyPrefix: string;
   fmt: (n: number) => string;
   displayPrices?: boolean;
@@ -383,7 +384,7 @@ function SummaryRow({
   const hue = getCategoryHue(catName);
 
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
-  const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
+  const imageURL = imageId ? getProductImageURL(imageId, tenantScope) : null;
 
   const unitNum = Number(item.computedProduct?.price?.primary ?? 0);
   const qty = Number(item.quantity ?? 0);
@@ -449,7 +450,7 @@ function CheckoutAddressPicker({
   noneTitle: string;
   loadingLabel: string;
 }) {
-  const {scope} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(

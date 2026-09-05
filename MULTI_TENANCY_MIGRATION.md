@@ -36,7 +36,6 @@ is plain JSON.
 ```jsonc
 {
   "$global": {
-    "betterAuthSecret": "<secret>",                               // BETTER_AUTH_SECRET
     "betterAuthUrl": "https://portal.example.com",                // BETTER_AUTH_URL, origin only
     "defaultTenant": "d",                                         // the entry below
     "pushMaxConnections": 10,                                     // optional, PUSH_MAX_CONNECTIONS
@@ -45,6 +44,8 @@ is plain JSON.
 
   // The tenant id: the segment every address of the deployment carries.
   "d": {
+    "betterAuthSecret": "<secret>",                               // BETTER_AUTH_SECRET, one per tenant
+
     "db": {
       "url": "postgres://user:pass@host:5432/goovee"              // DATABASE_URL
     },
@@ -165,9 +166,8 @@ Write that origin and nothing more: a scheme and a host, the port only where it
 is not the default, and no path, query, fragment or trailing slash. Anything else
 is refused at start-up, against the field that carries it.
 
-Set `defaultTenant` to the tenant id. `/` and the sign-in screens carry no tenant
-in their address, and this is what tells them which one to serve; leave it out and
-they require a tenant in the URL.
+Set `defaultTenant` to the tenant id. `/` carries no tenant in its address, and
+this is what tells it which one to serve; leave it out and `/` answers not-found.
 
 Set `payments.stripe.webhookSecret` to take bank transfer: without it, bank
 transfer is not offered at checkout. Card payments do not need it.
@@ -175,8 +175,9 @@ transfer is not offered at checkout. Card payments do not need it.
 Serving the deployment under an id other than `d` means renaming the entry and
 `$global.defaultTenant` together, and re-pointing every workspace address in AOS.
 The id must be a letter followed by letters, digits or hyphens, at most 15
-characters, and not one of `api`, `auth`, `images`, `locales`, `pdfjs`, `pwa`,
-`website` — the deployment answers those itself. Do not change it while Up2Pay or
+characters, and not one of `api`, `auth`, `deployment`, `images`, `locales`,
+`pdfjs`, `pwa`, `website` — the deployment answers some of those itself, and every
+tenant serves the rest under its own segment. Do not change it while Up2Pay or
 Hub PISP payments are in flight: those payments can no longer be settled.
 
 ## 2. Set the environment
@@ -203,25 +204,25 @@ Remove every other variable: `DATABASE_URL`, `AOS_*`, `BASIC_AUTH_*`,
 `UPLOAD_RECORD_RETENTION_HOURS`, `PUSH_MAX_CONNECTIONS`, `IMAGE_CACHE_MAX_BYTES`
 and `MULTI_TENANCY`. Nothing replaces `MULTI_TENANCY`: the document decides.
 
-On a build carrying a base path, put that subpath before every `/api/…` address
-below. `$global.betterAuthUrl` stays a bare origin.
+On a build carrying a base path, put that subpath before every
+`/<tenantId>/api/…` address below. `$global.betterAuthUrl` stays a bare origin.
 
 ## 3. Re-point the gateway webhook URLs
 
-Every webhook address takes the tenant after `/api`:
+Every webhook address takes the tenant in front of `/api`:
 
 ```
-https://<host>/api/<path>   ->   https://<host>/api/tenant/<tenantId>/<path>
+https://<host>/api/<path>   ->   https://<host>/<tenantId>/api/<path>
 ```
 
 With `<tenantId>` as `d`, that is:
 
-| Gateway         | Was                                  | Now                                           |
-| --------------- | ------------------------------------ | --------------------------------------------- |
-| Stripe          | `/api/webhooks/stripe`               | `/api/tenant/d/webhooks/stripe`               |
-| Up2Pay          | `/api/webhooks/up2pay`               | `/api/tenant/d/webhooks/up2pay`               |
-| Hub PISP / BPCE | `/api/webhooks/hubpisp/<resourceId>` | `/api/tenant/d/webhooks/hubpisp/<resourceId>` |
-| Paybox          | `/api/payment/paybox/validate`       | `/api/tenant/d/payment/paybox/validate`       |
+| Gateway         | Was                                  | Now                                    |
+| --------------- | ------------------------------------ | -------------------------------------- |
+| Stripe          | `/api/webhooks/stripe`               | `/d/api/webhooks/stripe`               |
+| Up2Pay          | `/api/webhooks/up2pay`               | `/d/api/webhooks/up2pay`               |
+| Hub PISP / BPCE | `/api/webhooks/hubpisp/<resourceId>` | `/d/api/webhooks/hubpisp/<resourceId>` |
+| Paybox          | `/api/payment/paybox/validate`       | `/d/api/payment/paybox/validate`       |
 
 Change Stripe in the dashboard under Webhooks, Up2Pay in the merchant
 back-office as the IPN URL, and Hub PISP in the BPCE webhook registration —
@@ -236,9 +237,7 @@ configuration, beside the address it posts to.
 In AOS open the Goovee Portal app configuration and set:
 
 - **Notification webhook url** =
-  `https://<host>/api/tenant/d/webhooks/notifications` — the tenant is now in the
-  path, so the previous `https://<host>/api/webhooks/notifications` no longer
-  answers
+  `https://<host>/d/api/webhooks/notifications`
 - **Webhook secret** = the document's `aos.webhookSecret`
 
 Set `encryption.password` in the AOS `axelor-config.properties` first: it is what
@@ -259,16 +258,16 @@ Every redirect URI now carries the tenant in the provider id, and Google answers
 on the same `oauth2` path as Keycloak:
 
 ```
-https://<host>/api/auth/oauth2/callback/<provider>-<tenantId>
+https://<host>/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>
 ```
 
 Register that with each provider and remove the old one. With `<tenantId>` as
 `d`, that is:
 
-| Provider | Was                                  | Now                                    |
-| -------- | ------------------------------------ | -------------------------------------- |
-| Google   | `/api/auth/callback/google`          | `/api/auth/oauth2/callback/google-d`   |
-| Keycloak | `/api/auth/oauth2/callback/keycloak` | `/api/auth/oauth2/callback/keycloak-d` |
+| Provider | Was                                  | Now                                      |
+| -------- | ------------------------------------ | ---------------------------------------- |
+| Google   | `/api/auth/callback/google`          | `/d/api/auth/oauth2/callback/google-d`   |
+| Keycloak | `/api/auth/oauth2/callback/keycloak` | `/d/api/auth/oauth2/callback/keycloak-d` |
 
 ## 6. Provision storage and certificate mounts
 
@@ -356,8 +355,8 @@ port its scheme does not imply is then never resolved.
 Serve the new host over HTTPS. Notifications, offline caching and installing the
 app all need it.
 
-Point liveness and readiness probes at `/api/info`. Page addresses answer
-not-found on a host no tenant declares; `/api/info` answers on any host.
+Point liveness and readiness probes at `/deployment/info`. Page addresses answer
+not-found on a host no tenant declares; `/deployment/info` answers on any host.
 
 ### Move the stored workspace URLs
 
@@ -394,14 +393,14 @@ visitors re-grant them on the new host.
 
 Every address from sections 3, 4 and 5 keeps its path and changes its host.
 
-| Registration                    | Was                                             | Now                                           |
-| ------------------------------- | ----------------------------------------------- | --------------------------------------------- |
-| Gateway webhooks (section 3)    | `portal.example.com/api/tenant/acme/…`          | `acme.example.com/api/tenant/acme/…`          |
-| AOS notifications (section 4)   | `portal.example.com/api/tenant/acme/…`          | `acme.example.com/api/tenant/acme/…`          |
-| OAuth redirect URIs (section 5) | `portal.example.com/api/auth/oauth2/callback/…` | `acme.example.com/api/auth/oauth2/callback/…` |
+| Registration                    | Was                                                  | Now                                           |
+| ------------------------------- | ---------------------------------------------------- | --------------------------------------------- |
+| Gateway webhooks (section 3)    | `portal.example.com/acme/api/…`                      | `acme.example.com/api/…`                      |
+| AOS notifications (section 4)   | `portal.example.com/acme/api/…`                      | `acme.example.com/api/…`                      |
+| OAuth redirect URIs (section 5) | `portal.example.com/acme/api/auth/oauth2/callback/…` | `acme.example.com/api/auth/oauth2/callback/…` |
 
-The tenant stays in the path of the `/api/tenant/…` addresses; only the host
-changes.
+Moving to its own host drops the tenant segment from every one of these
+addresses; re-register all of them.
 
 ### Restart and verify
 
@@ -419,18 +418,21 @@ changes.
 - Everyone signs in again.
 - Everyone re-grants notifications.
 - An installed app has to be removed and re-installed from the new address.
-- Page addresses under the old origin answer 307 to the new ones for as long as
-  it still reaches the deployment. Its sign-in screens answer 307 to the new
-  origin as well, but without the address the visitor was heading for — that
-  address was written for the old origin, so the screen sends them to their
-  tenant's landing page instead. Its route handlers, static files and the
-  tenant's manifest answer in place.
+- Every address under the old origin answers 307 to the new one for as long as
+  it still reaches the deployment, the sign-in screens included — but without the
+  address the visitor was heading for, since that was written for the old origin,
+  so the screen sends them to their tenant's landing page instead. Static files
+  and the tenant's manifest answer in place.
+- The session cookie made on the old origin is left behind there. It is written
+  for that host alone, so the new origin never receives it and nothing on the old
+  one reads it any more; it expires on its own within a week. Ask signed-in users
+  to sign out before the move if you would rather it went at once.
 
 ### Workspace names to avoid
 
 On its own domain the first path segment is the workspace name, so rename any
-workspace of this tenant whose slug is `auth`, `api`, `images`, `locales`,
-`pdfjs`, `pwa`, `website`, `sign-out` or `manifest.webmanifest`, or whose slug
+workspace of this tenant whose slug is `api`, `auth`, `deployment`, `images`,
+`locales`, `pdfjs`, `pwa`, `website` or `manifest.webmanifest`, or whose slug
 carries a dot (`sales.v2`). Those addresses are answered by the deployment itself
 and never reach the workspace.
 

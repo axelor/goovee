@@ -50,6 +50,7 @@ import {
 } from '../../common/utils/validators';
 import {formatVersionNumber} from '../../common/utils/version-number';
 import {isPaid} from '../../common/utils/price';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;
@@ -82,6 +83,7 @@ export default async function ProductPage(props: {
 
   const workspaceURI = access.scope.forRouter();
   const tenantId = access.tenant.id;
+  const tenantScope = await currentTenantScope();
 
   const client = access.tenant.client;
 
@@ -215,7 +217,7 @@ export default async function ProductPage(props: {
           client={client}
           user={access.user}
           scope={access.scope}
-          tenantId={tenantId}
+          tenantScope={tenantScope}
           preview={preview}
           canDownloadPromise={canDownloadPromise}
         />
@@ -302,16 +304,15 @@ export default async function ProductPage(props: {
             {tab === ProductTab.Reviews && (
               <ReviewsTab
                 product={product}
-                tenantId={tenantId}
+                tenantScope={tenantScope}
                 client={client}
                 reviewPage={reviewPage}
                 user={access.user}
                 preview={preview}
                 buildPageHref={page => productUrl({reviewPage: page})}
-                loginHref={getLoginURL({
+                loginHref={getLoginURL(tenantScope, {
                   callbackurl: productUrl({tab: ProductTab.Reviews}),
                   workspaceURI,
-                  tenant: tenantId,
                 })}
               />
             )}
@@ -451,7 +452,7 @@ export default async function ProductPage(props: {
                     <AvatarImage
                       src={getPartnerImageURL(
                         product.publisher.picture?.id,
-                        tenantId,
+                        tenantScope,
                         {noimage: true, noimageSrc: NO_IMAGE_URL},
                       )}
                       alt={

@@ -22,6 +22,7 @@ import type {ShopCategory} from '@/subapps/shop/common/ui/components';
 import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 import {ShopQuantityStepper} from '@/subapps/shop/common/ui/components/shop-quantity-stepper';
 import type {ComputedProduct} from '@/types';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 export interface ShopProductDetailLabels {
   categoriesTitle: string;
@@ -71,7 +72,7 @@ export function ShopProductDetail({
   hidePriceAndPurchase = false,
   displayPrices = false,
 }: ShopProductDetailProps) {
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {loaded: cartLoaded, updateQuantity, getProductQuantity} = useCart();
   const {toast} = useToast();
 
@@ -267,7 +268,7 @@ export function ShopProductDetail({
             <div>
               <GalleryFrame
                 images={images}
-                tenant={tenant}
+                tenantScope={tenantScope}
                 activeIndex={activeImg}
                 fallbackHue={hue}
                 categoryName={catName}
@@ -286,7 +287,7 @@ export function ShopProductDetail({
                           : 'border-2 border-ink-100',
                       )}>
                       <Image
-                        src={getProductImageURL(id, tenant)}
+                        src={getProductImageURL(id, tenantScope)}
                         alt=""
                         fill
                         className="object-cover"
@@ -455,7 +456,7 @@ export function ShopProductDetail({
                   const rImageId =
                     rProduct?.thumbnailImage?.id || rProduct?.images?.[0];
                   const rImage = rImageId
-                    ? getProductImageURL(rImageId, tenant)
+                    ? getProductImageURL(rImageId, tenantScope)
                     : null;
                   return (
                     <Link
@@ -545,19 +546,19 @@ function CategoryNavLink({
 
 function GalleryFrame({
   images,
-  tenant,
+  tenantScope,
   activeIndex,
   fallbackHue,
   categoryName,
 }: {
   images: string[];
-  tenant: string;
+  tenantScope: TenantScope;
   activeIndex: number;
   fallbackHue: number;
   categoryName: string | null;
 }) {
   const id = images[activeIndex] ?? images[0];
-  const src = id ? getProductImageURL(id, tenant) : null;
+  const src = id ? getProductImageURL(id, tenantScope) : null;
   return (
     <div
       className="relative h-[380px] rounded-[16px] overflow-hidden border border-ink-100 grid place-items-center"

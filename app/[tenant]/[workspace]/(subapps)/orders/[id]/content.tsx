@@ -33,6 +33,7 @@ import type {
   DetailOrder,
   OrderAddress,
 } from '@/subapps/orders/common/types/orders';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const Content = ({order}: {order: DetailOrder}) => {
   const {
@@ -64,7 +65,7 @@ const Content = ({order}: {order: DetailOrder}) => {
     deliveredAt: undefined,
   });
 
-  const {scope, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const hideDiscount = saleOrderLineList?.every(
     item => parseFloat(String(item.discountAmount)) === 0,
@@ -139,7 +140,11 @@ const Content = ({order}: {order: DetailOrder}) => {
                   </li>
                 )}
                 {saleOrderLineList.map(line => (
-                  <ProductRow key={line.id} line={line} tenant={tenant} />
+                  <ProductRow
+                    key={line.id}
+                    line={line}
+                    tenantScope={tenantScope}
+                  />
                 ))}
               </ul>
             </Card>
@@ -385,12 +390,12 @@ function AddressBlock({
 
 function ProductRow({
   line,
-  tenant,
+  tenantScope,
 }: {
   line: NonNullable<DetailOrder['saleOrderLineList']>[number];
-  tenant: string;
+  tenantScope: TenantScope;
 }) {
-  const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
+  const imageURL = getProductImageURL(line.product?.picture?.id, tenantScope, {
     noimage: true,
   });
   const taxValue = line.taxLineSet?.[0]?.value;

@@ -3,8 +3,8 @@ import {throttle} from 'lodash-es';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {MAX_UPLOAD_RECOVERIES, UPLOAD_CHUNK_SIZE} from './constants';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 /** Server response from the stage route — the opaque token, never a meta_file id. */
 export interface StagedUpload {
@@ -213,7 +213,7 @@ const EMPTY: StagedUploadItem[] = [];
 class UploadManager {
   private tasks = new Map<string, Task>();
   private nextId = 0;
-  private tenant: string;
+  private tenantScope: TenantScope;
   private concurrency: number;
 
   private listeners = new Set<() => void>();
@@ -224,15 +224,15 @@ class UploadManager {
   private cancelProgress: () => void;
 
   constructor({
-    tenant,
+    tenantScope,
     concurrency,
     progressThrottleMs,
   }: {
-    tenant: string;
+    tenantScope: TenantScope;
     concurrency: number;
     progressThrottleMs: number;
   }) {
-    this.tenant = tenant;
+    this.tenantScope = tenantScope;
     this.concurrency = Math.max(1, concurrency);
 
     if (progressThrottleMs > 0) {
@@ -283,8 +283,8 @@ class UploadManager {
 
   // ---- config pushed from the hook when props change ----
 
-  configure = (tenant: string, concurrency: number) => {
-    this.tenant = tenant;
+  configure = (tenantScope: TenantScope, concurrency: number) => {
+    this.tenantScope = tenantScope;
     this.concurrency = Math.max(1, concurrency);
     this.pump(); // a raised cap may free a slot
   };
@@ -497,8 +497,8 @@ class UploadManager {
 
   /* One address per purpose; the upload being worked on rides in a header. */
   private uploadUrl(purpose: string) {
-    return withBasePath(
-      `/api/tenant/${this.tenant}/upload/stage/${encodeURIComponent(purpose)}`,
+    return this.tenantScope.forBrowser(
+      `/api/upload/stage/${encodeURIComponent(purpose)}`,
     );
   }
 
@@ -825,22 +825,22 @@ class UploadManager {
  * one snapshot per animation frame.
  */
 export function useStagedUpload({
-  tenant,
+  tenantScope,
   concurrency = 3,
   progressThrottleMs = 200,
 }: {
-  tenant: string;
+  tenantScope: TenantScope;
   concurrency?: number;
   progressThrottleMs?: number;
 }): UseStagedUpload {
   const [manager] = useState(
-    () => new UploadManager({tenant, concurrency, progressThrottleMs}),
+    () => new UploadManager({tenantScope, concurrency, progressThrottleMs}),
   );
 
   // push prop changes into the store (the throttle is fixed at construction)
   useEffect(() => {
-    manager.configure(tenant, concurrency);
-  }, [manager, tenant, concurrency]);
+    manager.configure(tenantScope, concurrency);
+  }, [manager, tenantScope, concurrency]);
 
   // release whatever is still under way when the consumer unmounts
   useEffect(() => () => manager.dispose(), [manager]);

@@ -28,10 +28,11 @@ import {ReportReviewButton} from '../report-review-button';
 import {Rating} from '../../shared/rating';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 interface ReviewsTabProps {
   product: SingleProduct;
-  tenantId: string;
+  tenantScope: TenantScope;
   client: Client;
   reviewPage: number;
   user?: User;
@@ -44,7 +45,7 @@ interface ReviewsTabProps {
 
 export async function ReviewsTab({
   product,
-  tenantId,
+  tenantScope,
   client,
   reviewPage,
   user,
@@ -126,7 +127,6 @@ export async function ReviewsTab({
         productId={product.id}
         user={user}
         loginHref={loginHref}
-        tenantId={tenantId}
         initial={myReview ? clone(myReview) : null}
         versions={publishedVersions.map(v => ({
           id: v.id,
@@ -202,7 +202,10 @@ export async function ReviewsTab({
               className="bg-white rounded-lg border border-ink-100 p-6 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <PartnerAvatar partner={review.author} tenantId={tenantId} />
+                  <PartnerAvatar
+                    partner={review.author}
+                    tenantScope={tenantScope}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-ink-900 text-sm">

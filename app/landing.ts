@@ -1,7 +1,8 @@
+import {headers} from 'next/headers';
+
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {getAuth} from '@/lib/auth';
 import {getPublicEnvironment} from '@/environment';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {absoluteRoot} from '@/lib/core/url/absolute';
 import {
   findDefaultPartnerWorkspace,
@@ -77,7 +78,15 @@ export async function resolveLanding({
 
   const {client} = tenant;
 
-  const session = await getSession();
+  /* Resolved through this tenant's own instance rather than `getSession()`,
+   * which reads the tenant from the header the proxy sets. `/` names no tenant,
+   * so the proxy sets none there and `getSession()` would answer null — leaving
+   * a signed-in visitor resolved as a guest on the one address whose whole job
+   * is to find where they belong. The tenant is settled by the caller above,
+   * against the document, before this runs. */
+  const session = await getAuth(tenantId).api.getSession({
+    headers: await headers(),
+  });
   const user = session?.user;
 
   const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
@@ -96,7 +105,7 @@ export async function resolveLanding({
   const workspaceURI = decodeURIComponent(requestedWorkspaceURI || '');
 
   if (workspaceURI) {
-    const url = `${host}${withBasePath(workspaceURI)}`;
+    const url = `${baseUrl}${workspaceURI}`;
 
     if (await opensForVisitor({url, user, client})) {
       return url;

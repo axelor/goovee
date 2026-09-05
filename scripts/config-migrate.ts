@@ -223,10 +223,9 @@ function oauthFromEnv(): TenantConfigInput['oauth'] {
 
 function buildGlobal(): GlobalConfigInput {
   return {
-    betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
     betterAuthUrl: process.env.BETTER_AUTH_URL ?? '',
-    /* So that "/" and the sign-in screens keep answering for a deployment that
-     * has never named a tenant in an address. */
+    /* So that "/" keeps answering for a deployment that has never named a
+     * tenant in an address. */
     defaultTenant: TENANT_ID,
     pushMaxConnections: count(process.env.PUSH_MAX_CONNECTIONS),
     imageCacheMaxBytes: count(process.env.IMAGE_CACHE_MAX_BYTES),
@@ -235,6 +234,12 @@ function buildGlobal(): GlobalConfigInput {
 
 function buildDefaultTenant(): TenantConfigInput {
   return {
+    /* Per tenant, so a deployment that grows a second one does not sign both
+     * tenants' sessions with the same key. The old deployment-wide value is
+     * carried over rather than replaced, so an upgrade in place keeps one key
+     * instead of inventing another; it does not carry the sessions over, since
+     * the cookies are renamed per tenant and the old names are no longer read. */
+    betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
     db: {url: process.env.DATABASE_URL ?? ''},
     aos: {
       url: process.env.AOS_URL ?? '',

@@ -16,6 +16,7 @@ import {
   findProductAccess,
   setPartnerFavorite,
 } from '../orm';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),
@@ -59,10 +60,9 @@ export async function addProductToFavorites(
       const scope = await currentWorkspace();
 
       redirect(
-        getLoginURL({
+        getLoginURL(await currentTenantScope(), {
           callbackurl: returnUrl,
           workspaceURI: scope?.forRouter(),
-          tenant: tenantId,
         }),
       );
     }

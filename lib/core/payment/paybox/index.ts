@@ -54,7 +54,7 @@ export function getPaymentURL({
     PBX_REFUSE: url?.failure,
     PBX_ANNULE: url?.failure,
     PBX_REPONDRE_A: tenantURLs(tenant).forExternal(
-      `/api/tenant/${tenant}/payment/paybox/validate`,
+      '/api/payment/paybox/validate',
     ),
     PBX_RETOUR: 'reference:R;error:E;transaction:S;sign:K',
     PBX_TIME: new Date().toISOString(),

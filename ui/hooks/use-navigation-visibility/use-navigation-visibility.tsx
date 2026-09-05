@@ -2,7 +2,7 @@
 
 import {useState, useEffect, useMemo} from 'react';
 import {usePathname} from 'next/navigation';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
@@ -80,7 +80,7 @@ export function useNavigationVisibility() {
   const pathname = usePathname();
 
   const {scope} = useWorkspace();
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const user = session?.user;
   const userId = user?.id;
 
