@@ -57,7 +57,10 @@ const AuthClientContext = createContext<AuthClient | null>(null);
  *
  * An address naming no tenant still gets a client, pointed at `/api/auth`, where
  * no route handler is served. Its session fetch finds nothing, which is the truth
- * for such an address — there is no tenant to be signed in to.
+ * for such an address — there is no tenant to be signed in to. Only the pages the
+ * deployment renders above the tenant segment reach that state; `/` answers with
+ * a redirect and creates no document, so no page is ever left holding a client
+ * built for a tenant it has since navigated away from.
  */
 export function AuthClientProvider({
   visitorPrefix,
