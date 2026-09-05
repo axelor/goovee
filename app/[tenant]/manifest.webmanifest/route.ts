@@ -1,8 +1,9 @@
 import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {listTenantIds} from '@/tenant/config';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {getTenantConfig} from '@/tenant/config';
+import {isHostRouted} from '@/lib/core/tenant/routing';
+import {ownsAddressedOrigin, tenantURLs} from '@/lib/core/url/scope';
 import {buildManifest} from '@/lib/core/pwa/manifest';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
@@ -23,17 +24,38 @@ import {buildManifest} from '@/lib/core/pwa/manifest';
  * one of its own makes this a different app: an install made before the move
  * keeps launching at the old address and has to be replaced.
  *
- * Public — fetched by the browser without credentials; validate the tenant
- * cheaply via listTenantIds. */
+ * Public — fetched by the browser without credentials, so the tenant is checked
+ * against the configuration document rather than against a session. */
 export async function GET(
   request: Request,
   {params}: {params: Promise<{tenant: string}>},
 ) {
   const {tenant} = await params;
 
-  const knownTenantIds = listTenantIds();
-  if (!knownTenantIds.includes(tenant)) {
+  const config = getTenantConfig(tenant);
+  if (!config) {
     return new NextResponse('Not found', {status: 404});
+  }
+
+  /* Sent to the origin the tenant is served at, the way the proxy sends every
+   * other address of a moved tenant. This route is outside the proxy's matcher
+   * — it has to be, since the address already carries the tenant segment and the
+   * proxy would put a second one on for a host-routed tenant — so the redirect
+   * the proxy would have made is made here instead. Without it the shared origin
+   * answers with a manifest whose entry is `/<tenant>/`, an address that origin
+   * no longer serves, and an app installed from it launches straight into a
+   * redirect off its own scope.
+   *
+   * The path is kept as it stands: this address carries the tenant segment on
+   * either origin, because nothing adds or removes one here. */
+  if (isHostRouted(config) && !ownsAddressedOrigin(tenant, request.headers)) {
+    const canonical = new URL(request.url);
+    const origin = new URL(config.publicEnv.GOOVEE_PUBLIC_HOST);
+
+    canonical.protocol = origin.protocol;
+    canonical.host = origin.host;
+
+    return NextResponse.redirect(canonical, 307);
   }
 
   /* The same value the service worker in app/[tenant]/layout.tsx registers as

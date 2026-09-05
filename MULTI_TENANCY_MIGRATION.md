@@ -207,6 +207,30 @@ and `MULTI_TENANCY`. Nothing replaces `MULTI_TENANCY`: the document decides.
 On a build carrying a base path, put that subpath before every
 `/<tenantId>/api/…` address below. `$global.betterAuthUrl` stays a bare origin.
 
+### Setting or changing the base path moves every stored workspace URL
+
+A workspace is found by its stored `url` matched in full, and that URL carries
+the base path. Set `NEXT_PUBLIC_BASE_PATH` without moving the stored URLs and
+every page answers not-found, with nothing in the log to say why — the tenant
+resolves, the database connects, and no workspace matches.
+
+In each tenant's own database, adding `/portal` to a deployment already serving
+at the root:
+
+```sql
+UPDATE portal_portal_workspace
+SET
+  url = replace(
+    url,
+    'https://portal.example.com/',
+    'https://portal.example.com/portal/'
+  );
+```
+
+Reversing the change reverses the replacement. The same applies to a base path
+that changes value; nothing checks the two agree, so confirm one workspace opens
+before announcing the deployment.
+
 ## 3. Re-point the gateway webhook URLs
 
 Every webhook address takes the tenant in front of `/api`:
