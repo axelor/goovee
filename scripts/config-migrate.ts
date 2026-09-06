@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 
-import {config as loadDotenv} from 'dotenv';
+import {loadEnvConfig} from '@next/env';
 
 import * as out from '@/scripts/lib/output';
 import {runScript} from '@/scripts/lib/script';
@@ -19,19 +19,13 @@ import {
  * nothing else reads the name. */
 const TENANT_ID = 'd';
 
-/* Load .env files with Next.js precedence for the chosen mode (more-specific
- * files win — loaded first, never overridden). This matches the set Next loads
- * at runtime, so the migration sees the same environment the app would — not
- * the subset @/load-swc-env reads. */
+/* Loads the `.env` files the way the server does, for the chosen mode, so the
+ * migration reads the same environment the application would. Called at run
+ * time rather than imported first as `@/load-swc-env` is, because this script
+ * reads the environment lazily inside its builders and takes the mode from a
+ * flag rather than from NODE_ENV. */
 function loadEnv(dev: boolean) {
-  const mode = dev ? 'development' : 'production';
-  const files = [`.env.${mode}.local`, '.env.local', `.env.${mode}`, '.env'];
-  for (const file of files) {
-    const fullPath = path.join(process.cwd(), file);
-    if (fs.existsSync(fullPath)) {
-      loadDotenv({path: fullPath, override: false, quiet: true});
-    }
-  }
+  loadEnvConfig(process.cwd(), dev);
 }
 
 /* A count setting carried over verbatim. Left out when absent or unusable rather

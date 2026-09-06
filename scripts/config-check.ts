@@ -1,8 +1,7 @@
-/* Loads `.env.local`, `.env.production` and `.env`, so that running this with no
- * argument against a deployment reads the document that deployment would. A
- * development-mode file is not among them, so a checkout served by `pnpm dev`
- * needs the path passed. First, because the loader below takes the path it reads
- * from the environment. */
+/* Loads the `.env` files the server would: the production ones where
+ * NODE_ENV=production is set, as it is on a server, and the development ones on
+ * a checkout. First, because the loader below takes the path it reads from the
+ * environment. */
 import '@/load-swc-env';
 
 import path from 'node:path';
