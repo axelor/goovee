@@ -65,7 +65,7 @@ export default function SignUp({
    * OAuth callback somewhere the session cookie never reaches. */
   const redirection =
     (workspaceURL && isSameOrigin(workspaceURL, host) && workspaceURL) ||
-    withBasePath('/');
+    tenantScope.forBrowser('/');
 
   /* The path the error screen links back to, without the base path: next/link
    * adds it there, and `new URL(...).pathname` would keep it and get it added

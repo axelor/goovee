@@ -4,7 +4,7 @@ import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {sessionTenantIds} from '@/lib/auth';
-import {getDefaultTenantId, getTenantConfig} from '@/tenant/config';
+import {getDefaultTenantId} from '@/tenant/config';
 
 import {resolveLanding} from './landing';
 
@@ -28,7 +28,9 @@ async function resolveLandingTenantId(fromAddress: string): Promise<string> {
    * names no single answer, so the document's default decides instead. */
   const signedInTo = await sessionTenantIds(await headers());
 
-  if (signedInTo.length === 1 && getTenantConfig(signedInTo[0])) {
+  /* Already only tenants the document names — `sessionTenantIds` builds its
+   * candidates from `listTenantIds()`. */
+  if (signedInTo.length === 1) {
     return signedInTo[0];
   }
 

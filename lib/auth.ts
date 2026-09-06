@@ -18,6 +18,7 @@ import {
 import {APIError, getOAuthState} from 'better-auth/api';
 import {
   SECURE_COOKIE_PREFIX,
+  deleteSessionCookie,
   getCookieCache,
   parseCookies,
 } from 'better-auth/cookies';
@@ -284,7 +285,6 @@ const options = {
       },
     },
   },
-  plugins: [],
 } satisfies BetterAuthOptions;
 
 /* Deployment-wide auth settings come from the document's "$global" section
@@ -369,6 +369,25 @@ function cookiePrefixFor(tenantId: string): string {
   return `auth-${tenantId}`;
 }
 
+/**
+ * Ends the session a request carries, and answers as though it had none.
+ *
+ * Through Better Auth's own `deleteSessionCookie`, which expires each cookie
+ * with the attributes it was written under. Clearing by name alone leaves the
+ * path off, and a browser then scopes the deletion to the directory the request
+ * was made in — `/<tenant>/api/auth` — which never matches the deployment root
+ * the cookies were written at. The cookies survive that, and every later request
+ * repeats the work that ended this one.
+ *
+ * `null` is not in `customSession`'s return type, but Better Auth reads it as
+ * unauthenticated; the cast keeps the branch out of the inferred type.
+ */
+function endSession(ctx: Parameters<Parameters<typeof customSession>[0]>[1]) {
+  deleteSessionCookie(ctx);
+
+  return null as never;
+}
+
 function buildAuth(tenantId: string) {
   const oauthProviders = buildOAuthProviders(tenantId);
 
@@ -437,7 +456,6 @@ function buildAuth(tenantId: string) {
       errorURL: withBasePath(tenantURLs(tenantId).forRouter('/auth/error')),
     },
     plugins: [
-      ...options.plugins,
       /* This tenant's credentials endpoints. Built per instance so each closes
        * over the tenant it authenticates against, taken from the address the
        * instance is mounted at. */
@@ -448,23 +466,28 @@ function buildAuth(tenantId: string) {
        * here at all. */
       ...(oauthProviders ? [oauthProviders] : []),
       customSession(async ({user, session}, ctx) => {
-        const {tenantId} = session;
-        const tenant = tenantId ? await manager.getTenant(tenantId) : null;
+        /* The tenant this instance was built for, not the one the cookie claims.
+         * Every cookie this instance can open should name it, since each tenant
+         * signs with its own key — but two tenants given the same key would open
+         * each other's, and then the tenant read from the payload would choose
+         * the database while the address chose the instance. Refused rather than
+         * trusted: the caller sees an ended session, which is what a cookie of
+         * somebody else's tenant amounts to here. */
+        if (session.tenantId !== tenantId) {
+          return endSession(ctx);
+        }
+
+        const tenant = await manager.getTenant(tenantId);
         const partner =
           tenant &&
           user.email &&
           (await findGooveeUserByEmail(user.email, tenant.client));
 
         if (!partner) {
-          // Session cookie exists but partner no longer found — clear cookies and treat as no session
-          // customSession types don't accept null but better-auth handles it as unauthenticated
-          const cookies = ctx.context.authCookies;
-          ctx.setCookie(cookies.sessionToken.name, '', {maxAge: 0});
-          ctx.setCookie(cookies.sessionData.name, '', {maxAge: 0});
-          ctx.setCookie(cookies.accountData.name, '', {maxAge: 0});
-          ctx.setCookie(cookies.dontRememberToken.name, '', {maxAge: 0});
-          // Cast to `never` so this branch is excluded from the function’s inferred return type.
-          return null as never;
+          /* The session outlived the partner it stands for — removed in AOS, or
+           * moved out of the portal. Ended here so the visitor is asked to sign
+           * in again rather than every request repeating this lookup. */
+          return endSession(ctx);
         }
 
         const {

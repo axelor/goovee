@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 import React from 'react';
 import type {Metadata} from 'next';
 import {headers} from 'next/headers';
+import {notFound} from 'next/navigation';
 
 import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
@@ -43,7 +44,19 @@ export default async function TenantLayout(props: {
 }) {
   const {tenant} = await props.params;
 
+  /* A segment naming no tenant the document holds is answered by the deployment,
+   * not by this shell. Refused here so it is refused once, for everything below:
+   * without it a sign-in screen renders in full for a tenant that does not
+   * exist, and submitting it posts to an endpoint that answers not-found — a
+   * form that looks live and cannot work. Raised from the layout, so the
+   * deployment's screen answers rather than the tenant's, whose way back would
+   * point at the same segment that resolved nothing. */
   const config = getTenantConfig(tenant);
+
+  if (!config) {
+    notFound();
+  }
+
   const theme = await findTheme();
 
   const env = getPublicEnvironment(config);

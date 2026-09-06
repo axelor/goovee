@@ -96,8 +96,8 @@ export default function SignUp({
   workspace?: WorkspaceForRegistration;
   googleProviderId?: string;
 }) {
-  const {data: session} = useAuthClient().useSession();
   const authClient = useAuthClient();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -142,7 +142,7 @@ export default function SignUp({
     (workspaceURI &&
       isSameOrigin(workspaceURI, host) &&
       withBasePath(workspaceURI)) ||
-    withBasePath('/');
+    tenantScope.forBrowser('/');
 
   const showDirectoryControls = form.watch(
     'showProfileAsContactOnDirectory',
@@ -152,7 +152,7 @@ export default function SignUp({
   const {toast} = useToast();
 
   const handleCancel = () => {
-    router.replace('/');
+    router.replace(tenantScope.forRouter('/'));
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {

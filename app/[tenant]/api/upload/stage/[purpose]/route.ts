@@ -75,10 +75,11 @@ async function resolveTenantClient(tenantId: string) {
   const session = await getSession();
   if (!session?.user) return null;
 
-  /* Nothing upstream compares the session's tenant with the one in this path. `getSession` resolves the session of the tenant the
-   * address names, so the two agree unless something above changes; this refuses
-   * the disagreement rather than assuming it cannot happen, and refusing here
-   * covers every method below rather than the opening request only. */
+  /* Nothing upstream compares the session's tenant with the one in this path.
+   * `getSession` resolves the session of the tenant the address names, so the
+   * two agree unless something above changes; this refuses the disagreement
+   * rather than assuming it cannot happen, and refusing here covers every
+   * method below rather than the opening request only. */
   if (session.user.tenantId !== tenantId) return FORBIDDEN;
 
   const tenant = await manager.getTenant(tenantId).catch(error => {

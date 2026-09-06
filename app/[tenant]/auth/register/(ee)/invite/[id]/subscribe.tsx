@@ -31,9 +31,10 @@ export default function Subscribe({
   const {toast} = useToast();
 
   const searchParams = useSearchParams();
+  const tenantScope = useTenantScope();
 
   const handleCancel = () => {
-    router.replace('/');
+    router.replace(tenantScope.forRouter('/'));
   };
 
   const handleSubscription = async () => {

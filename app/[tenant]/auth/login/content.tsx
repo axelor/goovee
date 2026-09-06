@@ -62,7 +62,7 @@ export default function Content({
 
     return tenantScope.forRouter(`${path}${query ? `?${query}` : ''}`);
   };
-  const {isPending} = useAuthClient().useSession();
+  const {isPending} = authClient.useSession();
   const env = useEnvironment();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +75,7 @@ export default function Content({
   const redirection =
     decoded && isSameOrigin(decoded, env.GOOVEE_PUBLIC_HOST!)
       ? withBasePath(decoded)
-      : withBasePath('/');
+      : tenantScope.forBrowser('/');
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

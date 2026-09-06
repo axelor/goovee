@@ -560,6 +560,38 @@ function checkStorageIsolation(tenants: TenantEntry[]): ConfigIssue[] {
   return issues;
 }
 
+/* Cross-tenant invariant. A tenant's signing key is what keeps its sessions its
+ * own: a cookie is named for one tenant and opened with that tenant's key, so a
+ * key belonging to one tenant alone is what makes a cookie of another tenant's
+ * unreadable. Shared, the two tenants can open each other's sessions, and a
+ * cookie renamed from one to the other is then accepted — read as the tenant its
+ * payload names, which chooses the database, while the address chose the
+ * instance. The session guard in lib/auth.ts refuses that mismatch; this refuses
+ * the configuration that makes it reachable. */
+function checkSecretIsolation(tenants: TenantEntry[]): ConfigIssue[] {
+  const issues: ConfigIssue[] = [];
+  const owners = new Map<string, string>();
+
+  for (const [id, config] of tenants) {
+    const secret = config.betterAuthSecret;
+    const owner = owners.get(secret);
+
+    if (owner) {
+      issues.push({
+        path: [id, 'betterAuthSecret'],
+        message:
+          `Tenants "${owner}" and "${id}" share a betterAuthSecret. Each tenant ` +
+          `signs its own sessions, so a shared key lets either open the other's. ` +
+          `Generate one per tenant with: openssl rand -base64 32`,
+      });
+    } else {
+      owners.set(secret, id);
+    }
+  }
+
+  return issues;
+}
+
 /* Cross-tenant invariant. Tenants sharing one mail account share one connection
  * pool, so they must agree on how many connections that account allows: the pool
  * is built by whichever tenant sends first, and a disagreement would make the
@@ -889,6 +921,7 @@ export const configDocumentSchema = z
               settled,
             ),
             ...checkHubPispCertIsolation(settled),
+            ...checkSecretIsolation(settled),
             ...checkStorageIsolation(settled),
             ...checkMailCeilings(settled),
           ]

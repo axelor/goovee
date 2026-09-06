@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {notFound, redirect} from 'next/navigation';
+import {redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -9,9 +9,10 @@ import {getPublicEnvironment} from '@/environment';
 import Content from './content';
 import {canRegisterForWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
-import {getTenantConfig, listTenantIds} from '@/tenant/config';
+import {getTenantConfig} from '@/tenant/config';
 import {isSameOrigin} from '@/utils/same-origin';
 import {absoluteRoot} from '@/lib/core/url/absolute';
+import {tenantURLs} from '@/lib/core/url/scope';
 
 import {resolveAuthTenantId} from '../common/tenant';
 import {
@@ -48,14 +49,18 @@ export default async function Page(props: {
 
   const host = getPublicEnvironment(tenantConfig).GOOVEE_PUBLIC_HOST!;
 
-  /* A session belongs to a single tenant, and this screen is one tenant's own.
-   * Bounce away from the form only for a session of the tenant whose address
-   * this is; otherwise render it, so the visitor can sign in here. */
-  if (session?.user?.tenantId === tenantId) {
+  /* A session here is always this tenant's — `getSession` resolves it through the
+   * instance the address names — so any session at all means the visitor is
+   * already signed in where they are asking to sign in, and the form has nothing
+   * to offer them. */
+  if (session?.user) {
     redirect(
       (callbackurl && isSameOrigin(callbackurl, host) && callbackurl) ||
         (workspaceURI && isSameOrigin(workspaceURI, host) && workspaceURI) ||
-        '/',
+        /* This tenant's own entry, not the deployment's: on a shared origin the
+         * deployment's resolves a tenant of its own and would land a visitor
+         * signed in here on somebody else's. */
+        tenantURLs(tenantId).forRouter('/'),
     );
   }
 
@@ -66,10 +71,6 @@ export default async function Page(props: {
   let canRegister;
 
   if (workspaceURL) {
-    const knownTenantIds = listTenantIds();
-    if (!knownTenantIds.includes(tenantId)) {
-      return notFound();
-    }
     const tenant = await manager.getTenant(tenantId);
     if (tenant) {
       canRegister = await canRegisterForWorkspace({

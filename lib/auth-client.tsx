@@ -49,18 +49,13 @@ const AuthClientContext = createContext<AuthClient | null>(null);
 /**
  * Binds everything below to the authentication endpoint of one tenant.
  *
- * Mounted in the root shell rather than the tenant's, because `Locale` reads the
- * session there to pick a locale and a hook cannot be called conditionally
- * further down. Takes the tenant's visitor prefix rather than a scope: a scope
- * carries methods, and those do not cross from a server component to a client
- * one.
+ * Mounted in the tenant shell, above `Locale`, which reads the session to pick a
+ * locale. Nothing above the tenant is given a client: the addresses served there
+ * resolve no tenant, so there is no endpoint to bind and nothing to be signed in
+ * to.
  *
- * An address naming no tenant still gets a client, pointed at `/api/auth`, where
- * no route handler is served. Its session fetch finds nothing, which is the truth
- * for such an address — there is no tenant to be signed in to. Only the pages the
- * deployment renders above the tenant segment reach that state; `/` answers with
- * a redirect and creates no document, so no page is ever left holding a client
- * built for a tenant it has since navigated away from.
+ * Takes the tenant's visitor prefix rather than a scope: a scope carries methods,
+ * and those do not cross from a server component to a client one.
  */
 export function AuthClientProvider({
   visitorPrefix,
@@ -85,16 +80,15 @@ export function AuthClientProvider({
 /**
  * The authentication client for the tenant whose page is rendering.
  *
- * @throws outside the root shell, where nothing has bound an authentication
- *   endpoint. Inside it there is always a client, though one built for an
- *   address naming no tenant reaches nothing — see `AuthClientProvider`.
+ * @throws above the tenant shell, where no endpoint is bound — the deployment's
+ *   own screens render there and none of them authenticates.
  */
 export function useAuthClient(): AuthClient {
   const client = useContext(AuthClientContext);
 
   if (!client) {
     throw new Error(
-      'useAuthClient() outside the root layout: no auth endpoint bound.',
+      'useAuthClient() outside the tenant layout: no auth endpoint bound.',
     );
   }
 
