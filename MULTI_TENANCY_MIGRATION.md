@@ -415,7 +415,7 @@ visitors re-grant them on the new host.
 
 ### Re-register the addresses
 
-Every address from sections 3, 4 and 5 keeps its path and changes its host.
+Every address from sections 3, 4 and 5 changes: the host becomes the tenant's own, and the tenant segment comes off the path.
 
 | Registration                    | Was                                                  | Now                                           |
 | ------------------------------- | ---------------------------------------------------- | --------------------------------------------- |
