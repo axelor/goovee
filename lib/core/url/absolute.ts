@@ -1,10 +1,11 @@
 import {getBasePath} from '@/lib/core/path/base-path';
 
 /*
- * The root an absolute address stands on, and the two directions between such an
- * address and a `workspaceURI`. Those two are each other's inverse, so they sit
- * together: a change to what the root is made of has to land on both or stored
- * addresses stop round-tripping.
+ * The root an absolute address stands on, and the strip that turns a stored
+ * absolute `workspace.url` back into a `workspaceURI`. The prepend direction is
+ * `forExternal` on the two scope types, built on this same root — a change to
+ * what the root is made of has to land on both or stored addresses stop
+ * round-tripping.
  *
  * Config-free on purpose, so the client half of the address builders can use
  * them. The origin a root is built on is passed in rather than read, and comes

@@ -5,7 +5,7 @@ import {listTenantConfigs} from '@/tenant/config';
 import {getMaxConnections, getVapidDetails} from './utils';
 
 /**
- * Report at startup which tenants can send push notifications — nothing else in
+ * Reports at startup which tenants can send push notifications — nothing else in
  * the portal surfaces a missing key, because a notification is stored and shown
  * in the portal whether or not it reaches a device.
  *
@@ -15,8 +15,8 @@ import {getMaxConnections, getVapidDetails} from './utils';
  */
 export function checkPushConfig(): void {
   /* Reporting must not be what stops the server starting. Reading the document
-   * throws when it is missing or malformed, and the rest of `register()` — the
-   * upload sweeps, the payment resumption — has no reason to be lost to that. */
+   * throws when it is missing or malformed, and the payment resumption
+   * `register()` schedules after this has no reason to be lost to that. */
   try {
     report();
   } catch (error) {

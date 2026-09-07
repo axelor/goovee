@@ -45,8 +45,10 @@ interface FileCaller {
   storagePath: string;
 }
 
-/* Refused because the caller's session belongs to another tenant, as distinct
- * from having no session at all. */
+/**
+ * Marks a caller whose session belongs to another tenant, as distinct from one
+ * with no session at all.
+ */
 const FORBIDDEN = 'forbidden';
 
 /**

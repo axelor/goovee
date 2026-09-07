@@ -7,8 +7,7 @@ import {Link} from '@/ui/components/link';
 import {cn} from '@/utils/css';
 
 /**
- * The look every "this address leads nowhere" screen shares: an oversized
- * watermark, a badge, a heading, a line of explanation and one way back.
+ * The look every "this address leads nowhere" screen shares.
  *
  * Presentational only. Each boundary supplies its own words and its own way
  * back, because what "back" means differs by how much of the address still
@@ -28,7 +27,7 @@ export function ErrorScreen({
   heading: string;
   description: string;
   action: {href: string; label: string; icon?: ReactNode};
-  /* Whether this screen is the whole page. Inside the workspace shell it is one
+  /** Whether this screen is the whole page. Inside the workspace shell it is one
    * pane of a column that already fills the viewport, so it grows to fill what
    * is left; rendered on its own — above the workspace, where there is no such
    * column — nothing gives it a height and it would collapse to the height of
@@ -41,7 +40,6 @@ export function ErrorScreen({
         'relative flex items-center justify-center overflow-hidden bg-white p-6 md:p-10',
         standalone ? 'min-h-screen' : 'flex-grow',
       )}>
-      {/* Oversized watermark — decorative, non-interactive */}
       <span
         aria-hidden
         className="pointer-events-none absolute -bottom-20 -right-5 select-none font-extrabold leading-none tracking-[-0.05em] text-royal-pale"

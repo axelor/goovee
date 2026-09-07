@@ -84,7 +84,6 @@ export async function POST(
     });
   }
 
-  /* The tenant's Hub PISP credentials drive every fetch attempt. */
   let linkData: PaymentLinkStatusResult;
   try {
     linkData = await fetchPaymentLinkStatusWithRetry(resourceId, config);

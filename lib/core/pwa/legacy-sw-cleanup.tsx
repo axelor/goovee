@@ -20,9 +20,15 @@ import {withBasePath} from '@/lib/core/path/base-path';
  * share `/sw.js`, so cache names can collide and the orphaned caches are inert
  * once the worker is gone.
  *
- * This is lingering migration code: it is idempotent (a no-op once a browser is
- * clean) but cannot detect that every browser has run it, so remove it manually
- * once the upgrade window has passed (target: a release or two after deploy).
+ * Must not be rendered on an origin a host-routed tenant holds: such a tenant
+ * scopes its own worker at the base root, and this would unregister it on every
+ * page load.
+ *
+ * Idempotent — a no-op once a browser is clean — but nothing here can tell that
+ * every browser has run it.
+ *
+ * TODO: RM-113733 - delete this component and its mount in app/layout.tsx once
+ * the upgrade window for pre-multi-tenancy installs has passed.
  */
 export function LegacyServiceWorkerCleanup() {
   useEffect(() => {

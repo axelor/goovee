@@ -1,7 +1,10 @@
 /* The app resolves the tenant per request, from the path or the host, so
- * nothing is statically rendered and frozen at build. This root layout is a
- * tenant-agnostic shell; the per-tenant theme and browser variables are applied
- * in app/[tenant]/layout.tsx. */
+ * nothing is statically rendered and frozen at build.
+ *
+ * This root layout is a tenant-agnostic shell: the per-tenant theme, browser
+ * variables, authentication endpoint and translations are all mounted in
+ * app/[tenant]/layout.tsx, where a tenant is known and no client navigation can
+ * carry a page out from under the shell that chose them. */
 export const dynamic = 'force-dynamic';
 
 import {
@@ -89,25 +92,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  /* The upgrade cleanup unregisters a service worker scoped to the root of the
-   * origin, which is exactly where a tenant reached by host registers its own —
-   * so on such an origin it would unregister that tenant's worker on every page
-   * load. Nothing is left behind by leaving it out: a registration is keyed by
-   * its scope, so the tenant's own registration at that scope replaces whatever
-   * an earlier build left there rather than sitting alongside it. */
   const requestHeaders = await headers();
   const host = addressedHost(requestHeaders);
+
+  /* What gates the upgrade cleanup below. That cleanup unregisters a service
+   * worker scoped to the root of the origin, which is exactly where a tenant
+   * reached by host registers its own — so on such an origin it would
+   * unregister that tenant's worker on every page load. Nothing is left behind
+   * by leaving it out: a registration is keyed by its scope, so the tenant's own
+   * registration at that scope replaces whatever an earlier build left there
+   * rather than sitting alongside it. */
   const servesHostRoutedTenant = Boolean(
     host && getRoutingIndex().tenantByHost.has(host),
   );
 
-  /* Nothing tenant-shaped is resolved here. The authentication endpoint and the
-   * translations both belong to one tenant, so both are mounted by
-   * app/[tenant]/layout.tsx, where a tenant is known — and where a client
-   * navigation cannot carry a page out from under the shell that chose them.
-   * What is left above the tenant is what belongs to no tenant: the document,
-   * the fonts, and the two screens the deployment renders for an address that
-   * resolved none. */
   return (
     <html lang="en">
       <head>

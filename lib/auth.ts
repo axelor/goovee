@@ -287,8 +287,9 @@ const options = {
   },
 } satisfies BetterAuthOptions;
 
-/* Deployment-wide auth settings come from the deployment's own configuration
- * (the provider loads synchronously). */
+/* Read at import, not per request: the loader answers synchronously and its
+ * answer is fixed for the process. Importing this module therefore settles the
+ * configuration. */
 const deploymentConfig = getDeploymentConfig();
 
 /* The origin the addresses carrying no tenant of their own are served on. Parsed
@@ -530,10 +531,10 @@ function buildAuth(tenantId: string) {
 /**
  * The authentication instance for a tenant, built once and reused.
  *
- * @throws nothing for a tenant the document does not name — an instance is
- *   still returned, and every lookup through it resolves no tenant, so a
- *   request naming an unknown tenant is answered as unauthenticated rather than
- *   by an error a caller would have to tell apart from a refusal.
+ * A tenant the document does not name still gets an instance, and every lookup
+ * through it resolves no tenant, so a request naming an unknown tenant is
+ * answered as unauthenticated rather than by an error a caller would have to
+ * tell apart from a refusal.
  */
 export function getAuth(tenantId: string): Auth {
   const instances = (global.__tenantAuth ??= new Map());
@@ -583,7 +584,6 @@ let cookieReadFailureReported = false;
  * Read from the cookie rather than through `getSession()`, which runs the
  * customSession enrichment — a partner lookup — on every call, while the tenant
  * is already in the cookie and cannot change for the life of a session.
- *
  */
 export async function sessionTenantIds(headers: Headers): Promise<string[]> {
   const cookies = parseCookies(headers.get('cookie') ?? '');

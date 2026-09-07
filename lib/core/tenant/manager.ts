@@ -76,8 +76,7 @@ export class TenantManager {
     });
   }
 
-  /* Resolves to null for an unknown (or missing) tenant id — callers guard with
-   * `if (!tenant)` and return a 4xx. A genuine connection failure still throws. */
+  /** Null for a missing id or one the configuration document does not name; a connection failure throws. */
   async getTenant(id: Tenant['id']): Promise<Tenant | null> {
     if (!id) {
       return null;
@@ -92,8 +91,8 @@ export class TenantManager {
     const config = getTenantConfig(id);
 
     if (!config) {
-      /* Unknown tenant is not an error: callers guard with `if (!tenant)` and
-       * return a 4xx. Throwing here would turn attacker-controllable path
+      /* Unknown tenant is not an error: a caller decides what a missing tenant
+       * means for it. Throwing here would turn attacker-controllable path
        * values into 500s. A genuine connection failure below still throws. */
       return null;
     }

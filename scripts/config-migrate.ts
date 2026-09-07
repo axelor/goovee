@@ -33,16 +33,17 @@ type Format = keyof typeof FORMATS;
 const TENANT_ID = 'd';
 
 /* Loads the `.env` files the way the server does: the production ones where
- * NODE_ENV=production is set, the development ones otherwise. Called at run
- * time rather than imported first as `@/load-swc-env` is, because this script
- * reads the environment lazily inside its builders. */
+ * NODE_ENV=production is set, the test ones where it is `test`, the development
+ * ones otherwise. Called at run time rather than on import, so nothing is read
+ * before the overwrite prompt has been answered. */
 function loadEnv() {
   loadEnvConfig(process.cwd(), process.env.NODE_ENV !== 'production');
 }
 
-/* A count setting carried over verbatim. Left out when absent or unusable rather
- * than corrected here — the loader validates it by name, so a typo is reported
- * against the variable the operator is about to review. */
+/* A count setting carried over verbatim. Left out when absent or unusable
+ * rather than written through — a required setting is then reported missing
+ * against its own name and an optional one falls back to its default, instead
+ * of the file carrying a value the parse cannot word. */
 function count(value: string | undefined): number | undefined {
   if (!value) return undefined;
 
@@ -163,9 +164,9 @@ function paymentsFromEnv(): TenantConfigInput['payments'] {
       beneficiaryName: process.env.HUBPISP_BENEFICIARY_NAME,
       iban: process.env.HUBPISP_IBAN,
       bic: process.env.HUBPISP_BIC || undefined,
-      /* No environment variable ever carried this — the path was hardcoded
-       * before it was a setting, so this is where the certificates of the
-       * deployment being migrated already are. */
+      /* No variable carried this. The release being migrated from read the
+       * certificates from `certs/hubpisp` under the working directory, so that
+       * is where a migrating deployment's already are. */
       certsDir: 'certs/hubpisp',
     };
   }
@@ -272,10 +273,10 @@ function buildTenant(): TenantConfigInput {
 
   return {
     /* Per tenant, so a deployment that grows a second one does not sign both
-     * tenants' sessions with the same key. The old deployment-wide value is
-     * carried over rather than replaced, so an upgrade in place keeps one key
-     * instead of inventing another; it does not carry the sessions over, since
-     * the cookies are renamed per tenant and the old names are no longer read. */
+     * tenants' sessions with the same key. The value the previous release used
+     * is carried across, so an upgrade in place keeps one key rather than
+     * inventing another. Sessions do not survive it: a cookie name carries the
+     * tenant, so no cookie already issued is read back. */
     sessionSecret: process.env.BETTER_AUTH_SECRET ?? '',
     db: {url: process.env.DATABASE_URL ?? ''},
     aos: {
@@ -351,7 +352,6 @@ function envLine(variable: string, value: string): string {
   return `${variable}=${quoted}`;
 }
 
-/* Ask before clobbering an existing file — never silently rewrite one. */
 function confirmOverwrite(filePath: string): Promise<boolean> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -392,8 +392,8 @@ function renderEnv(document: ConfigInput): string {
 }
 
 /* The document as the loader reads it from portal.config.json. A section left
- * undefined is dropped by the serialisation, so omitted sections disappear.
- * The build-time variable has no place in it and is left where it is. */
+ * undefined is dropped by the serialisation. NEXT_PUBLIC_BASE_PATH is not in
+ * it — it is inlined at build time, so no portal.config file can carry it. */
 function renderJson(document: ConfigInput): string {
   return `${JSON.stringify({$schema: `./${CONFIG_SCHEMA_FILE}`, ...document}, null, 2)}\n`;
 }

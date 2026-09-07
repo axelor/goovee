@@ -1,10 +1,8 @@
 /*
  * Reads the configuration schema as a tree: which keys an object holds, whether a
  * setting is optional, what kind of value a leaf takes, what its description
- * says. Two things walk the schema this way — the environment reader, to find
- * the setting a variable names, and the example generator, to list every
- * variable — and both have to agree on what counts as a group and what counts as
- * a leaf, so the reading lives here once.
+ * says. What counts as a group and what counts as a leaf is decided here rather
+ * than per reader.
  *
  * Everything reads the input side of the schema: the shape a document is
  * written in, before a transform settles a value. That is the shape an operator
@@ -104,7 +102,7 @@ export function leafKind(schema: z.ZodType): LeafKind | null {
   if (inner instanceof z.ZodEnum) return 'enum';
 
   if (inner instanceof z.ZodNumber) {
-    /* `z.int()` is a number whose format says so. */
+    // `z.int()` is a number whose format says so.
     const format: unknown = (inner.def as {format?: unknown}).format;
 
     return format === 'safeint' || format === 'int32' ? 'integer' : 'number';
@@ -113,7 +111,7 @@ export function leafKind(schema: z.ZodType): LeafKind | null {
   return null;
 }
 
-/** The values an enum leaf admits. */
+/** The values an enum leaf admits; empty for a schema that is not an enum. */
 export function enumValues(schema: z.ZodType): string[] {
   const inner = unwrap(schema);
 

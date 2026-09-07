@@ -16,7 +16,6 @@ export async function POST(
     return new NextResponse('Unauthorized', {status: 401});
   }
 
-  // The session's tenant has to be the one the address names.
   if (session.user.tenantId !== tenantId) {
     return new NextResponse('Forbidden', {status: 403});
   }

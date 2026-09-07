@@ -9,16 +9,22 @@ import type {Client} from '@/goovee/.generated/client';
 import {resolveStoragePath} from '@/storage/index';
 import {getFileSizeText} from '@/utils/files';
 
-/* Every path below is resolved against the acting tenant's storage root, which
- * the caller passes in. There is no process-wide storage path to fall back on:
- * a tenant on a shared AOS keeps its files under its own subdirectory, so a part
- * written against the wrong root assembles into a blob no tenant can read back.
+/* Every path in this file is resolved against the acting tenant's storage root,
+ * which the caller passes in. There is no process-wide storage path to fall back
+ * on: a tenant on a shared AOS keeps its files under its own subdirectory, so a
+ * part written against the wrong root assembles into a blob no tenant can read
+ * back. */
+
+/**
+ * A staged part's absolute path inside the tenant's storage root.
  *
- * `partPath` is confined to that root exactly as a recorded `meta_file.filePath`
- * is. It is a plain column reachable from outside this application, so a value
- * carrying parent-directory segments would otherwise resolve into another
- * tenant's storage — read by the validation step, renamed into this tenant's
- * root on completion, or removed by the retention sweep. */
+ * @param partPath - confined to that root exactly as a recorded
+ *   `meta_file.filePath` is. It is a plain column reachable from outside this
+ *   application, so a value carrying parent-directory segments would otherwise
+ *   resolve into another tenant's storage — read by the validation step, renamed
+ *   into this tenant's root on completion, or removed by the retention sweep.
+ * @throws when `partPath` resolves outside `storagePath`
+ */
 export function resolvePart(storagePath: string, partPath: string): string {
   const resolved = resolveStoragePath(storagePath, partPath);
 

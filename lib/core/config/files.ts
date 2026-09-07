@@ -42,7 +42,7 @@ import {recordValueOf, shapeOf} from './walk';
 /** Every configuration file is `portal.config` and a suffix. */
 export const CONFIG_FILE_STEM = 'portal.config';
 
-/** The JSON Schema an editor checks a file against. Generated; see scripts. */
+/** The JSON Schema an editor checks a file against, written by `pnpm config:generate`. */
 export const CONFIG_SCHEMA_FILE = `${CONFIG_FILE_STEM}.schema.json`;
 
 /** The key a file may carry for its editor, naming that JSON Schema. */
@@ -51,9 +51,12 @@ const SCHEMA_KEY = '$schema';
 export type ConfigMode = 'development' | 'production' | 'test';
 
 /**
- * The mode NODE_ENV selects, read the way @next/env reads it for the .env files:
- * `production` and `test` as themselves, anything else — an unset value
- * included — as development.
+ * The mode NODE_ENV selects: `production` and `test` as themselves, anything
+ * else — an unset value included — as development.
+ *
+ * The same mode @next/env picks for the .env files, which takes `test` off
+ * NODE_ENV and the other two from the flag its caller passes; every caller here
+ * passes `NODE_ENV !== 'production'`.
  */
 export function configMode(): ConfigMode {
   switch (process.env.NODE_ENV) {

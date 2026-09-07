@@ -142,7 +142,7 @@ function describeIssues(
        * message says "received undefined" only in one wording. */
       if (issue.code === 'invalid_type' && !sources.has(setting)) {
         /* A whole group left out is reported against a name no variable
-         * carries — PORTAL_TENANT_D_AOS_AUTH is nothing an operator can set —
+         * carries — PORTAL_TENANT_ACME_AOS_AUTH is nothing an operator can set —
          * so the variables that would fill it are named instead. */
         const group = schemaAt(configSchema, issue.path);
         const shape = group ? shapeOf(group) : null;

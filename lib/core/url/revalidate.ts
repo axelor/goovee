@@ -1,11 +1,11 @@
 import 'server-only';
 
-/* The only file that may import revalidatePath: everywhere else the import is
- * refused by lint, because the raw call is a footgun — it matches the
+/* The only file that may import revalidatePath. The raw call matches the
  * route-tree path, which always carries the tenant segment, while most code
  * holds the visitor-shaped `workspaceURI`, which does not on a tenant reached
- * on its own origin. Fed that, it silently revalidates nothing. */
-// eslint-disable-next-line no-restricted-imports
+ * on its own origin — fed that, it silently revalidates nothing. */
+
+// eslint-disable-next-line no-restricted-imports -- the one file the restriction sends callers to
 import {revalidatePath} from 'next/cache';
 
 /**

@@ -6,10 +6,11 @@
  * the deployment serves would never be reached.
  *
  * Only some of them are *addresses the deployment answers itself*, and that is
- * the narrower list below. The difference is `api`: a tenant's route handlers
- * sit at `/<tenant>/api`, and on an origin a tenant holds to itself the address
- * arrives without that segment, so the proxy has to put one on rather than pass
- * the request through. No tenant may still be called `api`.
+ * the narrower list below. The difference is `api` and `auth`: a tenant's route
+ * handlers sit at `/<tenant>/api` and its sign-in screens at `/<tenant>/auth`,
+ * and on an origin a tenant holds to itself those addresses arrive without that
+ * segment, so the proxy has to put one on rather than pass the request through.
+ * No tenant may still be called either.
  *
  * The proxy and the configuration document both read these — the proxy to pass
  * an address through, the document to refuse a tenant id — so the two cannot
@@ -61,7 +62,7 @@ export function isDeploymentSegment(segment: string): boolean {
   return deployment.has(segment.toLowerCase());
 }
 
-/** The reserved segments, for error messages that list them. */
+/** The reserved segments, sorted, so a message listing them reads the same every time. */
 export function reservedSegments(): string[] {
   return [...RESERVED_PATH_SEGMENTS].sort();
 }

@@ -43,7 +43,7 @@ export async function notifyTicketChange({
   user: UserCtx;
   workspaceUserId?: ID;
   tenantId: string;
-  /** The workspace's stored `url` — its identity; the addresses come from it. */
+  /** The workspace's stored `url` — its identity: the key the mail-recipient lookup and the stored notification row match, and what the absolute link here is built from. */
   workspaceURL: string;
   client: Client;
 }): Promise<void> {

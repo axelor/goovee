@@ -13,10 +13,12 @@ export class CacheNode<K, V> {
 }
 
 export interface LRUCacheOptions<V> {
-  /* Entries expire this many ms after they are written. */
+  /** Entries expire this many ms after they are written. */
   ttlMs?: number;
-  /* Called with the value whenever an entry leaves the cache — capacity
-   * eviction, TTL expiry, or explicit delete. */
+  /**
+   * Called with the value whenever an entry leaves the cache — capacity
+   * eviction, TTL expiry, or explicit delete.
+   */
   onEvict?: (value: V) => void;
 }
 

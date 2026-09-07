@@ -33,8 +33,10 @@ export type ConfigDocument = {
  * A tenant id becomes a property name on the document as it stands, and only
  * lowercase letters and digits are safe to write there unexamined: "__proto__"
  * or "constructor" would reach the prototype rather than a tenant. Both readers
- * refuse an id this does not match before writing it; the schema repeats the
- * rule with the fuller explanation of what an id is for.
+ * refuse an id this does not match before writing it. Deliberately wider than
+ * what a tenant id may actually be — the schema decides that, where the message
+ * can say what an id is for — so an id the schema refuses is refused against its
+ * own setting rather than dropped here without explanation.
  */
 export const WRITABLE_TENANT_ID = /^[a-z0-9]+$/;
 

@@ -7,7 +7,7 @@ import {MailNotificationService} from './mail';
 import {getMaxConnections, mailAccountKey} from './mail-account';
 
 /**
- * Report at startup whether mail can be delivered — nothing else in the portal
+ * Reports at startup whether mail can be delivered — nothing else in the portal
  * surfaces a bad mail configuration. `verify()` opens its own connection and
  * authenticates, then quits it, so it does not consume one of the pool's.
  *

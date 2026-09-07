@@ -61,10 +61,8 @@ export default async function TenantLayout(props: {
 
   const env = config.public;
 
-  /* Register one service worker per tenant, so each holds a push subscription of
-   * its own and a per-tenant VAPID key takes effect (it registers SerwistProvider
-   * before PushProvider subscribes). Environment wraps both, since PushProvider
-   * reads the VAPID public key from it.
+  /* One service worker per tenant, so each holds a push subscription of its own
+   * and a per-tenant VAPID key takes effect.
    *
    * The scope is the tenant's entry address, the same value the manifest route
    * serves as the app's entry — one function answers both, because a browser
@@ -90,7 +88,11 @@ export default async function TenantLayout(props: {
    *
    * `TenantProvider` is above them because `Locale` takes the tenant's addresses
    * from it — a scope carries methods, and those do not cross from a server
-   * component to a client one, so the prefix is passed and the scope rebuilt. */
+   * component to a client one, so the prefix is passed and the scope rebuilt.
+   *
+   * `SerwistProvider` sits above `PushProvider` so the worker is registered
+   * before anything subscribes, and `Environment` wraps both, since
+   * `PushProvider` reads the VAPID public key from it. */
   return (
     <Environment value={env}>
       <TenantProvider

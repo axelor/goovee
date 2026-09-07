@@ -1,14 +1,13 @@
 /*
  * The spelling that turns a setting's path into the environment variable that
- * carries it, and nothing else: no zod, no document, so both the schema (for its
- * messages) and the environment reader (for its lookups) can import it without
- * one depending on the other.
+ * carries it, and nothing else: no zod, no document, so every module that has
+ * to spell a variable can import this without importing the schema or the
+ * reader.
  */
 
 /** Every configuration variable starts with this. Nothing else is read. */
 export const ENV_PREFIX = 'PORTAL_';
 
-/** The key holding the tenants in the parsed document. */
 export const TENANTS_KEY = 'tenants';
 
 /**

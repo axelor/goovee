@@ -110,9 +110,10 @@ the final coverage can be lower than the number of records processed.`,
     const aos = config.aos;
     if (!aos?.url) out.fail(`AOS url not configured for tenant '${tenantId}'.`);
 
-    /* getAOSHeaders rather than the auth headers alone: a tenant sharing an AOS
-     * instance selects itself with X-Tenant-ID on every request, and without it
-     * this would write coordinates onto another tenant's addresses. */
+    /* `getAOSHeaders`, not the auth headers alone: a tenant on a shared AOS
+     * instance selects itself with X-Tenant-ID on every request. Without that
+     * header the write lands on whichever tenant that AOS resolves by default —
+     * coordinates written onto another tenant's addresses. */
     const headers = {
       ...getAOSHeaders(aos),
       'Content-Type': 'application/json',

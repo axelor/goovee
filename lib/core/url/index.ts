@@ -15,10 +15,9 @@ export type WorkspaceSubPath = `/${string}`;
  *
  * The workspace prefix of a pathname is configuration, not parseable text: a
  * tenant reached on its own origin has no tenant segment in its addresses,
- * while one reached under a path segment does. So the caller hands in the
- * prefix — `scope.forRouter()` from `useWorkspace()`, or
- * `access.scope.forRouter()` on the server — and this only strips it, never a
- * regex over `usePathname()`.
+ * while one reached under a path segment does. The caller hands in the prefix
+ * it already holds and this only strips it — a regex over `usePathname()`
+ * cannot tell the two shapes apart.
  */
 export function subPathOf(
   pathname: string,

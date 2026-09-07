@@ -24,14 +24,13 @@ const SCHEMA_SOURCE = 'lib/core/config/schema.ts';
 const ENV_EXAMPLE_FILE = 'env.example';
 const JSON_EXAMPLE_FILE = `${CONFIG_FILE_STEM}.example.json`;
 
-/* The tenant the examples are written for. Any lowercase alphanumeric id works;
- * this one is short and reads as a placeholder. */
+/* The tenant the examples are written for. Any id the schema admits works; this
+ * one is short and reads as a placeholder. */
 const EXAMPLE_TENANT = 'acme';
 
+// 78 columns; an 80-column terminal shows a wrapped line without scrolling.
 const WIDTH = 78;
 
-/* A paragraph as comment lines, wrapped at the width a terminal shows without
- * scrolling sideways. */
 function comment(text: string): string[] {
   const lines: string[] = [];
   let line = '#';
@@ -133,8 +132,6 @@ function renderLeaf(
   return lines;
 }
 
-/* A group: its description once, then every setting under it, with groups
- * nested inside it following after their own blank line. */
 function renderGroup(
   schema: z.ZodType,
   keyPath: string[],

@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
-/* Make sure a tenant's storage directory exists. Called once when the tenant
- * connects (see the tenant manager). Storage paths are per-tenant config, so
- * there is no process-wide default. */
+/**
+ * Creates the directory and any missing parent. The path is a per-tenant
+ * setting, so there is no process-wide default to fall back on.
+ */
 export function ensureStorageDir(storagePath: string): void {
   if (!fs.existsSync(storagePath)) {
     fs.mkdirSync(storagePath, {recursive: true});

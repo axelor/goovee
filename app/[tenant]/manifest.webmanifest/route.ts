@@ -8,9 +8,8 @@ import {buildManifest} from '@/lib/core/pwa/manifest';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
  * app is identified by it, launches on the tenant's landing workspace there, and
- * keeps navigation inside it. That entry is the root of the origin the manifest
- * was asked on where the tenant holds that origin, and `/<tenant>/` anywhere
- * else.
+ * keeps navigation inside it. That entry is `<basePath>/` on an origin the
+ * tenant holds, and `<basePath>/<tenant>/` anywhere else.
  *
  * The scope cannot be widened past the service worker registered in
  * app/[tenant]/layout.tsx, which is per-tenant so that each tenant carries its

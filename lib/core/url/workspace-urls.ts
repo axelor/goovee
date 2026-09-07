@@ -12,8 +12,8 @@ import type {WorkspaceSubPath} from './index';
  *
  * Built from a prefix that is already in visitor shape rather than from the
  * tenant's configuration, so the same object can be assembled anywhere that
- * prefix reaches — which is what will let a component hold one without learning
- * how its tenant is routed. `ServerWorkspaceScope` extends it with the forms
+ * prefix reaches — which is what lets a component hold one without learning how
+ * its tenant is routed. `ServerWorkspaceScope` extends it with the forms
  * that need configuration or the database.
  */
 export type WorkspaceScope = {

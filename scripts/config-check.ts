@@ -48,7 +48,7 @@ instance or mail host is not a fault here.`,
 
     const loaded = (() => {
       try {
-        /* Either accessor loads the whole configuration, so this raises exactly
+        /* Any of these accessors loads the whole configuration, so this raises exactly
          * what start-up raises: no configuration, a variable or file entry
          * naming no setting, or a shape and a set of invariants spanning tenants
          * that the load refuses. */
@@ -59,20 +59,21 @@ instance or mail host is not a fault here.`,
         };
       } catch (error) {
         /* A refused configuration arrives worded by the loader, against the
-         * variables and file entries at fault. Reported as this script's own failure, so it comes
-         * without a stack, which would say only that a schema rejected
-         * something. */
+         * variables and file entries at fault. Reported as this script's own
+         * failure, so it comes without a stack, which would say only that a
+         * schema rejected something. */
         out.fail(error instanceof Error ? error.message : String(error));
       }
     })();
 
     const {tenants, deployment, sources} = loaded;
 
-    /* Which files took part, by name: an operator checking a layered
-     * configuration is checking that the right file was picked up. */
     const variables = sources.filter(
       ([, source]) => !isFileSource(source),
     ).length;
+
+    /* Which files took part, by name: an operator checking a layered
+     * configuration is checking that the right file was picked up. */
     const files = [
       ...new Set(sources.map(([, source]) => source).filter(isFileSource)),
     ];

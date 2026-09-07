@@ -196,8 +196,9 @@ export function readEnvironmentDocument(
 
   const tenantSchema = recordValueOf(configSchema.shape[TENANTS_KEY]);
 
-  /* The record's value is the tenant schema by construction; read back rather
-   * than imported so a change to how tenants are keyed lands here too. */
+  /* Read off `configSchema` so that changing how the tenants are keyed cannot
+   * leave this resolving against the wrong shape. The fallback is unreachable
+   * while they are a record, and is there to keep the value non-null. */
   const tenantShape = tenantSchema ?? tenantConfigSchema;
 
   for (const [variable, value] of Object.entries(env)) {
@@ -298,8 +299,9 @@ export function readEnvironmentDocument(
 
 /**
  * The variables a nested document spells out to, one per leaf, in the order the
- * document holds them. The inverse of `readEnvironmentDocument`, for whatever
- * writes configuration rather than reads it.
+ * document holds them. The inverse of `readEnvironmentDocument`: a value comes
+ * back as its string spelling, so a document round-trips through the
+ * environment unchanged.
  */
 export function flattenToEnvironment(
   document: Record<string, unknown>,

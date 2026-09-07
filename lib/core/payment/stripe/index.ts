@@ -34,12 +34,13 @@ export function getStripeWebhookSecret(
  * Whether this tenant can settle a Stripe bank transfer.
  *
  * A transfer is confirmed only by a `payment_intent.succeeded` delivery, which
- * the tenant's webhook endpoint verifies with this secret; nothing in the
- * request path confirms one. Offering the option without it shows the payer real
- * bank details and leaves the invoice unpaid after the money has reached Stripe.
+ * the tenant's webhook endpoint verifies with its own signing secret; nothing in
+ * the request path confirms one. Offering the option without that secret shows
+ * the payer real bank details and leaves the invoice unpaid after the money has
+ * reached Stripe.
  *
- * Card payments do not depend on it: their return leg confirms the Checkout
- * session against Stripe before settling.
+ * Card payments do not depend on that secret: their return leg confirms the
+ * Checkout session against Stripe before settling.
  */
 export function canSettleStripeBankTransfer(
   config?: TenantConfig | null,

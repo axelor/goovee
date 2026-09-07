@@ -11,10 +11,9 @@
  * that are free to disagree.
  *
  * A `describe()` string is operator-facing: it is what the generated references
- * carry beside the setting, and what a load error quotes. Where one names
- * another setting, it names the variable rather than the key, since the variable
- * is the spelling an operator types and the one a JSON file's key is easy to
- * read off.
+ * carry beside the setting. Where one names another setting, it names the
+ * variable rather than the key, since the variable is the spelling an operator
+ * types and the one a JSON file's key is easy to read off.
  *
  * The configuration arrives as environment variables, assembled into the nested
  * document this schema describes by ./env, which maps
@@ -48,10 +47,11 @@ import {envNameFor, TENANTS_KEY} from './names';
  * Lowercase letters and digits only, opening with a letter. The environment
  * decides most of that: a variable name is uppercased and split on underscores,
  * so an id holding either would never round-trip, and a hyphen cannot be typed
- * into a shell's `export`. The proxy reads the first segment of an address as a
- * tenant name, so the leading letter keeps `_next`, `_not-found`, a digit or a
- * dot from looking like one; the proxy's own pattern is wider, and an id it
- * matches that this refuses resolves no tenant, which is the right answer.
+ * into a shell's `export`. The leading letter is what the proxy also demands of
+ * a first segment before it will read it as a tenant name, so an id without one
+ * would be configured and then never routed to. The proxy's own pattern is
+ * wider, and an id it matches that this refuses resolves no tenant, which is
+ * the right answer.
  */
 const TENANT_ID_PATTERN = /^[a-z][a-z0-9]*$/;
 
@@ -146,7 +146,7 @@ const ORIGIN_ERROR =
   'fragment or trailing slash, e.g. https://portal.example.com. Ports 80 and ' +
   '443 are the defaults and are left off';
 
-/* The variable carrying a setting, for descriptions and messages. */
+// The variable carrying a setting, for descriptions and messages.
 const name = envNameFor;
 
 /**
@@ -266,7 +266,7 @@ const aosSchema = z
       )
       .optional(),
   })
-  /* Bake the per-tenant storage root once, mirroring AOP's
+  /* The per-tenant storage root, settled once, mirroring AOP's
    * FileSystemStore.getRootPath(): a tenant on a shared multi-tenant AOS keeps
    * its files under <data.upload.dir>/<tenantId>, while a dedicated instance
    * (or the AOP "default" tenant) uses <data.upload.dir> as-is. The portal reads
@@ -534,9 +534,10 @@ export type DeploymentConfig = z.output<typeof deploymentConfigSchema>;
 export type PublicConfig = TenantConfig['public'];
 
 /* The shapes as they are written, before the parse settles the storage root and
- * the Keycloak issuer. What writes configuration rather than reads it — the
- * environment migration — builds these, which match the parsed ones only for as
- * long as no setting is given a default or a coercion. */
+ * the Keycloak issuer. Anything that writes a configuration builds these rather
+ * than the parsed shapes, so a value it emits is one an operator could have
+ * typed. Giving a setting a default or a coercion parts the two further, so a
+ * writer must never reach for the parsed shapes instead. */
 export type TenantConfigInput = z.input<typeof tenantConfigSchema>;
 export type DeploymentConfigInput = z.input<typeof deploymentConfigSchema>;
 
@@ -552,9 +553,9 @@ const tenantPath = (id: string, ...keys: string[]) => [
   ...keys,
 ];
 
-/* Cross-tenant invariant. A HUB PISP tenant authenticates to BPCE with an mTLS
+/* Cross-tenant invariant. A Hub PISP tenant authenticates to BPCE with an mTLS
  * client certificate loaded from its certsDir (client.crt + private-key.pem) —
- * that certificate IS the tenant's enrolled bank identity, so two tenants must
+ * that certificate is the tenant's enrolled bank identity, so two tenants must
  * never resolve to the same certsDir or they would transact as the same bank
  * client. certsDir is required per tenant, so this only has to reject two
  * tenants that point at the same directory. Paths are resolved to absolute so
@@ -1015,12 +1016,11 @@ export const configSchema = z
         .filter((segment): segment is string => typeof segment === 'string'),
     );
 
-    /* The ids stay whole: what a tenant is named, and whether the default names
-     * one, is answered by the keys and holds however the entry under a key
-     * fared. */
     const settled = tenants.filter(([id]) => !faulted.has(id));
 
     const issues = [
+      /* Every id, faulted or not: the key is the name, whatever the entry under
+       * it holds. */
       ...checkTenantIds(ids),
       ...(tenants.length
         ? [

@@ -20,7 +20,6 @@ export type AccessReason =
   | 'app-not-installed'
   | 'no-app-access';
 
-/* allowGuest typed so the granted user follows the caller's guest policy. */
 type GuestUser<TAllowGuest extends boolean> = TAllowGuest extends true
   ? User | undefined
   : User;
@@ -120,7 +119,7 @@ export async function ensureAccess({
     : null;
 
   /* Fast path: what was asked about is reachable, and either a user is present
-     or this caller permits guests. */
+   * or this caller permits guests. */
   if (workspace && (subapp || !named) && (user || allowGuest)) {
     const granted = {
       ok: true as const,
@@ -134,7 +133,7 @@ export async function ensureAccess({
   }
 
   /* Reachable, but this caller requires a user and none is present: what was
-     asked about exists, so it is a sign-in, not a 404. */
+   * asked about exists, so it is a sign-in, not a 404. */
   if (workspace && (subapp || !named)) {
     return {ok: false, user, reason: 'unauthenticated'};
   }

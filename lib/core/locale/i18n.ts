@@ -26,9 +26,10 @@ function asTranslations(data: unknown): Record<string, string> {
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
-  /* `scope` addresses the tenant whose translations these are. Always one:
-   * the only caller is mounted inside the tenant shell, and the screens that
-   * resolve no tenant carry their own words rather than loading a bundle. */
+  /* `scope` addresses the tenant whose translations these are, and the bundle
+   * kept here is that tenant's alone: loading a second tenant's would replace
+   * the first's words in place. The screens that resolve no tenant carry their
+   * own words rather than loading a bundle. */
   async function load(locale: string = DEFAULT_LOCALE, scope: TenantScope) {
     if (!locale) {
       return {};

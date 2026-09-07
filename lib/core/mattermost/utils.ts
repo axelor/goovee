@@ -1,8 +1,8 @@
 import {type TenantConfig} from '@/tenant';
 
 /**
- * Get the Mattermost host URL for the tenant. Browser-facing, so it lives in
- * the tenant's `public` group.
+ * The tenant's Mattermost host, or an empty string where there is no config or
+ * it declares none. Browser-facing, so it lives in the tenant's `public` group.
  */
 export function getHost(config?: TenantConfig | null): string {
   return config?.public.mattermost?.host || '';

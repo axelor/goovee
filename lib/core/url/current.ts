@@ -26,9 +26,9 @@ import {buildTenantScope, type TenantScope} from './tenant-urls';
  *
  * Null where the address names no workspace, which is an ordinary shape rather
  * than a fault: a tenant's own landing address is matched by the proxy and
- * carries both headers, and so is an address whose workspace segment could name
- * a different workspace once decoded. A caller
- * turns that into whatever "no such workspace" means for it.
+ * carries both headers, and so is an address whose workspace segment decodes to
+ * something no slug may be. A caller turns that into whatever "no such
+ * workspace" means for it.
  *
  * @throws only when the headers are absent, which means this ran outside a
  *   request the proxy matched — a deployment route under `/deployment`, a
@@ -58,10 +58,9 @@ export async function currentWorkspace(): Promise<ServerWorkspaceScope | null> {
  * The addresses of the tenant the request being handled is addressed to.
  *
  * Measured from the origin the request arrived at rather than from the tenant's
- * configured routing, so a page served under the tenant's segment on an origin
- * it used to share builds its own addresses the way that origin serves them.
- * `tenantURLs(id)` answers from the configuration instead, which is what a
- * webhook address or an emailed link needs.
+ * configured routing, so every address a page builds works on the origin that
+ * page was served on. `tenantURLs(id)` answers from the configuration instead,
+ * which is what a webhook address or an emailed link needs.
  *
  * @throws where the proxy did not run, for the reason `currentWorkspace` gives.
  */

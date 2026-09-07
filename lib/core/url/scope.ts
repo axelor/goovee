@@ -1,3 +1,11 @@
+/*
+ * Two scopes, because the application has two: some addresses belong to a
+ * workspace and some belong only to the tenant. Which one you hold decides what
+ * a path argument means, so no method takes a flag saying how deep it is —
+ * `tenantURLs(id)` takes paths from the tenant's own root, and
+ * `tenantURLs(id).workspace(slug)` takes paths below that workspace.
+ */
+
 import 'server-only';
 
 import {z} from 'zod';
@@ -71,14 +79,6 @@ function workspaceVisitorPathSchema(workspaceURI: string) {
     );
 }
 
-/*
- * Two scopes, because the application has two: some addresses belong to a
- * workspace and some belong only to the tenant. Which one you hold decides what
- * a path argument means, so no method takes a flag saying how deep it is —
- * `tenantURLs(id)` takes paths from the tenant's own root, and
- * `tenantURLs(id).workspace(slug)` takes paths below that workspace.
- */
-
 /**
  * A workspace's addresses, plus the forms that are not addresses.
  *
@@ -146,11 +146,10 @@ type TenantURLs = TenantScope & {
    * addresses from.
    *
    * The origin the request arrived on decides it, not the tenant's configured
-   * routing, for the reason `entry` gives: a tenant given an origin of its own
-   * is still served under its segment on the origin it used to share, and a
-   * page there must build its addresses the way that origin serves them.
-   * `forBrowser` on this type is measured from the configured routing instead,
-   * since it answers without a request in hand.
+   * routing, so the prefix handed to a browser works on the origin the page was
+   * served on whether or not the two agree — `ownsAddressedOrigin` says what
+   * keeps them agreeing. `forBrowser` on this type is measured from the
+   * configured routing instead, since it answers without a request in hand.
    */
   visitorPrefix(headers: Headers): string;
 
@@ -161,11 +160,11 @@ type TenantURLs = TenantScope & {
    *
    * The trailing slash is required: this is both the service worker's
    * registration scope and the manifest's `scope`/`start_url`/`id` — a
-   * different sense of the word from this module's own — those scopes are
-   * matched by path prefix,
-   * and `/acme` does not enclose `/acme/…`. A browser installs an app only
-   * where the page's worker encloses the manifest's scope, so a drift between
-   * the two shows up as the install prompt silently not appearing.
+   * different sense of the word from this module's own — and those scopes are
+   * matched by path prefix, where `/acme` does not enclose `/acme/…`. A browser
+   * installs an app only where the page's worker encloses the manifest's scope,
+   * so a drift between the two shows up as the install prompt silently not
+   * appearing.
    *
    * It follows the origin the request arrived on rather than the tenant's own
    * routing, because scoping to the root on a shared origin would register a

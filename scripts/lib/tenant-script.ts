@@ -59,8 +59,6 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
   runParsed<Values & TenantValues, Args>(
     {...spec, options: withTenant},
     async ({values, args}) => {
-      /* Named in both failures below: the argument is either a typo of one of
-       * these, or missing with nothing to fall back to. */
       const configuredIds = listTenantIds();
 
       const selected = values.tenant ?? getDefaultTenantId() ?? undefined;
@@ -85,10 +83,10 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
           const tenantId = requireTenant();
           const tenant = await manager.getTenant(tenantId);
 
-          /* An id naming no tenant resolves to nothing rather than throwing, so
-           * that a value from outside cannot be turned into a fault. Here it is
-           * the operator's own argument, and saying so beats failing on a
-           * connection that was never opened. */
+          /* An id naming no tenant resolves to null rather than throwing, so
+           * that a value from outside cannot be turned into a fault. Here the id
+           * is the operator's own argument, and unguarded the next line would
+           * fail as a TypeError naming neither the id nor the option. */
           if (!tenant) {
             out.fail(
               `Tenant '${tenantId}' is not configured; the document names ${configuredIds.join(', ')}.`,

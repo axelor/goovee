@@ -21,10 +21,11 @@ export function getAOSAuthHeaders(auth: AOSAuth): Record<string, string> {
   };
 }
 
-/* Builds the full AOS request headers: authentication plus, when the tenant
- * shares an AOS instance (AOS multi-tenancy), the X-Tenant-ID selector. Goovee
- * authenticates to AOS without a session, so on a shared instance the AOS
- * tenant must be selected on every request via X-Tenant-ID. */
+/**
+ * Builds the full AOS request headers: authentication plus, when the tenant
+ * shares an AOS instance (AOS multi-tenancy), the X-Tenant-ID selector — Goovee
+ * holds no AOS session, so the AOS tenant is selected per request.
+ */
 export function getAOSHeaders(aos: AOS): Record<string, string> {
   const headers = getAOSAuthHeaders(aos.auth);
   if (aos.tenantId) {

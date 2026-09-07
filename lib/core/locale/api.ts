@@ -123,8 +123,8 @@ function computeHash(translations: Translations): string {
 }
 
 /**
- * Load one locale's bundle for a tenant, or the general-only bundle when there
- * is none.
+ * Loads one locale's bundle for a tenant. A context with no tenant gets the
+ * shipped translations alone.
  *
  * The config arrives already resolved, so the tenant is looked up here only for
  * the client its own translations are read with — and only when a cold bundle is

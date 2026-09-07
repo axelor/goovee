@@ -14,10 +14,10 @@ export default async function Layout({
   params: Promise<{tenant: string; workspace: string}>;
   children: ReactNode;
 }) {
-  /* Not a gate — each page runs its own. This only reads the app's icon and
-   * colour for the mobile menu, so it names the workspace the request arrived
-   * at rather than paying for an access check to reach a presentational
-   * lookup. */
+  /* Not a gate: this reads only the app's icon and colour for the mobile menu,
+   * so it names the workspace the request arrived at rather than paying for an
+   * access check to reach a presentational lookup. Anything a page shows that
+   * access decides is gated by that page. */
   const scope = await currentWorkspace();
   if (!scope) return notFound();
 

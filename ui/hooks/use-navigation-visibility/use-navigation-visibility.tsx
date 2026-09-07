@@ -22,7 +22,6 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
  * - code: dynamic segment passed to the function (e.g., 'events')
  * - slug: expected to be a UUID (36-character format including hyphens)
  * - Supports optional sub-paths after the slug
- *
  */
 const CODE_REGEX = (code: string) =>
   new RegExp(`^\/${code}\/(?<slug>[0-9a-fA-F-]{36})(?:\/.*)?$`);

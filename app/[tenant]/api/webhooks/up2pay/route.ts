@@ -23,9 +23,11 @@ import {updateInvoice} from '@/subapps/invoices/common/service';
 import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 /**
- * Fire-and-forget forward of the IPN to the legacy ERP.
- * Only called when Goovee cannot process the IPN (unrecognized ref format or unknown payment context).
- * Controlled by the tenant's payments.up2pay.legacyForwardUrl — if unset, no forwarding occurs.
+ * Forwards the IPN to the legacy ERP and returns without waiting for it.
+ *
+ * @param legacyUrl - the tenant's `payments.up2pay.legacyForwardUrl`;
+ *   `undefined` forwards nothing and returns `false`
+ * @returns whether a forward was started, not whether it succeeded
  */
 function forwardToLegacy(
   request: Request,

@@ -19,14 +19,16 @@ export const WorkspaceContext = React.createContext<{
   tenant: string;
   workspace: string;
   /**
-   * The workspace's stored `url`, for the two consumers that need the value
-   * itself rather than an address: the cart's storage key, and the invoice
-   * payment actions, whose capability-token path names the workspace the token
-   * was minted for. It is a database key — to link somewhere, use `scope`.
+   * The workspace's stored `url`: a database key, never an address.
+   *
+   * Carried for the callers that need the value itself — a key in the browser's
+   * own store, whose spelling orphans every record saved under the old one, and
+   * a capability-token path that names the workspace the token was minted for.
+   * Anything that links somewhere takes `scope`.
    */
   workspaceURL: string;
   workspaceID: Workspace['id'];
-  /** Every address below this workspace. Reach for this, not the strings. */
+  /** Every address below this workspace, measured from the prefix the server resolved. */
   scope: WorkspaceScope;
   /**
    * Every address below the tenant — the route handlers, and the screens that
@@ -52,11 +54,15 @@ export const WorkspaceContext = React.createContext<{
   }),
 });
 
-/* The visitor prefix is given rather than built from the tenant and workspace
- * names: its shape depends on how the tenant is routed, which is server-side
- * configuration. The workspace shell resolves it from the access gate. It
- * reaches the rest of the app only through `scope` — nothing reads the prefix
- * itself. */
+/**
+ * Binds one workspace's addresses to everything below it.
+ *
+ * @param workspaceURI - the visitor prefix, given rather than built from the
+ *   tenant and workspace names: its shape depends on how the tenant is routed,
+ *   which is server-side configuration, and the workspace shell resolves it from
+ *   the access gate. It reaches the rest of the app only through `scope` —
+ *   nothing reads the prefix itself.
+ */
 export function WorkspaceProvider({
   id,
   tenant,

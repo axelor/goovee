@@ -13,7 +13,6 @@
 
 import type {TenantConfig} from '@/tenant';
 
-/** The mail settings of a tenant that declares them. */
 export type MailSettings = NonNullable<TenantConfig['mail']>;
 
 /* Servers differ by an order of magnitude — a Microsoft 365 mailbox allows three

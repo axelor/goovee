@@ -34,8 +34,8 @@ export type InvoiceFilter = {token: string} | {params: {where: object}};
  * Resolves access for an invoice payment request. The token path goes through
  * ensureTokenAccess (no user, no sub-app — authorization is the token fused into
  * the invoice query); the session path goes through ensureAccess and scopes the
- * query to the partner's invoices. Returns the tenant so callers keep using
- * tenant.client / tenant.config exactly as before.
+ * query to the partner's invoices. The tenant comes back whole, so a caller
+ * reads `tenant.client` and `tenant.config` off it.
  *
  * `workspaceURL` and `tenantId` are the ones the request carried, and only the
  * token path reads them: a capability token names the workspace it was minted

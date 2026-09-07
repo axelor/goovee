@@ -20,8 +20,9 @@ export const config = {
      * 3. /_vercel (platform endpoints, e.g. /_vercel/insights)
      * 4. all root files inside /public (e.g. /favicon.ico)
      * 5. all files inside /public/images website locales pwa and pdfjs
-     * 6. the per-tenant web manifest (public, but fetched with same-origin
-     *    cookies, so it must not run the session logic)
+     * 6. the per-tenant web manifest, whose address already carries the tenant
+     *    segment — matched, a host-routed tenant would have a second one put
+     *    on. That route makes the moved-tenant redirect itself.
      *
      * Route handlers are matched like anything else. A tenant's own are
      * addressed the way its pages are — with the tenant segment where the
@@ -39,9 +40,10 @@ export const config = {
   ],
 };
 
-/* The path given here already has the base path removed. next.config.mjs sets
- * `basePath` from the same variable, and Next strips it before `pathname` can be
- * read. Stripping it again would cut those characters off the tenant name. */
+/* The path given here already has the base path removed: next.config.mjs and
+ * @/lib/core/path/base-path both read NEXT_PUBLIC_BASE_PATH, and Next strips the
+ * configured basePath before `pathname` can be read. Stripping it again would
+ * cut those characters off the tenant name. */
 export function extractTenant(url: string) {
   url = url.startsWith('/') ? url : '/' + url;
 
@@ -53,7 +55,8 @@ export function extractTenant(url: string) {
 
 /* Renders the not-found page for a request the proxy refuses, keeping the address
  * the visitor asked for. `/_not-found` is where the framework serves that page
- * from; every single-segment address belongs to the tenant segment. */
+ * from, and it is not a name `extractTenant` reads as a tenant, so the rewrite
+ * cannot come back round as one. */
 function notFound(req: NextRequest, headers: Headers) {
   const url = req.nextUrl.clone();
 
@@ -171,10 +174,10 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(canonical, 307);
   }
 
-  /* Record the path (with query string) being requested so server components
-     can send a denied guest back to exactly where they were after login. The
-     address the visitor used, not the one the route tree is asked for, so what
-     they are returned to is an address they can reach. */
+  /* The path being requested, query string included, so a server component can
+   * send a denied guest back to exactly where they were after signing in. The
+   * address the visitor used, not the one the route tree is asked for, so what
+   * they are returned to is an address they can reach. */
   headers.set(CURRENT_PATH_HEADER, url.pathname + url.search);
 
   headers.set(TENANT_HEADER, tenant);
