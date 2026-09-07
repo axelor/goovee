@@ -3,6 +3,33 @@ import type {Client} from '@/goovee/.generated/client';
 import {PartnerAddress, Partner, ID, Address} from '@/types';
 import type {SelectOptions, UpdateArgs, CreateArgs} from '@goovee/orm';
 
+import {aosClient, toAOSPayload, type AOSConfig} from '@/service';
+
+const PARTNER_ADDRESS_MODEL = 'com.axelor.apps.base.db.PartnerAddress';
+
+/* Partner address writes go through AOS's REST API rather than the shared
+ * database, so that AOP's audit listener fires and records the change in the
+ * record's tracking history.
+ *
+ * AOS recomputes fields on save (Address.fullName) and bumps the version more
+ * than once, so what the callers expect is rebuilt by re-reading through the
+ * ORM instead of being derived from the request. That re-read happens inside
+ * the caller's transaction while AOS committed the row in its own: it works
+ * because the ORM opens transactions at PostgreSQL's default READ COMMITTED
+ * level, where each statement sees the latest committed data. A stricter
+ * isolation level would make the re-read come back empty. */
+async function savePartnerAddressToAOS(
+  data: Record<string, unknown>,
+  aos: AOSConfig,
+): Promise<ID> {
+  const saved = await aosClient(aos).save<{id: number | string}>(
+    PARTNER_ADDRESS_MODEL,
+    toAOSPayload(data),
+  );
+
+  return String(saved.id);
+}
+
 const addressFields = {
   address: {
     zip: true,
@@ -64,11 +91,12 @@ export async function createPartnerAddress(
     isDefaultAddr?: boolean | null;
   },
   client: Client,
+  aos: AOSConfig,
 ) {
   if (!partnerId) return null;
 
-  const address = await client.aOSPartnerAddress.create({
-    data: {
+  const addressId = await savePartnerAddressToAOS(
+    {
       partner: {
         select: {
           id: partnerId,
@@ -109,9 +137,18 @@ export async function createPartnerAddress(
       isDeliveryAddr: values.isDeliveryAddr,
       isDefaultAddr: values.isDefaultAddr,
     },
+    aos,
+  );
+
+  const address = await client.aOSPartnerAddress.findOne({
+    where: {id: {eq: addressId}},
     select: {id: true},
   });
 
+  /* Runs after the address is saved, and deliberately outside its write: an
+   * HTTP call cannot take part in a database transaction. Should this fail the
+   * address still exists with a stale fiscal position, which the next address
+   * save recomputes. */
   if (values.isDeliveryAddr && values.address.country?.id) {
     await updatePartnerFiscal({
       partnerId,
@@ -136,6 +173,7 @@ export async function updatePartnerAddress(
     isDefaultAddr?: boolean | null;
   },
   client: Client,
+  aos: AOSConfig,
 ) {
   const partnerAddressId = values.id;
 
@@ -149,8 +187,8 @@ export async function updatePartnerAddress(
 
   if (!partnerAddress) return null;
 
-  const address = await client.aOSPartnerAddress.update({
-    data: {
+  const savedId = await savePartnerAddressToAOS(
+    {
       id: values.id,
       version: partnerAddress.version,
       partner: {
@@ -195,9 +233,16 @@ export async function updatePartnerAddress(
       isDeliveryAddr: values.isDeliveryAddr,
       isDefaultAddr: values.isDefaultAddr,
     },
+    aos,
+  );
+
+  const address = await client.aOSPartnerAddress.findOne({
+    where: {id: {eq: savedId}},
     select: {id: true, isDeliveryAddr: true, isDefaultAddr: true},
   });
 
+  /* See createPartnerAddress: the fiscal alignment runs after the address is
+   * saved and outside its write. */
   if (values.isDeliveryAddr && values.address.country?.id) {
     await updatePartnerFiscal({
       partnerId,
