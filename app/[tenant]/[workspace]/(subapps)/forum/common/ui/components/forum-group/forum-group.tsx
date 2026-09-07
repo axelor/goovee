@@ -104,7 +104,6 @@ export function ForumGroup({
       const res = next
         ? await joinGroup({
             groupID: group.id,
-            userId,
             workspaceURL,
             workspaceURI,
           })
