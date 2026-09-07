@@ -28,7 +28,6 @@ export type ExitGroupInput = z.infer<typeof ExitGroupSchema>;
 
 export const JoinGroupSchema = z.object({
   groupID: IdSchema,
-  userId: IdSchema,
 });
 export type JoinGroupInput = z.infer<typeof JoinGroupSchema>;
 
