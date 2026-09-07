@@ -1,6 +1,5 @@
 'use client';
 
-import {useSearchParams} from 'next/navigation';
 import {MdHome} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -13,24 +12,16 @@ import {ErrorScreen} from '@/ui/components/error-screen';
  *
  * Written in English rather than translated, for the reason the deployment's
  * not-found is: it renders above the tenant, where no tenant's translations are
- * loaded. The reason, when one is given, is passed through as it arrived —
- * whoever raised the refusal chose those words.
+ * loaded.
  */
 export default function Unauthorized() {
-  const searchParams = useSearchParams();
-  const reason = searchParams.get('message');
-
   return (
     <ErrorScreen
       standalone
       watermark="401"
       badge="Error 401"
       heading="This page is not open to you"
-      description={
-        reason
-          ? decodeURIComponent(reason)
-          : 'The address exists, but this account cannot open it. Signing in as someone else may help.'
-      }
+      description="The address exists, but this account cannot open it. Signing in as someone else may help."
       action={{
         href: '/',
         label: 'Return home',
