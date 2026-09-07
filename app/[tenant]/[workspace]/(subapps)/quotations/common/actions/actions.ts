@@ -1,13 +1,12 @@
 'use server';
 
 import {after} from 'next/server';
-import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
-import {TENANT_HEADER} from '@/proxy';
+import type {WorkspaceSubPath} from '@/lib/core/url';
 import {getQuotationsConfig} from '../orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -29,21 +28,14 @@ import {NotificationTag} from '@/pwa/tags';
 import {findQuotation} from '../orm/quotations';
 
 export const createComment: CreateComment = async props => {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = CreateCommentPropsSchema.safeParse(props);
   if (!parsed.success) {
     return {error: true, message: await t('Invalid request')};
   }
-  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
+  const commentProps = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -86,10 +78,10 @@ export const createComment: CreateComment = async props => {
   });
 
   const quotation = await findQuotation({
-    id: rest.recordId,
+    id: commentProps.recordId,
     client,
     params: {where: quotationWhereClause},
-    workspaceURL,
+    workspaceURL: access.workspace.url,
   });
   if (!quotation) {
     return {error: true, message: await t('Record not found')};
@@ -107,23 +99,23 @@ export const createComment: CreateComment = async props => {
           commentField: 'body',
           trackingField: 'body',
           subject: `${user.simpleFullName || user.name} added a comment`,
-          ...rest,
+          ...commentProps,
         }),
     );
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
-      const quotationUrl = `${workspaceURI}/${SUBAPP_CODES.quotations}/${rest.recordId}`;
+      const quotationLink: WorkspaceSubPath = `/${SUBAPP_CODES.quotations}/${commentProps.recordId}#comment-${comment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
-        tenant: tenantId,
+        tenant: access.tenant.id,
       });
       after(async () => {
         await notifyUser({
           userId: parentComment.partner!.id,
-          tenantId,
+          tenantId: access.tenant.id,
+          workspaceURL: access.workspace.url,
           client,
-          workspaceURL,
           payload: {
             title: await tr(
               '{0} replied to your comment on {1}',
@@ -131,7 +123,7 @@ export const createComment: CreateComment = async props => {
               quotation.saleOrderSeq ?? '',
             ),
             body: comment.body ?? '',
-            url: `${quotationUrl}#comment-${comment.id}`,
+            link: quotationLink,
             tag: NotificationTag.quotationReply(parentComment.id),
           },
           getReplacementTitle: count =>
@@ -157,21 +149,10 @@ export const createComment: CreateComment = async props => {
 };
 
 export const fetchComments: FetchComments = async props => {
-  const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
+  const commentQuery = FetchCommentsPropsSchema.parse(props);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -209,10 +190,10 @@ export const fetchComments: FetchComments = async props => {
   });
 
   const quotation = await findQuotation({
-    id: rest.recordId,
+    id: commentQuery.recordId,
     client,
     params: {where: quotationWhereClause},
-    workspaceURL,
+    workspaceURL: access.workspace.url,
   });
   if (!quotation) {
     return {error: true, message: await t('Record not found')};
@@ -224,7 +205,7 @@ export const fetchComments: FetchComments = async props => {
       client,
       commentField: 'body',
       trackingField: 'body',
-      ...rest,
+      ...commentQuery,
     });
     return {success: true, data: clone(data)};
   } catch (e) {

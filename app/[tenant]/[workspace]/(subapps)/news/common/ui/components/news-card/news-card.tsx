@@ -28,21 +28,21 @@ export const NewsCard = ({
   config: NewsConfig | Cloned<NewsConfig>;
 }) => {
   const {publicationDateTime, title, image, categorySet, slug} = news;
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const {isShowPublicationDate} = config;
 
   return (
     <Link
       key={id}
-      href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+      href={scope.forRouter(
+        `/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`,
+      )}
       className="bg-white rounded-xl border border-ink-100 shadow-xs hover:shadow-soft-md transition-shadow flex flex-col cursor-pointer overflow-hidden">
       <div className="w-full aspect-[16/10] relative bg-ink-50">
         <Image
           src={
             image?.id
-              ? withBasePath(
-                  `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
-                )
+              ? scope.forBrowser(`/${SUBAPP_CODES.news}/api/news/${slug}/image`)
               : withBasePath(NO_IMAGE_URL)
           }
           alt={image?.fileName || 'News image'}

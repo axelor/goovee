@@ -2,7 +2,6 @@ import {NextRequest, NextResponse} from 'next/server';
 
 import {isFileOfRecord} from '@/comments/orm';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 import {isCommentEnabled} from '@/comments';
 
 import {findTicketAccess} from '../../../../../common/orm/tickets';
@@ -23,13 +22,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {'ticket-id': ticketId, 'file-id': fileId} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
   if (!access.ok) {

@@ -7,7 +7,6 @@ export const RECENT_REVIEW_WINDOW_DAYS = 7;
 
 export const saveReviewSchema = z.object({
   productId: z.string().min(1),
-  workspaceURL: z.string().min(1),
   rating: z.number().int().min(1, 'Pick at least one star').max(5),
   reviewComment: z
     .string()
@@ -23,7 +22,6 @@ export type SaveReviewInput = z.infer<typeof saveReviewSchema>;
 
 export const deleteReviewSchema = z.object({
   productId: z.string().min(1),
-  workspaceURL: z.string().min(1),
 });
 
 export type DeleteReviewInput = z.infer<typeof deleteReviewSchema>;
@@ -42,7 +40,6 @@ export type ReportReason = (typeof REPORT_REASONS)[number];
 
 export const reportReviewSchema = z.object({
   reviewId: z.string().min(1),
-  workspaceURL: z.string().min(1),
   reasonSelect: z.enum(REPORT_REASONS),
 });
 

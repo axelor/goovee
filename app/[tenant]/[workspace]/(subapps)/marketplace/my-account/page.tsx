@@ -8,10 +8,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import {
   ChevronRight,
   Heart,
@@ -20,10 +18,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {canManageProducts} from '../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../common/orm/config';
 import {hasDirectoryAccess} from '../common/utils/directory';
 import {PartnerProfileLink} from '../common/ui/components/shared/partner-profile-link';
@@ -36,37 +35,10 @@ export default async function MyAccountPage(props: {
 
   const paramsResult = myAccountParamsSchema.safeParse(rawParams);
   if (!paramsResult.success) notFound();
-  const params = paramsResult.data;
-
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const config = await getMarketplaceConfig(
     access.workspace.config.id,
@@ -80,7 +52,9 @@ export default async function MyAccountPage(props: {
     canManageProducts({user: access.user, subapp: access.subapp});
   // Already resolved with the workspace, so this costs no extra query.
   const directoryAvailable = hasDirectoryAccess(access.workspace.apps);
-  const accountBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`;
+  const accountBase = access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}/my-account`,
+  );
 
   const cards: Array<{
     href: string;
@@ -122,7 +96,8 @@ export default async function MyAccountPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-ink-500 cursor-pointer truncate">
-                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                <Link
+                  href={access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`)}>
                   {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>
@@ -158,7 +133,9 @@ export default async function MyAccountPage(props: {
               <PartnerProfileLink
                 client={access.tenant.client}
                 partnerId={partnerId}
-                href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${partnerId}`}
+                href={access.scope.forRouter(
+                  `/${SUBAPP_CODES.directory}/entry/${partnerId}`,
+                )}
                 label={await t('See partner profile')}
               />
             </Suspense>

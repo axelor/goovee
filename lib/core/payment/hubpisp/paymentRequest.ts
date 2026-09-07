@@ -4,6 +4,8 @@ import {
   buildPispHeaders,
   pispFetch,
 } from './crypto';
+import {getHubPispSettings} from './settings';
+import type {TenantConfig} from '@/tenant';
 import {
   generateRequestId,
   getDateHeader,
@@ -18,19 +20,21 @@ import type {PaymentRequestStatusResult} from './types';
  */
 export async function fetchPaymentRequestStatus(
   resourceId: string,
+  config: TenantConfig,
 ): Promise<PaymentRequestStatusResult> {
-  const baseUrl = process.env.HUBPISP_API_URL;
-  const keyId = process.env.HUBPISP_CERT_FINGERPRINT;
+  const settings = getHubPispSettings(config);
+  const {apiUrl: baseUrl, certFingerprint: keyId} = settings;
 
-  if (!(baseUrl && keyId)) {
-    console.error('[HUBPISP][REQUEST_STATUS] Missing env config', {
+  if (!(baseUrl && keyId && settings.certsDir)) {
+    console.error('[HUBPISP][REQUEST_STATUS] Missing config', {
       hasBaseUrl: !!baseUrl,
       hasKeyId: !!keyId,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP is not configured');
   }
 
-  const token = await getPispAccessToken();
+  const token = await getPispAccessToken(settings);
 
   const path = `${PAYMENT_REQUEST_PATH}/${resourceId}`;
   const bodyString = '';
@@ -46,12 +50,17 @@ export async function fetchPaymentRequestStatus(
     digest,
     date,
     xRequestId,
+    certsDir: settings.certsDir,
   });
 
-  const response = await pispFetch(`${baseUrl}${path}`, {
-    method: 'GET',
-    headers,
-  });
+  const response = await pispFetch(
+    `${baseUrl}${path}`,
+    {
+      method: 'GET',
+      headers,
+    },
+    settings.certsDir,
+  );
 
   if (!response.ok) {
     const errorBody = await response.text();

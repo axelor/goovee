@@ -1,4 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import {Link} from '@/ui/components/link';
@@ -6,6 +7,7 @@ import type {ActivityItem} from '../../../../orm';
 import {ProductTab} from '../../../../constants/tabs';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const CARD = 'bg-white rounded-lg border border-ink-100 p-4 md:p-6';
 
@@ -17,12 +19,12 @@ const ACTIVITY_STYLE: Record<ActivityItem['kind'], {bgColor: string}> = {
 
 export async function RecentActivity({
   activity,
-  workspaceURI,
-  tenantId,
+  scope,
+  tenantScope,
 }: {
   activity: Promise<ActivityItem[]>;
-  workspaceURI: string;
-  tenantId: string;
+  scope: WorkspaceScope;
+  tenantScope: TenantScope;
 }) {
   const items = await activity;
 
@@ -39,8 +41,8 @@ export async function RecentActivity({
             <ActivityRow
               key={index}
               item={item}
-              workspaceURI={workspaceURI}
-              tenantId={tenantId}
+              scope={scope}
+              tenantScope={tenantScope}
             />
           ))}
         </div>
@@ -51,12 +53,12 @@ export async function RecentActivity({
 
 async function ActivityRow({
   item,
-  workspaceURI,
-  tenantId,
+  scope,
+  tenantScope,
 }: {
   item: ActivityItem;
-  workspaceURI: string;
-  tenantId: string;
+  scope: WorkspaceScope;
+  tenantScope: TenantScope;
 }) {
   const action =
     item.kind === 'review'
@@ -73,7 +75,7 @@ async function ActivityRow({
       {item.actor ? (
         <PartnerAvatar
           partner={item.actor}
-          tenantId={tenantId}
+          tenantScope={tenantScope}
           size={28}
           fallbackClassName={ACTIVITY_STYLE[item.kind].bgColor}
         />
@@ -88,9 +90,11 @@ async function ActivityRow({
           <span className="font-bold">{name}</span>
           <span className="text-ink-500"> {action} </span>
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}${
-              item.kind === 'review' ? `?tab=${ProductTab.Reviews}` : ''
-            }`}
+            href={scope.forRouter(
+              `/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}${
+                item.kind === 'review' ? `?tab=${ProductTab.Reviews}` : ''
+              }`,
+            )}
             className="font-bold text-royal hover:underline">
             {item.marketplaceProduct.name}
           </Link>

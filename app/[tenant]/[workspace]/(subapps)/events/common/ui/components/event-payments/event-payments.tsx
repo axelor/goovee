@@ -52,16 +52,18 @@ export function EventPayments({
 
   const {toast} = useToast();
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const redirectToEvents = useCallback(
     async (result: SuccessResponse<Registration>) => {
       if (!result.data.event?.slug) return;
       router.replace(
-        `${workspaceURI}/${SUBAPP_CODES.events}/${result.data.event.slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}?${URL_PARAMS.isPaid}=true`,
+        scope.forRouter(
+          `/${SUBAPP_CODES.events}/${result.data.event.slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}?${URL_PARAMS.isPaid}=true`,
+        ),
       );
     },
-    [workspaceURI, router],
+    [scope, router],
   );
 
   function getMappedParticipants(
@@ -127,7 +129,6 @@ export function EventPayments({
         onPaypalCreatedOrder={async () => {
           const formValues = getMappedParticipants(form, metaFields);
           return await paypalCreateOrder({
-            workspaceURL,
             values: formValues,
             eventId: event.id,
           });
@@ -135,7 +136,6 @@ export function EventPayments({
         onPaypalCaptureOrder={async orderID => {
           return await register({
             payment: {data: {id: orderID}, mode: PaymentOption.paypal},
-            workspaceURL,
             eventId: event.id,
           });
         }}
@@ -144,7 +144,6 @@ export function EventPayments({
           const formValues = getMappedParticipants(form, metaFields);
           return await createStripeCheckoutSession({
             eventId: event.id,
-            workspaceURL,
             values: formValues,
           });
         }}
@@ -158,7 +157,6 @@ export function EventPayments({
               data: {id: stripeSessionId},
               mode: PaymentOption.stripe,
             },
-            workspaceURL,
             eventId: event.id,
           });
         }}
@@ -166,7 +164,6 @@ export function EventPayments({
           const formValues = getMappedParticipants(form, metaFields);
           return await payboxCreateOrder({
             eventId: event.id,
-            workspaceURL,
             values: formValues,
             uri,
           });
@@ -177,7 +174,6 @@ export function EventPayments({
               mode: PaymentOption.paybox,
               data: {params},
             },
-            workspaceURL,
             eventId: event.id,
           });
         }}

@@ -111,7 +111,7 @@ export const CreatePost = ({
   const [loading, setLoading] = useState(false);
 
   const {toast} = useToast();
-  const {tenant, workspaceURI, workspaceURL} = useWorkspace();
+  const {tenantScope} = useWorkspace();
   const router = useRouter();
 
   const {
@@ -122,7 +122,7 @@ export const CreatePost = ({
     remove: removeUpload,
     reset: resetUploads,
     isStaged,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
 
   const chosenGroup = groups?.find(g => String(g.id) === String(groupId));
   const valid = Boolean(title.trim() && groupId && stripHtml(editorContent));
@@ -238,8 +238,6 @@ export const CreatePost = ({
         group: {id: groupID},
         title,
         content: editorContent,
-        workspaceURL,
-        workspaceURI,
         attachments,
       });
 

@@ -1,9 +1,7 @@
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {denyPage} from '@/lib/core/access/denial';
+import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
@@ -17,7 +15,6 @@ import {
 } from '@/subapps/website/common/orm/website';
 import {clone} from '@/utils';
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Plugins, Template} from '../client-wrapper';
 import {Metadata} from 'next';
 
@@ -30,13 +27,10 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {websiteSlug, websitePageSlug} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -46,6 +40,8 @@ export async function generateMetadata(props: {
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
@@ -75,38 +71,22 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
   const {websiteSlug, websitePageSlug} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
+
+  const workspaceURI = access.scope.forRouter();
 
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const [canUserEditWiki, websitePage] = await Promise.all([
     canEditWiki({userId: user?.id, client}),
@@ -120,7 +100,11 @@ export default async function Page(props: {
   ]);
 
   if (!websitePage) {
-    return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
+    return (
+      <NotFound
+        homePageUrl={access.scope.forRouter(`/${SUBAPP_CODES.website}`)}
+      />
+    );
   }
 
   let contentLinesChunk: Promise<ReplacedContentLine[]>[] = [];

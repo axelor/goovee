@@ -3,7 +3,7 @@
 import {useEffect, useLayoutEffect, useRef} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
 import {PaymentSource} from '@/lib/core/payment/common/type';
 import {
   PaymentUpdateStatus,
@@ -23,6 +23,10 @@ export function usePaymentSSE({
   contextId,
   onUpdate,
 }: UsePaymentSSEOptions) {
+  /* The stream is one of the tenant's own addresses, and these components only
+   * ever render inside its shell, so the scope that builds it is in context. */
+  const scope = useTenantScope();
+
   const onUpdateRef = useRef(onUpdate);
   useLayoutEffect(() => {
     onUpdateRef.current = onUpdate;
@@ -31,7 +35,7 @@ export function usePaymentSSE({
   useEffect(() => {
     if (!entityId || !source || !contextId) return;
 
-    const url = withBasePath(
+    const url = scope.forBrowser(
       `/api/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`,
     );
     const es = new EventSource(url);
@@ -59,7 +63,7 @@ export function usePaymentSSE({
     return () => {
       es.close();
     };
-  }, [source, entityId, contextId]);
+  }, [source, entityId, contextId, scope]);
 }
 
 export default usePaymentSSE;

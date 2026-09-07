@@ -1,7 +1,7 @@
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
+import {IdSchema} from '@/utils/validators';
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
 
 // ---- LOCAL IMPORTS ---- //
@@ -9,7 +9,6 @@ import {MAX_RESOURCE_FILES} from '@/subapps/resources/common/constants';
 
 export const FindDmsFilesSchema = z.object({
   search: z.string().optional(),
-  workspaceURL: WorkspaceURLSchema,
 });
 export type FindDmsFilesInput = z.infer<typeof FindDmsFilesSchema>;
 
@@ -24,7 +23,6 @@ const UploadFileSchema = z.object({
 export type UploadFileInput = z.infer<typeof UploadFileSchema>;
 
 export const UploadSchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
   parent: IdSchema,
   values: z
     .array(UploadFileSchema)
@@ -36,7 +34,6 @@ export const UploadSchema = z.object({
 export type UploadInput = z.infer<typeof UploadSchema>;
 
 export const CreateCategorySchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
   title: z
     .string({
       error: issue =>

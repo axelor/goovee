@@ -1,4 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {t} from '@/locale/server';
 import {
   Pagination,
@@ -27,8 +28,7 @@ import {MyProductsTable} from '../my-products-table';
 type ProductsListTabProps = {
   products: ListMyProduct[];
   title: string;
-  workspaceURI: string;
-  workspaceURL: string;
+  scope: WorkspaceScope;
   categories: ListCategory[];
   licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
@@ -43,8 +43,7 @@ type ProductsListTabProps = {
 export async function ProductsListTab({
   products,
   title,
-  workspaceURI,
-  workspaceURL,
+  scope,
   categories,
   licenses,
   compatibilityVersions,
@@ -60,8 +59,6 @@ export async function ProductsListTab({
       <MyProductsTable
         products={clone(products)}
         title={title}
-        workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         categories={clone(categories)}
         licenses={clone(licenses)}
         compatibilityVersions={clone(compatibilityVersions)}
@@ -85,7 +82,9 @@ export async function ProductsListTab({
                       ['pointer-events-none opacity-50']: page <= 1,
                     })}
                     href={{
-                      pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+                      pathname: scope.forRouter(
+                        `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+                      ),
                       query: {
                         tab: MyContributionsTab.Products,
                         productsPage: Math.max(1, page - 1),
@@ -112,7 +111,9 @@ export async function ProductsListTab({
                           scroll={false}
                           replace
                           href={{
-                            pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+                            pathname: scope.forRouter(
+                              `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+                            ),
                             query: {
                               tab: MyContributionsTab.Products,
                               productsPage: String(value),
@@ -134,7 +135,9 @@ export async function ProductsListTab({
                       ['pointer-events-none opacity-50']: page >= totalPages,
                     })}
                     href={{
-                      pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+                      pathname: scope.forRouter(
+                        `/${SUBAPP_CODES.marketplace}/my-account/contributions`,
+                      ),
                       query: {
                         tab: MyContributionsTab.Products,
                         productsPage: page + 1,

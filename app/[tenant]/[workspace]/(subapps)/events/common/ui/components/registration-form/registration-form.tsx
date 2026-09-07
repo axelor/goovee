@@ -76,7 +76,7 @@ export const RegistrationForm = ({
 
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
 
   const {searchParams} = useSearchParams();
@@ -151,7 +151,6 @@ export const RegistrationForm = ({
         required: true,
         customComponent: getEmailFieldComponent({
           eventId,
-          workspaceURL,
         }),
       },
       {
@@ -190,7 +189,6 @@ export const RegistrationForm = ({
       user,
       isCompanyOrAddressRequired,
       eventId,
-      workspaceURL,
       facilityList,
       eventPrice,
       formattedDefaultPriceAti,
@@ -383,7 +381,6 @@ export const RegistrationForm = ({
       const {error, message} = await register({
         eventId,
         values: result,
-        workspaceURL,
       });
 
       if (error) {
@@ -397,7 +394,9 @@ export const RegistrationForm = ({
           title: i18n.t(SUCCESS_REGISTER_MESSAGE),
         });
         router.push(
-          `${workspaceURI}/${SUBAPP_CODES.events}/${slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}`,
+          scope.forRouter(
+            `/${SUBAPP_CODES.events}/${slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}`,
+          ),
         );
       }
     } catch (err) {
@@ -408,7 +407,7 @@ export const RegistrationForm = ({
     }
   };
 
-  const eventDetailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${slug}`;
+  const eventDetailHref = scope.forRouter(`/${SUBAPP_CODES.events}/${slug}`);
 
   return (
     <div className="flex flex-col gap-[18px]">
@@ -571,11 +570,9 @@ export const RegistrationForm = ({
 const getEmailFieldComponent = ({
   isDisabled = false,
   eventId,
-  workspaceURL,
 }: {
   isDisabled?: boolean;
   eventId: string;
-  workspaceURL: string;
 }) => {
   const EmailComponent = (props: customComponentOptions) => (
     <EmailFormField
@@ -587,7 +584,6 @@ const getEmailFieldComponent = ({
         return isValidParticipant({
           email,
           eventId,
-          workspaceURL,
         });
       }}
     />

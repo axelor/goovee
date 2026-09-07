@@ -105,7 +105,6 @@ type UseProductEditFormParams = {
   /** First page of existing versions (server-fetched in the route). */
   initialVersions: ExistingVersion[];
   initialTotal: number;
-  workspaceURL: string;
   /** Called after a successful combined save. */
   onSaved: () => void;
   /** Reports where the first validation error is on a failed save, so a host
@@ -128,7 +127,6 @@ export function useProductEditForm({
   defaultType,
   initialVersions,
   initialTotal,
-  workspaceURL,
   onSaved,
   onInvalidLocation,
 }: UseProductEditFormParams) {
@@ -140,9 +138,9 @@ export function useProductEditForm({
    * dialog's product-collapse (both unmount the leaves, which would otherwise
    * give up the upload). Only opaque tokens land in the form; bytes never
    * do. */
-  const {tenant} = useWorkspace();
-  const screenshotUpload = useStagedUpload({tenant});
-  const bundleUpload = useStagedUpload({tenant});
+  const {tenantScope} = useWorkspace();
+  const screenshotUpload = useStagedUpload({tenantScope});
+  const bundleUpload = useStagedUpload({tenantScope});
   /* Each version row's in-flight bundle item, keyed by its stable field-array
    * id (rhfId), so the per-version dropzone re-finds its progress after the
    * remount on navigation. */
@@ -270,7 +268,6 @@ export function useProductEditForm({
       try {
         const result = await loadProductVersions({
           productId,
-          workspaceURL,
           skip: versionsFA.fields.length,
           take: VERSIONS_PAGE_SIZE,
         });
@@ -309,7 +306,6 @@ export function useProductEditForm({
     versionsFA,
     total,
     productId,
-    workspaceURL,
     toast,
     resetDefaultValues,
     productBaseline,
@@ -516,7 +512,6 @@ export function useProductEditForm({
             ...(imagesChanged ? {images} : {}),
             versions: changedExisting,
             newVersions,
-            workspaceURL,
           });
           if (!result.success) {
             toast({variant: 'destructive', title: result.message});

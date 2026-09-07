@@ -60,7 +60,7 @@ import {
   PARTNER_PICTURE_PURPOSE,
   PARTNER_PICTURE_MAX_FILE_SIZE,
 } from '../common/constants';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 
@@ -168,14 +168,14 @@ export default function Personal({
 }) {
   const pathname = usePathname();
   const {toast} = useToast();
-  const {tenant, workspaceURL, workspaceURI} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {
     uploads,
     upload,
     pause,
     resume,
     remove: removeUpload,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
   const signOut = useSignOut();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<string | undefined>(pictureProp);
@@ -253,10 +253,9 @@ export default function Personal({
         if (editEmail || isMainPartnerUpdated) {
           await signOut();
 
-          const loginURL = getLoginURL({
+          const loginURL = getLoginURL(tenantScope, {
             callbackurl: pathname,
-            workspaceURI,
-            tenant,
+            workspaceURI: scope.forRouter(),
           });
           window.location.href = withBasePath(loginURL);
         } else {
@@ -428,7 +427,7 @@ export default function Personal({
 
   const handleGenerateOTP = async () => {
     try {
-      const res = await generateOTPForUpdate({email, workspaceURL});
+      const res = await generateOTPForUpdate({email});
       if (res && 'error' in res) {
         toast({title: i18n.t(res.message), variant: 'destructive'});
       } else {
@@ -452,7 +451,7 @@ export default function Personal({
                 <div className="relative size-[72px] shrink-0">
                   <Avatar className="size-[72px] rounded-2xl">
                     <AvatarImage
-                      src={getPartnerImageURL(picture, tenant, {
+                      src={getPartnerImageURL(picture, tenantScope, {
                         noimage: true,
                         noimageSrc: '/images/profile.png',
                       })}

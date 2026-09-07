@@ -1,17 +1,15 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
@@ -24,39 +22,18 @@ const FETCH_LIMIT = 200;
 export default async function Page(context: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
-  const params = await context.params;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
   const workspace = clone(access.workspace);
+
+  const workspaceURL = access.workspace.url;
 
   return (
     <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">
@@ -65,7 +42,7 @@ export default async function Page(context: {
           workspace={workspace}
           user={user}
           client={client}
-          workspaceURI={workspaceURI}
+          scope={access.scope}
           workspaceURL={workspaceURL}
         />
       </Suspense>
@@ -77,13 +54,13 @@ async function AgendaData({
   workspace,
   user,
   client,
-  workspaceURI,
+  scope,
   workspaceURL,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user: User | null | undefined;
   client: Client;
-  workspaceURI: string;
+  scope: WorkspaceScope;
   workspaceURL: string;
 }) {
   const result = await findEvents({
@@ -99,13 +76,11 @@ async function AgendaData({
 
   const events = (result?.events ?? []).filter(e => e.eventStartDateTime);
 
-  const magazineHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
+  const magazineHref = scope.forRouter(`/${SUBAPP_CODES.events}`);
 
   return (
     <EventsAgenda
       initialEvents={events}
-      workspaceURI={workspaceURI}
-      workspaceURL={workspaceURL}
       magazineHref={magazineHref}
       searchAction={searchEvents}
     />

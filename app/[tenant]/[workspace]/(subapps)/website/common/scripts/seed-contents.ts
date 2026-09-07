@@ -9,10 +9,11 @@ runTenantScript({
   summary: `Creates the demo content for every website template. Requires the
 templates to have been seeded first.`,
   run: async ({openTenant}) => {
-    const {client} = await openTenant();
+    const {client, config} = await openTenant();
 
-    // One entry per template, each holding that template's own contents.
-    const contents = await seedContents(client);
+    /* The demo content carries files, which belong under the storage root of
+     * the tenant being seeded rather than any process-wide one. */
+    const contents = await seedContents(client, config.aos.storage);
     out.ok(
       `Contents seeded successfully — ${contents.flat().length} contents across ${contents.length} templates.`,
     );

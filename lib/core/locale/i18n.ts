@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
-import {withBasePath} from '@/lib/core/path/base-path';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const rest = axios.create();
 
@@ -26,19 +26,17 @@ function asTranslations(data: unknown): Record<string, string> {
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
-  async function load(locale: string = DEFAULT_LOCALE, tenant?: string) {
+  /* `scope` addresses the tenant whose translations these are, and the bundle
+   * kept here is that tenant's alone: loading a second tenant's would replace
+   * the first's words in place. The screens that resolve no tenant carry their
+   * own words rather than loading a bundle. */
+  async function load(locale: string = DEFAULT_LOCALE, scope: TenantScope) {
     if (!locale) {
       return {};
     }
 
-    const url = withBasePath(
-      tenant
-        ? `/api/tenant/${tenant}/locales/${locale}`
-        : `/api/locales/${locale}`,
-    );
-
     translations = await rest
-      .get(url)
+      .get(scope.forBrowser(`/api/locales/${locale}`))
       .then(result => asTranslations(result?.data))
       .catch(() => ({}));
   }

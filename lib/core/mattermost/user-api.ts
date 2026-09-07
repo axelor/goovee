@@ -16,10 +16,11 @@ import type {
 
 async function getMattermostUserByEmail(
   email: string,
+  config?: TenantConfig,
 ): Promise<MattermostUser | null> {
   try {
-    const host = getHost();
-    const token = getAdminToken();
+    const host = getHost(config);
+    const token = getAdminToken(config);
 
     if (!host || !token) {
       return null;
@@ -45,10 +46,11 @@ async function getMattermostUserByEmail(
 async function updateMattermostPassword(
   userId: string,
   newPassword: string,
+  config?: TenantConfig,
 ): Promise<boolean> {
   try {
-    const host = getHost();
-    const token = getAdminToken();
+    const host = getHost(config);
+    const token = getAdminToken(config);
 
     if (!host || !token) {
       return false;
@@ -76,10 +78,11 @@ async function updateMattermostPassword(
 async function updateMattermostEmail(
   userId: string,
   newEmail: string,
+  config?: TenantConfig,
 ): Promise<boolean> {
   try {
-    const host = getHost();
-    const token = getAdminToken();
+    const host = getHost(config);
+    const token = getAdminToken(config);
 
     if (!host || !token) {
       return false;
@@ -156,7 +159,7 @@ export async function syncOrCreateMattermostUser({
   name: string;
   firstName?: string;
 }): Promise<SyncOrCreateMattermostUserResult> {
-  if (!isCreateMattermostUsersEnabled()) {
+  if (!isCreateMattermostUsersEnabled(config)) {
     return {
       success: true,
       action: 'skipped',
@@ -164,10 +167,14 @@ export async function syncOrCreateMattermostUser({
   }
 
   try {
-    const existingUser = await getMattermostUserByEmail(email);
+    const existingUser = await getMattermostUserByEmail(email, config);
 
     if (existingUser) {
-      const updated = await updateMattermostPassword(existingUser.id, password);
+      const updated = await updateMattermostPassword(
+        existingUser.id,
+        password,
+        config,
+      );
 
       if (!updated) {
         return {
@@ -249,21 +256,27 @@ export async function withMattermostSync({
 export async function withMattermostEmailSync({
   oldEmail,
   newEmail,
+  config,
 }: {
   oldEmail: string;
   newEmail: string;
+  config?: TenantConfig;
 }): Promise<void> {
-  if (!isCreateMattermostUsersEnabled()) {
+  if (!isCreateMattermostUsersEnabled(config)) {
     return;
   }
 
-  const existingUser = await getMattermostUserByEmail(oldEmail);
+  const existingUser = await getMattermostUserByEmail(oldEmail, config);
 
   if (!existingUser) {
     return;
   }
 
-  const updated = await updateMattermostEmail(existingUser.id, newEmail);
+  const updated = await updateMattermostEmail(
+    existingUser.id,
+    newEmail,
+    config,
+  );
 
   if (!updated) {
     throw new Error('Failed to update Mattermost email');

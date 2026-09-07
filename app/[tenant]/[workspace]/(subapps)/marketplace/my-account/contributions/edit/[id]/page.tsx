@@ -35,8 +35,10 @@ export default async function EditProductPage(props: {
   const {type} = await props.searchParams;
   const ctx = await loadEditContext({tenant, workspace});
 
-  const returnHref = `${ctx.workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions?tab=products`;
-  const base = `${ctx.workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const returnHref = ctx.access.scope.forRouter(
+    `/${SUBAPP_CODES.marketplace}/my-account/contributions?tab=products`,
+  );
+  const base = ctx.access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const isNew = id === 'new';
   const defaultType =
@@ -135,8 +137,6 @@ export default async function EditProductPage(props: {
         inAti={cloned?.inAti ?? ctx.inAti}
         requiresReview={ctx.requiresReview}
         allowToPublish={ctx.allowToPublish}
-        workspaceURI={ctx.workspaceURI}
-        workspaceURL={ctx.workspaceURL}
         returnHref={returnHref}
       />
     </div>

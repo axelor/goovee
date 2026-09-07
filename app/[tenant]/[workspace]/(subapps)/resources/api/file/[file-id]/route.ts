@@ -6,7 +6,6 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {resolveStoragePath} from '@/storage/index';
 import {streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
@@ -18,13 +17,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {'file-id': fileId} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -34,6 +30,8 @@ export async function GET(
   }
   const {client} = access.tenant;
   const storage = access.tenant.config.aos.storage;
+
+  const workspaceURL = access.workspace.url;
 
   const file = await fetchFile({
     id: fileId,

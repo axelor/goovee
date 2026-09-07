@@ -2,33 +2,32 @@
 
 import {useState, useEffect, useMemo} from 'react';
 import {usePathname} from 'next/navigation';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
+import {subPathOf} from '@/lib/core/url';
 import {fetchEvent} from '@/app/[tenant]/[workspace]/(subapps)/events/common/actions/actions';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 /**
- * Returns a RegExp that matches paths structured like:
- * /{tenant}/{workspace}/{code}/{slug}
+ * Returns a RegExp that matches workspace sub-paths structured like:
+ * /{code}/{slug}
+ *
+ * Matched against the part of the pathname below the workspace, never the
+ * pathname itself: how many segments sit in front of the code depends on how
+ * the tenant is routed, and only the workspace's own address knows that.
  *
  * Dynamic Parts:
- * - tenant: any string without slashes
- * - workspace: any string without slashes
  * - code: dynamic segment passed to the function (e.g., 'events')
  * - slug: expected to be a UUID (36-character format including hyphens)
  * - Supports optional sub-paths after the slug
- *
  */
 const CODE_REGEX = (code: string) =>
-  new RegExp(
-    `^\/(?<tenant>[^\\/]+)\/(?<workspace>[^\\/]+)\/${code}\/(?<slug>[0-9a-fA-F-]{36})(?:\/.*)?$`,
-  );
+  new RegExp(`^\/${code}\/(?<slug>[0-9a-fA-F-]{36})(?:\/.*)?$`);
 
 type VisibilityHandler = (
-  pathname: string,
-  workspaceURL: string,
+  subPath: string,
   userId: string | undefined,
 ) => Promise<boolean>;
 
@@ -47,19 +46,18 @@ const HANDLERS: Array<Handler> = [
 ];
 
 async function navigationVisibilityForEvents(
-  pathname: string,
-  workspaceURL: string,
+  subPath: string,
   userId: string | undefined,
 ): Promise<boolean> {
   const handler = HANDLERS.find(h => h.code === SUBAPP_CODES.events)!;
   const {regex} = handler;
 
-  const match = pathname.match(regex!);
+  const match = subPath.match(regex!);
 
   if (match?.groups) {
     const {slug} = match.groups;
 
-    const response = await fetchEvent({slug, workspaceURL});
+    const response = await fetchEvent({slug});
     if (response?.success) {
       const {
         data: {isHidden},
@@ -80,8 +78,8 @@ export function useNavigationVisibility() {
 
   const pathname = usePathname();
 
-  const {workspaceURL} = useWorkspace();
-  const {data: session} = authClient.useSession();
+  const {scope} = useWorkspace();
+  const {data: session} = useAuthSession();
   const user = session?.user;
   const userId = user?.id;
 
@@ -90,25 +88,25 @@ export function useNavigationVisibility() {
 
     const handleVisibility = async () => {
       try {
+        const subPath = subPathOf(pathname, scope.forRouter());
+
         let matchedHandler: Handler | undefined;
 
-        for (const handler of HANDLERS) {
-          const {regex} = handler;
-          const match = pathname.match(regex!);
+        if (subPath) {
+          for (const handler of HANDLERS) {
+            const {regex} = handler;
+            const match = subPath.match(regex!);
 
-          if (match) {
-            matchedHandler = handler;
-            break;
+            if (match) {
+              matchedHandler = handler;
+              break;
+            }
           }
         }
 
-        if (matchedHandler) {
+        if (matchedHandler && subPath) {
           setLoading(true);
-          const visible = await matchedHandler.visibility(
-            pathname,
-            workspaceURL,
-            userId,
-          );
+          const visible = await matchedHandler.visibility(subPath, userId);
           if (mounted) setVisible(visible);
         } else {
           if (mounted) setVisible(true);
@@ -125,7 +123,7 @@ export function useNavigationVisibility() {
     return () => {
       mounted = false;
     };
-  }, [pathname, userId, workspaceURL]);
+  }, [pathname, userId, scope]);
 
   return useMemo(() => ({visible, loading}), [visible, loading]);
 }

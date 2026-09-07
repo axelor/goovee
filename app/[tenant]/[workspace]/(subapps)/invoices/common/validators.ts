@@ -1,8 +1,6 @@
 import {z} from 'zod';
 import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 
-const WorkspaceURISchema = z.string().min(1);
-
 export const InvoiceRefSchema = z.object({id: IdSchema});
 export type InvoiceRef = z.infer<typeof InvoiceRefSchema>;
 
@@ -38,7 +36,6 @@ export type PaypalCaptureOrderInput = z.infer<typeof PaypalCaptureOrderSchema>;
 export const ValidateStripePaymentSchema = z.object({
   stripeSessionId: z.string().min(1),
   workspaceURL: WorkspaceURLSchema,
-  workspaceURI: WorkspaceURISchema,
   token: z.string().optional(),
 });
 export type ValidateStripePaymentInput = z.infer<
@@ -49,7 +46,6 @@ export const CancelStripeBankTransferSchema = z.object({
   id: z.string().min(1),
   contextId: z.string().min(1),
   workspaceURL: WorkspaceURLSchema,
-  workspaceURI: WorkspaceURISchema,
   token: z.string().optional(),
 });
 export type CancelStripeBankTransferInput = z.infer<
@@ -59,7 +55,6 @@ export type CancelStripeBankTransferInput = z.infer<
 export const ValidatePayboxPaymentSchema = z.object({
   params: z.record(z.string(), z.string()),
   workspaceURL: WorkspaceURLSchema,
-  workspaceURI: WorkspaceURISchema,
   token: z.string().optional(),
 });
 export type ValidatePayboxPaymentInput = z.infer<

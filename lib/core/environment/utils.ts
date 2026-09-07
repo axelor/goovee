@@ -1,12 +1,11 @@
-export function getPublicEnvironment() {
-  const prefix = 'GOOVEE_PUBLIC_';
+import type {PublicConfig, TenantConfig} from '@/tenant';
 
-  const variables = Object.entries(process.env)
-    .filter(([key]) => key.startsWith(prefix))
-    .reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {} as any);
-
-  return variables;
+/* A tenant's browser-facing settings, or null for a tenant that is not
+ * configured. There is no deployment-wide fallback: everything a browser is
+ * told about belongs to one tenant, so a caller holding no tenant holds no
+ * settings either. */
+export function getPublicEnvironment(
+  config: TenantConfig | null,
+): PublicConfig | null {
+  return config?.public ?? null;
 }

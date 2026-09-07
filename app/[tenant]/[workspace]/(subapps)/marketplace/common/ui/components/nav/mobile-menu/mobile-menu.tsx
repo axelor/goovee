@@ -2,7 +2,7 @@
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {i18n} from '@/locale';
 import {Icon, Portal} from '@/ui/components';
 import {Sheet, SheetContent, SheetTitle} from '@/ui/components/sheet';
@@ -17,10 +17,10 @@ function Menu({icon, color}: {icon: string; color?: string}) {
   const [open, setOpen] = useState(false);
   const openSidebar = useCallback(() => setOpen(true), []);
   const closeSidebar = useCallback(() => setOpen(false), []);
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const pathname = usePathname();
-  const {data: session} = authClient.useSession();
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const {data: session} = useAuthSession();
+  const marketplaceBase = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const links = useMemo(
     () => MARKETPLACE_LINKS.filter(item => !item.requiresAuth || session?.user),

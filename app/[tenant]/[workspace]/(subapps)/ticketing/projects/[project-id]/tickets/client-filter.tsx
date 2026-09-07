@@ -2,7 +2,7 @@
 
 import {i18n} from '@/locale';
 import {Filter} from '../../../common/ui/components/filter';
-import {decodeFilter} from '@/utils/url';
+import {decode} from '@/utils/compressed-param';
 import {useMemo} from 'react';
 import {
   TicketFilterForm,
@@ -13,7 +13,7 @@ export function ClientFilter(props: FilterFormProps) {
   const {searchParams, ...rest} = props;
 
   const filter = useMemo(
-    () => searchParams.filter && decodeFilter(searchParams.filter),
+    () => searchParams.filter && decode(searchParams.filter),
     [searchParams.filter],
   );
 

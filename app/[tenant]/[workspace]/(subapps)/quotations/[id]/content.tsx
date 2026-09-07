@@ -30,13 +30,13 @@ import {
   fetchComments,
   createComment,
 } from '@/subapps/quotations/common/actions';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {
   getStatus,
   getStatusKey,
   getQuoteJourney,
   getQuoteTone,
 } from '@/subapps/quotations/common/utils/quotations';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const Content = ({
   quotation,
@@ -61,7 +61,7 @@ const Content = ({
     statusSelect,
   } = quotation;
 
-  const {workspaceURI, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const {status} = getStatus(statusSelect);
   const statusKey = getStatusKey(Number(statusSelect));
@@ -102,12 +102,14 @@ const Content = ({
             </strong>
           </>
         }
-        backHref={`${workspaceURI}/${SUBAPP_CODES.quotations}`}
+        backHref={scope.forRouter(`/${SUBAPP_CODES.quotations}`)}
         primaryAction={
           isDraft ? (
             <Button asChild variant="royal" size="sm">
               <Link
-                href={`${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?quotation=${id}`}>
+                href={scope.forRouter(
+                  `/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?quotation=${id}`,
+                )}>
                 <MdEdit className="text-base mr-1" />
                 {i18n.t('Edit addresses')}
               </Link>
@@ -150,7 +152,11 @@ const Content = ({
                   </li>
                 )}
                 {saleOrderLineList.map(line => (
-                  <ProductRow key={line.id} line={line} tenant={tenant} />
+                  <ProductRow
+                    key={line.id}
+                    line={line}
+                    tenantScope={tenantScope}
+                  />
                 ))}
               </ul>
             </Card>
@@ -174,8 +180,8 @@ const Content = ({
                     showRepliesInMainThread
                     createComment={createComment}
                     fetchComments={fetchComments}
-                    attachmentDownloadUrl={withBasePath(
-                      `${workspaceURI}/${SUBAPP_CODES.quotations}/api/comments/attachments/${id}`,
+                    attachmentDownloadUrl={scope.forBrowser(
+                      `/${SUBAPP_CODES.quotations}/api/comments/attachments/${id}`,
                     )}
                     trackingField="body"
                     commentField="body"
@@ -425,8 +431,14 @@ function AddressBlock({
   );
 }
 
-function ProductRow({line, tenant}: {line: Product; tenant: string}) {
-  const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
+function ProductRow({
+  line,
+  tenantScope,
+}: {
+  line: Product;
+  tenantScope: TenantScope;
+}) {
+  const imageURL = getProductImageURL(line.product?.picture?.id, tenantScope, {
     noimage: true,
   });
   const taxValue = line.taxLineSet?.[0]?.value;

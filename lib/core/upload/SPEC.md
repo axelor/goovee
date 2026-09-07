@@ -108,7 +108,7 @@ not yours. A part that could not be stored answers `500`, and may be sent again.
 ### Open
 
 ```
-POST   /api/tenant/{tenant}/upload/stage/{purpose}
+POST   /{tenant}/api/upload/stage/{purpose}
 X-File-Name: <percent-encoded name>
 X-File-Type: <mime type>
 X-File-Size: <total bytes>
@@ -141,7 +141,7 @@ and send every part as an append.
 ### Ask where to resume
 
 ```
-HEAD   /api/tenant/{tenant}/upload/stage/{purpose}
+HEAD   /{tenant}/api/upload/stage/{purpose}
 X-File-Id: <id>
 
 200 → X-File-Offset, X-File-Size
@@ -151,7 +151,7 @@ X-File-Id: <id>
 ### Append
 
 ```
-PATCH  /api/tenant/{tenant}/upload/stage/{purpose}
+PATCH  /{tenant}/api/upload/stage/{purpose}
 X-File-Id: <id>
 X-File-Offset: <where this part starts>
 Content-Type: application/octet-stream
@@ -180,7 +180,7 @@ answer may simply ask again.
 ### Give up
 
 ```
-DELETE /api/tenant/{tenant}/upload/stage/{purpose}
+DELETE /{tenant}/api/upload/stage/{purpose}
 X-File-Id: <id>
 
 204
@@ -298,13 +298,23 @@ accounted for; pruning is what finally removes it.
 
 ## Configuration
 
-| Environment variable            | Default       | Controls                                                 |
-| ------------------------------- | ------------- | -------------------------------------------------------- |
-| `UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d)      | How long a terminal (consumed or reaped) record is kept. |
-| `DATA_STORAGE`                  | `cwd/storage` | Blob storage root.                                       |
+Both settings are per tenant, and come from that tenant's configuration —
+nothing here reads a variable of its own.
 
-`UPLOAD_RECORD_RETENTION_HOURS` is read in hours, fractional allowed; unset,
-non-positive or invalid falls back to the default.
+| Tenant setting                                     | Default  | Controls                                                 |
+| -------------------------------------------------- | -------- | -------------------------------------------------------- |
+| `PORTAL_TENANT_<ID>_UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d) | How long a terminal (consumed or reaped) record is kept. |
+| `PORTAL_TENANT_<ID>_AOS_STORAGE`                   | —        | Blob storage root. Required.                             |
+
+The retention is read in hours, fractional allowed; unset, non-positive or
+invalid falls back to the default.
+
+`aos.storage` is the AOS instance's `data.upload.dir` base. A tenant on a shared
+AOS (`aos.tenantId` set) reads and writes under `<aos.storage>/<aos.tenantId>`,
+matching AOP's own per-tenant subdirectory; a dedicated instance uses the path
+as-is. The resolved root is what every path in this module is taken against, and
+it travels with the tenant's database client so the two cannot be paired from
+different tenants.
 
 Everything else is fixed: per-purpose settings live in the registry, and the
 sweep cadences bound only the lag between expiry and deletion.
@@ -316,7 +326,11 @@ sweep cadences bound only the lag between expiry and deletion.
   two appends to one upload from interleaving is an in-process map. Scaling out
   needs shared storage or upload-pinned routing, an advisory lock per sweep, and
   a shared lock per upload.
-- **One storage root for all tenants.**
+- **Containment is lexical.** A recorded path is verified to resolve inside the
+  tenant's storage root, but a symlink inside that root pointing out of it is not
+  followed or detected. (A tenant's root resolving inside another's — the same
+  directory, or a subdirectory of it — is refused when the configuration is
+  read, so that is not a way in.)
 - **A failed delete leaks.** Storage is given up in the record before it is
   removed from disk, so an `unlink` that fails leaves a file no later sweep looks
   for. It is logged; nothing retries it.

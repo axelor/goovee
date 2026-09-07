@@ -34,7 +34,6 @@ export const formSchema = z
 const IDSchema = z.string();
 
 export const FetchCommentsPropsSchema = z.object({
-  workspaceURL: z.string(),
   recordId: IDSchema,
   sort: z.enum(SORT_TYPE).optional(),
   limit: z.number().optional(),
@@ -45,8 +44,6 @@ export const FetchCommentsPropsSchema = z.object({
 
 export const CreateCommentPropsSchema = z.object({
   data: formSchema,
-  workspaceURL: z.string(),
-  workspaceURI: z.string(),
   recordId: IDSchema,
   parentId: IDSchema.optional(),
   showRepliesInMainThread: z.boolean().optional(),

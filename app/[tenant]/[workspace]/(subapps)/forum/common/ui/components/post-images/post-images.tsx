@@ -4,19 +4,16 @@ import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+
+// ---- LOCAL IMPORTS ---- //
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 type AnyRec = any;
 
 const MAX_THUMBS = 3;
 
-export function PostImages({
-  post,
-  workspaceURI,
-}: {
-  post: AnyRec;
-  workspaceURI: string;
-}) {
+export function PostImages({post}: {post: AnyRec}) {
+  const {scope} = useWorkspace();
   const images = (
     Array.isArray(post?.attachmentList) ? post.attachmentList : []
   ).filter(
@@ -26,8 +23,8 @@ export function PostImages({
   if (!images.length) return null;
 
   const url = (fileId: string) =>
-    withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
+    scope.forBrowser(
+      `/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
     );
 
   const shown = images.slice(0, MAX_THUMBS);

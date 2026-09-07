@@ -23,25 +23,25 @@ import {
   AvatarImage,
   AvatarFallback,
 } from '@/ui/components';
-import type {ID} from '@/types';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {getInitials} from '@/utils/names';
 import {Link} from '@/ui/components/link';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {useSignOut} from '@/ui/hooks';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 export function Account({
   baseURL = '',
-  tenant,
+  tenantScope,
 }: {
   baseURL?: string;
-  tenant?: ID | null;
+  tenantScope: TenantScope;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const [confirmationDialog, setConfirmationDialog] = useState(false);
 
   const user = session?.user;
@@ -58,10 +58,9 @@ export function Account({
 
   const loggedin = !!session;
 
-  const loginURL = getLoginURL({
+  const loginURL = getLoginURL(tenantScope, {
     callbackurl: pathname + (searchParams.toString() ? `?${searchParams}` : ''),
     workspaceURI: baseURL,
-    tenant,
   });
 
   const signOut = useSignOut();

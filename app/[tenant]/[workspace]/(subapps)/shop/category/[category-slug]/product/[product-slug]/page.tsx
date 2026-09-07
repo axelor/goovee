@@ -1,14 +1,12 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {clone, htmlToNormalString} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 // ---- LOCAL IMPORTS ---- //
@@ -38,15 +36,11 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
-  if (!(productSlug && categorySlug)) return null;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) return null;
@@ -93,37 +87,13 @@ async function Detail({
 }) {
   const productSlug = params['product-slug'];
   const categorySlug = params['category-slug'];
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
-  if (!(productSlug && categorySlug)) {
-    return redirect(`${workspaceURI}/shop`);
-  }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client, config} = access.tenant;
@@ -152,7 +122,7 @@ async function Detail({
      which would leave the lookup unscoped and resolve any sellable product in
      the tenant. Send the reader back to the shop either way. */
   const category = allCategories.find(c => c?.slug === categorySlug);
-  if (!category) return redirect(`${workspaceURI}/shop`);
+  if (!category) return redirect(access.scope.forRouter('/shop'));
 
   const [computed, allProductsRes, labels, hidePriceAndPurchase] =
     await Promise.all([
@@ -181,7 +151,7 @@ async function Detail({
       shouldHidePricesAndPurchase({user, config: workspaceConfig, client}),
     ]);
 
-  if (!computed?.product) return redirect(`${workspaceURI}/shop`);
+  if (!computed?.product) return redirect(access.scope.forRouter('/shop'));
 
   const allProducts: ComputedProduct[] = Array.isArray(allProductsRes)
     ? (allProductsRes as ComputedProduct[])

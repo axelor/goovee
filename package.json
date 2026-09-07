@@ -27,6 +27,9 @@
     "marketplace:seed": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/run.ts",
     "marketplace:reset": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/reset.ts",
     "pricing:compare": "node -r @swc-node/register lib/core/product/scripts/test-price/run.ts",
+    "config:migrate": "node -r @swc-node/register ./scripts/config-migrate.ts",
+    "config:generate": "node -r @swc-node/register ./scripts/config-generate.ts",
+    "config:check": "node -r @swc-node/register ./scripts/config-check.ts",
     "changelogs:validate": "node -r @swc-node/register ./changelogs/validate.ts",
     "changelogs:generate": "node -r @swc-node/register ./changelogs/generate.ts",
     "release:bump": "node -r @swc-node/register ./scripts/prepare-bump.ts",
@@ -153,6 +156,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@next/env": "16.2.4",
     "@prettier/plugin-xml": "^3.4.2",
     "@serwist/cli": "^9.5.7",
     "@swc-node/register": "^1.11.1",
@@ -179,7 +183,6 @@
     "autoprefixer": "^10.4.20",
     "commander": "^14.0.3",
     "cross-env": "^10.1.0",
-    "dotenv": "^17.2.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.2.4",
     "eslint-config-prettier": "^10.1.8",

@@ -8,7 +8,6 @@ import type {FieldValues, UseFormReturn} from 'react-hook-form';
 import {i18n} from '@/locale';
 import {createDefaultValues} from '@/ui/form';
 import type {Field} from '@/ui/form';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks/use-toast';
 
 // ---- LOCAL IMPORTS ---- //
@@ -56,7 +55,6 @@ export const CustomSelect = ({
   const [inputValue, setInputValue] = useState('');
   const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
 
-  const {workspaceURL} = useWorkspace();
   const {toast} = useToast();
 
   const handleChange = async (selected: MultiValue<OptionType>) => {
@@ -99,7 +97,6 @@ export const CustomSelect = ({
         const {error, message} = await isValidParticipant({
           email,
           eventId,
-          workspaceURL,
         });
         if (error) {
           toast({variant: 'destructive', title: message});
@@ -133,7 +130,6 @@ export const CustomSelect = ({
     try {
       const {error, message, data} = await fetchContacts({
         search: input,
-        workspaceURL,
       });
 
       if (error) {

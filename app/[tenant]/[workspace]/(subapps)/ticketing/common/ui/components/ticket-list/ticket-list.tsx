@@ -45,7 +45,7 @@ export function TicketList(props: TicketListProps) {
   const {tickets, fields} = props;
   const [sortedTickets, sort, toggleSort] = useSortBy(tickets);
 
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const columns = useMemo(() => {
@@ -56,10 +56,12 @@ export function TicketList(props: TicketListProps) {
     (record: Cloned<TicketListTicket>) => {
       if (!record.project?.id || !record.id) return;
       router.push(
-        `${workspaceURI}/ticketing/projects/${record.project.id}/tickets/${record.id}`,
+        scope.forRouter(
+          `/ticketing/projects/${record.project.id}/tickets/${record.id}`,
+        ),
       );
     },
-    [router, workspaceURI],
+    [router, scope],
   );
 
   return (
@@ -99,7 +101,7 @@ export function ParentTicketList(props: {
 }) {
   const {tickets, ticketId, fields} = props;
 
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const columns = useMemo(() => {
@@ -110,10 +112,12 @@ export function ParentTicketList(props: {
     (record: Cloned<ParentTicket>) => {
       if (!record.project?.id || !record.id) return;
       router.push(
-        `${workspaceURI}/ticketing/projects/${record.project.id}/tickets/${record.id}`,
+        scope.forRouter(
+          `/ticketing/projects/${record.project.id}/tickets/${record.id}`,
+        ),
       );
     },
-    [router, workspaceURI],
+    [router, scope],
   );
   const hasTickets = Boolean(tickets.length);
   return (
@@ -150,7 +154,7 @@ export function ChildTicketList(props: {
   const {tickets, ticketId, fields} = props;
   const hasTickets = Boolean(tickets?.length);
 
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const columns = useMemo(() => {
@@ -161,10 +165,12 @@ export function ChildTicketList(props: {
     (record: Cloned<ChildTicket>) => {
       if (!record.project?.id || !record.id) return;
       router.push(
-        `${workspaceURI}/ticketing/projects/${record.project.id}/tickets/${record.id}`,
+        scope.forRouter(
+          `/ticketing/projects/${record.project.id}/tickets/${record.id}`,
+        ),
       );
     },
-    [router, workspaceURI],
+    [router, scope],
   );
 
   return (
@@ -205,17 +211,19 @@ export function RelatedTicketList(props: {
     return filterColumns(relatedColumns, fields);
   }, [fields]);
 
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
 
   const handleRowClick = useCallback(
     (record: Cloned<TicketLink>) => {
       if (!record.relatedTask?.project?.id || !record.relatedTask?.id) return;
       router.push(
-        `${workspaceURI}/ticketing/projects/${record.relatedTask.project.id}/tickets/${record.relatedTask.id}`,
+        scope.forRouter(
+          `/ticketing/projects/${record.relatedTask.project.id}/tickets/${record.relatedTask.id}`,
+        ),
       );
     },
-    [router, workspaceURI],
+    [router, scope],
   );
 
   return (

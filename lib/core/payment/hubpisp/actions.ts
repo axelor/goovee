@@ -1,20 +1,14 @@
 import type {Tenant} from '@/tenant';
+import {getTenantConfig} from '@/tenant/config';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {
   createPaymentContext,
-  findPaymentContext,
-  markPaymentAsExpired,
   markPaymentAsFailed,
   updatePaymentContextData,
 } from '../common/orm';
-import type {PaymentOrder} from '../common/type';
-import {createPaymentLink, getPaymentLinkStatus} from '.';
-import {
-  HUBPISP_CONSENT_STATUS,
-  HUBPISP_DEFAULT_EXPIRE_IN,
-  HubPispLocalInstrument,
-} from './constants';
+import {createPaymentLink} from '.';
+import {HUBPISP_DEFAULT_EXPIRE_IN, HubPispLocalInstrument} from './constants';
 import type {HubPispContextData, PageConsentInfo, PsuInfo} from './types';
 import {scheduleLinkExpiryCheck} from './pollLink';
 
@@ -70,18 +64,27 @@ export async function createHubPispPaymentLink({
   let resourceId: string;
   let consentHref: string;
   try {
-    ({resourceId, consentHref} = await createPaymentLink({
-      amount,
-      currency,
-      remittanceInformation,
-      endToEnd,
-      expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
-      successfulReportUrl,
-      unsuccessfulReportUrl,
-      pageConsentInfo,
-      psuInfo,
-      localInstrument,
-    }));
+    const config = getTenantConfig(tenantId);
+
+    if (!config) {
+      throw new Error(`Tenant "${tenantId}" is not configured`);
+    }
+
+    ({resourceId, consentHref} = await createPaymentLink(
+      {
+        amount,
+        currency,
+        remittanceInformation,
+        endToEnd,
+        expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
+        successfulReportUrl,
+        unsuccessfulReportUrl,
+        pageConsentInfo,
+        psuInfo,
+        localInstrument,
+      },
+      config,
+    ));
   } catch (err) {
     await markPaymentAsFailed({contextId, version, client});
     throw err;
@@ -105,54 +108,4 @@ export async function createHubPispPaymentLink({
   });
 
   return {resourceId, consentHref, contextId};
-}
-
-export async function findHubPispOrder({
-  contextId,
-  resourceId,
-  client,
-}: {
-  contextId: string;
-  resourceId: string;
-  client: Client;
-}): Promise<PaymentOrder> {
-  const context = await findPaymentContext({
-    id: contextId,
-    client,
-    mode: PaymentOption.hubpisp,
-    ignoreExpiration: true,
-  });
-
-  if (!context) {
-    console.error('[HUBPISP][FIND_ORDER] Payment context not found', {
-      contextId,
-    });
-    throw new Error('Payment context not found');
-  }
-
-  const linkStatusResult = await getPaymentLinkStatus(resourceId);
-
-  if (linkStatusResult.consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
-    console.warn('[HUBPISP][FIND_ORDER] Payment link expired', {resourceId});
-    await markPaymentAsExpired({
-      contextId: context.id,
-      version: context.version,
-      client,
-    });
-    throw new Error(`Payment link expired (resourceId: ${resourceId})`);
-  }
-
-  if (linkStatusResult.consentStatus !== HUBPISP_CONSENT_STATUS.PROCESSED) {
-    console.warn('[HUBPISP][FIND_ORDER] Payment link not yet processed', {
-      resourceId,
-    });
-    throw new Error('Payment link not yet processed');
-  }
-
-  const amount = context.data?.amount ?? 0;
-
-  return {
-    context,
-    amount,
-  };
 }

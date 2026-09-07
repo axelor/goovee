@@ -7,7 +7,7 @@ import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import type {User} from '@/types';
-import {withBasePath} from '@/lib/core/path/base-path';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsConfig} from '@/subapps/news/common/orm/config';
@@ -181,26 +181,18 @@ export async function RecommendedNewsWrapper({
   navigatingPathFrom,
   isRecommendationEnable,
   config,
-  workspaceURL,
-  tenantId,
   categoryIds,
 }: {
   navigatingPathFrom: string;
   isRecommendationEnable: boolean;
   config: NewsConfig | Cloned<NewsConfig>;
-  workspaceURL: string;
-  tenantId: string;
   categoryIds: string[];
 }) {
   if (!isRecommendationEnable) {
     return;
   }
 
-  const newsResult = await findRecommendedNews({
-    workspaceURL,
-    tenantId,
-    categoryIds,
-  });
+  const newsResult = await findRecommendedNews({categoryIds});
   const title = await t(RECOMMENDED_NEWS);
 
   if (!Array.isArray(newsResult) || !newsResult.length) {
@@ -222,12 +214,12 @@ export async function CommentsWrapper({
   config,
   user,
   news,
-  workspaceURI,
+  scope,
 }: {
   config: NewsConfig | Cloned<NewsConfig>;
   user?: User;
   news: NewsItem;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const title = await t(COMMENTS);
   const isDisabled = !user ? true : false;
@@ -257,8 +249,8 @@ export async function CommentsWrapper({
         commentField="note"
         createComment={createComment}
         fetchComments={fetchComments}
-        attachmentDownloadUrl={withBasePath(
-          `${workspaceURI}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`,
+        attachmentDownloadUrl={scope.forBrowser(
+          `/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`,
         )}
       />
     </div>

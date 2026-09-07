@@ -2,7 +2,6 @@
 
 import {z} from 'zod';
 import {headers} from 'next/headers';
-import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -12,6 +11,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import {t} from '@/locale/server';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {TENANT_HEADER} from '@/proxy';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
@@ -45,9 +45,8 @@ import {
   STRIPE_CANCELLATION_REASONS,
 } from '@/lib/core/payment/stripe/constants';
 import type {CountryCode} from '@/lib/core/payment/stripe/types';
+import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
 import {scale} from '@/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {ensureLeadingSlash} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -87,13 +86,13 @@ const normalizeAmount = (
 export async function paypalCreateOrder({
   invoice,
   amount,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: InvoicePaymentInput) {
   const parsed = InvoicePaymentSchema.safeParse({
     invoice,
     amount,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -105,14 +104,14 @@ export async function paypalCreateOrder({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
@@ -122,6 +121,7 @@ export async function paypalCreateOrder({
     amount,
     invoiceFilter,
     workspaceURL,
+    tenantId,
   });
   if (validationResult.error) {
     return validationResult;
@@ -158,6 +158,7 @@ export async function paypalCreateOrder({
   try {
     const response = await createPaypalOrder({
       client,
+      tenantId,
       amount: $amount,
       currency: currencyCode,
       context: {
@@ -178,12 +179,12 @@ export async function paypalCreateOrder({
 
 export async function paypalCaptureOrder({
   orderID,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: PaypalCaptureOrderInput): ActionResponse<Invoice> {
   const parsed = PaypalCaptureOrderSchema.safeParse({
     orderID,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -199,14 +200,14 @@ export async function paypalCaptureOrder({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, invoiceFilter} = access.data;
+  const {tenant, config, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
@@ -245,6 +246,7 @@ export async function paypalCaptureOrder({
   try {
     const {amount, context} = await findPaypalOrder({
       id: orderID,
+      tenantId,
       client,
     });
 
@@ -264,6 +266,7 @@ export async function paypalCaptureOrder({
       id: invoice.id,
       ...invoiceFilter,
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -330,13 +333,13 @@ export async function paypalCaptureOrder({
 export async function createStripeCheckoutSession({
   invoice,
   amount,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: InvoicePaymentInput) {
   const parsed = InvoicePaymentSchema.safeParse({
     invoice,
     amount,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -349,14 +352,14 @@ export async function createStripeCheckoutSession({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
@@ -366,6 +369,7 @@ export async function createStripeCheckoutSession({
     amount,
     invoiceFilter,
     workspaceURL,
+    tenantId,
   });
   if (validationResult.error) {
     return validationResult;
@@ -406,6 +410,8 @@ export async function createStripeCheckoutSession({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.stripe);
 
   try {
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
     const session = await createStripeOrder({
       tenantId,
       client,
@@ -420,8 +426,12 @@ export async function createStripeCheckoutSession({
       amount: Number($amount),
       currency: currencyCode,
       url: {
-        success: `${workspaceURL}/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_session_id={CHECKOUT_SESSION_ID}&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
-        error: `${workspaceURL}/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_error=true${token ? `&token=${token}` : ''}`,
+        success: workspaceScope.forExternal(
+          `/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_session_id={CHECKOUT_SESSION_ID}&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
+        ),
+        error: workspaceScope.forExternal(
+          `/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_error=true${token ? `&token=${token}` : ''}`,
+        ),
       },
     });
 
@@ -440,14 +450,12 @@ export async function createStripeCheckoutSession({
 
 export async function validateStripePayment({
   stripeSessionId,
-  workspaceURL,
-  workspaceURI,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: ValidateStripePaymentInput) {
   const parsed = ValidateStripePaymentSchema.safeParse({
     stripeSessionId,
-    workspaceURL,
-    workspaceURI,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -460,14 +468,14 @@ export async function validateStripePayment({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, invoiceFilter} = access.data;
+  const {tenant, config, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   try {
@@ -508,6 +516,7 @@ export async function validateStripePayment({
     try {
       const order = await findStripeOrder({
         id: stripeSessionId,
+        tenantId,
         client,
       });
       invoice = order.context.data;
@@ -525,6 +534,7 @@ export async function validateStripePayment({
       id: invoice.id,
       ...invoiceFilter,
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -587,6 +597,7 @@ export async function validateStripePayment({
         id: $invoice.id,
         ...invoiceFilter,
         workspaceURL,
+        tenantId,
         client: txClient,
       });
 
@@ -606,11 +617,14 @@ export async function validateStripePayment({
           client: txClient,
           sourceId: String(updatedInvoice.id),
           amountRemaining: updatedAmountRemaining,
+          tenantId,
         });
       }
     });
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Stripe payment:', error);
@@ -624,13 +638,13 @@ export async function validateStripePayment({
 export async function createStripeBankTransferIntent({
   invoice,
   amount,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: InvoicePaymentInput) {
   const parsed = InvoicePaymentSchema.safeParse({
     invoice,
     amount,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -645,15 +659,23 @@ export async function createStripeBankTransferIntent({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
+
+  /* Not offered to a payer whose tenant cannot settle a transfer, so reaching
+   * this is a stale page or a direct call. Refused rather than served, because
+   * what follows hands back the account details to wire real money to, and
+   * nothing would confirm the money arriving. */
+  if (!canSettleStripeBankTransfer(tenant.config)) {
+    return {error: true, message: await t('Bank transfer is not available.')};
+  }
 
   const validationResult = await validatePaymentData({
     config,
@@ -662,6 +684,7 @@ export async function createStripeBankTransferIntent({
     amount,
     invoiceFilter,
     workspaceURL,
+    tenantId,
   });
   if (validationResult.error) {
     return validationResult;
@@ -750,15 +773,13 @@ export async function createStripeBankTransferIntent({
 export async function cancelStripeBankTransferPaymentIntent({
   id,
   contextId,
-  workspaceURL,
-  workspaceURI,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: CancelStripeBankTransferInput) {
   const parsed = CancelStripeBankTransferSchema.safeParse({
     id,
     contextId,
-    workspaceURL,
-    workspaceURI,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -773,14 +794,14 @@ export async function cancelStripeBankTransferPaymentIntent({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, invoiceFilter} = access.data;
+  const {tenant, config, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   try {
@@ -819,7 +840,7 @@ export async function cancelStripeBankTransferPaymentIntent({
 
     let context;
     try {
-      const paymentIntent = await findStripePaymentIntent(id);
+      const paymentIntent = await findStripePaymentIntent(id, tenantId);
       context = paymentIntent.metadata.context_id;
     } catch (err) {
       return {
@@ -848,6 +869,7 @@ export async function cancelStripeBankTransferPaymentIntent({
       id: data.id,
       ...invoiceFilter,
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -858,10 +880,13 @@ export async function cancelStripeBankTransferPaymentIntent({
     await cancelStripePaymentIntent({
       id,
       cancellationReason: STRIPE_CANCELLATION_REASONS.REQUESTED_BY_CUSTOMER,
+      tenantId,
       client,
     });
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: null};
   } catch (error) {
     console.error('Error Cancelling:', error);
@@ -875,14 +900,14 @@ export async function cancelStripeBankTransferPaymentIntent({
 export async function payboxCreateOrder({
   invoice,
   amount,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   uri,
   token,
 }: InvoicePaymentWithUriInput) {
   const parsed = InvoicePaymentWithUriSchema.safeParse({
     invoice,
     amount,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     uri,
     token,
   });
@@ -896,14 +921,14 @@ export async function payboxCreateOrder({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
@@ -913,6 +938,7 @@ export async function payboxCreateOrder({
     amount,
     invoiceFilter,
     workspaceURL,
+    tenantId,
   });
   if (validationResult.error) {
     return validationResult;
@@ -948,8 +974,11 @@ export async function payboxCreateOrder({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.paybox);
 
   try {
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
     const response = await createPayboxOrder({
       client,
+      tenantId,
       amount: $amount,
       currency: currencyCode,
       email: payerEmail,
@@ -958,8 +987,17 @@ export async function payboxCreateOrder({
         paymentModeId,
       },
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`))}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true${token ? `&token=${token}` : ''}`))}`,
+        success: workspaceScope.fromClient(uri, {
+          paybox_response: 'true',
+          type: isPartialPayment
+            ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+            : INVOICE_PAYMENT_OPTIONS.TOTAL,
+          ...(token ? {token} : {}),
+        }),
+        failure: workspaceScope.fromClient(uri, {
+          paybox_error: 'true',
+          ...(token ? {token} : {}),
+        }),
       },
     });
 
@@ -974,14 +1012,12 @@ export async function payboxCreateOrder({
 
 export async function validatePayboxPayment({
   params,
-  workspaceURL,
-  workspaceURI,
+  workspaceURL: givenWorkspaceURL,
   token,
 }: ValidatePayboxPaymentInput) {
   const parsed = ValidatePayboxPaymentSchema.safeParse({
     params,
-    workspaceURL,
-    workspaceURI,
+    workspaceURL: givenWorkspaceURL,
     token,
   });
   if (!parsed.success) {
@@ -994,14 +1030,14 @@ export async function validatePayboxPayment({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, invoiceFilter} = access.data;
+  const {tenant, config, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   try {
@@ -1058,6 +1094,7 @@ export async function validatePayboxPayment({
       id: invoice.id,
       ...invoiceFilter,
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -1109,7 +1146,9 @@ export async function validatePayboxPayment({
       version: context.version,
       client,
     });
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
+    tenantURLs(tenantId)
+      .workspaceByKey(workspaceURL)
+      .revalidate(`/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Paybox payment:', error);
@@ -1123,14 +1162,14 @@ export async function validatePayboxPayment({
 export async function up2payCreateOrder({
   invoice,
   amount,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   uri,
   token,
 }: InvoicePaymentWithUriInput) {
   const parsed = InvoicePaymentWithUriSchema.safeParse({
     invoice,
     amount,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     uri,
     token,
   });
@@ -1146,14 +1185,14 @@ export async function up2payCreateOrder({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
@@ -1163,6 +1202,7 @@ export async function up2payCreateOrder({
     amount,
     invoiceFilter,
     workspaceURL,
+    tenantId,
   });
 
   if (validationResult.error) {
@@ -1217,6 +1257,8 @@ export async function up2payCreateOrder({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.up2pay);
 
   try {
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
     const response = await createUp2payOrder({
       tenantId,
       client,
@@ -1233,17 +1275,21 @@ export async function up2payCreateOrder({
       },
       billingInfo,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
-          ensureLeadingSlash(
-            `${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
-              isPartialPayment
-                ? INVOICE_PAYMENT_OPTIONS.PARTIAL
-                : INVOICE_PAYMENT_OPTIONS.TOTAL
-            }${token ? `&token=${token}` : ''}`,
-          ),
-        )}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`))}`,
-        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`))}`,
+        success: workspaceScope.fromClient(uri, {
+          status: UP2PAY_REDIRECT_STATUS.SUCCESS,
+          type: isPartialPayment
+            ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+            : INVOICE_PAYMENT_OPTIONS.TOTAL,
+          ...(token ? {token} : {}),
+        }),
+        failure: workspaceScope.fromClient(uri, {
+          status: UP2PAY_REDIRECT_STATUS.REFUSED,
+          ...(token ? {token} : {}),
+        }),
+        cancel: workspaceScope.fromClient(uri, {
+          status: UP2PAY_REDIRECT_STATUS.CANCELLED,
+          ...(token ? {token} : {}),
+        }),
       },
     });
 
@@ -1260,7 +1306,7 @@ export async function up2payCreateOrder({
 export async function initiatePispPayment({
   invoice,
   amount,
-  workspaceURL,
+  workspaceURL: givenWorkspaceURL,
   uri,
   localInstrument,
   token,
@@ -1268,7 +1314,7 @@ export async function initiatePispPayment({
   const parsed = InitiatePispPaymentSchema.safeParse({
     invoice,
     amount,
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     uri,
     localInstrument,
     token,
@@ -1285,14 +1331,14 @@ export async function initiatePispPayment({
   }
 
   const access = await resolveInvoicePaymentAccess({
-    workspaceURL,
+    workspaceURL: givenWorkspaceURL,
     tenantId,
     token,
   });
   if (access.error) {
     return access;
   }
-  const {tenant, config, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter, workspaceURL} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
@@ -1302,6 +1348,7 @@ export async function initiatePispPayment({
     amount,
     invoiceFilter,
     workspaceURL,
+    tenantId,
   });
 
   if (validationResult.error) {
@@ -1343,20 +1390,6 @@ export async function initiatePispPayment({
     };
   }
 
-  const host = process.env.GOOVEE_PUBLIC_HOST;
-  const tokenSuffix = token ? `&token=${token}` : '';
-
-  const successfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}${tokenSuffix}`))}`;
-  const unsuccessfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.CANCELLED}${tokenSuffix}`))}`;
-
-  const pageConsentInfo = {
-    pageTimeout: 1200,
-    pageTimeoutUnit: 'SECONDS' as const,
-    pageUserTimeout: 300,
-    pageUserTimeoutUnit: 'SECONDS' as const,
-    pageTimeOutReturnURL: `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.EXPIRED}${tokenSuffix}`))}`,
-  };
-
   const pispEmail = token
     ? $invoice.partner?.emailAddress?.address
     : user?.email;
@@ -1371,6 +1404,30 @@ export async function initiatePispPayment({
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.hubpisp);
 
   try {
+    const tokenQuery: Record<string, string> = token ? {token} : {};
+
+    const workspaceScope = tenantURLs(tenantId).workspaceByKey(workspaceURL);
+
+    /* Inside the try, because a refused `uri` throws where this is called and
+     * has to come back as this action's own error shape, like the sibling
+     * gateways' calls do. */
+    const returnURL = (status: string) =>
+      workspaceScope.fromClient(uri, {
+        hubpisp_status: status,
+        ...tokenQuery,
+      });
+
+    const successfulReportUrl = returnURL(HUBPISP_REDIRECT_STATUS.SUCCESS);
+    const unsuccessfulReportUrl = returnURL(HUBPISP_REDIRECT_STATUS.CANCELLED);
+
+    const pageConsentInfo = {
+      pageTimeout: 1200,
+      pageTimeoutUnit: 'SECONDS' as const,
+      pageUserTimeout: 300,
+      pageUserTimeoutUnit: 'SECONDS' as const,
+      pageTimeOutReturnURL: returnURL(HUBPISP_REDIRECT_STATUS.EXPIRED),
+    };
+
     const psuInfo = {
       name: [$invoice?.partner?.firstName, $invoice?.partner?.name]
         .filter(Boolean)

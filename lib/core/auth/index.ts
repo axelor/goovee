@@ -1,11 +1,18 @@
 import type {ReadonlyHeaders} from 'next/dist/server/web/spec-extension/adapters/headers';
 import {headers} from 'next/headers';
-import {auth} from '@/lib/auth';
+
+import {getAuth} from '@/lib/auth';
+import {TENANT_HEADER} from '@/proxy';
 
 const getSessionBase = async (headerList: ReadonlyHeaders) => {
-  return auth.api.getSession({
-    headers: headerList,
-  });
+  /* Whose session this is follows the address the request arrived at, not the
+   * cookies it carries: a browser may hold a session for several tenants of one
+   * deployment, and only the one whose address this is may answer here. */
+  const tenantId = headerList.get(TENANT_HEADER);
+
+  if (!tenantId) return null;
+
+  return getAuth(tenantId).api.getSession({headers: headerList});
 };
 
 // Next.js 'headers()' returns a unique object per request.

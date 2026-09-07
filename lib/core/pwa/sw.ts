@@ -11,8 +11,8 @@ import {
   StaleWhileRevalidate,
 } from 'serwist';
 import type {NotificationPayload} from './types';
-import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
-import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/utils';
+import {pushChannelName, MSG_TYPE} from './sw-constants';
+import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/prefix';
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
@@ -26,12 +26,75 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const scopeBasePath = normalizePathPrefix(
-  new URL(self.registration.scope).pathname,
+/* The deployment base path, taken from this worker's own script URL: it is
+ * served as `<basePath>/sw.js`, so dropping the filename leaves the base path,
+ * whatever scope it was registered at.
+ *
+ * Not `process.env.NEXT_PUBLIC_BASE_PATH`: `serwist build` bundles this file
+ * with esbuild rather than Next, so nothing substitutes `process` and reading it
+ * throws while the worker is evaluated, which fails the install and leaves the
+ * previously installed worker in place. Not `registration.scope` either: that
+ * carries the tenant where the tenant shares an origin, and what this prefixes
+ * are the deployment's own assets. `withTenantRoot` below is the one for an
+ * address belonging to the tenant. */
+const basePath = normalizePathPrefix(
+  new URL(self.location.href).pathname.replace(/\/[^/]*$/, ''),
 );
 
-function withScopeBasePath(path: string) {
-  return withPathPrefix(scopeBasePath, path);
+function withDeploymentBasePath(path: string) {
+  return withPathPrefix(basePath, path);
+}
+
+/**
+ * An address of the tenant this worker serves, measured from the address it was
+ * registered at.
+ *
+ * That registration scope is where the tenant's addresses start — the base path,
+ * and the tenant segment where the tenant shares an origin — so joining onto it
+ * produces the shape the origin actually serves. Reading the scope rather than
+ * composing the tenant id keeps the worker from having to know which of the two
+ * shapes its tenant is reached by.
+ */
+function withTenantRoot(path: string) {
+  return new URL(path.replace(/^\//, ''), self.registration.scope).pathname;
+}
+
+/**
+ * The tenant this worker was registered for, named in the address it was
+ * registered from (`sw.js?tenant=<id>`).
+ *
+ * Cache storage and BroadcastChannel are both per origin, not per scope, so every
+ * tenant's registration of this same script would otherwise share one cache and
+ * one entry budget — opening a gallery in one tenant would evict another tenant's
+ * held images — and one notification channel, which would carry a notification
+ * into a different tenant's open tab. Naming both after the tenant keeps each
+ * registration to itself.
+ *
+ * Not the registration scope, which is the whole origin for a tenant reached by
+ * host and would name no tenant at all. `/` where the address names none: the
+ * caches and the channel then carry no tenant, so a notification is announced on
+ * a channel no page is listening to and does not reach an open tab. Nothing else
+ * is affected, and the next registration from a page replaces this one.
+ *
+ * A path segment rather than a bare id, because the cache names below are this
+ * value appended to a prefix and a browser keeps whatever a previous worker
+ * wrote: spelling it any other way renames every cache a tenant holds, which
+ * abandons its translations, images and reader assets to be fetched again and
+ * leaves the entries under the old names with nothing to prune them.
+ *
+ * `searchParams` decodes the value, and cannot throw on a malformed escape the
+ * way `decodeURIComponent` does — which matters because nothing evaluated at this
+ * level may throw: it would fail the install and leave the previously installed
+ * worker in place.
+ */
+const scopeTenant = ((): string => {
+  const named = new URL(self.location.href).searchParams.get('tenant');
+
+  return named ? `/${named}` : '/';
+})();
+
+function tenantCacheName(name: string) {
+  return `${name}${scopeTenant}`;
 }
 
 /*
@@ -43,7 +106,7 @@ function withScopeBasePath(path: string) {
  * and documents must not be mistaken for static files — those are answered from
  * a held copy without checking that whoever asks may still see them.
  */
-const PDF_READER_PATH = withScopeBasePath('/pdfjs/');
+const PDF_READER_PATH = withDeploymentBasePath('/pdfjs/');
 const PDF_READER_VERSION = /^\d+\.\d+\.\d+\//;
 
 function isPDFReaderAsset(url: URL): boolean {
@@ -62,11 +125,17 @@ const serwist = new Serwist({
      * background on every load. The API routes set ETag + Cache-Control:
      * no-cache, so the background fetch is a bodyless 304 via the browser
      * HTTP cache unless translations actually changed. Must be listed before
-     * defaultCache to override the default NetworkFirst rule for /api/**. */
+     * defaultCache to override the default NetworkFirst rule for /api/**.
+     *
+     * Only a tenant's own address is matched, and that is the only one a worker
+     * ever sees: every page a registration controls sits under that tenant. `/`
+     * asks the deployment for its translations instead, and it is served either
+     * on a shared origin, where no worker is registered, or on a tenant's own
+     * origin, where the proxy has already made it that tenant's page. */
     {
-      matcher: /\/api\/(tenant\/[^/]+\/)?locales\//,
+      matcher: /\/api\/locales\//,
       handler: new StaleWhileRevalidate({
-        cacheName: 'locale-translations',
+        cacheName: tenantCacheName('locale-translations'),
       }),
     },
     /* Displayed images, which are served by the routes that hold the files and
@@ -84,7 +153,7 @@ const serwist = new Serwist({
       matcher: ({request, url}) =>
         request.destination === 'image' && url.searchParams.has('w'),
       handler: new NetworkFirst({
-        cacheName: 'display-images',
+        cacheName: tenantCacheName('display-images'),
         plugins: [
           new ExpirationPlugin({maxEntries: 128, maxAgeSeconds: 24 * 60 * 60}),
         ],
@@ -101,7 +170,7 @@ const serwist = new Serwist({
     {
       matcher: ({url}) => isPDFReaderAsset(url),
       handler: new CacheFirst({
-        cacheName: 'pdf-reader',
+        cacheName: tenantCacheName('pdf-reader'),
         plugins: [
           new ExpirationPlugin({
             maxEntries: 256,
@@ -114,7 +183,7 @@ const serwist = new Serwist({
   ],
 });
 
-const channel = new BroadcastChannel(PUSH_CHANNEL);
+const channel = new BroadcastChannel(pushChannelName(scopeTenant));
 
 self.addEventListener('push', event => {
   const data: NotificationPayload | undefined = event.data?.json();
@@ -133,8 +202,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'Notification';
   const options: NotificationOptions & {renotify?: boolean} = {
     body: data.body,
-    icon: data.icon ?? withScopeBasePath('/pwa/icons/icon-192x192.png'),
-    badge: data.badge ?? withScopeBasePath('/pwa/icons/icon-72x72.png'),
+    icon: data.icon ?? withDeploymentBasePath('/pwa/icons/icon-192x192.png'),
+    badge: data.badge ?? withDeploymentBasePath('/pwa/icons/icon-72x72.png'),
     dir: data.dir,
     lang: data.lang,
     requireInteraction: data.requireInteraction,
@@ -171,14 +240,14 @@ self.addEventListener('notificationclick', event => {
      * was never stored. Interpolating a missing id would ask the server to read
      * a notification called "undefined". */
     const readPath = tag
-      ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
+      ? `/api/push/notifications/read/tag/${encodeURIComponent(tag)}`
       : notification?.id
-        ? `/api/tenant/${tenantId}/push/notifications/read/${notification.id}`
+        ? `/api/push/notifications/read/${notification.id}`
         : null;
 
     if (tenantId && readPath) {
       try {
-        await fetch(withScopeBasePath(readPath), {method: 'POST'});
+        await fetch(withTenantRoot(readPath), {method: 'POST'});
         // Notify all tabs to remove this notification from their unread state
         channel.postMessage({type: MSG_TYPE.READ, notification, tag});
       } catch (err) {
@@ -187,7 +256,7 @@ self.addEventListener('notificationclick', event => {
     }
 
     if (self.clients.openWindow) {
-      return self.clients.openWindow(withScopeBasePath(url || '/'));
+      return self.clients.openWindow(withDeploymentBasePath(url || '/'));
     }
   };
 

@@ -1,13 +1,14 @@
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 type PartnerAvatarProps = {
   partner: {
     simpleFullName: string | null;
     picture: {id: string} | null;
   };
-  tenantId: string;
+  tenantScope: TenantScope;
   /** Diameter in pixels. Defaults to 40. */
   size?: number;
   /** Optional tailwind background class for the fallback initial. */
@@ -16,7 +17,7 @@ type PartnerAvatarProps = {
 
 export function PartnerAvatar({
   partner,
-  tenantId,
+  tenantScope,
   size = 40,
   fallbackClassName = 'bg-ink-50',
 }: PartnerAvatarProps) {
@@ -28,7 +29,7 @@ export function PartnerAvatar({
     return (
       <Avatar className="rounded-full shrink-0" style={style}>
         <AvatarImage
-          src={getPartnerImageURL(pictureId, tenantId)}
+          src={getPartnerImageURL(pictureId, tenantScope)}
           alt={partner.simpleFullName || 'Reviewer'}
           size={size}
         />

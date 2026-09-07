@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import {type SUBAPP_CODES} from '@/constants';
-import {type Tenant} from '@/tenant';
 import type {ID} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -11,6 +10,7 @@ import type {
   CreateProps,
   TrackingField,
 } from '../../types';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 type CommentsListProps = {
   recordId: ID;
@@ -21,7 +21,7 @@ type CommentsListProps = {
   disabled?: boolean;
   sortBy: any;
   onSubmit?: (comment: CreateProps) => Promise<void>;
-  tenantId: Tenant['id'];
+  tenantScope: TenantScope;
   commentField: CommentField;
   trackingField: TrackingField;
   disableReply?: boolean;
@@ -38,7 +38,7 @@ export const CommentsList = ({
   disabled = false,
   onSubmit,
   sortBy,
-  tenantId,
+  tenantScope,
   commentField,
   trackingField,
   disableReply,
@@ -59,7 +59,7 @@ export const CommentsList = ({
           subapp={subapp}
           sortBy={sortBy}
           onSubmit={onSubmit}
-          tenantId={tenantId}
+          tenantScope={tenantScope}
           commentField={commentField}
           trackingField={trackingField}
           disableReply={disableReply}

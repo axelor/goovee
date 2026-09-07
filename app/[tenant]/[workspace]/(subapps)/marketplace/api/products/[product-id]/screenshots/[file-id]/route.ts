@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
 import {getPartnerId} from '@/utils';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
@@ -12,7 +11,7 @@ import {getProductScreenshot} from '../../../../../common/orm';
  * so the workspace is in the path — the access check is in the query and
  * workspace-scoped: the product must be the caller's own or published. The
  * shared
- * `/api/tenant/[tenant]/product/image/[id]` route only resolves metafiles
+ * `/[tenant]/api/product/image/[id]` route only resolves metafiles
  * owned by a base AOSProduct, which marketplace pictures are not.
  */
 export async function GET(
@@ -26,18 +25,10 @@ export async function GET(
     }>;
   },
 ) {
-  const {
-    tenant: tenantId,
-    workspace,
-    'product-id': productId,
-    'file-id': fileId,
-  } = await props.params;
-  const {workspaceURL} = workspacePathname({tenant: tenantId, workspace});
+  const {'product-id': productId, 'file-id': fileId} = await props.params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {

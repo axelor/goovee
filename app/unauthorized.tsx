@@ -1,33 +1,32 @@
 'use client';
 
-import {useSearchParams} from 'next/navigation';
+import {MdHome} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {Link} from '@/ui/components/link';
-import {Button} from '@/ui/components';
-import {i18n} from '@/locale';
+import {ErrorScreen} from '@/ui/components/error-screen';
 
+/**
+ * The deployment's own unauthorized screen, for a refusal raised above the
+ * tenant segment. A refusal inside a workspace is answered by that workspace's
+ * own screen instead, which keeps the visitor in its shell.
+ *
+ * Written in English rather than translated, for the reason the deployment's
+ * not-found is: it renders above the tenant, where no tenant's translations are
+ * loaded.
+ */
 export default function Unauthorized() {
-  const searchParams = useSearchParams();
-  const searchParamMessage = searchParams.get('message');
-
-  const message = searchParamMessage
-    ? decodeURIComponent(searchParamMessage)
-    : i18n.t('Unauthorized Access');
-
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="space-y-2">
-        <div className="space-y-1">
-          <h2 className="text-3xl">401 | {i18n.t('Unauthorized')}</h2>
-          <p className="text-muted-foreground">{message}</p>
-        </div>
-        <div>
-          <Link href="/">
-            <Button>{i18n.t('Return Home')}</Button>
-          </Link>
-        </div>
-      </div>
-    </div>
+    <ErrorScreen
+      standalone
+      watermark="401"
+      badge="Error 401"
+      heading="This page is not open to you"
+      description="The address exists, but this account cannot open it. Signing in as someone else may help."
+      action={{
+        href: '/',
+        label: 'Return home',
+        icon: <MdHome className="size-[18px]" />,
+      }}
+    />
   );
 }

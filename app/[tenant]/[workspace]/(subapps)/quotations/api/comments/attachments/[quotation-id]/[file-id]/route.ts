@@ -10,7 +10,6 @@ import {getQuotationsConfig} from '../../../../../common/orm/config';
 import {PartnerKey} from '@/types';
 import {findFile, streamFile} from '@/utils/download';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findQuotation} from '../../../../../common/orm/quotations';
@@ -27,13 +26,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
   const {'quotation-id': quotationId, 'file-id': fileId} = params;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
   if (!access.ok) {
@@ -43,6 +39,8 @@ export async function GET(
   }
   const {user, subapp} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) {

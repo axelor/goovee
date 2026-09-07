@@ -2,8 +2,6 @@ import {MUTATE_TYPE} from '../constants';
 import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 
 export type MutateProps = {
-  workspaceURL: string;
-  workspaceURI: string;
   action:
     | {
         type: typeof MUTATE_TYPE.CREATE;

@@ -19,7 +19,8 @@ import {UserType} from '@/auth/types';
 import {generateOTP} from '@/otp/actions';
 import {findOne, isValid, markUsed} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
-import {findWorkspace} from '@/orm/workspace';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {withMattermostEmailSync} from '@/lib/core/mattermost';
 import {z} from 'zod';
 import {
@@ -281,6 +282,7 @@ export async function update(data: UpdatePersonal) {
       await withMattermostEmailSync({
         oldEmail: partner.emailAddress!.address!,
         newEmail: email,
+        config: tenant.config,
       });
     } catch (err: any) {
       return {
@@ -342,30 +344,22 @@ export async function update(data: UpdatePersonal) {
 }
 
 export async function generateOTPForUpdate(data: EmailUpdateOTP) {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('TenantId is required'));
-  }
-
   const validation = EmailUpdateOTPSchema.safeParse(data);
 
   if (!validation.success) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {email, workspaceURL} = validation.data;
+  const {email} = validation.data;
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureAccess();
 
-  if (!user) {
-    return error(await t('Unauthorized'));
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Invalid tenant'));
-  const {client} = tenant;
+  const {user, workspace, tenant} = access;
+  const {client, id: tenantId} = tenant;
 
   const $user = await findPartnerById(user.id!, client);
 
@@ -378,16 +372,6 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
   const partner = await findPartnerById(partnerId!, client);
 
   if (!partner) {
-    return error(await t('Bad request'));
-  }
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    client,
-    user,
-  });
-
-  if (!workspace) {
     return error(await t('Bad request'));
   }
 

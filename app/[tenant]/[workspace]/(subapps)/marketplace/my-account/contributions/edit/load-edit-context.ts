@@ -1,9 +1,6 @@
 import {SUBAPP_CODES} from '@/constants';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {
   findCompatibilityVersions,
   findLicenses,
@@ -13,6 +10,7 @@ import {
 } from '../../../common/orm';
 import {canManageProducts} from '../../../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from '../../../common/orm/config';
 
 /**
@@ -26,37 +24,13 @@ export async function loadEditContext(params: {
   tenant: string;
   workspace: string;
 }) {
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
+
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   /* Seller-only area — the same hard gate as the contributions listing, so
@@ -97,9 +71,7 @@ export async function loadEditContext(params: {
     ]);
 
   return {
-    workspaceURI,
-    workspaceURL,
-    tenantId,
+    tenantId: access.tenant.id,
     access,
     partnerId,
     config,

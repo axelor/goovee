@@ -5,9 +5,9 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-import {withBasePath} from '@/lib/core/path/base-path';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {cn} from '@/utils/css';
-import {getLoginURL} from '@/utils/url';
+import {getLoginURL} from '@/utils/login-url';
 import {Download, FileText, Heart} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {Suspense} from 'react';
@@ -21,14 +21,14 @@ import {ProductIcon} from '../../shared/product-icon';
 import {ProductTypeBadge} from '../../shared/product-type-badge';
 import {Rating} from '../../shared/rating';
 import {TooltipDate} from '../../shared/tooltip-date';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 export interface ProductHeaderCardProps {
   product: SingleProduct;
   client: Client;
   user?: {id: ID; mainPartnerId?: ID};
-  workspaceURL: string;
-  workspaceURI: string;
-  tenantId: string;
+  scope: WorkspaceScope;
+  tenantScope: TenantScope;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
   preview?: boolean;
   canDownloadPromise: Promise<boolean>;
@@ -38,9 +38,8 @@ export async function ProductHeaderCard({
   product,
   client,
   user,
-  workspaceURL,
-  workspaceURI,
-  tenantId,
+  scope,
+  tenantScope,
   preview = false,
   canDownloadPromise,
 }: ProductHeaderCardProps) {
@@ -57,7 +56,7 @@ export async function ProductHeaderCard({
   const categoryNames = await Promise.all(
     categories.map(category => tattr(category.name)),
   );
-  const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const marketplaceHref = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const priceScale = product.price.currency.numberOfDecimals;
   const {ati: priceAti} = product.price;
@@ -101,8 +100,6 @@ export async function ProductHeaderCard({
             }>
             <FavoriteButton
               productId={product.id}
-              workspaceURL={workspaceURL}
-              workspaceURI={workspaceURI}
               userId={user?.id}
               client={client}
             />
@@ -215,8 +212,8 @@ export async function ProductHeaderCard({
           <CTAButton
             product={product}
             user={user}
-            workspaceURI={workspaceURI}
-            tenantId={tenantId}
+            scope={scope}
+            tenantScope={tenantScope}
             paid={paid}
             priceAti={priceAti}
             priceScale={priceScale}
@@ -240,8 +237,8 @@ export async function ProductHeaderCard({
 async function CTAButton({
   product,
   user,
-  workspaceURI,
-  tenantId,
+  scope,
+  tenantScope,
   paid,
   priceAti,
   priceScale,
@@ -251,8 +248,8 @@ async function CTAButton({
 }: {
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
-  workspaceURI: string;
-  tenantId: string;
+  scope: WorkspaceScope;
+  tenantScope: TenantScope;
   paid: boolean;
   priceAti: number;
   priceScale: number;
@@ -308,8 +305,8 @@ async function CTAButton({
         <a
           href={
             product.currentVersion?.id
-              ? withBasePath(
-                  `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`,
+              ? scope.forBrowser(
+                  `/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`,
                 )
               : '#'
           }
@@ -325,10 +322,11 @@ async function CTAButton({
     return (
       <Button variant="royal" size="lg" className="gap-2" asChild>
         <Link
-          href={getLoginURL({
-            callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
-            workspaceURI,
-            tenant: tenantId,
+          href={getLoginURL(tenantScope, {
+            callbackurl: scope.forRouter(
+              `/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
+            ),
+            workspaceURI: scope.forRouter(),
           })}>
           {await t('Sign in to buy')}
         </Link>
@@ -352,7 +350,7 @@ async function CTAButton({
           ? formatVersionNumber(product.currentVersion)
           : null
       }
-      cartHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/cart`}
+      cartHref={scope.forRouter(`/${SUBAPP_CODES.marketplace}/cart`)}
       addToCartLabel={await t('Add to cart')}
       buyNowLabel={await t('Buy now')}
       inCartLabel={await t('In cart — view cart')}
@@ -373,14 +371,10 @@ function DocumentationButton({url, label}: {url: string; label: string}) {
 
 async function FavoriteButton({
   productId,
-  workspaceURL,
-  workspaceURI,
   userId,
   client,
 }: {
   productId: ID;
-  workspaceURL: string;
-  workspaceURI: string;
   userId?: ID;
   client: Client;
 }) {
@@ -392,12 +386,5 @@ async function FavoriteButton({
       })
     : false;
 
-  return (
-    <AddToFavoriteButton
-      productId={productId}
-      workspaceURL={workspaceURL}
-      workspaceURI={workspaceURI}
-      isFavorite={isFavorited}
-    />
-  );
+  return <AddToFavoriteButton productId={productId} isFavorite={isFavorited} />;
 }

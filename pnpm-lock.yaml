@@ -356,6 +356,9 @@ dependencies:
     version: 4.5.5(@types/react@19.2.14)(react@19.2.5)
 
 devDependencies:
+  '@next/env':
+    specifier: 16.2.4
+    version: 16.2.4
   '@prettier/plugin-xml':
     specifier: ^3.4.2
     version: 3.4.2(prettier@3.3.3)
@@ -434,9 +437,6 @@ devDependencies:
   cross-env:
     specifier: ^10.1.0
     version: 10.1.0
-  dotenv:
-    specifier: ^17.2.0
-    version: 17.2.0
   eslint:
     specifier: ^9.39.2
     version: 9.39.2
@@ -3816,7 +3816,6 @@ packages:
 
   /@next/env@16.2.4:
     resolution: {integrity: sha512-dKkkOzOSwFYe5RX6y26fZgkSpVAlIOJKQHIiydQcrWH6y/97+RceSOAdjZ14Qa3zLduVUy0TXcn+EiM6t4rPgw==}
-    dev: false
 
   /@next/eslint-plugin-next@16.2.4:
     resolution: {integrity: sha512-tOX826JJ96gYK/go18sPUgMq9FK1tqxBFfUCEufJb5XIkWFFmpgU7mahJANKGkHs7F41ir3tReJ3Lv5La0RvhA==}
@@ -8987,11 +8986,6 @@ packages:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
     dev: false
-
-  /dotenv@17.2.0:
-    resolution: {integrity: sha512-Q4sgBT60gzd0BB0lSyYD3xM4YxrXA9y4uBDof1JNYGzOXrQdQ6yX+7XIAqoFOGQFOTK1D3Hts5OllpxMDZFONQ==}
-    engines: {node: '>=12'}
-    dev: true
 
   /draft-js-export-html@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-G4VGBSalPowktIE4wp3rFbhjs+Ln9IZ2FhXeHjsZDSw0a2+h+BjKu5Enq+mcsyVb51RW740GBK8Xbf7Iic51tw==}

@@ -4,7 +4,7 @@ import type {ReactNode} from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {getitem, setitem} from '@/storage/local';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
@@ -25,7 +25,7 @@ import {
  */
 export default function CartProvider({children}: {children: ReactNode}) {
   const {workspaceURL} = useWorkspace();
-  const {data: session, isPending: sessionPending} = authClient.useSession();
+  const {data: session, isPending: sessionPending} = useAuthSession();
   const userId = session?.user?.id;
 
   const [slices, setSlices] = useState<Record<string, CartSlice>>({});

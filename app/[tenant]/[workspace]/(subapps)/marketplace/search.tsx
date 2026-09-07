@@ -23,7 +23,7 @@ import {SearchItem} from './common/ui/components/shared/search-item';
 
 export function Search({className}: {className?: string}) {
   const router = useRouter();
-  const {workspaceURL, workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -45,7 +45,6 @@ export function Search({className}: {className?: string}) {
           }
           const {error, message, data} = await searchProducts({
             search: query,
-            workspaceURL,
           });
           if (searchRef.current !== query) return;
           if (error) {
@@ -67,7 +66,7 @@ export function Search({className}: {className?: string}) {
           }
         }
       }, 500),
-    [toast, workspaceURL],
+    [toast],
   );
 
   const handleSearch = useCallback(
@@ -83,7 +82,9 @@ export function Search({className}: {className?: string}) {
   );
 
   const handleRedirection = (slug: string) => {
-    router.push(`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${slug}`);
+    router.push(
+      scope.forRouter(`/${SUBAPP_CODES.marketplace}/products/${slug}`),
+    );
   };
 
   return (

@@ -1,18 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
-export function getStoragePath() {
-  const storage = process.env.DATA_STORAGE;
-
-  if (!storage) {
-    return `${process.cwd()}/storage`;
+/**
+ * Creates the directory and any missing parent. The path is a per-tenant
+ * setting, so there is no process-wide default to fall back on.
+ */
+export function ensureStorageDir(storagePath: string): void {
+  if (!fs.existsSync(storagePath)) {
+    fs.mkdirSync(storagePath, {recursive: true});
   }
-
-  if (!fs.existsSync(storage)) {
-    fs.mkdirSync(storage, {recursive: true});
-  }
-
-  return storage;
 }
 
 /**

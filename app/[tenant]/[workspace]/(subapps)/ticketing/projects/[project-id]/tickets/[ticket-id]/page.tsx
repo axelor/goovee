@@ -1,15 +1,16 @@
 import type {ID} from '@/types';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {formatDate} from '@/locale/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,10 +22,7 @@ import {
 import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
-import {encodeFilter, getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {workspacePathname} from '@/utils/workspace';
+import {encode} from '@/utils/compressed-param';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -89,35 +87,15 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURI, workspaceURL, tenant} = workspacePathname(params);
   const projectId = params['project-id'];
   const ticketId = params['ticket-id'];
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user, subapp} = access;
   const {client} = access.tenant;
@@ -143,9 +121,11 @@ export default async function Page(props: {
 
   if (!ticket) notFound();
 
-  const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
+  const ticketsURL = access.scope.forRouter(
+    `/ticketing/projects/${projectId}/tickets`,
+  );
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encode<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   // Opening request = the client-authored first message of the conversation.
   const requesterName =
@@ -167,7 +147,7 @@ export default async function Page(props: {
                   <BreadcrumbLink
                     asChild
                     className="text-ink-500 cursor-pointer truncate text-sm">
-                    <Link href={`${workspaceURI}/ticketing`}>
+                    <Link href={access.scope.forRouter('/ticketing')}>
                       {await t('Projects')}
                     </Link>
                   </BreadcrumbLink>
@@ -180,7 +160,9 @@ export default async function Page(props: {
                     asChild
                     className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-sm">
                     <Link
-                      href={`${workspaceURI}/ticketing/projects/${projectId}`}>
+                      href={access.scope.forRouter(
+                        `/ticketing/projects/${projectId}`,
+                      )}>
                       {ticket.project?.name}
                     </Link>
                   </BreadcrumbLink>
@@ -269,8 +251,8 @@ export default async function Page(props: {
                   commentField="note"
                   createComment={createComment}
                   fetchComments={fetchComments}
-                  attachmentDownloadUrl={withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
+                  attachmentDownloadUrl={access.scope.forBrowser(
+                    `/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
                   )}
                 />
               )}

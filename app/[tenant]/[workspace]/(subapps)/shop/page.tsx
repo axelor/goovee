@@ -1,14 +1,12 @@
 import {Suspense} from 'react';
 import type {Cloned} from '@/types/util';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
-import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {DEFAULT_LIMIT, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -265,10 +263,7 @@ export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{[key: string]: string | string[] | undefined}>;
 }) {
-  const [params, searchParams] = await Promise.all([
-    props.params,
-    props.searchParams,
-  ]);
+  const searchParams = await props.searchParams;
   const readParam = (key: string) =>
     typeof searchParams[key] === 'string' ? searchParams[key] : undefined;
 
@@ -285,33 +280,12 @@ export default async function Page(props: {
       ? requestedPage
       : 1;
 
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client, config} = access.tenant;

@@ -12,20 +12,22 @@ import {PaymentOption} from '@/types';
 export async function getPaymentInfo({
   mode,
   data,
+  tenantId,
   client,
 }: {
   mode: PaymentOption;
   data: {id?: string; params?: any};
+  tenantId: string;
   client: Client;
 }): Promise<PaymentOrder> {
   switch (mode) {
     case PaymentOption.stripe: {
       if (!data.id) throw new Error('Stripe payment requires an ID');
-      return findStripeOrder({id: data.id, client});
+      return findStripeOrder({id: data.id, tenantId, client});
     }
     case PaymentOption.paypal: {
       if (!data.id) throw new Error('PayPal payment requires an ID');
-      return findPaypalOrder({id: data.id, client});
+      return findPaypalOrder({id: data.id, tenantId, client});
     }
     case PaymentOption.paybox: {
       if (!data.params) throw new Error('Paybox payment requires parameters');

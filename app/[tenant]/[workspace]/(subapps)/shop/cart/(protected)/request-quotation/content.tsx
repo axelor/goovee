@@ -27,14 +27,16 @@ export default function Content({
 
   const {clearCart, cart} = useCart();
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
   const {toast} = useToast();
 
   const invoicingAddress = cart?.invoicingAddress;
   const deliveryAddress = cart?.deliveryAddress;
 
-  const callbackURL = `${workspaceURI}/${SUBAPP_CODES.shop}/cart/request-quotation`;
-  const checkoutURL = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
+  const callbackURL = scope.forRouter(
+    `/${SUBAPP_CODES.shop}/cart/request-quotation`,
+  );
+  const checkoutURL = scope.forRouter(`/${SUBAPP_CODES.shop}/cart`);
 
   const handleRequestQuotation = async () => {
     if (!(cart?.invoicingAddress && cart?.deliveryAddress)) {
@@ -49,7 +51,7 @@ export default function Content({
 
     setRequestingQuotation(true);
 
-    const res = await requestQuotation({cart, workspaceURL});
+    const res = await requestQuotation({cart});
 
     if (res?.data) {
       toast({
@@ -58,15 +60,15 @@ export default function Content({
       });
       clearCart();
       const redirectURL = quotationSubapp
-        ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
-        : `${workspaceURI}/shop`;
+        ? scope.forRouter(`/${SUBAPP_CODES.quotations}/${res.data}`)
+        : scope.forRouter('/shop');
       router.replace(redirectURL);
     } else {
       toast({
         variant: 'destructive',
         title: i18n.t('Error requesting quotation, try again !'),
       });
-      router.replace(`${workspaceURI}/${SUBAPP_CODES.shop}/cart`);
+      router.replace(scope.forRouter(`/${SUBAPP_CODES.shop}/cart`));
     }
   };
 

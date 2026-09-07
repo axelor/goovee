@@ -1,13 +1,11 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {denyPage} from '@/lib/core/access/denial';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -25,37 +23,17 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
   const {id} = params;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const [folder, files, labels] = await Promise.all([
     fetchFolderWithParent({id, workspaceURL, client, user}).then(clone),
@@ -82,7 +60,6 @@ export default async function Page(props: {
     <DocsFolderView
       folder={folder}
       files={files ?? []}
-      workspaceURI={workspaceURI}
       labels={labels}
       uploadParent={canUpload ? parentRef : null}
       folderParent={canCreateFolder ? parentRef : null}

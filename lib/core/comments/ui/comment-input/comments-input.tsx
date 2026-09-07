@@ -91,7 +91,7 @@ export function CommentInput({
 }: CommentProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {tenant} = useWorkspace();
+  const {tenantScope} = useWorkspace();
   const {toast} = useToast();
   const {
     uploads,
@@ -101,7 +101,7 @@ export function CommentInput({
     remove: removeUpload,
     reset: resetUploads,
     isStaged,
-  } = useStagedUpload({tenant});
+  } = useStagedUpload({tenantScope});
 
   const form = useForm<z.infer<typeof commentFormSchema>>({
     resolver: zodResolver(commentFormSchema),

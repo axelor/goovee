@@ -60,9 +60,9 @@ export function Total({
   config,
   invoice,
   invoiceType,
-  workspaceURI,
   token,
   onPaymentUpdate,
+  allowStripeBankTransfer,
 }: TotalProps) {
   const {
     inTaxTotal,
@@ -161,7 +161,6 @@ export function Total({
         id,
         contextId,
         workspaceURL,
-        workspaceURI,
         token,
       });
 
@@ -367,6 +366,7 @@ export function Total({
               resetPaymentType={resetPaymentType}
               resetForm={resetForm}
               token={token}
+              allowStripeBankTransfer={allowStripeBankTransfer}
               onPaymentUpdate={status => {
                 setPaymentType(null);
                 onPaymentUpdate?.(status);

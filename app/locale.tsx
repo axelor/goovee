@@ -1,35 +1,48 @@
 'use client';
 
-import React, {useCallback, useEffect, useState} from 'react';
-import {authClient} from '@/lib/auth-client';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useAuthSession} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {useAppLang} from '@/ui/hooks';
 import {i18n, l10n} from '@/locale';
-import {useParams} from 'next/navigation';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
+/**
+ * Loads the tenant's translations and holds the tree back until they are in.
+ *
+ * Mounted inside the tenant shell, so the tenant is always known here: the
+ * addresses come from the scope that shell provides, and the locale from the
+ * session, which belongs to the same tenant. The screens the deployment renders
+ * for an address resolving no tenant sit above this and are written in English
+ * instead.
+ */
 export default function Locale({children}: {children: React.ReactNode}) {
   const [loading, setLoading] = useState<number>(0);
-  const params = useParams();
-  const tenant = params?.tenant;
 
-  const {data: session, isPending} = authClient.useSession();
+  const scope = useTenantScope();
+
+  const {data: session, isPending} = useAuthSession();
   const user = session?.user;
   const locale = user?.locale;
 
   const {dir, lang} = useAppLang({locale});
 
-  const init = useCallback(async (locale?: string | null, tenant?: string) => {
-    setLoading(l => l + 1);
-    await l10n.init(locale);
-    await i18n.load(l10n.getLocale(), tenant);
-    setLoading(l => l - 1);
-  }, []);
+  const init = useCallback(
+    async (locale: string | null | undefined, tenantScope: TenantScope) => {
+      setLoading(l => l + 1);
+      await l10n.init(locale);
+      await i18n.load(l10n.getLocale(), tenantScope);
+      setLoading(l => l - 1);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (isPending) return;
-    init(locale, tenant as string);
-  }, [init, isPending, locale, tenant]);
+    init(locale, scope);
+  }, [init, isPending, locale, scope]);
 
   useEffect(() => {
     document.documentElement.lang = lang;

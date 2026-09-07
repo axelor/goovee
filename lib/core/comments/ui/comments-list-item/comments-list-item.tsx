@@ -1,4 +1,4 @@
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {useMemo, useState} from 'react';
 import {
   MdFavoriteBorder,
@@ -20,7 +20,6 @@ import {
   formatNumber,
   formatRelativeTime,
 } from '@/locale/formatters';
-import {type Tenant} from '@/tenant';
 import type {ID} from '@/types';
 import {
   Avatar,
@@ -55,6 +54,7 @@ import type {
 import {isTrackObject, parseCommentContent} from '../../utils/helpers';
 import {CommentInput} from '../comment-input';
 import {CommentAttachments, CommentTracks} from '../comments-list';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 interface CommentListItemProps {
   recordId: ID;
@@ -66,7 +66,7 @@ interface CommentListItemProps {
   isTopLevel?: boolean;
   sortBy?: SORT_TYPE;
   onSubmit?: (data: CreateProps) => Promise<void>;
-  tenantId: Tenant['id'];
+  tenantScope: TenantScope;
   commentField: CommentField;
   trackingField: TrackingField;
   disableReply?: boolean;
@@ -96,7 +96,7 @@ export const CommentListItem = ({
   isTopLevel = true,
   sortBy,
   onSubmit,
-  tenantId,
+  tenantScope,
   commentField,
   trackingField,
   disableReply,
@@ -138,7 +138,7 @@ export const CommentListItem = ({
     [trackingFieldValue],
   );
 
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const isLoggedIn = Boolean(session?.user?.id);
   const isDisabled = !isLoggedIn || disabled;
 
@@ -201,7 +201,7 @@ export const CommentListItem = ({
         isTopLevel={false}
         disabled={isDisabled}
         onSubmit={onSubmit}
-        tenantId={tenantId}
+        tenantScope={tenantScope}
         commentField={commentField}
         trackingField={trackingField}
         disableReply={disableReply}
@@ -214,7 +214,7 @@ export const CommentListItem = ({
   const renderAvatar = (pictureId: ID, name?: string | null) => (
     <Avatar className="rounded-full h-7 w-7 bg-peach-avatar text-white text-[10px] font-bold overflow-hidden">
       <AvatarImage
-        src={getPartnerImageURL(pictureId, tenantId)}
+        src={getPartnerImageURL(pictureId, tenantScope)}
         alt={name ?? ''}
         size={28}
       />
@@ -334,7 +334,7 @@ export const CommentListItem = ({
             <Avatar className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
               {partner?.picture?.id && (
                 <AvatarImage
-                  src={getPartnerImageURL(partner.picture.id, tenantId)}
+                  src={getPartnerImageURL(partner.picture.id, tenantScope)}
                   alt={authorName ?? ''}
                   size={36}
                 />

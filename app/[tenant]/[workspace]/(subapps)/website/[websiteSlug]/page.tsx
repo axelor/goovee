@@ -1,11 +1,9 @@
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {denyPage} from '@/lib/core/access/denial';
+import {SUBAPP_CODES} from '@/constants';
 import {Website} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -25,37 +23,21 @@ export default async function Layout(props: {
   const params = await props.params;
 
   const {websiteSlug} = params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
+
+  const workspaceURI = access.scope.forRouter();
 
   const {user} = access;
   const {client} = access.tenant;
   const {config} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -85,9 +67,15 @@ export default async function Layout(props: {
 
   if (websitePageSlug) {
     redirect(
-      `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
+      access.scope.forRouter(
+        `/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
+      ),
     );
   }
 
-  return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
+  return (
+    <NotFound
+      homePageUrl={access.scope.forRouter(`/${SUBAPP_CODES.website}`)}
+    />
+  );
 }

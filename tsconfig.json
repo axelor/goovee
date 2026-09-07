@@ -32,6 +32,7 @@
       "@/locale/*": ["./lib/core/locale/*"],
       "@/tenant": ["./lib/core/tenant/index"],
       "@/tenant/*": ["./lib/core/tenant/*"],
+      "@/config/*": ["./lib/core/config/*"],
       "@/storage/*": ["./lib/core/storage/*"],
       "@/notification": ["./lib/core/notification/index"],
       "@/notification/*": ["./lib/core/notification/*"],

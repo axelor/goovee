@@ -1,7 +1,7 @@
 'use client';
 
 import {useCallback} from 'react';
-import {authClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/lib/auth-client';
 import {usePushNotifications} from '@/pwa/push-context';
 
 /* NOTE: Use this hook instead of calling authClient.signOut() directly.
@@ -10,6 +10,7 @@ import {usePushNotifications} from '@/pwa/push-context';
  */
 export function useSignOut() {
   const {unsubscribe} = usePushNotifications();
+  const authClient = useAuthClient();
 
   return useCallback(
     async (...args: Parameters<typeof authClient.signOut>) => {
@@ -18,8 +19,11 @@ export function useSignOut() {
       } catch (error) {
         console.error('Failed to unsubscribe on logout:', error);
       }
-      await authClient.signOut(...args);
+      /* Returned rather than swallowed: a sign-out the server refuses arrives as
+       * an `error` in here instead of throwing, and a caller that leaves the
+       * visitor on a screen of their own has to know it did not happen. */
+      return authClient.signOut(...args);
     },
-    [unsubscribe],
+    [authClient, unsubscribe],
   );
 }

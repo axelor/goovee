@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
@@ -16,23 +15,16 @@ import {FolderLogoIcon} from '@/subapps/resources/common/ui/components/folder-lo
 import MobileMenuFolders from '@/subapps/resources/mobile-menu-folders';
 
 export default async function Layout({
-  params: paramsPromise,
   children,
 }: {
   params: Promise<{tenant: string; workspace: string}>;
   children: React.ReactNode;
 }) {
-  const params = await paramsPromise;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   // The authoritative access gate lives on each page; here we only resolve the
   // scoped client/user to populate the sidebar. When access is denied we render
   // the shell with an empty tree and let the page handle the redirect/404.
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
@@ -40,7 +32,7 @@ export default async function Layout({
     await Promise.all([
       access.ok
         ? fetchExplorerCategories({
-            workspaceURL,
+            workspaceURL: access.workspace.url,
             client: access.tenant.client,
             user: access.user,
           }).then(clone)
@@ -84,8 +76,6 @@ export default async function Layout({
     <div className="flex flex-1 min-h-[calc(100vh-var(--goovee-header-height,0px))] bg-ink-25">
       <DocsSidebar
         categories={categories}
-        workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         searchPlaceholder={searchPlaceholder}
         homeLabel={homeLabel}
         categoriesLabel={categoriesLabel}
@@ -93,8 +83,6 @@ export default async function Layout({
       />
       <MobileMenuFolders
         categories={categories}
-        workspaceURI={workspaceURI}
-        workspaceURL={workspaceURL}
         searchPlaceholder={searchPlaceholder}
         homeLabel={homeLabel}
         categoriesLabel={categoriesLabel}

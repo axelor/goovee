@@ -2,7 +2,7 @@
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import {i18n} from '@/locale';
 import {Portal} from '@/ui/components';
 import {useResponsive} from '@/ui/hooks';
@@ -14,10 +14,10 @@ import {MARKETPLACE_LINKS} from '../../../../constants/marketplace-links';
 import styles from './index.module.scss';
 
 function NavLinks() {
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
   const pathname = usePathname();
-  const {data: session} = authClient.useSession();
-  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const {data: session} = useAuthSession();
+  const marketplaceBase = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const links = useMemo(
     () => MARKETPLACE_LINKS.filter(item => !item.requiresAuth || session?.user),

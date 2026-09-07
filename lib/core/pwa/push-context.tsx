@@ -10,9 +10,9 @@ import React, {
 } from 'react';
 import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
-import {authClient} from '@/lib/auth-client';
-import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useAuthSession} from '@/lib/auth-client';
+import {pushChannelName, MSG_TYPE} from './sw-constants';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
 
 interface PushContextType {
   permission: NotificationPermission;
@@ -29,6 +29,39 @@ interface PushContextType {
 
 const PushContext = createContext<PushContextType | undefined>(undefined);
 
+/**
+ * Whether a subscription was made for `key`, the VAPID public key this tenant
+ * publishes.
+ *
+ * True where there is nothing to compare — a browser that reports no key on the
+ * subscription, or a tenant that publishes none — so a subscription is only ever
+ * discarded on a key that is known to differ.
+ *
+ * The browser holds the key as the bytes it decoded, so the comparison is made in
+ * that direction: base64url out of the bytes, then against the published string
+ * with its padding and its two substituted characters normalised.
+ */
+function subscribedWithKey(
+  subscription: PushSubscription,
+  key: string | undefined,
+): boolean {
+  const subscribed = subscription.options.applicationServerKey;
+
+  if (!subscribed || !key) return true;
+
+  const bytes = new Uint8Array(subscribed);
+  let binary = '';
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  const base64url = (value: string) =>
+    value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  return base64url(btoa(binary)) === base64url(key);
+}
+
 export function PushProvider({
   children,
   tenant,
@@ -37,7 +70,8 @@ export function PushProvider({
   tenant: string;
 }) {
   const env = useEnvironment();
-  const {data: session, isPending} = authClient.useSession();
+  const scope = useTenantScope();
+  const {data: session, isPending} = useAuthSession();
   const user = session?.user;
   const userId = user?.id;
 
@@ -56,9 +90,7 @@ export function PushProvider({
   const fetchNotifications = useCallback(async () => {
     if (!tenant || !userId) return;
     try {
-      const response = await fetch(
-        withBasePath(`/api/tenant/${tenant}/push/notifications`),
-      );
+      const response = await fetch(scope.forBrowser('/api/push/notifications'));
       if (response.ok) {
         const data: NotificationDTO[] = await response.json();
         setUnreadNotifications(data);
@@ -66,14 +98,14 @@ export function PushProvider({
     } catch (error) {
       console.error('Failed to fetch unread notifications:', error);
     }
-  }, [tenant, userId]);
+  }, [scope, tenant, userId]);
 
   const markAsRead = useCallback(
     async (id: string) => {
       if (!tenant) return;
       try {
         const response = await fetch(
-          withBasePath(`/api/tenant/${tenant}/push/notifications/read/${id}`),
+          scope.forBrowser(`/api/push/notifications/read/${id}`),
           {method: 'POST'},
         );
         if (response.ok) {
@@ -87,14 +119,14 @@ export function PushProvider({
         console.error('Failed to mark notification as read:', error);
       }
     },
-    [tenant],
+    [scope, tenant],
   );
 
   const markAllAsRead = useCallback(async () => {
     if (!tenant) return;
     try {
       const response = await fetch(
-        withBasePath(`/api/tenant/${tenant}/push/notifications/read/all`),
+        scope.forBrowser('/api/push/notifications/read/all'),
         {method: 'POST'},
       );
       if (response.ok) {
@@ -106,13 +138,13 @@ export function PushProvider({
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
     }
-  }, [tenant]);
+  }, [scope, tenant]);
 
   const syncSubscription = useCallback(
     async (sub: PushSubscription) => {
       if (!tenant) return;
       try {
-        await fetch(withBasePath(`/api/tenant/${tenant}/push/subscribe`), {
+        await fetch(scope.forBrowser('/api/push/subscribe'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -123,7 +155,7 @@ export function PushProvider({
         console.error('Failed to sync push subscription:', error);
       }
     },
-    [tenant],
+    [scope, tenant],
   );
 
   const refreshPushNotifications = useCallback(async () => {
@@ -136,12 +168,33 @@ export function PushProvider({
       const registration = await navigator.serviceWorker.ready;
       let sub = await registration.pushManager.getSubscription();
 
+      /* A subscription is signed for one key pair, and the push service refuses a
+       * delivery signed with another — with a 401 or 403, which is neither
+       * temporary nor gone, so nothing retries it and nothing prunes the record.
+       * The device would go silent for good. Discarding the subscription lets the
+       * auto-heal below make one for the key this tenant now publishes.
+       *
+       * A subscription outlives the key it was made with wherever the worker
+       * holding it is updated rather than replaced, which is what happens when a
+       * registration keeps its scope: a tenant changing its key pair, or one given
+       * an origin of its own on a host it was already served on. */
+      if (
+        sub &&
+        currentPermission === 'granted' &&
+        tenant &&
+        userId &&
+        !subscribedWithKey(sub, env.webPush?.publicKey)
+      ) {
+        await sub.unsubscribe().catch(() => {});
+        sub = null;
+      }
+
       // AUTO-HEAL: If permission is granted but subscription is missing, create it
       if (currentPermission === 'granted' && !sub && tenant && userId) {
         try {
           sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+            applicationServerKey: env.webPush?.publicKey,
           });
         } catch (err) {
           console.error('Failed to auto-subscribe:', err);
@@ -167,7 +220,7 @@ export function PushProvider({
       fetchNotifications();
     }
   }, [
-    env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+    env.webPush?.publicKey,
     syncSubscription,
     tenant,
     fetchNotifications,
@@ -184,24 +237,19 @@ export function PushProvider({
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey: env.webPush?.publicKey,
       });
 
       setSubscription(sub);
       await syncSubscription(sub);
     }
-  }, [
-    env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
-    isSupported,
-    syncSubscription,
-    tenant,
-  ]);
+  }, [env.webPush?.publicKey, isSupported, syncSubscription, tenant]);
 
   const unsubscribe = useCallback(async () => {
     if (subscription && tenant) {
       try {
         await subscription.unsubscribe();
-        await fetch(withBasePath(`/api/tenant/${tenant}/push/unsubscribe`), {
+        await fetch(scope.forBrowser('/api/push/unsubscribe'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -214,7 +262,7 @@ export function PushProvider({
         console.error('Failed to unsubscribe from push notifications:', error);
       }
     }
-  }, [subscription, tenant]);
+  }, [scope, subscription, tenant]);
 
   useEffect(() => {
     refreshPushNotifications();
@@ -234,7 +282,7 @@ export function PushProvider({
     }
 
     // Listen for messages from the Service Worker (e.g. to refresh count when push arrives)
-    broadcastChannel.current = new BroadcastChannel(PUSH_CHANNEL);
+    broadcastChannel.current = new BroadcastChannel(pushChannelName(tenant));
     broadcastChannel.current.onmessage = event => {
       if (event.data?.type === MSG_TYPE.NEW && event.data.notification) {
         setUnreadNotifications(prev =>
@@ -256,7 +304,10 @@ export function PushProvider({
       broadcastChannel.current?.close();
       broadcastChannel.current = null;
     };
-  }, [refreshPushNotifications]);
+    /* `tenant` names the channel, so a change has to tear the old one down and
+     * open the new one — otherwise the panel would keep listening to the tenant
+     * it was first mounted for. */
+  }, [refreshPushNotifications, tenant]);
 
   // Safety cleanup: If we have a subscription but no user, unsubscribe
   useEffect(() => {

@@ -1,14 +1,12 @@
 'use server';
 
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {clone} from '@/utils';
 import {getTotal} from '@/utils/pagination';
 import {BigDecimal} from '@goovee/orm';
-import {headers} from 'next/headers';
 import {z} from 'zod';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {
@@ -43,7 +41,6 @@ import {parseVersionNumber} from '../utils/version-number';
 
 const loadMyProductForEditSchema = z.object({
   productId: z.string().min(1),
-  workspaceURL: z.string().min(1),
 });
 type LoadMyProductForEditInput = z.infer<typeof loadMyProductForEditSchema>;
 
@@ -54,10 +51,6 @@ export async function loadMyProductForEdit(
   versions: Cloned<MyProductVersion>[];
   total: number;
 }> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
   const parsed = loadMyProductForEditSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -65,12 +58,10 @@ export async function loadMyProductForEdit(
       message: z.prettifyError(parsed.error),
     };
   }
-  const {productId, workspaceURL} = parsed.data;
+  const {productId} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
@@ -136,7 +127,6 @@ export async function loadMyProductForEdit(
 
 const searchProductsSchema = z.object({
   search: z.string().min(1).max(200),
-  workspaceURL: z.string().min(1),
   type: z.enum(MARKETPLACE_TYPE).optional(),
 });
 
@@ -145,10 +135,6 @@ type SearchProductsInput = z.infer<typeof searchProductsSchema>;
 export async function searchProducts(
   input: SearchProductsInput,
 ): ActionResponse<Cloned<ProductSearchResult>[]> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
   const parsed = searchProductsSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -156,12 +142,10 @@ export async function searchProducts(
       message: z.prettifyError(parsed.error),
     };
   }
-  const {search, workspaceURL, type} = parsed.data;
+  const {search, type} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) {
@@ -188,23 +172,15 @@ export async function searchProducts(
 export async function saveProductWithVersions(
   input: SavePayload,
 ): ActionResponse<{productId: string}> {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {error: true, message: await t('TenantId is required')};
-  }
-
   const parsed = savePayloadSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
   const payload = parsed.data;
-  const {workspaceURL} = payload;
   const product = payload.product;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};

@@ -282,9 +282,7 @@ export async function findDefaultPartnerWorkspaceConfig({
 
   const workspace = await client.aOSPortalWorkspace.findOne({
     where: {
-      url: {
-        like: url,
-      },
+      url,
     },
     select: {
       defaultPartnerWorkspace: {
@@ -548,9 +546,7 @@ export async function findWorkspaceForRegistration({
     const workspace = await client.aOSPortalWorkspace
       .findOne({
         where: {
-          url: {
-            like: `${url}%`,
-          },
+          url,
           AND: [
             {
               OR: [
@@ -734,7 +730,7 @@ const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
 export const findGuestWorkspace = cache(
   async (url: string, client: Client): Promise<Workspace | null> => {
     const workspace = await client.aOSPortalWorkspace.findOne({
-      where: {url: {like: url}},
+      where: {url},
       select: {
         ...workspaceFields,
         defaultGuestWorkspace: {

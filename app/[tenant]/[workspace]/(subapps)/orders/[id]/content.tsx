@@ -17,7 +17,6 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {getProductImageURL} from '@/utils/files';
 import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -34,6 +33,7 @@ import type {
   DetailOrder,
   OrderAddress,
 } from '@/subapps/orders/common/types/orders';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const Content = ({order}: {order: DetailOrder}) => {
   const {
@@ -65,7 +65,7 @@ const Content = ({order}: {order: DetailOrder}) => {
     deliveredAt: undefined,
   });
 
-  const {workspaceURI, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
 
   const hideDiscount = saleOrderLineList?.every(
     item => parseFloat(String(item.discountAmount)) === 0,
@@ -88,13 +88,13 @@ const Content = ({order}: {order: DetailOrder}) => {
             <strong className="text-ink-900 tabular-nums">{inTaxTotal}</strong>
           </>
         }
-        backHref={`${workspaceURI}/${SUBAPP_CODES.orders}`}
+        backHref={scope.forRouter(`/${SUBAPP_CODES.orders}`)}
         actions={
           orderReport ? (
             <Button asChild variant="ink-outline" size="sm">
               <a
-                href={withBasePath(
-                  `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/attachment`,
+                href={scope.forBrowser(
+                  `/${SUBAPP_CODES.orders}/api/order/${id}/attachment`,
                 )}>
                 <MdOutlineFileDownload className="text-base mr-1" />
                 {i18n.t('Download order')}
@@ -140,7 +140,11 @@ const Content = ({order}: {order: DetailOrder}) => {
                   </li>
                 )}
                 {saleOrderLineList.map(line => (
-                  <ProductRow key={line.id} line={line} tenant={tenant} />
+                  <ProductRow
+                    key={line.id}
+                    line={line}
+                    tenantScope={tenantScope}
+                  />
                 ))}
               </ul>
             </Card>
@@ -202,8 +206,8 @@ const Content = ({order}: {order: DetailOrder}) => {
                   id: record.id,
                   label: record.invoiceId,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
-                  downloadURL: withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`,
+                  downloadURL: scope.forBrowser(
+                    `/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`,
                   ),
                 }))}
               />
@@ -216,8 +220,8 @@ const Content = ({order}: {order: DetailOrder}) => {
                   id: record.id,
                   label: record.stockMoveSeq,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
-                  downloadURL: withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`,
+                  downloadURL: scope.forBrowser(
+                    `/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`,
                   ),
                 }))}
               />
@@ -386,12 +390,12 @@ function AddressBlock({
 
 function ProductRow({
   line,
-  tenant,
+  tenantScope,
 }: {
   line: NonNullable<DetailOrder['saleOrderLineList']>[number];
-  tenant: string;
+  tenantScope: TenantScope;
 }) {
-  const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
+  const imageURL = getProductImageURL(line.product?.picture?.id, tenantScope, {
     noimage: true,
   });
   const taxValue = line.taxLineSet?.[0]?.value;

@@ -15,7 +15,7 @@ import {
 
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 import {i18n} from '@/locale';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components';
@@ -46,36 +46,33 @@ export interface DocsFolderViewLabels {
 export function DocsFolderView({
   folder,
   files,
-  workspaceURI,
   labels,
   uploadParent,
   folderParent,
 }: {
   folder: FolderWithParent;
   files: DmsFile[];
-  workspaceURI: string;
   labels: DocsFolderViewLabels;
   // Each present only when the user may perform that action into this folder;
   // opens a modal instead of navigating to a separate create page.
   uploadParent?: {id: string; fileName?: string | null} | null;
   folderParent?: {id: string; fileName?: string | null} | null;
 }) {
+  const {scope} = useWorkspace();
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [folderOpen, setFolderOpen] = useState(false);
 
-  const docsRoot = `${workspaceURI}/${SUBAPP_CODES.resources}`;
+  const docsRoot = scope.forRouter(`/${SUBAPP_CODES.resources}`);
   const folderHref = (id: string) =>
-    `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${id}`;
+    scope.forRouter(`/${SUBAPP_CODES.resources}/folder/${id}`);
   const viewHref = (id: string) =>
-    `${workspaceURI}/${SUBAPP_CODES.resources}/${id}`;
+    scope.forRouter(`/${SUBAPP_CODES.resources}/${id}`);
   // Real download endpoint (streams the file), gated on the DMS file actually
   // having a metaFile — the row action used to just re-open the viewer.
   const downloadHref = (file: DmsFile) =>
     file.metaFile?.id
-      ? withBasePath(
-          `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${file.id}`,
-        )
+      ? scope.forBrowser(`/${SUBAPP_CODES.resources}/api/file/${file.id}`)
       : null;
 
   const lastUpdated = useMemo(() => {

@@ -2,6 +2,9 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
+// ---- CORE IMPORTS ---- //
+import {getDeploymentConfig} from '@/tenant/config';
+
 // ---- LOCAL IMPORTS ---- //
 import {
   CACHE_VERSION,
@@ -26,10 +29,16 @@ import {
  * access before reaching this module, on every request.
  */
 
-/** Bytes the cache may occupy, overridable via `IMAGE_CACHE_MAX_BYTES`. */
+/**
+ * Bytes the cache may occupy, from the deployment's `imageCache.maxBytes`.
+ *
+ * One directory beside the build holds every tenant's derivatives, so the budget
+ * is the deployment's rather than any tenant's. Entries are keyed by the absolute
+ * source path, which is what keeps one tenant's derivatives distinct from
+ * another's — a relative path here would make them collide.
+ */
 function maxBytes(): number {
-  const configured = Number(process.env.IMAGE_CACHE_MAX_BYTES);
-  return configured > 0 ? configured : DEFAULT_CACHE_MAX_BYTES;
+  return getDeploymentConfig().imageCache?.maxBytes ?? DEFAULT_CACHE_MAX_BYTES;
 }
 
 /**

@@ -158,6 +158,7 @@
   "Bank address": "Adresse de la banque",
   "Bank details are currently unavailable": "Les coordonnées bancaires ne sont pas disponibles pour le moment.",
   "Bank information": "Informations bancaires",
+  "Bank transfer is not available.": "Le virement bancaire n’est pas disponible.",
   "Bank transfer is not supported": "Le virement bancaire n'est pas pris en charge",
   "Bank transfers may immediately use your existing Stripe balance.": "Les virements bancaires peuvent utiliser immédiatement votre solde Stripe existant.",
   "Baseline": "Ligne de base",

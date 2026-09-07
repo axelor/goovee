@@ -1,11 +1,10 @@
 'use server';
 
 import {z} from 'zod';
-import {getSession} from '@/auth';
 import {t} from '@/locale/server';
-import {manager} from '@/tenant';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {updatePreferences} from '@/orm/notification';
-import {revalidatePath} from 'next/cache';
 import {
   UpdateNotificationPreferenceSchema,
   type UpdateNotificationPreference,
@@ -25,25 +24,17 @@ export async function updatePreference(data: UpdateNotificationPreference) {
     return error(z.prettifyError(validation.error));
   }
 
-  const {
-    workspaceURL,
-    workspaceURI,
-    code,
-    data: notificationData,
-    tenant: tenantId,
-  } = validation.data;
-  const session = await getSession();
-  const user = session?.user;
+  const {code, data: notificationData} = validation.data;
 
-  if (!user) {
-    return error(await t('Unauthorized'));
+  const access = await ensureAccess();
+
+  if (!access.ok) {
+    return error(await accessMessage(access.reason));
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return error(await t('Tenant not found'));
-  }
+  const {user, tenant, scope} = access;
   const {client} = tenant;
+  const workspaceURL = access.workspace.url;
 
   try {
     const result = await updatePreferences({
@@ -59,7 +50,7 @@ export async function updatePreference(data: UpdateNotificationPreference) {
       throw new Error();
     }
 
-    revalidatePath(`${workspaceURI}/account/notifications`);
+    scope.revalidate('/account/notifications');
 
     return {
       success: true,

@@ -1,57 +1,115 @@
 'use client';
 
 import React, {useContext, useEffect, useMemo, useRef} from 'react';
-import {
-  DEFAULT_TENANT,
-  DEFAULT_WORKSPACE,
-  DEFAULT_WORKSPACE_URI,
-} from '@/constants';
+import {DEFAULT_WORKSPACE} from '@/constants';
 
 // ---- CORE IMPORTS ---- //
 import {useTheme} from '@/app/theme';
 import {Theme} from '@/types/theme';
 import {type Workspace} from '@/orm/workspace';
 import {useEnvironment} from '@/environment';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {buildTenantScope, type TenantScope} from '@/lib/core/url/tenant-urls';
+import {
+  buildWorkspaceScope,
+  type WorkspaceScope,
+} from '@/lib/core/url/workspace-urls';
 
 export const WorkspaceContext = React.createContext<{
   tenant: string;
   workspace: string;
-  workspaceURI: string;
+  /**
+   * The workspace's stored `url`: a database key, never an address.
+   *
+   * Carried for the callers that need the value itself — a key in the browser's
+   * own store, whose spelling orphans every record saved under the old one, and
+   * a capability-token path that names the workspace the token was minted for.
+   * Anything that links somewhere takes `scope`.
+   */
   workspaceURL: string;
   workspaceID: Workspace['id'];
+  /** Every address below this workspace, measured from the prefix the server resolved. */
+  scope: WorkspaceScope;
+  /**
+   * Every address below the tenant — the route handlers, and the screens that
+   * sit beside this workspace rather than under it. Carried here so a component
+   * that already holds the workspace does not reach for a second hook.
+   */
+  tenantScope: TenantScope;
 }>({
-  tenant: DEFAULT_TENANT,
+  tenant: '',
   workspace: DEFAULT_WORKSPACE,
-  workspaceURI: DEFAULT_WORKSPACE_URI,
   workspaceURL: '',
   workspaceID: '',
+  scope: buildWorkspaceScope({
+    tenantId: '',
+    workspace: DEFAULT_WORKSPACE,
+    visitorPrefix: '',
+    host: undefined,
+  }),
+  tenantScope: buildTenantScope({
+    tenantId: '',
+    visitorPrefix: '',
+    host: undefined,
+  }),
 });
 
+/**
+ * Binds one workspace's addresses to everything below it.
+ *
+ * @param workspaceURI - the visitor prefix, given rather than built from the
+ *   tenant and workspace names: its shape depends on how the tenant is routed,
+ *   which is server-side configuration, and the workspace shell resolves it from
+ *   the access gate. It reaches the rest of the app only through `scope` —
+ *   nothing reads the prefix itself.
+ */
 export function WorkspaceProvider({
   id,
   tenant,
   workspace,
+  workspaceURI,
   theme,
   children,
 }: {
   id: Workspace['id'];
   tenant: string;
   workspace: string;
+  workspaceURI: string;
   theme?: {id: string; name: string; options: Theme};
   children: React.ReactNode;
 }) {
   const {updateTheme} = useTheme();
   const prevTheme = useRef<any>(undefined);
   const env = useEnvironment();
+  const tenantScope = useTenantScope();
 
-  const workspaceURI = `/${tenant}/${workspace}`;
-  const workspaceURL = `${env.GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
   const workspaceID = id;
 
+  /* Built from the prefix the server resolved, so the client never has to know
+   * how its tenant is routed. `forExternal()` with no sub-path is the stored
+   * workspace URL, which is why `workspaceURL` is read off it rather than
+   * joined a second way. */
+  const scope = useMemo(
+    () =>
+      buildWorkspaceScope({
+        tenantId: tenant,
+        workspace,
+        visitorPrefix: workspaceURI,
+        host: env.host,
+      }),
+    [tenant, workspace, workspaceURI, env.host],
+  );
+
   const value = useMemo(
-    () => ({tenant, workspace, workspaceURI, workspaceURL, workspaceID}),
-    [tenant, workspace, workspaceURI, workspaceURL, workspaceID],
+    () => ({
+      tenant,
+      workspace,
+      workspaceURL: scope.forExternal(),
+      workspaceID,
+      scope,
+      tenantScope,
+    }),
+    [tenant, workspace, workspaceID, scope, tenantScope],
   );
 
   useEffect(() => {

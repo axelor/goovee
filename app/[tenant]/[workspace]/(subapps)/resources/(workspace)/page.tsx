@@ -1,14 +1,12 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {denyPage} from '@/lib/core/access/denial';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -22,38 +20,17 @@ import {
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
-  const params = await props.params;
-
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   return (
     <Suspense fallback={<HomeSkeleton />}>
@@ -61,7 +38,7 @@ export default async function Page(props: {
         workspaceURL={workspaceURL}
         client={client}
         user={user}
-        workspaceURI={workspaceURI}
+        scope={access.scope}
       />
     </Suspense>
   );
@@ -71,12 +48,12 @@ async function HomeContent({
   workspaceURL,
   client,
   user,
-  workspaceURI,
+  scope,
 }: {
   workspaceURL: string;
   client: Client;
   user?: User;
-  workspaceURI: string;
+  scope: WorkspaceScope;
 }) {
   const [pinnedFolders, labels] = await Promise.all([
     fetchPinnedFoldersWithMeta({workspaceURL, client, user}).then(clone),
@@ -86,7 +63,7 @@ async function HomeContent({
   return (
     <DocsHomeView
       pinnedFolders={pinnedFolders ?? []}
-      workspaceURI={workspaceURI}
+      scope={scope}
       labels={labels}
     />
   );

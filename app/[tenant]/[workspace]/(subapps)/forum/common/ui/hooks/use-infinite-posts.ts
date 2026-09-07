@@ -8,7 +8,6 @@ import {useInView} from 'react-intersection-observer';
 import {i18n} from '@/locale';
 import {DEFAULT_LIMIT} from '@/constants';
 import {useSearchParams, useToast} from '@/ui/hooks';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -38,7 +37,6 @@ export function useInfinitePosts<T extends {id: string | number}>({
   const [loading, setLoading] = useState(false);
   const [ref, inView] = useInView();
 
-  const {workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const {searchParams} = useSearchParams();
 
@@ -81,7 +79,6 @@ export function useInfinitePosts<T extends {id: string | number}>({
         search,
         limit: DEFAULT_LIMIT,
         page: nextPage,
-        workspaceURL,
         groupIDs: groupKey ? groupKey.split(',') : [],
         memberGroupIDs: memberKey ? memberKey.split(',') : [],
       });
@@ -115,17 +112,7 @@ export function useInfinitePosts<T extends {id: string | number}>({
       // Only the current generation clears loading.
       if (generation === generationRef.current) setLoading(false);
     }
-  }, [
-    loading,
-    hasMore,
-    page,
-    sort,
-    search,
-    workspaceURL,
-    toast,
-    groupKey,
-    memberKey,
-  ]);
+  }, [loading, hasMore, page, sort, search, toast, groupKey, memberKey]);
 
   useEffect(() => {
     if (inView) loadMore();

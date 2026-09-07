@@ -158,6 +158,7 @@
   "Bank address": "Bank address",
   "Bank details are currently unavailable": "Bank details are currently unavailable",
   "Bank information": "Bank information",
+  "Bank transfer is not available.": "Bank transfer is not available.",
   "Bank transfer is not supported": "Bank transfer is not supported",
   "Bank transfers may immediately use your existing Stripe balance.": "Bank transfers may immediately use your existing Stripe balance.",
   "Baseline": "Baseline",

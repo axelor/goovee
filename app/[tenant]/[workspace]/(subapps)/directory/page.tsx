@@ -1,12 +1,13 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/lib/core/locale/server';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {
   Pagination,
   PaginationContent,
@@ -17,9 +18,6 @@ import {
 } from '@/ui/components/pagination';
 import {clone} from '@/utils';
 import {getPaginationButtons, getPages, getSkip} from '@/utils/pagination';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
 
@@ -34,6 +32,7 @@ import {MapSkeleton} from './common/ui/components/map/map-skeleton';
 import {getOrderBy} from './common/utils';
 import Hero from './hero';
 import {Client} from '@/goovee/.generated/client';
+import {currentTenantScope} from '@/lib/core/url/current';
 
 const ITEMS_PER_PAGE = 7;
 
@@ -42,34 +41,15 @@ export default async function Page(props: {
   searchParams: Promise<SearchParams>;
 }) {
   const searchParams = await props.searchParams;
-  const params = await props.params;
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+
+  const tenantScope = await currentTenantScope();
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: true,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {client} = access.tenant;
 
@@ -89,9 +69,7 @@ export default async function Page(props: {
 
   const pages = getPages(partners, limit);
   const imageURL = config?.directoryHeroBgImage?.id
-    ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.directory}/api/hero/background`,
-      )
+    ? access.scope.forBrowser(`/${SUBAPP_CODES.directory}/api/hero/background`)
     : withBasePath(IMAGE_URL);
 
   return (
@@ -123,14 +101,16 @@ export default async function Page(props: {
               {partners.map(item => (
                 <Card
                   item={item}
-                  url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${item.id}`}
+                  url={access.scope.forRouter(
+                    `/${SUBAPP_CODES.directory}/entry/${item.id}`,
+                  )}
                   key={item.id}
-                  tenant={tenant}
+                  tenantScope={tenantScope}
                 />
               ))}
               {pages > 1 && (
                 <CardPagination
-                  url={`${workspaceURI}/${SUBAPP_CODES.directory}`}
+                  url={access.scope.forRouter(`/${SUBAPP_CODES.directory}`)}
                   pages={pages}
                   searchParams={searchParams}
                 />

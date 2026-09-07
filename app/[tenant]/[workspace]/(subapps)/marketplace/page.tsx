@@ -19,14 +19,12 @@ import {
   getSkip,
   getTotal,
 } from '@/utils/pagination';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+
 import {getPartnerId} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
 import type {OrderByOptions} from '@goovee/orm';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound} from 'next/navigation';
 import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 import {
   findProductCategories,
@@ -39,6 +37,7 @@ import {PriceTypeSelect} from './common/ui/components/product/price-type-select'
 import {ProductSortSelect} from './common/ui/components/product/product-sort-select';
 import {ProductTypeSelect} from './common/ui/components/product/product-type-select';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {getMarketplaceConfig} from './common/orm/config';
 import {
   PAGE_SIZE,
@@ -59,44 +58,17 @@ export default async function Page(props: {
 
   const paramsResult = pageParamsSchema.safeParse(rawParams);
   if (!paramsResult.success) notFound();
-  const params = paramsResult.data;
 
   const searchParamsResult = searchParamsSchema.safeParse(rawSearchParams);
   if (!searchParamsResult.success) notFound();
   const searchParams = searchParamsResult.data;
-
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
-
-  const listingHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          tenant: tenantId,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
+
+  const listingHref = access.scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
 
   const {limit, page, category, sort, priceType, type: rawType} = searchParams;
   const client = access.tenant.client;
@@ -279,7 +251,7 @@ export default async function Page(props: {
               <ProductCard
                 key={product.id}
                 product={product}
-                workspaceURI={workspaceURI}
+                scope={access.scope}
               />
             ))}
           </div>

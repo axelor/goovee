@@ -1,26 +1,21 @@
-import {taintSecret} from '@/lib/core/security/taint';
 import {type TenantConfig} from '@/tenant';
 
 /**
- * Get the Mattermost host URL from environment variables
+ * The tenant's Mattermost host, or an empty string where there is no config or
+ * it declares none. Browser-facing, so it lives in the tenant's `public` group.
  */
-export function getHost(): string {
-  return process.env.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
+export function getHost(config?: TenantConfig | null): string {
+  return config?.public.mattermost?.host || '';
 }
 
-export function getAdminToken(): string {
-  const token = process.env.MATTERMOST_TOKEN || '';
-
-  taintSecret(
-    'Mattermost token is a server secret. Do not pass to Client Components.',
-    token,
-  );
-
-  return token;
+export function getAdminToken(config?: TenantConfig | null): string {
+  return config?.mattermost?.token || '';
 }
 
-export function isCreateMattermostUsersEnabled(): boolean {
-  return process.env.CREATE_MATTERMOST_USERS === 'true';
+export function isCreateMattermostUsersEnabled(
+  config?: TenantConfig | null,
+): boolean {
+  return config?.mattermost?.createUsers === true;
 }
 
 export function getAosUrl(config: TenantConfig): string {

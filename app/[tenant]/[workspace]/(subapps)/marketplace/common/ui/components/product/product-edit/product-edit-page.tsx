@@ -34,8 +34,6 @@ type ProductEditPageProps = {
   inAti: boolean;
   requiresReview: boolean;
   allowToPublish: boolean;
-  workspaceURI: string;
-  workspaceURL: string;
   /** Where Save and Cancel navigate to. */
   returnHref: string;
 };
@@ -52,8 +50,6 @@ export function ProductEditPage({
   inAti,
   requiresReview,
   allowToPublish,
-  workspaceURI,
-  workspaceURL,
   returnHref,
 }: ProductEditPageProps) {
   const router = useRouter();
@@ -62,7 +58,6 @@ export function ProductEditPage({
     defaultType,
     initialVersions,
     initialTotal,
-    workspaceURL,
     onSaved: () => router.push(returnHref, {scroll: false}),
   });
   const leave = () => router.push(returnHref, {scroll: false});
@@ -87,7 +82,6 @@ export function ProductEditPage({
             requiresReview={requiresReview}
             allowToPublish={allowToPublish}
             compatibilityVersions={compatibilityVersions}
-            workspaceURI={workspaceURI}
           />
         </div>
 

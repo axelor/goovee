@@ -25,9 +25,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
-.env
+# local env files — every layer the server reads, since a PORTAL_* variable in
+# any of them carries a database URL, a session secret or a payment secret. The
+# tracked reference is named env.example, without the leading dot, so that this
+# one pattern needs no exception.
+.env*
+
+# configuration files — hold db/auth/payment secrets, never commit; only the
+# generated references (portal.config.example.json, portal.config.schema.json)
+# are tracked. portal.env is what `config:migrate --format env` writes.
+/portal.config*.json
+!/portal.config.example.json
+!/portal.config.schema.json
+/portal.env
 
 # vercel
 .vercel

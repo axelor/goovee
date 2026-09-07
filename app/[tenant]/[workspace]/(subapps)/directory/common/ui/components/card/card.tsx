@@ -6,14 +6,14 @@ import {Link} from '@/ui/components/link';
 import {Cloned, Maybe} from '@/types/util';
 import type {Entry, ListEntry} from '../../../types';
 import {getPartnerImageURL} from '@/utils/files';
-import {Tenant} from '@/lib/core/tenant';
 import {cn} from '@/utils/css';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 export type CardProps = {
   item: ListEntry | Entry | Cloned<Entry> | Cloned<ListEntry>;
   url?: string;
   compact?: boolean;
-  tenant: Tenant['id'];
+  tenantScope: TenantScope;
   className?: string;
 };
 
@@ -21,7 +21,7 @@ const stripImages = (htmlContent: Maybe<string>) =>
   htmlContent?.replace(/<img\b[^>]*>/gi, '');
 
 export function Card(props: CardProps) {
-  const {item, url, compact, tenant, className} = props;
+  const {item, url, compact, tenantScope, className} = props;
 
   const Wrapper = url ? Link : 'div';
 
@@ -39,7 +39,7 @@ export function Card(props: CardProps) {
             fill
             sizes="40px"
             className="object-contain"
-            src={getPartnerImageURL(item.picture?.id, tenant, {
+            src={getPartnerImageURL(item.picture?.id, tenantScope, {
               noimage: true,
               noimageSrc: NO_IMAGE_URL,
             })}
@@ -88,7 +88,7 @@ export function Card(props: CardProps) {
           fill
           sizes="160px"
           className="object-contain p-3"
-          src={getPartnerImageURL(item.picture?.id, tenant, {
+          src={getPartnerImageURL(item.picture?.id, tenantScope, {
             noimage: true,
             noimageSrc: NO_IMAGE_URL,
           })}

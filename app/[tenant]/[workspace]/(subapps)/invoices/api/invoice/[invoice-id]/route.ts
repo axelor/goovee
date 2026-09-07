@@ -6,7 +6,7 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {findLatestDMSFileByName, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, type User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
@@ -26,7 +26,6 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'invoice-id': invoiceId} = params;
   const token = request.nextUrl.searchParams.get('token') ?? undefined;
 
@@ -37,10 +36,17 @@ export async function GET(
 
   if (token) {
     /* Token path: the token is fused into findInvoice, which is what authorizes
-       this specific invoice; ensureTokenAccess only resolves the workspace. */
+       this specific invoice; ensureTokenAccess only resolves the workspace. The
+       workspace is named from the address the request arrived at, because no
+       gate runs before it to resolve one. */
+    const scope = await currentWorkspace();
+    if (!scope) {
+      return new NextResponse('Not found', {status: 404});
+    }
+
     const access = await ensureTokenAccess({
-      url: workspaceURL,
-      tenantId,
+      url: scope.key(),
+      tenantId: scope.tenantId,
       token,
     });
     if (!access.ok) {
@@ -53,15 +59,14 @@ export async function GET(
     invoice = await findInvoice({
       id: invoiceId,
       token: access.token,
-      workspaceURL,
+      workspaceURL: access.workspace.url,
+      tenantId: access.tenant.id,
       client,
     });
     fileAccess = {skipUserCheck: true};
   } else {
     const access = await ensureAccess({
       code: SUBAPP_CODES.invoices,
-      url: workspaceURL,
-      tenantId,
       allowGuest: false,
     });
     if (!access.ok) {
@@ -80,7 +85,8 @@ export async function GET(
     invoice = await findInvoice({
       id: invoiceId,
       params: {where: invoicesWhereClause},
-      workspaceURL,
+      workspaceURL: access.workspace.url,
+      tenantId: access.tenant.id,
       client,
     });
     fileAccess = {user: access.user};

@@ -8,7 +8,6 @@ import {
   DEFAULT_PAGE,
   MONTH,
   ORDER_BY,
-  SUBAPP_CODES,
   YEAR,
 } from '@/constants';
 import type {AOSPortalEvent} from '@/goovee/.generated/models';
@@ -418,8 +417,6 @@ export async function findEvent({
     };
   });
 
-  const eventLink = `${workspace.url}/${SUBAPP_CODES.events}/${event.slug}`;
-
   const additionalFieldSet = (await Promise.all(
     (event.additionalFieldSet ?? []).map(async field => {
       if (field.selection == null) return {...field, selectionOptions: null};
@@ -444,7 +441,6 @@ export async function findEvent({
       id: productsFromWS?.currencyId,
       code: productsFromWS?.currencyCode,
     },
-    eventLink,
     priceScale: scale,
   };
 }

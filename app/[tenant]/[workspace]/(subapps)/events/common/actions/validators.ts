@@ -1,10 +1,9 @@
 import {z} from 'zod';
-import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
+import {IdSchema} from '@/utils/validators';
 import {PaymentOption} from '@/types';
 
 export const SearchEventsSchema = z.object({
   search: z.string(),
-  workspaceURL: WorkspaceURLSchema,
 });
 
 const SubscriptionSchema = z.object({
@@ -42,7 +41,6 @@ const PaymentSchema = z.object({
 
 const BaseRegisterSchema = z.object({
   eventId: z.string(),
-  workspaceURL: WorkspaceURLSchema,
 });
 
 const FreeRegisterSchema = BaseRegisterSchema.extend({
@@ -58,12 +56,10 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 
 export const FetchContactsSchema = z.object({
   search: z.string(),
-  workspaceURL: WorkspaceURLSchema,
 });
 export type FetchContactsInput = z.infer<typeof FetchContactsSchema>;
 
 export const IsValidParticipantSchema = z.object({
-  workspaceURL: WorkspaceURLSchema,
   eventId: IdSchema,
   email: z.email(),
 });
@@ -71,13 +67,11 @@ export type IsValidParticipantInput = z.infer<typeof IsValidParticipantSchema>;
 
 export const FetchEventSchema = z.object({
   slug: z.string(),
-  workspaceURL: WorkspaceURLSchema,
 });
 export type FetchEventInput = z.infer<typeof FetchEventSchema>;
 
 export const CreateStripeCheckoutSessionSchema = z.object({
   eventId: IdSchema,
-  workspaceURL: WorkspaceURLSchema,
   values: RegistrationValuesSchema,
 });
 export type CreateStripeCheckoutSessionInput = z.infer<
@@ -86,14 +80,12 @@ export type CreateStripeCheckoutSessionInput = z.infer<
 
 export const PaypalCreateOrderSchema = z.object({
   values: RegistrationValuesSchema,
-  workspaceURL: WorkspaceURLSchema,
   eventId: IdSchema,
 });
 export type PaypalCreateOrderInput = z.infer<typeof PaypalCreateOrderSchema>;
 
 export const PayboxCreateOrderSchema = z.object({
   eventId: IdSchema,
-  workspaceURL: WorkspaceURLSchema,
   values: RegistrationValuesSchema,
   uri: z.string(),
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import {authClient} from '@/lib/auth-client';
+import {useAuthSession} from '@/lib/auth-client';
 import Image from 'next/image';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {
@@ -111,11 +111,11 @@ export function Comments(props: CommentsProps) {
     });
   // Initial fetch: no comments loaded yet — show a skeleton, not a blank gap.
   const isInitialLoading = fetching && comments.length === 0;
-  const {data: session} = authClient.useSession();
+  const {data: session} = useAuthSession();
   const isLoggedIn = !!session?.user?.id;
   const isDisabled = !isLoggedIn || disabled;
 
-  const {tenant} = useWorkspace();
+  const {tenantScope} = useWorkspace();
 
   /* Scroll to the comment referenced in the URL hash (#comment-{id}) on first load. */
   useEffect(() => {
@@ -305,7 +305,7 @@ export function Comments(props: CommentsProps) {
               subapp={subapp}
               sortBy={sortBy}
               onSubmit={handleCreate}
-              tenantId={tenant}
+              tenantScope={tenantScope}
               commentField={commentField}
               trackingField={trackingField}
               disableReply={disableReply}

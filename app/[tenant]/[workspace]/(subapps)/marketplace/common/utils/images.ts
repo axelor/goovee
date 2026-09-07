@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
 
 /**
  * URL for a marketplace product screenshot, served by the marketplace image
@@ -7,19 +7,19 @@ import {withBasePath} from '@/lib/core/path/base-path';
  * the product per request. Carries productId + fileId so the route can scope the
  * access check to that product.
  *
- * `workspaceURI` is router-relative, so the deployment base path has to be added
- * here: this value is read as a raw image src, which Next.js does not rewrite.
+ * The browser form of the address, because this value is read as a raw image
+ * src, which Next.js does not rewrite.
  */
 export function getProductScreenshotURL({
-  workspaceURI,
+  scope,
   productId,
   fileId,
 }: {
-  workspaceURI: string;
+  scope: WorkspaceScope;
   productId: string;
   fileId: string;
 }) {
-  return withBasePath(
-    `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${productId}/screenshots/${fileId}`,
+  return scope.forBrowser(
+    `/${SUBAPP_CODES.marketplace}/api/products/${productId}/screenshots/${fileId}`,
   );
 }

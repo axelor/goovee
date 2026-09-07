@@ -1,5 +1,4 @@
 'use client';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
@@ -84,8 +83,6 @@ export function TicketDetailsProvider(props: Props) {
   const {action: updateAssignmentAction, loading: isUpdatingAssignment} =
     useRetryAction(updateAssignment);
 
-  const {workspaceURL, workspaceURI} = useWorkspace();
-
   const loading =
     isSubmitting ||
     isClosingTicket ||
@@ -120,8 +117,6 @@ export function TicketDetailsProvider(props: Props) {
             ...dirtyValues,
           },
         },
-        workspaceURL,
-        workspaceURI,
       };
 
       await mutateAction(mutateProps, {
@@ -136,16 +131,7 @@ export function TicketDetailsProvider(props: Props) {
         onDiscard: () => router.refresh(),
       });
     },
-    [
-      getDirtyValues,
-      mutateAction,
-      ticket.id,
-      ticket.version,
-      workspaceURI,
-      workspaceURL,
-      toast,
-      router,
-    ],
+    [getDirtyValues, mutateAction, ticket.id, ticket.version, toast, router],
   );
 
   const submitFormWithAction = useCallback(
@@ -184,7 +170,6 @@ export function TicketDetailsProvider(props: Props) {
               ? ASSIGNMENT.CUSTOMER
               : ASSIGNMENT.PROVIDER,
           },
-          workspaceURL,
         },
         {
           onSuccess: () => {
@@ -207,7 +192,6 @@ export function TicketDetailsProvider(props: Props) {
     ticket.id,
     ticket.version,
     ticket.assignment,
-    workspaceURL,
     router,
     toast,
     client,
@@ -219,7 +203,6 @@ export function TicketDetailsProvider(props: Props) {
       cancelTicketAction(
         {
           data: {id: ticket.id, version: data?.version ?? ticket.version},
-          workspaceURL,
         },
         {
           onSuccess: () => {
@@ -238,7 +221,6 @@ export function TicketDetailsProvider(props: Props) {
     cancelTicketAction,
     ticket.id,
     ticket.version,
-    workspaceURL,
     toast,
     router,
   ]);
@@ -248,7 +230,6 @@ export function TicketDetailsProvider(props: Props) {
       closeTicketAction(
         {
           data: {id: ticket.id, version: data?.version ?? ticket.version},
-          workspaceURL,
         },
         {
           onSuccess: () => {
@@ -267,7 +248,6 @@ export function TicketDetailsProvider(props: Props) {
     closeTicketAction,
     ticket.id,
     ticket.version,
-    workspaceURL,
     router,
     toast,
   ]);

@@ -1,14 +1,12 @@
 import {Suspense} from 'react';
-import {notFound, redirect, unauthorized} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {denyPage} from '@/lib/core/access/denial';
 import {findSubappAccess} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {getCurrentPath} from '@/utils/current-path';
+import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {t} from '@/locale/server';
 
@@ -25,42 +23,23 @@ async function Checkout({
 }: {
   params: {tenant: string; workspace: string};
 }) {
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
-    url: workspaceURL,
-    tenantId: tenant,
     allowGuest: false,
   });
 
-  if (!access.ok) {
-    if (
-      access.reason === 'workspace-not-found' ||
-      access.reason === 'app-not-installed'
-    ) {
-      notFound();
-    }
-    if (!access.user) {
-      redirect(
-        getLoginURL({
-          callbackurl: await getCurrentPath(),
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenant,
-        }),
-      );
-    }
-    unauthorized();
-  }
+  if (!access.ok) return denyPage(access);
 
   const {user} = access;
   const {client} = access.tenant;
+
+  const workspaceURL = access.workspace.url;
 
   const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   if (!config?.confirmOrder) {
-    redirect(`${workspaceURI}/shop/cart`);
+    redirect(access.scope.forRouter('/shop/cart'));
   }
 
   const [orderSubapp, hidePriceAndPurchase, labels] = await Promise.all([
@@ -80,7 +59,7 @@ async function Checkout({
     <Content
       config={clone(config)}
       orderSubapp={clone(orderSubapp)}
-      tenant={tenant}
+      tenant={access.tenant.id}
       labels={labels}
     />
   );

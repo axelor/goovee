@@ -21,7 +21,6 @@ import {
 } from '@/ui/components';
 import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {AccountToggle} from '../../common/ui/components';
@@ -77,7 +76,6 @@ export function InviteMemberModal({
   invite?: PendingInvite;
 }) {
   const {toast} = useToast();
-  const {workspaceURL, workspaceURI} = useWorkspace();
   const isEditMember = mode === 'edit';
   const isEditInvite = mode === 'edit-invite';
   const isEdit = isEditMember || isEditInvite;
@@ -178,8 +176,6 @@ export function InviteMemberModal({
       emails: emailInput,
       role,
       apps,
-      workspaceURL,
-      workspaceURI,
     });
 
     if ('success' in result) {
@@ -207,8 +203,6 @@ export function InviteMemberModal({
 
       if (desired.access !== hadAccess) {
         const res = await updateMemberApplication({
-          workspaceURL,
-          workspaceURI,
           member: ref,
           app,
           value: desired.access ? 'yes' : 'no',
@@ -231,8 +225,6 @@ export function InviteMemberModal({
         const justGranted = !hadAccess;
         if (justGranted || desired.level !== currentLevel) {
           const res = await updateMemberAuthentication({
-            workspaceURL,
-            workspaceURI,
             member: ref,
             app,
             value: desired.level,
@@ -264,8 +256,6 @@ export function InviteMemberModal({
 
       if (desired.access !== hadAccess) {
         const res = await updateInviteApplication({
-          workspaceURL,
-          workspaceURI,
           invite: ref,
           app,
           value: desired.access ? 'yes' : 'no',
@@ -286,8 +276,6 @@ export function InviteMemberModal({
         const justGranted = !hadAccess;
         if (justGranted || desired.level !== currentLevel) {
           const res = await updateInviteAuthentication({
-            workspaceURL,
-            workspaceURI,
             invite: ref,
             app,
             value: desired.level,

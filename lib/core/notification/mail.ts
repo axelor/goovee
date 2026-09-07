@@ -1,19 +1,25 @@
 import {randomUUID} from 'node:crypto';
 import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
-import {taintSecret} from '@/lib/core/security/taint';
+import type {TenantConfig} from '@/tenant';
 import nodemailer, {type Transporter} from 'nodemailer';
 import type SMTPPool from 'nodemailer/lib/smtp-pool';
 import type Mail from 'nodemailer/lib/mailer';
 
 import {NotificationService, type MailNotificationData} from '.';
+import {
+  getMaxConnections,
+  mailAccountKey,
+  type MailSettings,
+} from './mail-account';
 
 /* `maxRequeues` is a real pooled-transport option that is missing from
  * `@types/nodemailer`. Required rather than optional, so it cannot be dropped. */
 type PoolOptions = SMTPPool.Options & {maxRequeues: number};
 
-/* Servers differ by an order of magnitude — a Microsoft 365 mailbox allows three
- * and refuses the rest with `432 4.3.2 Concurrent connections limit exceeded`. */
-const DEFAULT_MAX_CONNECTIONS = 10;
+/* Tenants already told they have no mail settings. Keyed by the config object,
+ * which the provider reads once per process, so each tenant is reported once
+ * rather than once per recipient. */
+const reportedUnconfigured = new WeakSet<TenantConfig>();
 
 /* Nodemailer's own default, stated because a shared pool actually reaches it. */
 const MAX_MESSAGES = 100;
@@ -136,132 +142,134 @@ function createMessageId(from: string | undefined): string {
   return `<${randomUUID()}@${domain}>`;
 }
 
-function describeMailBacklog(queued: number): string {
-  return `[MAIL] ${queued} messages are waiting to send — the mail server is not keeping up`;
+/* Names the account, because a deployment with several cannot otherwise tell
+ * whose mail server is falling behind. */
+function describeMailBacklog(mail: MailSettings, queued: number): string {
+  return `[MAIL] ${queued} messages are waiting to send for ${forLog(mail.user)}@${forLog(mail.host)} — the mail server is not keeping up`;
 }
 
-let reportedBadConnectionSetting = false;
-
-/* Reports a value it cannot use, once. Falling back silently is how a deployment
- * ends up believing it set three and running at ten. */
-export function getMaxConnections(): number {
-  const setting = process.env.MAIL_MAX_CONNECTIONS;
-
-  if (!setting) {
-    return DEFAULT_MAX_CONNECTIONS;
-  }
-
-  const configured = Number(setting);
-
-  if (!Number.isInteger(configured) || configured < 1) {
-    if (!reportedBadConnectionSetting) {
-      reportedBadConnectionSetting = true;
-      console.warn(
-        `[MAIL] MAIL_MAX_CONNECTIONS is "${setting}", which is not a whole number of connections — using ${DEFAULT_MAX_CONNECTIONS}`,
-      );
-    }
-
-    return DEFAULT_MAX_CONNECTIONS;
-  }
-
-  return configured;
-}
-
-function getDeliverySlots(): DeliverySlots {
-  if (!global.__mailDeliverySlots) {
-    /* Sized to the pool. The pooled transport queues anything beyond
-     * `maxConnections` itself, so a larger count would not send more — it would
-     * only build more messages up front and hold them there. */
-    global.__mailDeliverySlots = new DeliverySlots(
-      getMaxConnections(),
-      describeMailBacklog,
-    );
-  }
-
-  return global.__mailDeliverySlots;
-}
-
-/* One pool for the process, and one set of slots sized to it. An orphaned pooled
- * transport leaks — its open sockets keep it reachable — and this module is
- * evaluated once per bundler layer, plus again on every Turbopack recompile, so
- * the global is what keeps them sharing.
+/**
+ * A pool and its slots, keyed by the mail account they belong to.
  *
- *   undefined — not decided yet
- *   null      — mail is not configured
- *   transport — mail is configured */
+ * Keyed on the SMTP identity rather than the tenant: a mail server limits
+ * concurrency per sender, so two tenants configured onto one mailbox must share
+ * one pool or between them open twice what that account allows. Separate
+ * accounts get separate pools, so one tenant's fan-out cannot occupy another's
+ * connections or queue.
+ *
+ * Held in a global because an orphaned pooled transport leaks its open sockets,
+ * and this module is evaluated once per bundler layer and again on every
+ * Turbopack recompile. In development that outlives the settings it was built
+ * from, so an edited mail account leaves its previous pool behind until restart.
+ *
+ * A plain map rather than a bounded cache: the accounts cannot outnumber the
+ * document's tenants, and closing one to evict it drops the messages it still
+ * holds without ever calling back, hanging a delivery on a slot it never
+ * releases. An idle pool holds no sockets — nodemailer closes them on its own
+ * idle timeout.
+ */
+type MailPool = {transporter: Transporter; slots: DeliverySlots};
+
 declare global {
-  var __mailTransporter: Transporter | null | undefined;
-  var __mailDeliverySlots: DeliverySlots | undefined;
+  var __mailPools: Map<string, MailPool> | undefined;
 }
 
-function createTransporter(): Transporter | null {
-  if (
-    !process.env.MAIL_HOST ||
-    !process.env.MAIL_PORT ||
-    !process.env.MAIL_USER ||
-    !process.env.MAIL_PASSWORD
-  ) {
-    console.log(
-      '[MAIL] Email not configured — set MAIL_HOST, MAIL_PORT, MAIL_USER and MAIL_PASSWORD to send mail',
-    );
-    return null;
+function getPools(): Map<string, MailPool> {
+  if (!global.__mailPools) {
+    global.__mailPools = new Map<string, MailPool>();
   }
+
+  return global.__mailPools;
+}
+
+/**
+ * The pool serving a tenant's mail account, built on first use.
+ *
+ * Not built at module load: construction is cheap and opens no socket, but the
+ * account it describes is only known once a tenant's configuration has been
+ * read.
+ */
+function getPool(mail: MailSettings): MailPool {
+  const key = mailAccountKey(mail);
+  const pools = getPools();
+
+  const existing = pools.get(key);
+  if (existing) return existing;
+
+  const maxConnections = getMaxConnections(mail);
 
   const options = {
     pool: true,
-    host: process.env.MAIL_HOST,
-    port: Number(process.env.MAIL_PORT),
-    secure: process.env.MAIL_SECURE === 'true',
-    maxConnections: getMaxConnections(),
+    host: mail.host,
+    port: mail.port,
+    secure: Boolean(mail.secure),
+    maxConnections,
     maxMessages: MAX_MESSAGES,
     maxRequeues: MAX_REQUEUES,
     connectionTimeout: CONNECTION_TIMEOUT_MS,
     greetingTimeout: GREETING_TIMEOUT_MS,
     auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASSWORD,
+      user: mail.user,
+      pass: mail.password,
     },
   } satisfies PoolOptions;
 
-  return nodemailer.createTransport(options);
-}
+  const pool: MailPool = {
+    transporter: nodemailer.createTransport(options),
+    /* Sized to the pool. The pooled transport queues anything beyond
+     * `maxConnections` itself, so a larger count would not send more — it would
+     * only build more messages up front and hold them there. */
+    slots: new DeliverySlots(maxConnections, queued =>
+      describeMailBacklog(mail, queued),
+    ),
+  };
 
-/**
- * The process-wide mail transport, built on first use.
- *
- * Not built at module load: `next build` evaluates server modules, and a
- * container sets the mail variables for the running server and not for the build,
- * so deciding then would leave mail permanently unconfigured. Construction opens
- * no socket.
- */
-export function getTransporter(): Transporter | null {
-  if (global.__mailTransporter === undefined) {
-    global.__mailTransporter = createTransporter();
-  }
+  pools.set(key, pool);
 
-  taintSecret(
-    'Mail password is a server secret. Do not pass to Client Components.',
-    process.env.MAIL_PASSWORD,
-  );
-
-  return global.__mailTransporter;
+  return pool;
 }
 
 export class MailNotificationService implements NotificationService {
   private transporter: Transporter;
+  private slots: DeliverySlots;
+  private from?: string;
 
-  private constructor(transporter: Transporter) {
-    this.transporter = transporter;
+  private constructor(pool: MailPool, from?: string) {
+    this.transporter = pool.transporter;
+    this.slots = pool.slots;
+    this.from = from;
   }
 
-  static create(): MailNotificationService | null {
-    const transporter = getTransporter();
+  /**
+   * The service for one tenant's mail account, or null when that tenant declares
+   * none.
+   *
+   * Reported per account rather than once for the deployment: a tenant with no
+   * mail settings must not make a configured tenant look unconfigured, and the
+   * pool it would have shared is not the same pool.
+   */
+  static create(
+    tenantConfig?: TenantConfig | null,
+  ): MailNotificationService | null {
+    const mail = tenantConfig?.mail;
 
-    if (!transporter) {
+    if (!mail?.host || !mail?.port || !mail?.user || !mail?.password) {
+      if (tenantConfig && !reportedUnconfigured.has(tenantConfig)) {
+        reportedUnconfigured.add(tenantConfig);
+        console.log(
+          '[MAIL] Email not configured for this tenant — set mail.host, mail.port, mail.user and mail.password in its configuration to send mail',
+        );
+      }
       return null;
     }
 
-    return new MailNotificationService(transporter);
+    return new MailNotificationService(getPool(mail), mail.email || mail.user);
+  }
+
+  /* Opens its own connection and authenticates, then quits it, so it does not
+   * consume one of the pool's. */
+  async verify(): Promise<void> {
+    await this.transporter.verify();
   }
 
   async notify(data: MailNotificationData): Promise<SMTPPool.SentMessageInfo> {
@@ -303,9 +311,12 @@ export class MailNotificationService implements NotificationService {
   private async deliver(
     buildMessage: () => Promise<MailNotificationData>,
   ): Promise<SMTPPool.SentMessageInfo> {
-    const from = process.env.MAIL_EMAIL || process.env.MAIL_USER;
+    /* Both come from this tenant's own account, so the sender and the Message-ID
+     * domain name the tenant that is sending rather than whichever one happens to
+     * be configured process-wide. */
+    const from = this.from;
     const messageId = createMessageId(from);
-    const slots = getDeliverySlots();
+    const slots = this.slots;
 
     let recipients = 'an unknown recipient';
     let subject = 'no subject';

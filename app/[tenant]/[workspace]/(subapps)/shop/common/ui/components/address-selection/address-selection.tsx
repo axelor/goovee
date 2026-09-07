@@ -35,7 +35,7 @@ export function AddressSelection({
   );
 
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const {
     invoicingAddress: cartInvoicingAddress,
@@ -46,32 +46,28 @@ export function AddressSelection({
     setLoading(true);
 
     const [delivery, invoicing] = await Promise.all([
-      cartDeliveryAddress
-        ? findAddress({id: cartDeliveryAddress, workspaceURL})
-        : null,
-      cartInvoicingAddress
-        ? findAddress({id: cartInvoicingAddress, workspaceURL})
-        : null,
+      cartDeliveryAddress ? findAddress({id: cartDeliveryAddress}) : null,
+      cartInvoicingAddress ? findAddress({id: cartInvoicingAddress}) : null,
     ]);
     if (delivery) setDeliveryAddress(delivery as unknown as PartnerAddress);
     if (invoicing) setInvoicingAddress(invoicing as unknown as PartnerAddress);
     setLoading(false);
-  }, [cartDeliveryAddress, cartInvoicingAddress, workspaceURL]);
+  }, [cartDeliveryAddress, cartInvoicingAddress]);
 
   const resolveDefaultAddresses = useCallback(async () => {
     setLoading(true);
 
     const getDeliveryAddress = async (): Promise<PartnerAddress | null> => {
-      const def = await findDefaultDelivery({workspaceURL});
+      const def = await findDefaultDelivery();
       if (def) return def as unknown as PartnerAddress;
-      const addresses = await fetchDeliveryAddresses({workspaceURL});
+      const addresses = await fetchDeliveryAddresses();
       return (addresses?.[0] ?? null) as unknown as PartnerAddress | null;
     };
 
     const getInvoicingAddress = async (): Promise<PartnerAddress | null> => {
-      const def = await findDefaultInvoicing({workspaceURL});
+      const def = await findDefaultInvoicing();
       if (def) return def as unknown as PartnerAddress;
-      const addresses = await fetchInvoicingAddresses({workspaceURL});
+      const addresses = await fetchInvoicingAddresses();
       return (addresses?.[0] ?? null) as unknown as PartnerAddress | null;
     };
 
@@ -99,7 +95,7 @@ export function AddressSelection({
     }
 
     setLoading(false);
-  }, [updateAddress, workspaceURL]);
+  }, [updateAddress]);
 
   useEffect(() => {
     /* Wait for the stored cart to be read. An unread cart reports no addresses,
@@ -133,7 +129,9 @@ export function AddressSelection({
   }: React.ComponentPropsWithoutRef<typeof Button>) => (
     <Link
       className="block"
-      href={`${workspaceURI}/account/addresses?checkout=true${callbackURL ? `&callbackURL=${callbackURL}` : ''}`}>
+      href={scope.forRouter(
+        `/account/addresses?checkout=true${callbackURL ? `&callbackURL=${callbackURL}` : ''}`,
+      )}>
       <Button variant={variant ?? 'royal-outline'} size="sm" {...props}>
         {children}
       </Button>

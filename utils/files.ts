@@ -2,6 +2,7 @@ import type {ID} from '@/types';
 
 // ---- CORE IMPORTS ---- //
 import {withBasePath} from '@/lib/core/path/base-path';
+import type {TenantScope} from '@/lib/core/url/tenant-urls';
 
 const KILOBYTE = 1024;
 const MEGABYTE = KILOBYTE * 1024;
@@ -96,28 +97,28 @@ export function getHTMLURL(record: any) {
 
 export function getPartnerImageURL(
   id: ID | undefined,
-  tenant: string,
+  scope: TenantScope | undefined,
   options: {noimage?: boolean; noimageSrc?: string} = {},
 ) {
   const {noimage, noimageSrc} = options;
 
-  if (!(id && tenant)) {
+  if (!(id && scope)) {
     return noimage ? withBasePath(noimageSrc || '/images/user.png') : '';
   }
 
-  return withBasePath(`/api/tenant/${tenant}/partner/image/${id}`);
+  return scope.forBrowser(`/api/partner/image/${id}`);
 }
 
 export function getProductImageURL(
   id: ID | undefined,
-  tenant: string,
+  scope: TenantScope | undefined,
   options: {noimage?: boolean; noimageSrc?: string} = {},
 ) {
   const {noimage, noimageSrc} = options;
 
-  if (!(id && tenant)) {
+  if (!(id && scope)) {
     return noimage ? withBasePath(noimageSrc || '/images/no-image.png') : '';
   }
 
-  return withBasePath(`/api/tenant/${tenant}/product/image/${id}`);
+  return scope.forBrowser(`/api/product/image/${id}`);
 }

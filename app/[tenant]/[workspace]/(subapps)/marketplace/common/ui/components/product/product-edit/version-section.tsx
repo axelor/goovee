@@ -261,13 +261,11 @@ export function VersionSection({
   requiresReview,
   allowToPublish,
   compatibilityVersions,
-  workspaceURI,
 }: {
   model: ProductEditFormModel;
   requiresReview: boolean;
   allowToPublish: boolean;
   compatibilityVersions: Cloned<CompatibilityVersion>[];
-  workspaceURI: string;
 }) {
   const {position, namePrefix, isNew, currentVersionMeta} = model;
   const status = useWatch({
@@ -400,7 +398,6 @@ export function VersionSection({
             bundleUpload={model.bundleUpload}
             bundleItemByRow={model.bundleItemByRow}
             compatibilityVersions={compatibilityVersions}
-            workspaceURI={workspaceURI}
             productId={model.productId}
           />
         </div>

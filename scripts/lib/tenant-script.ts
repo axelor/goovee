@@ -1,10 +1,5 @@
-import {DEFAULT_TENANT} from '@/constants';
-import {
-  isMultiTenancy,
-  manager,
-  type TenantClient,
-  type TenantConfig,
-} from '@/tenant';
+import {manager, type TenantClient, type TenantConfig} from '@/tenant';
+import {getDefaultTenantId, listTenantIds} from '@/tenant/config';
 import * as out from './output';
 import {
   runParsed,
@@ -58,31 +53,24 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
   const withTenant: ScriptOptions = command =>
     (spec.options ? spec.options(command) : command).option(
       '--tenant <id>',
-      `Tenant id (defaults to '${DEFAULT_TENANT}' when MULTI_TENANCY is not true)`,
+      "Tenant id (defaults to the deployment's default tenant, where it has one)",
     );
 
   runParsed<Values & TenantValues, Args>(
     {...spec, options: withTenant},
     async ({values, args}) => {
-      /* A single-tenant manager serves the configured database whatever id it is
-       * handed, so accepting another one would report work against a tenant that
-       * was never opened. */
-      if (
-        !isMultiTenancy &&
-        values.tenant &&
-        values.tenant !== DEFAULT_TENANT
-      ) {
-        out.fail(
-          `Tenant '${values.tenant}' cannot be selected: this portal serves the single tenant '${DEFAULT_TENANT}'.`,
-        );
-      }
+      const configuredIds = listTenantIds();
 
-      const selected =
-        values.tenant ?? (isMultiTenancy ? undefined : DEFAULT_TENANT);
+      const selected = values.tenant ?? getDefaultTenantId() ?? undefined;
 
       const requireTenant = (): string =>
         selected ??
-        out.fail('--tenant is required when MULTI_TENANCY is true.');
+        out.fail(
+          `--tenant is required: this deployment resolves no default tenant. ` +
+            `Pass it, or configure one — PORTAL_DEFAULT_TENANT as a variable, ` +
+            `defaultTenant in a portal.config file. The configuration names ` +
+            `${configuredIds.join(', ')}.`,
+        );
 
       /* `opened` is set only once there is something to release, so a tenant
        * that could not be opened leaves nothing behind to close. `session` is
@@ -93,8 +81,19 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
       const openTenant = (): Promise<TenantHandle> => {
         session ??= (async () => {
           const tenantId = requireTenant();
-          const {client, config} = await manager.getTenant(tenantId);
-          opened = {tenantId, client, config};
+          const tenant = await manager.getTenant(tenantId);
+
+          /* An id naming no tenant resolves to null rather than throwing, so
+           * that a value from outside cannot be turned into a fault. Here the id
+           * is the operator's own argument, and unguarded the next line would
+           * fail as a TypeError naming neither the id nor the option. */
+          if (!tenant) {
+            out.fail(
+              `Tenant '${tenantId}' is not configured; the document names ${configuredIds.join(', ')}.`,
+            );
+          }
+
+          opened = {tenantId, client: tenant.client, config: tenant.config};
           return opened;
         })();
 

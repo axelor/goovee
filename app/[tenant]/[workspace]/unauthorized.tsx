@@ -9,7 +9,7 @@ import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
 
 export default function Unauthorized() {
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
 
   return (
     <div className="flex items-center justify-center h-screen">
@@ -21,7 +21,9 @@ export default function Unauthorized() {
           </p>
         </div>
         <div>
-          <Link href={workspaceURI}>
+          {/* Empty when the layout answered before it rendered the workspace
+              provider, and an empty href reloads this page. */}
+          <Link href={scope.forRouter() || '/'}>
             <Button>{i18n.t('Return Home')}</Button>
           </Link>
         </div>

@@ -1,11 +1,8 @@
 'use server';
 
-import {headers} from 'next/headers';
-
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {TENANT_HEADER} from '@/proxy';
 
 // ---- LOCAL IMPORTS ---- //
 import {searchFiles} from '@/subapps/resources/common/orm/dms';
@@ -23,30 +20,24 @@ export type DocumentSearchResult = {
 
 export async function searchDocuments({
   search,
-  workspaceURL,
 }: {
   search: string;
-  workspaceURL: string;
 }): Promise<DocumentSearchResult[]> {
-  const parsed = FindDmsFilesSchema.safeParse({search, workspaceURL});
+  const parsed = FindDmsFilesSchema.safeParse({search});
   if (!parsed.success) return [];
 
   const q = search?.trim() ?? '';
   if (q.length < MIN_CHARS) return [];
 
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) return [];
-
   const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    url: workspaceURL,
-    tenantId,
     allowGuest: true,
   });
   if (!access.ok) return [];
 
   const {user} = access;
   const {client} = access.tenant;
+  const workspaceURL = access.workspace.url;
 
   const files = await searchFiles({
     search: q,

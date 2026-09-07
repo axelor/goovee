@@ -20,13 +20,9 @@ import {REPORT_REASONS, type ReportReason} from '../../../../constants/review';
 
 type ReportReviewButtonProps = {
   reviewId: string;
-  workspaceURL: string;
 };
 
-export function ReportReviewButton({
-  reviewId,
-  workspaceURL,
-}: ReportReviewButtonProps) {
+export function ReportReviewButton({reviewId}: ReportReviewButtonProps) {
   const {toast} = useToast();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<ReportReason | null>(null);
@@ -37,7 +33,6 @@ export function ReportReviewButton({
     startTransition(async () => {
       const result = await reportReview({
         reviewId,
-        workspaceURL,
         reasonSelect: reason,
       });
       if (!result.success) {

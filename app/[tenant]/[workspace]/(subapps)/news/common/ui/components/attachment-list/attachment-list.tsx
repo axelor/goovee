@@ -7,7 +7,6 @@ import {Separator, Skeleton} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {download} from '@/utils/files';
 import {SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Attachment} from '@/subapps/news/common/types';
@@ -23,13 +22,13 @@ export const AttachmentList = ({
   items: Attachment[];
   width?: string;
 }) => {
-  const {workspaceURI} = useWorkspace();
+  const {scope} = useWorkspace();
 
   const handleDownload = async (attachment: Attachment) => {
     const {metaFile} = attachment;
     if (!metaFile?.id) return;
-    const href = withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/attachment/${metaFile.id}`,
+    const href = scope.forBrowser(
+      `/${SUBAPP_CODES.news}/api/news/${slug}/attachment/${metaFile.id}`,
     );
     download(metaFile, href);
   };

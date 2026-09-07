@@ -18,11 +18,12 @@ import {
 } from '@/orm/workspace';
 import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
+import {listTenantIds} from '@/tenant/config';
 import {withMattermostSync} from '@/lib/core/mattermost';
 import {APP_TITLE, RESET_PASSWORD} from '@/constants';
-import {findInviteById} from '@/app/auth/register/common/orm/register';
+import {findInviteById} from '@/app/[tenant]/auth/register/common/orm/register';
 import {registerByInvite} from '@/lib/core/auth/orm';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/lib/core/url/scope';
 import {
   EmailRegisterOTPSchema,
   InviteEmailRegisterOTPSchema,
@@ -111,645 +112,689 @@ const resetPasswordEmailHTML = ({
       </html>
       `;
 
-const credentials = {
-  id: 'credentials',
-  endpoints: {
-    signInWithCredentials: createAuthEndpoint(
-      '/credentials/sign-in',
-      {
-        method: 'POST',
-        body: z.object({
-          email: z.email(),
-          password: z.string(),
-          tenantId: z.string(),
-          rememberMe: z.boolean().optional(),
-        }),
-        metadata: {
-          openapi: {
-            summary: 'Sign in with email and password',
-            tags: ['auth'],
-          },
-        },
-      },
-      async ctx => {
-        const {email, password, tenantId, rememberMe} = ctx.body;
-
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Invalid email or password',
-            ),
-          });
-        }
-        const {client} = tenant;
-
-        const user = await findGooveeUserByEmail(email, client);
-        if (!user) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Invalid email or password',
-            ),
-          });
-        }
-
-        if (!user.password) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Invalid email or password',
-            ),
-          });
-        }
-
-        const valid = await compare(password, user.password);
-        if (!valid) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Invalid email or password',
-            ),
-          });
-        }
-
-        const session = await ctx.context.internalAdapter.createSession(
-          user.id,
-          false,
-          {tenantId},
-        );
-        await setSessionCookie(
-          ctx,
-          {
-            session,
-            user: {
-              id: user.id,
-              name: user.fullName || '',
-              email: user.emailAddress?.address || email,
-              emailVerified: true,
-              createdAt: new Date(),
-              updatedAt: new Date(),
+/**
+ * The credentials endpoints of one tenant.
+ *
+ * Built per tenant so every endpoint closes over the tenant it authenticates
+ * against. That tenant comes from the address the instance is mounted at, so
+ * there is nothing in a request that can name a different one.
+ */
+export function buildCredentials(tenantId: string) {
+  return {
+    id: 'credentials',
+    endpoints: {
+      signInWithCredentials: createAuthEndpoint(
+        '/credentials/sign-in',
+        {
+          method: 'POST',
+          body: z.object({
+            email: z.email(),
+            password: z.string(),
+            rememberMe: z.boolean().optional(),
+          }),
+          metadata: {
+            openapi: {
+              summary: 'Sign in with email and password',
+              tags: ['auth'],
             },
           },
-          !rememberMe,
-        );
-        return session;
-      },
-    ),
+        },
+        async ctx => {
+          const {email, password, rememberMe} = ctx.body;
 
-    registerSendOtp: createAuthEndpoint(
-      '/credentials/register/send-otp',
-      {
-        method: 'POST',
-        body: EmailRegisterOTPSchema,
-        metadata: {
-          openapi: {
-            summary: 'Generate OTP for email registration',
-            tags: ['auth'],
+          const knownTenantIds = listTenantIds();
+          if (!knownTenantIds.includes(tenantId)) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid email or password',
+              ),
+            });
+          }
+
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid email or password',
+              ),
+            });
+          }
+          const {client} = tenant;
+
+          const user = await findGooveeUserByEmail(email, client);
+          if (!user) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid email or password',
+              ),
+            });
+          }
+
+          if (!user.password) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid email or password',
+              ),
+            });
+          }
+
+          const valid = await compare(password, user.password);
+          if (!valid) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid email or password',
+              ),
+            });
+          }
+
+          const session = await ctx.context.internalAdapter.createSession(
+            user.id,
+            false,
+            {tenantId},
+          );
+          await setSessionCookie(
+            ctx,
+            {
+              session,
+              user: {
+                id: user.id,
+                name: user.fullName || '',
+                email: user.emailAddress?.address || email,
+                emailVerified: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            },
+            !rememberMe,
+          );
+          return session;
+        },
+      ),
+
+      registerSendOtp: createAuthEndpoint(
+        '/credentials/register/send-otp',
+        {
+          method: 'POST',
+          body: EmailRegisterOTPSchema,
+          metadata: {
+            openapi: {
+              summary: 'Generate OTP for email registration',
+              tags: ['auth'],
+            },
           },
         },
-      },
-      async ctx => {
-        const {email, workspaceURL, tenantId} = ctx.body;
+        async ctx => {
+          const {email, workspaceURL} = ctx.body;
 
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.INVALID_TENANT,
-            message: await getTranslation({tenant: tenantId}, 'Invalid tenant'),
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.INVALID_TENANT,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid tenant',
+              ),
+            });
+          }
+          const {client} = tenant;
+
+          let defaultPartnerWorkspaceConfig;
+          if (workspaceURL) {
+            defaultPartnerWorkspaceConfig =
+              await findDefaultPartnerWorkspaceConfig({
+                url: workspaceURL,
+                client,
+              });
+          }
+
+          const template =
+            defaultPartnerWorkspaceConfig?.portalAppConfig?.otpTemplateList?.[0]
+              ?.template;
+
+          return coreGenerateOTP({
+            email,
+            scope: Scope.Registration,
+            tenantId,
+            client,
+            mailConfig: template?.content
+              ? {
+                  template: {
+                    subject: template.subject ?? undefined,
+                    content: template.content,
+                  },
+                }
+              : undefined,
           });
-        }
-        const {client} = tenant;
+        },
+      ),
 
-        let defaultPartnerWorkspaceConfig;
-        if (workspaceURL) {
-          defaultPartnerWorkspaceConfig =
-            await findDefaultPartnerWorkspaceConfig({
-              url: workspaceURL,
+      register: createAuthEndpoint(
+        '/credentials/register',
+        {
+          method: 'POST',
+          body: EmailRegisterSchema,
+          metadata: {
+            openapi: {
+              summary: 'Register with email and OTP',
+              tags: ['auth'],
+            },
+          },
+        },
+        async ctx => {
+          const {
+            email,
+            otp,
+            type,
+            name,
+            password,
+            workspaceURL,
+            firstName,
+            companyName,
+            identificationNumber,
+            companyNumber,
+            locale,
+          } = ctx.body;
+
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.INVALID_TENANT,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid tenant',
+              ),
+            });
+          }
+          const {client, config} = tenant;
+
+          const otpResult = await findOne({
+            scope: Scope.Registration,
+            entity: email,
+            client,
+          });
+
+          if (!otpResult) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_OTP,
+              message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
+            });
+          }
+
+          if (!(await isValid({id: otpResult.id, value: otp, client}))) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_OTP,
+              message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
+            });
+          }
+
+          try {
+            await client.$transaction(async txClient => {
+              await markUsed({id: otpResult.id, client: txClient});
+              await register({
+                email,
+                tenantId,
+                type,
+                name,
+                password,
+                workspaceURL,
+                firstName,
+                companyName,
+                identificationNumber,
+                companyNumber,
+                locale,
+                client: txClient,
+                config,
+              });
+            });
+            return {success: true};
+          } catch (err) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.REGISTRATION_FAILED,
+              message:
+                err instanceof Error
+                  ? err.message
+                  : await getTranslation(
+                      {tenant: tenantId},
+                      'Registration failed',
+                    ),
+            });
+          }
+        },
+      ),
+
+      inviteSendOtp: createAuthEndpoint(
+        '/credentials/invite/send-otp',
+        {
+          method: 'POST',
+          body: InviteEmailRegisterOTPSchema,
+          metadata: {
+            openapi: {
+              summary: 'Generate OTP for invite registration',
+              tags: ['auth'],
+            },
+          },
+        },
+        async ctx => {
+          const {inviteId} = ctx.body;
+
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.INVALID_TENANT,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid tenant',
+              ),
+            });
+          }
+          const {client} = tenant;
+
+          const invite = await findInviteById({id: inviteId, client});
+
+          if (!(invite?.workspace && invite?.partner)) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.BAD_REQUEST,
+              message: await getTranslation({tenant: tenantId}, 'Bad request'),
+            });
+          }
+
+          const workspace = await findWorkspace({
+            url: invite.workspace.url,
+            user: {
+              id: invite.partner.id,
+              isContact: false,
+              mainPartnerId: undefined,
+            },
+            client,
+          });
+
+          if (!workspace?.config) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.BAD_REQUEST,
+              message: await getTranslation({tenant: tenantId}, 'Bad request'),
+            });
+          }
+
+          const config = await getAuthConfig(workspace.config.id, client);
+          if (!config) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.BAD_REQUEST,
+              message: await getTranslation({tenant: tenantId}, 'Bad request'),
+            });
+          }
+
+          const emailAddress = invite?.emailAddress?.address;
+          if (!emailAddress) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.EMAIL_REQUIRED,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Email is required',
+              ),
+            });
+          }
+
+          if (!config.otpTemplateList?.length) {
+            return coreGenerateOTP({
+              email: emailAddress,
+              scope: Scope.Registration,
+              tenantId,
               client,
             });
-        }
+          }
 
-        const template =
-          defaultPartnerWorkspaceConfig?.portalAppConfig?.otpTemplateList?.[0]
-            ?.template;
+          const {otpTemplateList} = config;
+          const localization = invite.partner?.localization?.code;
 
-        return coreGenerateOTP({
-          email,
-          scope: Scope.Registration,
-          tenantId,
-          client,
-          mailConfig: template?.content
-            ? {
-                template: {
-                  subject: template.subject ?? undefined,
-                  content: template.content,
-                },
-              }
-            : undefined,
-        });
-      },
-    ),
+          let template =
+            localization &&
+            otpTemplateList.find(t => t?.localization?.code === localization);
 
-    register: createAuthEndpoint(
-      '/credentials/register',
-      {
-        method: 'POST',
-        body: EmailRegisterSchema,
-        metadata: {
-          openapi: {
-            summary: 'Register with email and OTP',
-            tags: ['auth'],
-          },
-        },
-      },
-      async ctx => {
-        const {
-          email,
-          tenantId,
-          otp,
-          type,
-          name,
-          password,
-          workspaceURL,
-          firstName,
-          companyName,
-          identificationNumber,
-          companyNumber,
-          locale,
-        } = ctx.body;
+          if (!template) {
+            template = otpTemplateList?.[0];
+          }
 
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.INVALID_TENANT,
-            message: await getTranslation({tenant: tenantId}, 'Invalid tenant'),
-          });
-        }
-        const {client, config} = tenant;
-
-        const otpResult = await findOne({
-          scope: Scope.Registration,
-          entity: email,
-          client,
-        });
-
-        if (!otpResult) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_OTP,
-            message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
-          });
-        }
-
-        if (!(await isValid({id: otpResult.id, value: otp, client}))) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_OTP,
-            message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
-          });
-        }
-
-        try {
-          await client.$transaction(async txClient => {
-            await markUsed({id: otpResult.id, client: txClient});
-            await register({
-              email,
-              tenantId,
-              type,
-              name,
-              password,
-              workspaceURL,
-              firstName,
-              companyName,
-              identificationNumber,
-              companyNumber,
-              locale,
-              client: txClient,
-              config,
-            });
-          });
-          return {success: true};
-        } catch (err) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.REGISTRATION_FAILED,
-            message:
-              err instanceof Error
-                ? err.message
-                : await getTranslation(
-                    {tenant: tenantId},
-                    'Registration failed',
-                  ),
-          });
-        }
-      },
-    ),
-
-    inviteSendOtp: createAuthEndpoint(
-      '/credentials/invite/send-otp',
-      {
-        method: 'POST',
-        body: InviteEmailRegisterOTPSchema,
-        metadata: {
-          openapi: {
-            summary: 'Generate OTP for invite registration',
-            tags: ['auth'],
-          },
-        },
-      },
-      async ctx => {
-        const {inviteId, tenantId} = ctx.body;
-
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.INVALID_TENANT,
-            message: await getTranslation({tenant: tenantId}, 'Invalid tenant'),
-          });
-        }
-        const {client} = tenant;
-
-        const invite = await findInviteById({id: inviteId, client});
-
-        if (!(invite?.workspace && invite?.partner)) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.BAD_REQUEST,
-            message: await getTranslation({tenant: tenantId}, 'Bad request'),
-          });
-        }
-
-        const workspace = await findWorkspace({
-          url: invite.workspace.url,
-          user: {
-            id: invite.partner.id,
-            isContact: false,
-            mainPartnerId: undefined,
-          },
-          client,
-        });
-
-        if (!workspace?.config) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.BAD_REQUEST,
-            message: await getTranslation({tenant: tenantId}, 'Bad request'),
-          });
-        }
-
-        const config = await getAuthConfig(workspace.config.id, client);
-        if (!config) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.BAD_REQUEST,
-            message: await getTranslation({tenant: tenantId}, 'Bad request'),
-          });
-        }
-
-        const emailAddress = invite?.emailAddress?.address;
-        if (!emailAddress) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.EMAIL_REQUIRED,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Email is required',
-            ),
-          });
-        }
-
-        if (!config.otpTemplateList?.length) {
           return coreGenerateOTP({
             email: emailAddress,
             scope: Scope.Registration,
             tenantId,
             client,
+            mailConfig: template?.template?.content
+              ? {
+                  template: {
+                    subject: template.template.subject ?? undefined,
+                    content: template.template.content,
+                  },
+                }
+              : undefined,
           });
-        }
+        },
+      ),
 
-        const {otpTemplateList} = config;
-        const localization = invite.partner?.localization?.code;
-
-        let template =
-          localization &&
-          otpTemplateList.find(t => t?.localization?.code === localization);
-
-        if (!template) {
-          template = otpTemplateList?.[0];
-        }
-
-        return coreGenerateOTP({
-          email: emailAddress,
-          scope: Scope.Registration,
-          tenantId,
-          client,
-          mailConfig: template?.template?.content
-            ? {
-                template: {
-                  subject: template.template.subject ?? undefined,
-                  content: template.template.content,
-                },
-              }
-            : undefined,
-        });
-      },
-    ),
-
-    inviteRegister: createAuthEndpoint(
-      '/credentials/invite/register',
-      {
-        method: 'POST',
-        body: EmailInviteRegisterSchema,
-        metadata: {
-          openapi: {
-            summary: 'Register via invite with OTP',
-            tags: ['auth'],
+      inviteRegister: createAuthEndpoint(
+        '/credentials/invite/register',
+        {
+          method: 'POST',
+          body: EmailInviteRegisterSchema,
+          metadata: {
+            openapi: {
+              summary: 'Register via invite with OTP',
+              tags: ['auth'],
+            },
           },
         },
-      },
-      async ctx => {
-        const {
-          email,
-          tenantId,
-          otp,
-          firstName,
-          name,
-          password,
-          inviteId,
-          locale,
-        } = ctx.body;
+        async ctx => {
+          const {email, otp, firstName, name, password, inviteId, locale} =
+            ctx.body;
 
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.INVALID_TENANT,
-            message: await getTranslation({tenant: tenantId}, 'Invalid tenant'),
-          });
-        }
-        const {client, config} = tenant;
-
-        const otpResult = await findOne({
-          scope: Scope.Registration,
-          entity: email,
-          client,
-        });
-
-        if (!otpResult) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_OTP,
-            message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
-          });
-        }
-
-        if (!(await isValid({id: otpResult.id, value: otp, client}))) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_OTP,
-            message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
-          });
-        }
-
-        try {
-          const query = await client.$transaction(async txClient => {
-            await markUsed({id: otpResult.id, client: txClient});
-            const {query} = await registerByInvite({
-              email,
-              tenantId,
-              firstName,
-              name,
-              password,
-              inviteId,
-              locale,
-              client: txClient,
-              config,
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.INVALID_TENANT,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid tenant',
+              ),
             });
-            return query;
+          }
+          const {client, config} = tenant;
+
+          const otpResult = await findOne({
+            scope: Scope.Registration,
+            entity: email,
+            client,
           });
-          return {success: true, data: {query}};
-        } catch (err) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.REGISTRATION_FAILED,
-            message:
-              err instanceof Error
-                ? err.message
-                : await getTranslation(
-                    {tenant: tenantId},
-                    'Registration failed',
-                  ),
-          });
-        }
-      },
-    ),
 
-    resetPasswordRequest: createAuthEndpoint(
-      '/credentials/reset-password/request',
-      {
-        method: 'POST',
-        body: RequestResetPasswordSchema,
-        metadata: {
-          openapi: {
-            summary: 'Request password reset email',
-            tags: ['auth'],
-          },
-        },
-      },
-      async ctx => {
-        const {email, tenantId, searchQuery} = ctx.body;
+          if (!otpResult) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_OTP,
+              message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
+            });
+          }
 
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.INVALID_TENANT,
-            message: await getTranslation({tenant: tenantId}, 'Invalid tenant'),
-          });
-        }
-        const {client} = tenant;
+          if (!(await isValid({id: otpResult.id, value: otp, client}))) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_OTP,
+              message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
+            });
+          }
 
-        const user = await findGooveeUserByEmail(email, client);
-
-        const link = `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
-          `/auth/reset-password/${email}?${searchQuery}`,
-        )}`;
-
-        if (user) {
-          const mailService = NotificationManager.getService(
-            NotificationType.mail,
-          );
-          after(async () => {
-            try {
-              const result = await createOTP({
-                entity: email,
-                scope: Scope.ResetPassword,
-                client,
-                force: true,
+          try {
+            const query = await client.$transaction(async txClient => {
+              await markUsed({id: otpResult.id, client: txClient});
+              const {query} = await registerByInvite({
+                email,
+                tenantId,
+                firstName,
+                name,
+                password,
+                inviteId,
+                locale,
+                client: txClient,
+                config,
               });
+              return query;
+            });
+            return {success: true, data: {query}};
+          } catch (err) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.REGISTRATION_FAILED,
+              message:
+                err instanceof Error
+                  ? err.message
+                  : await getTranslation(
+                      {tenant: tenantId},
+                      'Registration failed',
+                    ),
+            });
+          }
+        },
+      ),
 
-              if (result?.otp) {
-                await mailService?.notify({
-                  subject: `${APP_TITLE} Password Reset`,
-                  to: email,
-                  html: resetPasswordEmailHTML({email, otp: result.otp, link}),
-                });
-              }
-            } catch (err) {
-              console.error('[AUTH] Failed to send password reset mail', err);
-            }
-          });
-        }
-
-        return {success: true, data: {url: link}};
-      },
-    ),
-
-    resetPassword: createAuthEndpoint(
-      '/credentials/reset-password',
-      {
-        method: 'POST',
-        body: ResetPasswordSchema,
-        metadata: {
-          openapi: {
-            summary: 'Reset password with OTP',
-            tags: ['auth'],
+      resetPasswordRequest: createAuthEndpoint(
+        '/credentials/reset-password/request',
+        {
+          method: 'POST',
+          body: RequestResetPasswordSchema,
+          metadata: {
+            openapi: {
+              summary: 'Request password reset email',
+              tags: ['auth'],
+            },
           },
         },
-      },
-      async ctx => {
-        const {email, otp, password, tenantId} = ctx.body;
+        async ctx => {
+          const {email, searchQuery} = ctx.body;
 
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.INVALID_TENANT,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Error resetting password. Try again.',
-            ),
-          });
-        }
-        const {client, config} = tenant;
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.INVALID_TENANT,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Invalid tenant',
+              ),
+            });
+          }
+          const {client} = tenant;
 
-        const result = await findOne({
-          scope: Scope.ResetPassword,
-          entity: email,
-          client,
-        });
+          const user = await findGooveeUserByEmail(email, client);
 
-        if (!result) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.BAD_REQUEST,
-            message: await getTranslation({tenant: tenantId}, 'Bad request'),
-          });
-        }
+          /* The emailed address carries only what the reset screens read,
+           * rebuilt here parameter by parameter: the query arrives from the
+           * browser as one string, and echoing it whole would let a request
+           * write arbitrary parameters into a link sent to the address's owner.
+           * The tenant is the one this request already validated. */
+          const carried = new URLSearchParams(searchQuery);
+          const query = new URLSearchParams();
 
-        const isValidOTP = await isValid({id: result.id, value: otp, client});
-        if (!isValidOTP) {
-          throw new APIError('UNAUTHORIZED', {
-            ...ERROR_CODES.INVALID_OTP,
-            message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
-          });
-        }
+          for (const name of ['workspaceURI', 'callbackurl']) {
+            const value = carried.get(name);
+            if (value) query.set(name, value);
+          }
 
-        const user = await findGooveeUserByEmail(email, client);
-        if (!user) {
-          throw new APIError('NOT_FOUND', {
-            ...ERROR_CODES.USER_NOT_FOUND,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'You are not registered',
-            ),
-          });
-        }
+          const link = tenantURLs(tenantId).forExternal(
+            `/auth/reset-password/${encodeURIComponent(email)}?${query}`,
+          );
 
-        const hashedPassword = await hash(password);
+          if (user) {
+            const mailService = NotificationManager.getService(
+              NotificationType.mail,
+              tenant.config,
+            );
+            after(async () => {
+              try {
+                const result = await createOTP({
+                  entity: email,
+                  scope: Scope.ResetPassword,
+                  client,
+                  force: true,
+                });
 
-        try {
-          await withMattermostSync({
-            config,
-            email: user.emailAddress?.address || email,
-            password,
-            name: user.name || 'user',
-            firstName: user.firstName || 'user',
-            context: RESET_PASSWORD,
-          });
-        } catch (err: unknown) {
-          throw new APIError('BAD_REQUEST', {
-            ...ERROR_CODES.PASSWORD_RESET_FAILED,
-            message: await getTranslation(
-              {tenant: tenantId},
-              'Error resetting password. Try again.',
-            ),
-          });
-        }
+                if (result?.otp) {
+                  await mailService?.notify({
+                    subject: `${APP_TITLE} Password Reset`,
+                    to: email,
+                    html: resetPasswordEmailHTML({
+                      email,
+                      otp: result.otp,
+                      link,
+                    }),
+                  });
+                }
+              } catch (err) {
+                console.error('[AUTH] Failed to send password reset mail', err);
+              }
+            });
+          }
 
-        await client.$transaction(async txClient => {
-          await txClient.aOSPartner.update({
-            data: {
-              id: String(user.id),
-              version: user.version,
-              password: hashedPassword,
+          return {success: true, data: {url: link}};
+        },
+      ),
+
+      resetPassword: createAuthEndpoint(
+        '/credentials/reset-password',
+        {
+          method: 'POST',
+          body: ResetPasswordSchema,
+          metadata: {
+            openapi: {
+              summary: 'Reset password with OTP',
+              tags: ['auth'],
             },
-            select: {id: true},
+          },
+        },
+        async ctx => {
+          const {email, otp, password} = ctx.body;
+
+          const tenant = await manager.getTenant(tenantId);
+          if (!tenant) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.INVALID_TENANT,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Error resetting password. Try again.',
+              ),
+            });
+          }
+          const {client, config} = tenant;
+
+          const result = await findOne({
+            scope: Scope.ResetPassword,
+            entity: email,
+            client,
           });
 
-          await txClient.otp.update({
-            data: {
-              id: result.id,
-              version: result.version,
-              used: true,
-            },
-            select: {id: true},
-          });
-        });
+          if (!result) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.BAD_REQUEST,
+              message: await getTranslation({tenant: tenantId}, 'Bad request'),
+            });
+          }
 
-        return {
-          success: true,
-          message: await getTranslation(
-            {tenant: tenantId},
-            'Password reset successfully.',
-          ),
-        };
+          const isValidOTP = await isValid({id: result.id, value: otp, client});
+          if (!isValidOTP) {
+            throw new APIError('UNAUTHORIZED', {
+              ...ERROR_CODES.INVALID_OTP,
+              message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
+            });
+          }
+
+          const user = await findGooveeUserByEmail(email, client);
+          if (!user) {
+            throw new APIError('NOT_FOUND', {
+              ...ERROR_CODES.USER_NOT_FOUND,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'You are not registered',
+              ),
+            });
+          }
+
+          const hashedPassword = await hash(password);
+
+          try {
+            await withMattermostSync({
+              config,
+              email: user.emailAddress?.address || email,
+              password,
+              name: user.name || 'user',
+              firstName: user.firstName || 'user',
+              context: RESET_PASSWORD,
+            });
+          } catch (err: unknown) {
+            throw new APIError('BAD_REQUEST', {
+              ...ERROR_CODES.PASSWORD_RESET_FAILED,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Error resetting password. Try again.',
+              ),
+            });
+          }
+
+          await client.$transaction(async txClient => {
+            await txClient.aOSPartner.update({
+              data: {
+                id: String(user.id),
+                version: user.version,
+                password: hashedPassword,
+              },
+              select: {id: true},
+            });
+
+            await txClient.otp.update({
+              data: {
+                id: result.id,
+                version: result.version,
+                used: true,
+              },
+              select: {id: true},
+            });
+          });
+
+          return {
+            success: true,
+            message: await getTranslation(
+              {tenant: tenantId},
+              'Password reset successfully.',
+            ),
+          };
+        },
+      ),
+    },
+
+    rateLimit: [
+      {
+        pathMatcher: (path: string) => path === '/credentials/sign-in',
+        window: 300,
+        max: 5,
       },
-    ),
-  },
-  rateLimit: [
-    {
-      pathMatcher: (path: string) => path === '/credentials/sign-in',
-      window: 300,
-      max: 5,
-    },
-    {
-      pathMatcher: (path: string) => path === '/credentials/register/send-otp',
-      window: 300,
-      max: 3,
-    },
-    {
-      pathMatcher: (path: string) => path === '/credentials/register',
-      window: 300,
-      max: 5,
-    },
-    {
-      pathMatcher: (path: string) => path === '/credentials/invite/send-otp',
-      window: 300,
-      max: 3,
-    },
-    {
-      pathMatcher: (path: string) => path === '/credentials/invite/register',
-      window: 300,
-      max: 5,
-    },
-    {
-      pathMatcher: (path: string) =>
-        path === '/credentials/reset-password/request',
-      window: 300,
-      max: 3,
-    },
-    {
-      pathMatcher: (path: string) => path === '/credentials/reset-password',
-      window: 300,
-      max: 5,
-    },
-  ],
+      {
+        pathMatcher: (path: string) =>
+          path === '/credentials/register/send-otp',
+        window: 300,
+        max: 3,
+      },
+      {
+        pathMatcher: (path: string) => path === '/credentials/register',
+        window: 300,
+        max: 5,
+      },
+      {
+        pathMatcher: (path: string) => path === '/credentials/invite/send-otp',
+        window: 300,
+        max: 3,
+      },
+      {
+        pathMatcher: (path: string) => path === '/credentials/invite/register',
+        window: 300,
+        max: 5,
+      },
+      {
+        pathMatcher: (path: string) =>
+          path === '/credentials/reset-password/request',
+        window: 300,
+        max: 3,
+      },
+      {
+        pathMatcher: (path: string) => path === '/credentials/reset-password',
+        window: 300,
+        max: 5,
+      },
+    ],
 
-  $ERROR_CODES: ERROR_CODES,
-} satisfies BetterAuthPlugin;
+    $ERROR_CODES: ERROR_CODES,
+  } satisfies BetterAuthPlugin;
+}
 
-export type Credentials = typeof credentials;
-export default credentials;
+export type Credentials = ReturnType<typeof buildCredentials>;

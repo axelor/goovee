@@ -33,7 +33,7 @@ export function Search({
   className?: string;
 }) {
   const router = useRouter();
-  const {workspaceURL, workspaceURI, tenant} = useWorkspace();
+  const {scope, tenantScope} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -45,10 +45,7 @@ export function Search({
     () =>
       debounce(async (search: string) => {
         try {
-          const {error, message, data} = await searchEntries({
-            search,
-            workspaceURL,
-          });
+          const {error, message, data} = await searchEntries({search});
           if (searchRef.current !== search) return;
           if (error) {
             setSearchResult([]);
@@ -70,7 +67,7 @@ export function Search({
           }
         }
       }, 500),
-    [toast, workspaceURL],
+    [toast],
   );
 
   const handleSearch = useCallback(
@@ -86,7 +83,7 @@ export function Search({
   );
 
   const handleRedirection = (id: string) => {
-    router.push(`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${id}`);
+    router.push(scope.forRouter(`/${SUBAPP_CODES.directory}/entry/${id}`));
   };
 
   return (
@@ -119,7 +116,7 @@ export function Search({
                     value={result.id}
                     onSelect={handleRedirection}
                     className="block cursor-pointer">
-                    <Card item={result} tenant={tenant} compact />
+                    <Card item={result} tenantScope={tenantScope} compact />
                   </CommandItem>
                 ))
               : null}

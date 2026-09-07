@@ -1,13 +1,11 @@
-import {redirect} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {workspacePathname} from '@/utils/workspace';
+import {currentWorkspace} from '@/lib/core/url/current';
 
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  const {workspaceURI} = workspacePathname(params);
+export default async function Page() {
+  const scope = await currentWorkspace();
+  if (!scope) notFound();
 
-  redirect(`${workspaceURI}/shop`);
+  redirect(scope.forRouter('/shop'));
 }

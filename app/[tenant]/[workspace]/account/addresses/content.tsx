@@ -81,7 +81,7 @@ function Content({
 
   const [isPending, startTransition] = useTransition();
 
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {scope} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const {cart, loaded: cartLoaded, updateAddress} = useCart();
@@ -191,7 +191,6 @@ function Content({
     startTransition(async () => {
       try {
         const result = await confirmAddresses({
-          workspaceURL,
           subAppCode: SUBAPP_CODES.quotations,
           record: {
             id: quotationId,
@@ -218,7 +217,7 @@ function Content({
           });
           router.refresh();
           router.push(
-            `${workspaceURI}/${SUBAPP_CODES.quotations}/${quotation.id}`,
+            scope.forRouter(`/${SUBAPP_CODES.quotations}/${quotation.id}`),
           );
         }
       } catch (error) {
@@ -233,7 +232,7 @@ function Content({
   const handleConfirm = () => {
     if (fromCheckout) {
       router.refresh();
-      router.push(callbackURL || `${workspaceURI}/${SUBAPP_PAGE.checkout}`);
+      router.push(callbackURL || scope.forRouter(`/${SUBAPP_PAGE.checkout}`));
     } else if (fromQuotation) {
       handleQuotationConfirm();
     }

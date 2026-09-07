@@ -1,0 +1,325 @@
+/*
+ * Two scopes, because the application has two: some addresses belong to a
+ * workspace and some belong only to the tenant. Which one you hold decides what
+ * a path argument means, so no method takes a flag saying how deep it is —
+ * `tenantURLs(id)` takes paths from the tenant's own root, and
+ * `tenantURLs(id).workspace(slug)` takes paths below that workspace.
+ */
+
+import 'server-only';
+
+import {z} from 'zod';
+
+import {getPublicEnvironment} from '@/environment/utils';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
+import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
+
+import {absoluteRoot} from './absolute';
+import type {WorkspaceSubPath} from './index';
+import {revalidateRoutePath} from './revalidate';
+import {buildTenantScope, type TenantScope} from './tenant-urls';
+import {buildWorkspaceScope, type WorkspaceScope} from './workspace-urls';
+
+/**
+ * Whether the origin a request arrived on is the one this tenant holds to
+ * itself.
+ *
+ * Read from the request rather than from the tenant's declared routing, so the
+ * prefix handed to a browser is one that works on the origin the page was
+ * actually served on. The two answers agree as long as the proxy sends every
+ * address of a host-routed tenant to that tenant's own origin; an exception
+ * added there would part them, and `buildAuth` would have to stop deriving its
+ * `basePath` from the configuration alone.
+ *
+ * Lives here rather than beside `isHostRouted` in `tenant/routing.ts`, which
+ * documents itself as reading nothing from the configuration document so that
+ * `pnpm config:check` can import it before naming the document. This reads the
+ * document, and `tenant/config.ts` already imports `routing.ts`, so putting it
+ * there would both break that script and close an import cycle.
+ */
+export function ownsAddressedOrigin(
+  tenantId: string,
+  headers: Headers,
+): boolean {
+  const host = addressedHost(headers);
+
+  return Boolean(host && getRoutingIndex().tenantByHost.get(host) === tenantId);
+}
+
+/* A path segment of one or two dots, written plainly or percent-encoded — the
+ * segments a browser resolves against the rest of the path, which would carry
+ * an address out of the prefix the schema below checked. */
+const DOT_SEGMENT = /(^|\/)(?:\.|%2e){1,2}(?=\/|$)/i;
+
+/**
+ * Validates a client-supplied visitor path as an address inside the given
+ * workspace: the exact workspace root or a path below it, plain path only —
+ * no scheme, no backslashes, no query or fragment, no dot-segments.
+ *
+ * The prefix check is the confinement, not the authorization: a path bound to
+ * a workspace cannot name another tenant's or another workspace's address, and
+ * the caller establishes separately that the sender may reach it. Dot-segments
+ * are refused because a browser resolves them, which would step the address
+ * back out of the checked prefix; a query is refused because the caller
+ * appends its own.
+ */
+function workspaceVisitorPathSchema(workspaceURI: string) {
+  return z
+    .string()
+    .refine(
+      path =>
+        (path === workspaceURI || path.startsWith(`${workspaceURI}/`)) &&
+        !path.includes('://') &&
+        !path.includes('\\') &&
+        !path.includes('?') &&
+        !path.includes('#') &&
+        !DOT_SEGMENT.test(path),
+      {message: 'Path must be inside the workspace'},
+    );
+}
+
+/**
+ * A workspace's addresses, plus the forms that are not addresses.
+ *
+ * `routePath` and `key` name a workspace without being somewhere to send a
+ * browser — a coordinate the route tree resolves, and a row's primary key. They
+ * sit on this type rather than the shared one by intent rather than
+ * capability: a browser could compute either from what it already holds, and
+ * nothing running in one should act on them.
+ */
+export type ServerWorkspaceScope = WorkspaceScope & {
+  /**
+   * The coordinate the route tree resolves: `/{tenant}/{workspace}{sub}`,
+   * always carrying the tenant segment because the proxy puts it back on a
+   * host-routed address before a route is reached.
+   *
+   * This is what a cache tag matches and what a stored row holds, and the two
+   * uses meet: a notification stored at this path, rendered for a visitor,
+   * followed from the tray and routed by the proxy arrives back at this exact
+   * string.
+   */
+  routePath(sub?: WorkspaceSubPath): string;
+
+  /**
+   * The workspace's stored `url`, which AOS uses as its identity.
+   *
+   * An address by spelling only — it must be reproduced character for
+   * character to find the row, and is never somewhere to send a browser.
+   */
+  key(): string;
+
+  /**
+   * An absolute address built from a path the browser sent, refusing anything
+   * that does not sit inside this workspace.
+   *
+   * Guarantees confinement only: it proves the path names this workspace, not
+   * that the sender may reach it. Whoever calls this has already established
+   * that separately — a session through the access gate, or a capability token
+   * fused with the record it was minted for.
+   *
+   * @throws when `path` is outside the workspace, or carries a scheme, a
+   *   query, a fragment, a backslash or a dot-segment.
+   */
+  fromClient(path: string, query?: Record<string, string>): string;
+
+  /**
+   * Invalidates the cached page at `sub`, or the workspace's own page with no
+   * sub-path. Pass `'layout'` to take everything below it instead — one path is
+   * all a page invalidation reaches.
+   */
+  revalidate(sub?: WorkspaceSubPath, type?: 'page' | 'layout'): void;
+};
+
+/**
+ * A tenant's addresses: the ones that name no workspace, and the way down to
+ * one that does.
+ *
+ * `TenantScope` carries the three a browser or an outside reader needs; this
+ * adds the forms that take configuration or the database.
+ */
+type TenantURLs = TenantScope & {
+  /**
+   * Where this tenant's addresses start on the origin the request arrived at:
+   * empty on an origin the tenant holds to itself, its path segment anywhere
+   * else. No base path and no trailing slash — what a browser measures its own
+   * addresses from.
+   *
+   * The origin the request arrived on decides it, not the tenant's configured
+   * routing, so the prefix handed to a browser works on the origin the page was
+   * served on whether or not the two agree — `ownsAddressedOrigin` says what
+   * keeps them agreeing. `forBrowser` on this type is measured from the
+   * configured routing instead, since it answers without a request in hand.
+   */
+  visitorPrefix(headers: Headers): string;
+
+  /**
+   * Where this tenant's app enters on the origin the request arrived at: the
+   * origin root where the tenant holds that origin, its path segment anywhere
+   * else, with a trailing slash and the base path in front.
+   *
+   * The trailing slash is required: this is both the service worker's
+   * registration scope and the manifest's `scope`/`start_url`/`id` — a
+   * different sense of the word from this module's own — and those scopes are
+   * matched by path prefix, where `/acme` does not enclose `/acme/…`. A browser
+   * installs an app only where the page's worker encloses the manifest's scope,
+   * so a drift between the two shows up as the install prompt silently not
+   * appearing.
+   *
+   * It follows the origin the request arrived on rather than the tenant's own
+   * routing, because scoping to the root on a shared origin would register a
+   * worker covering every tenant served there — which the upgrade cleanup in
+   * the root layout unregisters on sight.
+   */
+  entry(headers: Headers): string;
+
+  /** Where the browser fetches this tenant's manifest, on any origin. */
+  manifest(): string;
+
+  /**
+   * The addresses of one of this tenant's workspaces.
+   *
+   * @throws when `slug` could compose a key naming another workspace — see
+   *   `assertSlug`.
+   */
+  workspace(slug: string): ServerWorkspaceScope;
+
+  /**
+   * The same, for a caller holding a workspace's stored `url` rather than its
+   * slug — a row that references a workspace, such as an invoice.
+   *
+   * The slug is the last segment of that value whatever host or base path
+   * precedes it, so this reads the slug rather than trusting the rest: a row
+   * written before the tenant's address changed still names the right
+   * workspace, and every address built from it is the one the tenant is
+   * reached at now.
+   *
+   * @throws when the value ends in no usable segment.
+   */
+  workspaceByKey(storedURL: string): ServerWorkspaceScope;
+};
+
+/**
+ * The slug in a workspace's stored `url`: its last path segment, whatever host
+ * and base path precede it.
+ */
+function workspaceSlugOf(storedURL: string): string {
+  const [withoutQuery] = storedURL.split('?');
+
+  return withoutQuery.split('/').filter(Boolean).pop() ?? '';
+}
+
+/* A workspace slug is interpolated into a lookup key that AOS compares by exact
+ * string match, so a slug carrying a path separator would compose the key of a
+ * different workspace — one that may exist and that the visitor may even be
+ * granted. Refused rather than escaped, because there is no spelling of these
+ * characters that a path segment legitimately needs, and refusing names the
+ * fault at the boundary instead of letting a wrong record be found.
+ *
+ * A slug arrives decoded, so `%` is refused as well: a value still carrying an
+ * escape has been decoded one time fewer than this expects, and `%2f` would
+ * otherwise slip a separator past the check. `workspaceSlugOf` is the one
+ * exception and does not decode — it reads the slug back out of a stored key
+ * that `key()` has to reproduce character for character, so the spelling it
+ * finds is the spelling that must go back. */
+const UNSAFE_SLUG = /[/\\%?#]|^\.{1,2}$/;
+
+/**
+ * Whether `slug` names a workspace without being able to compose the key of a
+ * different one.
+ *
+ * For a caller that holds a slug it did not choose — one read out of the
+ * address a request arrived at — where a refusal is an ordinary
+ * workspace-not-found rather than a fault. A caller naming a workspace from
+ * configuration or from a row should go straight to `workspace()`, whose throw
+ * is the right answer there.
+ */
+export function isUsableSlug(slug: string): boolean {
+  return Boolean(slug) && !UNSAFE_SLUG.test(slug);
+}
+
+function assertSlug(slug: string): string {
+  if (!isUsableSlug(slug)) {
+    throw new Error(`Invalid workspace slug: ${JSON.stringify(slug)}`);
+  }
+
+  return slug;
+}
+
+/**
+ * The addresses of a tenant, read from its configuration.
+ *
+ * Config only: it knows the tenant's host, the deployment's base path and how
+ * the tenant is routed, and nothing about the request, the session or what the
+ * visitor may reach. That is what lets a webhook route, a script or a cron job
+ * build the same addresses an action builds — none of them has a session, and
+ * the ones outside the proxy matcher have no tenant header either.
+ *
+ * A tenant the document does not name yields addresses with no host, which
+ * match no stored workspace, so a lookup built on them denies access rather
+ * than granting it.
+ */
+export function tenantURLs(tenantId: string): TenantURLs {
+  const config = getTenantConfig(tenantId);
+  const host = getPublicEnvironment(config)?.host;
+  const hostRouted = Boolean(config && isHostRouted(config));
+
+  /* Empty for a tenant named by its host, whose addresses carry no segment of
+   * its own. Everything below is measured from here. */
+  const tenantPrefix = hostRouted ? '' : `/${tenantId}`;
+
+  const base = buildTenantScope({tenantId, visitorPrefix: tenantPrefix, host});
+
+  const buildServerScope = (slug: string): ServerWorkspaceScope => {
+    const workspace = assertSlug(slug);
+
+    /* The tenant segment is absent from a host-routed tenant's addresses,
+     * where the host names it instead. Everything a caller asks for is
+     * measured from this. */
+    const visitorPrefix = `${tenantPrefix}/${workspace}`;
+
+    const base = buildWorkspaceScope({
+      tenantId,
+      workspace,
+      visitorPrefix,
+      host,
+    });
+
+    const routePath = (sub: WorkspaceSubPath = '/') =>
+      sub === '/'
+        ? `/${tenantId}/${workspace}`
+        : `/${tenantId}/${workspace}${sub}`;
+
+    return {
+      ...base,
+      routePath,
+      key: () => `${absoluteRoot(host)}${visitorPrefix}`,
+      fromClient: (path, query) => {
+        workspaceVisitorPathSchema(visitorPrefix).parse(path);
+
+        const url = `${absoluteRoot(host)}${path}`;
+
+        return query ? `${url}?${new URLSearchParams(query)}` : url;
+      },
+      revalidate: (sub, type) => revalidateRoutePath(routePath(sub), type),
+    };
+  };
+
+  return {
+    ...base,
+
+    visitorPrefix: headers =>
+      ownsAddressedOrigin(tenantId, headers) ? '' : `/${tenantId}`,
+
+    entry: headers =>
+      withBasePath(
+        ownsAddressedOrigin(tenantId, headers) ? '/' : `/${tenantId}/`,
+      ),
+
+    manifest: () => withBasePath(`/${tenantId}/manifest.webmanifest`),
+
+    workspace: buildServerScope,
+
+    workspaceByKey: storedURL => buildServerScope(workspaceSlugOf(storedURL)),
+  };
+}
