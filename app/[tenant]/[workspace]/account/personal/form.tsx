@@ -576,17 +576,26 @@ export default function Personal({
               </div>
 
               <div
-                className={cn(
-                  'grid grid-cols-1 md:grid-cols-2 gap-4 items-start',
-                  {
-                    'items-end': !editEmail,
-                  },
-                )}>
+                className={cn('gap-4', {
+                  /*
+                   * Editing mode packs three items on the row (email, OTP,
+                   * actions). A nested grid would force the nowrap action
+                   * buttons to overflow their column, so the row switches to a
+                   * wrapping flex layout instead.
+                   */
+                  'grid grid-cols-1 md:grid-cols-2 items-end': !editEmail,
+                  'flex flex-col md:flex-row md:flex-wrap': editEmail,
+                  'md:items-end': editEmail && !form.formState.errors.otp,
+                  'md:items-center': editEmail && !!form.formState.errors.otp,
+                })}>
                 <FormField
                   control={form.control}
                   name="email"
                   render={({field}) => (
-                    <FormItem>
+                    <FormItem
+                      className={cn({
+                        'flex-1 min-w-[14rem]': editEmail,
+                      })}>
                       <FormLabel>{i18n.t('Email')}</FormLabel>
                       <FormControl>
                         <Input
@@ -610,18 +619,12 @@ export default function Personal({
                     {i18n.t('Update Email')}
                   </Button>
                 ) : (
-                  <div
-                    className={cn(
-                      'grid grid-cols-1 md:grid-cols-2 gap-4 items-end',
-                      {
-                        'items-center': form.formState.errors.otp,
-                      },
-                    )}>
+                  <>
                     <FormField
                       control={form.control}
                       name="otp"
                       render={({field}) => (
-                        <FormItem>
+                        <FormItem className="flex-1 min-w-[10rem]">
                           <FormLabel>{i18n.t('OTP')}*</FormLabel>
                           <FormControl>
                             <Input
@@ -636,7 +639,7 @@ export default function Personal({
                       )}
                     />
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
                       <Button
                         variant="royal-outline"
                         type="button"
@@ -651,7 +654,7 @@ export default function Personal({
                         {i18n.t('Cancel')}
                       </Button>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
               {editEmail && (
