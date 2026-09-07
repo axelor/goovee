@@ -98,7 +98,6 @@ export function GroupControls({
   selectedGroup?: Group | null;
   onMemberCountChange?: (count: number) => void;
 }) {
-  const userId = user?.id as string;
   const isLoggedIn = !!user?.id;
   const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
@@ -217,7 +216,6 @@ export function GroupControls({
       dispatch({type: 'join', groupId});
       const response = await joinGroup({
         groupID: groupId,
-        userId,
         workspaceURL,
         workspaceURI,
       });

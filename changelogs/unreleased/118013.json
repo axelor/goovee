@@ -1,0 +1,6 @@
+{
+  "title": "Joining a forum group can no longer be done on someone else's behalf",
+  "type": "security",
+  "description": "Joining a forum group used the member id sent by the browser, so an authenticated member could enrol any other partner or contact into any group they could see and gain them member-only visibility and notifications. The action now always uses the signed-in user, ignoring any id supplied in the request.",
+  "scope": ["forum"]
+}

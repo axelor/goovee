@@ -177,13 +177,11 @@ export async function exitGroup({
 
 export async function joinGroup({
   groupID,
-  userId,
   workspaceURL,
   workspaceURI,
 }: JoinGroupInput) {
   const parsed = JoinGroupSchema.safeParse({
     groupID,
-    userId,
     workspaceURL,
     workspaceURI,
   });
@@ -232,7 +230,7 @@ export async function joinGroup({
             },
           },
           member: {
-            select: {id: userId},
+            select: {id: user.id},
           },
           notificationSelect: NOTIFICATION_VALUES.ALL_ON_MY_POST,
           isPin: false,
