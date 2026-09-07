@@ -1,0 +1,6 @@
+{
+  "title": "Resolve a workspace by its exact address rather than a pattern",
+  "type": "change",
+  "description": "A workspace address is compared with the workspace's stored URL character for character. The comparison previously honoured the characters SQL treats as pattern wildcards, so an address whose workspace segment read `franc_` resolved the workspace stored as `france`, and the page was then built for that workspace while every address on it came from the address requested. An address that is not exactly the stored value now resolves no workspace and is answered as not found.",
+  "scope": ["core"]
+}
