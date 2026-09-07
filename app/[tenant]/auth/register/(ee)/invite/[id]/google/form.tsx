@@ -58,7 +58,7 @@ export default function SignUp({
   const authClient = useAuthClient();
   const tenantScope = useTenantScope();
   const env = useEnvironment();
-  const host = env.GOOVEE_PUBLIC_HOST!;
+  const host = env.host;
 
   /* The stored workspace URL opens only on the tenant's own origin, so any
    * other host falls back to the landing address rather than sending the

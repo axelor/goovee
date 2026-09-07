@@ -3,34 +3,46 @@ import path from 'path';
 import readline from 'readline';
 
 import {loadEnvConfig} from '@next/env';
+import {Option} from 'commander';
 
 import * as out from '@/scripts/lib/output';
 import {runScript} from '@/scripts/lib/script';
 
-import {
-  PUBLIC_ENV_KEYS,
-  type GlobalConfigInput,
-  type PublicEnv,
-  type TenantConfigInput,
-} from '@/tenant/types';
+import {flattenToEnvironment} from '@/config/env';
+import {CONFIG_FILE_STEM, CONFIG_SCHEMA_FILE} from '@/config/files';
+import type {
+  ConfigInput,
+  DeploymentConfigInput,
+  TenantConfigInput,
+} from '@/config/schema';
 
-/* The id keying the one tenant this writes. It becomes the segment every
- * address of the deployment carries, and changing it is renaming this key —
- * nothing else reads the name. */
+/* What the written configuration is spelled as: the JSON document the loader
+ * reads from portal.config.json, or the PORTAL_* variables of a .env file. */
+const FORMATS = {
+  json: {file: `${CONFIG_FILE_STEM}.json`},
+  env: {file: 'portal.env'},
+} as const;
+
+/* Held to these by the option's `.choices()`, which is what lets the values be
+ * typed as the key. */
+type Format = keyof typeof FORMATS;
+
+/* The id of the one tenant this writes. It becomes the segment every address of
+ * the deployment carries and the segment of every variable that configures it,
+ * and changing it is renaming both — nothing else reads the name. */
 const TENANT_ID = 'd';
 
-/* Loads the `.env` files the way the server does, for the chosen mode, so the
- * migration reads the same environment the application would. Called at run
+/* Loads the `.env` files the way the server does: the production ones where
+ * NODE_ENV=production is set, the development ones otherwise. Called at run
  * time rather than imported first as `@/load-swc-env` is, because this script
- * reads the environment lazily inside its builders and takes the mode from a
- * flag rather than from NODE_ENV. */
-function loadEnv(dev: boolean) {
-  loadEnvConfig(process.cwd(), dev);
+ * reads the environment lazily inside its builders. */
+function loadEnv() {
+  loadEnvConfig(process.cwd(), process.env.NODE_ENV !== 'production');
 }
 
 /* A count setting carried over verbatim. Left out when absent or unusable rather
- * than corrected here — the provider validates it by name at load, so a typo is
- * reported against the document the operator is about to review. */
+ * than corrected here — the loader validates it by name, so a typo is reported
+ * against the variable the operator is about to review. */
 function count(value: string | undefined): number | undefined {
   if (!value) return undefined;
 
@@ -39,20 +51,44 @@ function count(value: string | undefined): number | undefined {
   return Number.isInteger(parsed) && parsed >= 1 ? parsed : undefined;
 }
 
-function publicEnvFromEnv(): TenantConfigInput['publicEnv'] {
-  const publicEnv: PublicEnv = {};
-  for (const key of PUBLIC_ENV_KEYS) {
-    const value = process.env[key];
-    if (value) {
-      publicEnv[key] = value;
-    }
-  }
+function publicFromEnv(): TenantConfigInput['public'] {
+  const env = process.env;
 
   return {
-    ...publicEnv,
-    /* Required per tenant, so always emit it — a blank to fill in is reviewable,
-     * whereas an omitted key just fails at boot with nothing to point at. */
-    GOOVEE_PUBLIC_HOST: process.env.GOOVEE_PUBLIC_HOST ?? '',
+    /* Required per tenant, so always emitted — a blank to fill in is
+     * reviewable, whereas an omitted variable just fails at boot. */
+    host: env.GOOVEE_PUBLIC_HOST ?? '',
+    paypal: env.GOOVEE_PUBLIC_PAYPAL_CLIENT_ID
+      ? {clientId: env.GOOVEE_PUBLIC_PAYPAL_CLIENT_ID}
+      : undefined,
+    webPush: env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY
+      ? {publicKey: env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY}
+      : undefined,
+    mattermost: env.GOOVEE_PUBLIC_MATTERMOST_HOST
+      ? {host: env.GOOVEE_PUBLIC_MATTERMOST_HOST}
+      : undefined,
+    keycloak:
+      env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL ||
+      env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE
+        ? {
+            buttonLabel:
+              env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL || undefined,
+            buttonImage:
+              env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE || undefined,
+          }
+        : undefined,
+    links:
+      env.GOOVEE_PUBLIC_LINKEDIN_URL ||
+      env.GOOVEE_PUBLIC_TWITTER_URL ||
+      env.GOOVEE_PUBLIC_INSTAGRAM_URL ||
+      env.GOOVEE_PUBLIC_WHATSAPP_URL
+        ? {
+            linkedin: env.GOOVEE_PUBLIC_LINKEDIN_URL || undefined,
+            twitter: env.GOOVEE_PUBLIC_TWITTER_URL || undefined,
+            instagram: env.GOOVEE_PUBLIC_INSTAGRAM_URL || undefined,
+            whatsapp: env.GOOVEE_PUBLIC_WHATSAPP_URL || undefined,
+          }
+        : undefined,
   };
 }
 
@@ -128,8 +164,8 @@ function paymentsFromEnv(): TenantConfigInput['payments'] {
       iban: process.env.HUBPISP_IBAN,
       bic: process.env.HUBPISP_BIC || undefined,
       /* No environment variable ever carried this — the path was hardcoded
-       * before the configuration document existed, so this is where the
-       * certificates of the deployment being migrated already are. */
+       * before it was a setting, so this is where the certificates of the
+       * deployment being migrated already are. */
       certsDir: 'certs/hubpisp',
     };
   }
@@ -151,7 +187,9 @@ function mailFromEnv(): TenantConfigInput['mail'] {
 
   return {
     host: process.env.MAIL_HOST,
-    port: Number(process.env.MAIL_PORT),
+    /* Left out where it is not a number, so the load reports it missing
+     * against its own name rather than the file writing a null. */
+    port: count(process.env.MAIL_PORT) as number,
     secure: process.env.MAIL_SECURE === 'true',
     user: process.env.MAIL_USER,
     password: process.env.MAIL_PASSWORD,
@@ -215,35 +253,43 @@ function oauthFromEnv(): TenantConfigInput['oauth'] {
   return Object.keys(oauth).length ? oauth : undefined;
 }
 
-function buildGlobal(): GlobalConfigInput {
+function buildDeployment(): DeploymentConfigInput {
+  const pushMaxConnections = count(process.env.PUSH_MAX_CONNECTIONS);
+  const imageCacheMaxBytes = count(process.env.IMAGE_CACHE_MAX_BYTES);
+
   return {
-    betterAuthUrl: process.env.BETTER_AUTH_URL ?? '',
+    origin: process.env.BETTER_AUTH_URL ?? '',
     /* So that "/" keeps answering for a deployment that has never named a
      * tenant in an address. */
     defaultTenant: TENANT_ID,
-    pushMaxConnections: count(process.env.PUSH_MAX_CONNECTIONS),
-    imageCacheMaxBytes: count(process.env.IMAGE_CACHE_MAX_BYTES),
+    push: pushMaxConnections ? {maxConnections: pushMaxConnections} : undefined,
+    imageCache: imageCacheMaxBytes ? {maxBytes: imageCacheMaxBytes} : undefined,
   };
 }
 
-function buildDefaultTenant(): TenantConfigInput {
+function buildTenant(): TenantConfigInput {
+  const retentionHours = count(process.env.UPLOAD_RECORD_RETENTION_HOURS);
+
   return {
     /* Per tenant, so a deployment that grows a second one does not sign both
      * tenants' sessions with the same key. The old deployment-wide value is
      * carried over rather than replaced, so an upgrade in place keeps one key
      * instead of inventing another; it does not carry the sessions over, since
      * the cookies are renamed per tenant and the old names are no longer read. */
-    betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
+    sessionSecret: process.env.BETTER_AUTH_SECRET ?? '',
     db: {url: process.env.DATABASE_URL ?? ''},
     aos: {
       url: process.env.AOS_URL ?? '',
-      aosTenantId: process.env.AOS_TENANT_ID || undefined,
+      tenantId: process.env.AOS_TENANT_ID || undefined,
       storage: process.env.DATA_STORAGE || path.join(process.cwd(), 'storage'),
+      /* Blanks rather than nothing where neither credential was set: a blank
+       * to fill in is reviewable, and the load then refuses the pair as
+       * incomplete rather than reporting a whole group missing. */
       auth: process.env.AOS_API_KEY
         ? {apiKey: process.env.AOS_API_KEY}
         : {
-            username: process.env.BASIC_AUTH_USERNAME,
-            password: process.env.BASIC_AUTH_PASSWORD,
+            username: process.env.BASIC_AUTH_USERNAME ?? '',
+            password: process.env.BASIC_AUTH_PASSWORD ?? '',
           },
       webhookSecret: process.env.NOTIFICATION_WEBHOOK_SECRET || undefined,
     },
@@ -255,14 +301,57 @@ function buildDefaultTenant(): TenantConfigInput {
     includeLanguage: process.env.INCLUDE_LANGUAGE
       ? process.env.INCLUDE_LANGUAGE === 'true'
       : undefined,
-    uploadRecordRetentionHours: process.env.UPLOAD_RECORD_RETENTION_HOURS
-      ? Number(process.env.UPLOAD_RECORD_RETENTION_HOURS)
-      : undefined,
-    publicEnv: publicEnvFromEnv(),
+    upload: retentionHours ? {recordRetentionHours: retentionHours} : undefined,
+    public: publicFromEnv(),
   };
 }
 
-/* Ask before clobbering an existing config — never silently rewrite one. */
+/*
+ * A value as a `.env` line carries it, so that what is written is what the
+ * loader reads back.
+ *
+ * `$` is escaped because the loader expands `${VAR}` references in every value;
+ * a value holding whitespace, a `#` or a quote is wrapped in the quote character
+ * it does not itself contain, because an unquoted `#` starts a comment and
+ * unquoted whitespace is trimmed.
+ */
+function quoteEnvValue(value: string): string | null {
+  const escaped = value.replace(/\$/g, '\\$');
+
+  if (!/[\s#'"`]/.test(escaped)) return escaped;
+
+  /* Single quotes and backticks are read back as written; double quotes turn a
+   * literal `\n` or `\r` into a line break, so they are the last resort and
+   * only for a value holding neither. A value holding all three quote
+   * characters has no spelling on a `.env` line at all. */
+  const quote = !escaped.includes("'")
+    ? "'"
+    : !escaped.includes('`')
+      ? '`'
+      : !escaped.includes('"') && !/\\[nr]/.test(escaped)
+        ? '"'
+        : null;
+
+  return quote ? `${quote}${escaped}${quote}` : null;
+}
+
+/* One `.env` line, or a comment naming the variable whose value has no spelling
+ * on such a line, so the operator sets it by another route. */
+function envLine(variable: string, value: string): string {
+  const quoted = quoteEnvValue(value);
+
+  if (quoted === null) {
+    out.warn(
+      `${variable}: the value cannot be written on a .env line; set it by hand.`,
+    );
+
+    return `# ${variable}: set by hand — the value cannot be written on a .env line`;
+  }
+
+  return `${variable}=${quoted}`;
+}
+
+/* Ask before clobbering an existing file — never silently rewrite one. */
 function confirmOverwrite(filePath: string): Promise<boolean> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -276,49 +365,104 @@ function confirmOverwrite(filePath: string): Promise<boolean> {
   });
 }
 
-type Values = {dev?: boolean};
+/* The document as `.env` lines, with the one build-time variable carried along
+ * since a `.env` file is where it lives too. */
+function renderEnv(document: ConfigInput): string {
+  const lines = flattenToEnvironment(document).map(([variable, value]) =>
+    envLine(variable, value),
+  );
 
-runScript<Values, [string | null]>({
+  if (process.env.NEXT_PUBLIC_BASE_PATH) {
+    lines.push(
+      '',
+      envLine('NEXT_PUBLIC_BASE_PATH', process.env.NEXT_PUBLIC_BASE_PATH),
+    );
+  }
+
+  const header = [
+    '# Written by pnpm config:migrate from the variables of the previous',
+    '# release. Review it, fill in any blank value, then use it as the',
+    "# deployment's .env (or pass it with docker run --env-file) in place",
+    '# of the old variables, which are no longer read. See .env.example for',
+    '# every setting.',
+    '',
+  ];
+
+  return [...header, ...lines, ''].join('\n');
+}
+
+/* The document as the loader reads it from portal.config.json. A section left
+ * undefined is dropped by the serialisation, so omitted sections disappear.
+ * The build-time variable has no place in it and is left where it is. */
+function renderJson(document: ConfigInput): string {
+  return `${JSON.stringify({$schema: `./${CONFIG_SCHEMA_FILE}`, ...document}, null, 2)}\n`;
+}
+
+runScript<{format: Format}, [string | null]>({
   command: 'pnpm config:migrate',
-  title: 'Environment to tenant document',
-  summary: `Writes a configuration document — a "$global" section plus one
-"${TENANT_ID}" tenant — from the .env files the application would read, so a
-deployment already configured through the environment can move to a document
-without its settings being retyped. Rename the tenant key to serve the
-deployment under another id, and "$global.defaultTenant" with it. Prompts
-before overwriting an existing file.`,
+  title: 'Environment migration',
+  summary: `Writes the configuration — the deployment's settings plus one
+tenant, "${TENANT_ID}" — from the variables a release before it read, taken
+from the process environment and the .env files the server loads, so a
+deployment already configured through the environment moves to the new settings
+without them being retyped. Written as ${FORMATS.json.file} unless --format env
+asks for the PORTAL_* variables of a .env file. Rename the tenant id to serve
+the deployment under another one, and defaultTenant with it. Set
+NODE_ENV=production to read the production .env files. Prompts before
+overwriting an existing file.`,
   options: command =>
     command
-      .option('--dev', 'Read the development-mode .env files')
-      .argument('[path]', 'Where to write the document'),
+      .addOption(
+        new Option(
+          '--format <format>',
+          `What to write: json (${FORMATS.json.file}) or env (${FORMATS.env.file})`,
+        )
+          .choices(Object.keys(FORMATS))
+          .default('json'),
+      )
+      .argument(
+        '[path]',
+        'Where to write the configuration; defaults to the name the format gives',
+      ),
   run: async ({values, args}) => {
-    loadEnv(Boolean(values.dev));
-
-    /* Built after loadEnv so the *FromEnv builders read the loaded values.
-     * JSON.stringify drops `undefined` keys, so omitted sections disappear. */
-    const document: Record<
-      string,
-      string | GlobalConfigInput | TenantConfigInput
-    > = {
-      $schema: './tenants.config.schema.json',
-      $global: buildGlobal(),
-      [TENANT_ID]: buildDefaultTenant(),
-    };
+    const {format} = values;
 
     const outPath = path.resolve(
       process.cwd(),
-      args[0] ?? 'tenants.config.json',
+      args[0] ?? FORMATS[format].file,
     );
 
     if (fs.existsSync(outPath) && !(await confirmOverwrite(outPath))) {
       out.fail('Aborted — existing file left unchanged.');
     }
 
-    fs.writeFileSync(outPath, JSON.stringify(document, null, 2) + '\n');
+    loadEnv();
+
+    /* Built after loadEnv so the *FromEnv builders read the loaded values. */
+    const document: ConfigInput = {
+      ...buildDeployment(),
+      tenants: {[TENANT_ID]: buildTenant()},
+    };
+
+    fs.writeFileSync(
+      outPath,
+      format === 'json' ? renderJson(document) : renderEnv(document),
+    );
+
+    if (format === 'json' && process.env.NEXT_PUBLIC_BASE_PATH) {
+      out.note(
+        `NEXT_PUBLIC_BASE_PATH stays a variable: it is inlined when the portal ` +
+          `is built, and no ${CONFIG_FILE_STEM} file can carry it.`,
+      );
+    }
 
     out.ok(
-      `Wrote ${outPath} — review it, fill any blank required fields, then set ` +
-        `TENANTS_CONFIG_FILE to its path.`,
+      `Wrote ${outPath} — review it, fill any blank value, then run ` +
+        `\`pnpm config:check\` against it.` +
+        (format === 'json'
+          ? ` It is read from the server's working directory; the old ` +
+            `variables are no longer read and can go.`
+          : ''),
     );
   },
 });

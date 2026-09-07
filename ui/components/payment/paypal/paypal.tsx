@@ -84,7 +84,7 @@ export function Paypal<TData>({
 
   return (
     <PayPalProvider
-      clientId={env.GOOVEE_PUBLIC_PAYPAL_CLIENT_ID!}
+      clientId={env.paypal?.clientId ?? ''}
       components={['paypal-payments']}
       locale={transformLocale(l10n.getLocale()) || undefined}
       pageType="checkout">

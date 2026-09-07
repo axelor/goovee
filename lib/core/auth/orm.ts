@@ -652,7 +652,7 @@ export async function registerByKeycloak({
    * matched against a stored workspace, so a missing host has to leave it
    * relative rather than write the word "undefined" into it. */
   const workspaceURL = `${absoluteRoot(
-    getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
+    getPublicEnvironment(config)?.host,
   )}${workspaceURI}`;
   const localization = await findRegistrationLocalization({
     locale,

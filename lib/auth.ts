@@ -4,7 +4,7 @@ import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
 import {
-  getGlobalConfig,
+  getDeploymentConfig,
   getRoutingIndex,
   getTenantConfig,
   listTenantIds,
@@ -287,14 +287,14 @@ const options = {
   },
 } satisfies BetterAuthOptions;
 
-/* Deployment-wide auth settings come from the document's "$global" section
- * (the provider loads synchronously and marks the secret at load). */
-const globalConfig = getGlobalConfig();
+/* Deployment-wide auth settings come from the deployment's own configuration
+ * (the provider loads synchronously). */
+const deploymentConfig = getDeploymentConfig();
 
 /* The origin the addresses carrying no tenant of their own are served on. Parsed
- * once, here, because the document admits only origins and so this cannot throw
- * — including for the placeholder document an image build holds. */
-const deploymentOrigin = new URL(globalConfig.betterAuthUrl);
+ * once, here, because the configuration admits only origins and so this cannot
+ * throw — including for the placeholder an image build holds. */
+const deploymentOrigin = new URL(deploymentConfig.origin);
 
 /**
  * The origins this deployment authenticates on.
@@ -304,7 +304,7 @@ const deploymentOrigin = new URL(globalConfig.betterAuthUrl);
  * follow. So a tenant served on an origin of its own has its OAuth redirect
  * address built there rather than on the deployment's. Session cookies do not
  * follow: they carry no domain, so each belongs to the host that answered the
- * request. A host absent from the list is answered under `betterAuthUrl`.
+ * request. A host absent from the list is answered under the deployment origin.
  *
  * Whole origins rather than the bare hosts the field also accepts: a bare host is
  * trusted at https, and at http only for a loopback name, so a deployment served
@@ -393,14 +393,13 @@ function buildAuth(tenantId: string) {
 
   return betterAuth({
     ...options,
-    secret:
-      getTenantConfig(tenantId)?.betterAuthSecret ?? UNKNOWN_TENANT_SECRET,
+    secret: getTenantConfig(tenantId)?.sessionSecret ?? UNKNOWN_TENANT_SECRET,
     baseURL: {
       allowedHosts: authOrigins(),
       /* Where a request arriving on a host the list does not hold is answered: the
        * addresses carrying no tenant of their own are served on this origin. Given
        * one, because an unmatched host throws when there is none. */
-      fallback: globalConfig.betterAuthUrl,
+      fallback: deploymentConfig.origin,
       /* Stated rather than derived. Given as "auto" or left out, the `__Secure-`
        * prefix on the session cookie names follows NODE_ENV rather than the scheme
        * the deployment is served on, and a production build behind plain http would

@@ -56,7 +56,7 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState(false);
   const {scope, workspaceID} = useWorkspace();
   const env = useEnvironment();
-  const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
+  const mattermostUrl = env.mattermost?.host || '';
   const pathname = usePathname();
   const router = useRouter();
 

@@ -73,7 +73,7 @@ export default function Content({
   const callbackurl = searchParams.get('callbackurl');
   const decoded = callbackurl ? decodeURIComponent(callbackurl) : '';
   const redirection =
-    decoded && isSameOrigin(decoded, env.GOOVEE_PUBLIC_HOST!)
+    decoded && isSameOrigin(decoded, env.host)
       ? withBasePath(decoded)
       : tenantScope.forBrowser('/');
 
@@ -161,8 +161,7 @@ export default function Content({
   const successMessage = searchParams.get('success');
   const showSso = showGoogleOauth || showKeycloakOauth;
   const keycloakButtonImage =
-    env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE ||
-    withBasePath('/images/keycloak.svg');
+    env.keycloak?.buttonImage || withBasePath('/images/keycloak.svg');
 
   return (
     <AuthShell workspaceName={workspaceName}>
@@ -295,10 +294,9 @@ export default function Content({
                   className="h-5 w-5 shrink-0 object-contain"
                   unoptimized={isVectorImage(keycloakButtonImage)}
                 />
-                {i18n.t(
-                  env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL ||
-                    'Log In with Keycloak',
-                )}
+                {env.keycloak?.buttonLabel
+                  ? i18n.t(env.keycloak.buttonLabel)
+                  : i18n.t('Log In with Keycloak')}
               </button>
             )}
           </div>

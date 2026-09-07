@@ -53,6 +53,6 @@ export const PRUNE_INTERVAL_MS = 24 * HOUR_MS; // 24h
 /*
  * Default retention for a terminal staged-upload record (consumed or reaped)
  * before the prune pass deletes it. A tenant may set its own in hours via
- * uploadRecordRetentionHours.
+ * PORTAL_TENANT_<ID>_UPLOAD_RECORD_RETENTION_HOURS.
  */
 export const DEFAULT_RECORD_RETENTION_HOURS = 7 * 24; // 7d

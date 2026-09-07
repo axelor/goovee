@@ -162,7 +162,7 @@ export default async function proxy(req: NextRequest) {
 
   if (pathTenantConfig && isHostRouted(pathTenantConfig)) {
     const canonical = url.clone();
-    const origin = new URL(pathTenantConfig.publicEnv.GOOVEE_PUBLIC_HOST);
+    const origin = new URL(pathTenantConfig.public.host);
 
     canonical.protocol = origin.protocol;
     canonical.host = origin.host;

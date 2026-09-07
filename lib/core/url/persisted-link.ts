@@ -18,7 +18,7 @@ import {absoluteRoot} from './absolute';
  * configuration document does not hold.
  */
 function tenantHost(tenantId: string): string | undefined {
-  return getPublicEnvironment(getTenantConfig(tenantId)).GOOVEE_PUBLIC_HOST;
+  return getPublicEnvironment(getTenantConfig(tenantId))?.host;
 }
 
 /**

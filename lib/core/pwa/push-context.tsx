@@ -183,7 +183,7 @@ export function PushProvider({
         currentPermission === 'granted' &&
         tenant &&
         userId &&
-        !subscribedWithKey(sub, env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY)
+        !subscribedWithKey(sub, env.webPush?.publicKey)
       ) {
         await sub.unsubscribe().catch(() => {});
         sub = null;
@@ -194,7 +194,7 @@ export function PushProvider({
         try {
           sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+            applicationServerKey: env.webPush?.publicKey,
           });
         } catch (err) {
           console.error('Failed to auto-subscribe:', err);
@@ -220,7 +220,7 @@ export function PushProvider({
       fetchNotifications();
     }
   }, [
-    env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+    env.webPush?.publicKey,
     syncSubscription,
     tenant,
     fetchNotifications,
@@ -237,18 +237,13 @@ export function PushProvider({
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey: env.webPush?.publicKey,
       });
 
       setSubscription(sub);
       await syncSubscription(sub);
     }
-  }, [
-    env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
-    isSupported,
-    syncSubscription,
-    tenant,
-  ]);
+  }, [env.webPush?.publicKey, isSupported, syncSubscription, tenant]);
 
   const unsubscribe = useCallback(async () => {
     if (subscription && tenant) {

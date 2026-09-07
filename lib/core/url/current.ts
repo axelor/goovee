@@ -80,7 +80,7 @@ export async function currentTenantScope(): Promise<TenantScope> {
   return buildTenantScope({
     tenantId,
     visitorPrefix: tenantURLs(tenantId).visitorPrefix(requestHeaders),
-    host: getPublicEnvironment(getTenantConfig(tenantId)).GOOVEE_PUBLIC_HOST,
+    host: getPublicEnvironment(getTenantConfig(tenantId))?.host,
   });
 }
 

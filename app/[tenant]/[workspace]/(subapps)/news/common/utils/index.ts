@@ -1,8 +1,8 @@
 export * from './common';
 
-type Environment = Record<string, string | undefined>;
+import type {PublicConfig} from '@/tenant/types';
 
-export function getSocialURL(code: string, env: Environment) {
+export function getSocialURL(code: string, env: PublicConfig) {
   switch (code) {
     case 'linkedin':
       return getLinkedinURL(env);
@@ -17,18 +17,18 @@ export function getSocialURL(code: string, env: Environment) {
   }
 }
 
-export function getLinkedinURL(env: Environment) {
-  return env?.GOOVEE_PUBLIC_LINKEDIN_URL;
+export function getLinkedinURL(env: PublicConfig) {
+  return env.links?.linkedin;
 }
 
-export function getTwitterURL(env: Environment) {
-  return env?.GOOVEE_PUBLIC_TWITTER_URL;
+export function getTwitterURL(env: PublicConfig) {
+  return env.links?.twitter;
 }
 
-export function getInstagramURL(env: Environment) {
-  return env?.GOOVEE_PUBLIC_INSTAGRAM_URL;
+export function getInstagramURL(env: PublicConfig) {
+  return env.links?.instagram;
 }
 
-export function getWhatsappURL(env: Environment) {
-  return env?.GOOVEE_PUBLIC_WHATSAPP_URL;
+export function getWhatsappURL(env: PublicConfig) {
+  return env.links?.whatsapp;
 }

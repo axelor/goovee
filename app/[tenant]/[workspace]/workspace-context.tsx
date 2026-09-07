@@ -89,9 +89,9 @@ export function WorkspaceProvider({
         tenantId: tenant,
         workspace,
         visitorPrefix: workspaceURI,
-        host: env.GOOVEE_PUBLIC_HOST,
+        host: env.host,
       }),
-    [tenant, workspace, workspaceURI, env.GOOVEE_PUBLIC_HOST],
+    [tenant, workspace, workspaceURI, env.host],
   );
 
   const value = useMemo(

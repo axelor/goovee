@@ -34,7 +34,7 @@ async function findAuthWorkspaceName({
    * resolving it first means an unknown or unconfigured tenant returns null here
    * instead of connecting a database just to build a title. */
   const config = getTenantConfig(tenantId);
-  const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
+  const host = getPublicEnvironment(config)?.host;
   if (!host) return null;
 
   const tenant = await manager.getTenant(tenantId);

@@ -8,7 +8,7 @@ import type {Metadata} from 'next';
 import {headers} from 'next/headers';
 import {notFound} from 'next/navigation';
 
-import {Environment, getPublicEnvironment} from '@/environment';
+import {Environment} from '@/environment';
 import {findTheme} from '@/orm/theme';
 import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
@@ -59,7 +59,7 @@ export default async function TenantLayout(props: {
 
   const theme = await findTheme();
 
-  const env = getPublicEnvironment(config);
+  const env = config.public;
 
   /* Register one service worker per tenant, so each holds a push subscription of
    * its own and a per-tenant VAPID key takes effect (it registers SerwistProvider
@@ -96,7 +96,7 @@ export default async function TenantLayout(props: {
       <TenantProvider
         tenantId={tenant}
         visitorPrefix={visitorPrefix}
-        host={env.GOOVEE_PUBLIC_HOST}>
+        host={env.host}>
         <AuthClientProvider visitorPrefix={visitorPrefix}>
           <Locale>
             <Theme theme={theme}>

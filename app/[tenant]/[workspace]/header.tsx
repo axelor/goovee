@@ -194,7 +194,7 @@ export default function Header({
   const {visible, loading} = useNavigationVisibility();
   const res: any = useResponsive();
   const env = useEnvironment();
-  const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
+  const mattermostUrl = env.mattermost?.host || '';
   const isLarge = ['lg', 'xl', 'xxl'].some(x => res[x]);
 
   const redirect = (value: any) => router.push(value);

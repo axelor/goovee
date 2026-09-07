@@ -1,15 +1,14 @@
 /* Loads the `.env` files the server would: the production ones where
  * NODE_ENV=production is set, as it is on a server, and the development ones on
- * a checkout. First, because the loader below takes the path it reads from the
- * environment. */
+ * a checkout. First, because the loader below reads the environment as it is
+ * evaluated. */
 import '@/load-swc-env';
-
-import path from 'node:path';
 
 import * as out from '@/scripts/lib/output';
 import {runScript} from '@/scripts/lib/script';
-/* Safe to import here, unlike the document's loader: this module reads nothing,
- * so importing it cannot settle where the document is read from. */
+/* Safe to import here, unlike the configuration loader: these modules read
+ * nothing, so importing them cannot settle what the configuration holds. */
+import {isFileSource} from '@/config/document';
 import {isHostRouted} from '@/lib/core/tenant/routing';
 /* Reaches `getBasePath`, whose module reads NEXT_PUBLIC_BASE_PATH as it is
  * evaluated, which the import above of `@/load-swc-env` has already filled in. */
@@ -17,85 +16,82 @@ import {absoluteRoot} from '@/lib/core/url/absolute';
 
 /*
  * Answers the question a deployment otherwise answers by starting: is this
- * configuration document one the application will accept?
+ * environment one the application will accept?
  *
- * The document is read and validated by the application's own loader, reached
+ * The variables are read and validated by the application's own loader, reached
  * through a dynamic import below, so this cannot reach a different verdict than
  * start-up does. Checks written out again here would be free to drift, and the
- * drift would surface as a document this accepts and the server refuses.
+ * drift would surface as a configuration this accepts and the server refuses.
  *
- * Only the document is examined. Nothing is connected to, so a database, an AOS
- * instance or a mail host that cannot be reached is not a fault here.
+ * Only the configuration is examined. Nothing is connected to, so a database, an
+ * AOS instance or a mail host that cannot be reached is not a fault here.
  */
-runScript<object, [string | null]>({
+runScript<{sources?: boolean}>({
   command: 'pnpm config:check',
-  title: 'Validate the tenant configuration document',
-  summary: `Reads the document the application would read — the path given here,
-or TENANTS_CONFIG_FILE, or TENANTS_CONFIG — and validates it the way start-up
-does, naming every fault against the tenant and the field holding it. Reports
-the tenants a valid document declares and the address each is reached at. Ends
-non-zero for a document that would be refused, so a deployment can be gated on
-it rather than on a server that starts and then fails every request. Nothing is
-connected to: an unreachable database, AOS instance or mail host is not a fault
-here.`,
+  title: 'Validate the configuration',
+  summary: `Reads the configuration the application would read — the PORTAL_*
+variables from the process environment and the .env files the server loads,
+then the portal.config*.json files in the working directory — and validates it
+the way start-up does, naming every fault against the variable or file entry
+holding it. Reports the tenants a valid configuration declares and the address
+each is reached at. Ends non-zero for a configuration that would be refused, so
+a deployment can be gated on it rather than on a server that starts and then
+fails every request. Nothing is connected to: an unreachable database, AOS
+instance or mail host is not a fault here.`,
   options: command =>
-    command.argument(
-      '[path]',
-      'Document to validate, instead of the one the environment names',
+    command.option(
+      '--sources',
+      'List every setting read, with the variable or file it came from',
     ),
-  run: async ({args}) => {
-    const [given] = args;
-
-    /* Set before the loader is imported, because where the document is comes
-     * from the environment as that module is evaluated rather than on each
-     * access. A path set here wins over inline JSON on its own: the loader reads
-     * the file whenever it has one. */
-    if (given) {
-      process.env.TENANTS_CONFIG_FILE = path.resolve(process.cwd(), given);
-    }
-
-    out.note(
-      process.env.TENANTS_CONFIG_FILE
-        ? `Reading ${process.env.TENANTS_CONFIG_FILE}`
-        : 'Reading TENANTS_CONFIG',
-    );
-
+  run: async ({values}) => {
     const provider = await import('@/tenant/config');
 
     const loaded = (() => {
       try {
-        /* Either accessor loads the whole document, so this raises exactly what
-         * start-up raises: no document, unreadable JSON, or a shape and a set of
-         * invariants spanning tenants that the load refuses. */
+        /* Either accessor loads the whole configuration, so this raises exactly
+         * what start-up raises: no configuration, a variable or file entry
+         * naming no setting, or a shape and a set of invariants spanning tenants
+         * that the load refuses. */
         return {
           tenants: provider.listTenantConfigs(),
-          deployment: provider.getGlobalConfig(),
+          deployment: provider.getDeploymentConfig(),
+          sources: provider.listConfigSources(),
         };
       } catch (error) {
-        /* A rejected document arrives worded by the loader, against the fields at
-         * fault; a document it could not read at all — no such file — arrives as
-         * whatever `fs` threw, naming the path. Reported as this script's own
-         * failure either way, so it comes without a stack, which would say only
-         * that a schema rejected something. */
+        /* A refused configuration arrives worded by the loader, against the
+         * variables and file entries at fault. Reported as this script's own failure, so it comes
+         * without a stack, which would say only that a schema rejected
+         * something. */
         out.fail(error instanceof Error ? error.message : String(error));
       }
     })();
 
-    const {tenants, deployment} = loaded;
+    const {tenants, deployment, sources} = loaded;
+
+    /* Which files took part, by name: an operator checking a layered
+     * configuration is checking that the right file was picked up. */
+    const variables = sources.filter(
+      ([, source]) => !isFileSource(source),
+    ).length;
+    const files = [
+      ...new Set(sources.map(([, source]) => source).filter(isFileSource)),
+    ];
 
     out.ok(
-      `Accepted — ${tenants.length} ${tenants.length === 1 ? 'tenant' : 'tenants'}. ` +
-        `Addresses naming none are served on ` +
-        `${absoluteRoot(deployment.betterAuthUrl)}.`,
+      `Accepted — ${sources.length} ${sources.length === 1 ? 'setting' : 'settings'} ` +
+        `(${variables} from ${variables === 1 ? 'a variable' : 'variables'}` +
+        `${files.length ? `, ${sources.length - variables} from ${files.join(', ')}` : ''}), ` +
+        `${tenants.length} ${tenants.length === 1 ? 'tenant' : 'tenants'}. ` +
+        `Addresses naming none are served on ${absoluteRoot(deployment.origin)}.`,
     );
 
     /* The address, not just the origin, because a tenant routed by host is
      * reached without its id and an operator reading this is checking the
-     * addresses their proxy has to serve. The base path comes from the
-     * environment rather than the document, so this is the address as served by
-     * a deployment carrying the NEXT_PUBLIC_BASE_PATH this script was run with. */
+     * addresses their proxy has to serve. The base path comes from its own
+     * variable, so this is the address as served by a deployment carrying the
+     * NEXT_PUBLIC_BASE_PATH this script was run with. */
     for (const [id, config] of tenants) {
-      const root = absoluteRoot(config.publicEnv.GOOVEE_PUBLIC_HOST);
+      const root = absoluteRoot(config.public.host);
       const hostRouted = isHostRouted(config);
       const isDefault = id === deployment.defaultTenant;
 
@@ -104,6 +100,15 @@ here.`,
           `${isDefault ? ' (default)' : ''}` +
           `${hostRouted ? ' [routed by host]' : ''}`,
       );
+    }
+
+    /* Names only: the values are the secrets, and the point of this listing is
+     * to see which variables took effect, not what they hold. */
+    if (values.sources) {
+      console.log('');
+      for (const [setting, variable] of sources.sort()) {
+        console.log(`  ${setting}  ←  ${variable}`);
+      }
     }
   },
 });

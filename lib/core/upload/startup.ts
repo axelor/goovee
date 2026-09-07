@@ -78,7 +78,7 @@ async function pruneTenants(): Promise<void> {
   await forEachTenant('PRUNE', async (tenantId, client, config) => {
     const {pruned} = await pruneStaleUploads({
       client,
-      retentionHours: config.uploadRecordRetentionHours,
+      retentionHours: config.upload?.recordRetentionHours,
     });
     console.log(`[UPLOAD][PRUNE] tenant "${tenantId}": pruned ${pruned}`);
   });

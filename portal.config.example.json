@@ -1,0 +1,12 @@
+{
+  "$schema": "./portal.config.schema.json",
+  "origin": "",
+  "tenants": {
+    "acme": {
+      "sessionSecret": "",
+      "db": {"url": ""},
+      "aos": {"url": "", "storage": "", "auth": {"apiKey": ""}},
+      "public": {"host": ""}
+    }
+  }
+}

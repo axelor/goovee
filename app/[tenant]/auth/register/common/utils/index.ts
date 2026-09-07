@@ -33,7 +33,7 @@ export async function extractSearchParams({
   const config = tenantId ? getTenantConfig(tenantId) : null;
 
   const workspaceURL = `${absoluteRoot(
-    getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
+    getPublicEnvironment(config)?.host,
   )}${workspaceURI || ''}`;
 
   return {

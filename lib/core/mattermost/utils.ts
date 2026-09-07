@@ -2,11 +2,10 @@ import {type TenantConfig} from '@/tenant';
 
 /**
  * Get the Mattermost host URL for the tenant. Browser-facing, so it lives in
- * publicEnv (per-tenant override or the env-derived value baked in by the
- * config provider).
+ * the tenant's `public` group.
  */
 export function getHost(config?: TenantConfig | null): string {
-  return config?.publicEnv?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
+  return config?.public.mattermost?.host || '';
 }
 
 export function getAdminToken(config?: TenantConfig | null): string {

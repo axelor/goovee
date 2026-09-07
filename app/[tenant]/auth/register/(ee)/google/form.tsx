@@ -135,7 +135,7 @@ export default function SignUp({
   const workspaceURI = searchParams.get('workspaceURI') as string;
   const callbackurl = searchParams.get('callbackurl');
   const env = useEnvironment();
-  const host = env.GOOVEE_PUBLIC_HOST!;
+  const host = env.host;
   const decoded = callbackurl ? decodeURIComponent(callbackurl) : '';
   const redirection =
     (decoded && isSameOrigin(decoded, host) && withBasePath(decoded)) ||

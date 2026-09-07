@@ -298,19 +298,19 @@ accounted for; pruning is what finally removes it.
 
 ## Configuration
 
-Both settings are per tenant, and come from that tenant's entry in the
-configuration document — nothing here is read from the environment.
+Both settings are per tenant, and come from that tenant's configuration —
+nothing here reads a variable of its own.
 
-| Tenant setting               | Default  | Controls                                                 |
-| ---------------------------- | -------- | -------------------------------------------------------- |
-| `uploadRecordRetentionHours` | 168 (7d) | How long a terminal (consumed or reaped) record is kept. |
-| `aos.storage`                | —        | Blob storage root. Required.                             |
+| Tenant setting                                     | Default  | Controls                                                 |
+| -------------------------------------------------- | -------- | -------------------------------------------------------- |
+| `PORTAL_TENANT_<ID>_UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d) | How long a terminal (consumed or reaped) record is kept. |
+| `PORTAL_TENANT_<ID>_AOS_STORAGE`                   | —        | Blob storage root. Required.                             |
 
-`uploadRecordRetentionHours` is read in hours, fractional allowed; unset,
-non-positive or invalid falls back to the default.
+The retention is read in hours, fractional allowed; unset, non-positive or
+invalid falls back to the default.
 
 `aos.storage` is the AOS instance's `data.upload.dir` base. A tenant on a shared
-AOS (`aosTenantId` set) reads and writes under `<aos.storage>/<aosTenantId>`,
+AOS (`aos.tenantId` set) reads and writes under `<aos.storage>/<aos.tenantId>`,
 matching AOP's own per-tenant subdirectory; a dedicated instance uses the path
 as-is. The resolved root is what every path in this module is taken against, and
 it travels with the tenant's database client so the two cannot be paired from

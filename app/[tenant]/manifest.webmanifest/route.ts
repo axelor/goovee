@@ -50,7 +50,7 @@ export async function GET(
    * either origin, because nothing adds or removes one here. */
   if (isHostRouted(config) && !ownsAddressedOrigin(tenant, request.headers)) {
     const canonical = new URL(request.url);
-    const origin = new URL(config.publicEnv.GOOVEE_PUBLIC_HOST);
+    const origin = new URL(config.public.host);
 
     canonical.protocol = origin.protocol;
     canonical.host = origin.host;

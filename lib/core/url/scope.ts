@@ -262,7 +262,7 @@ function assertSlug(slug: string): string {
  */
 export function tenantURLs(tenantId: string): TenantURLs {
   const config = getTenantConfig(tenantId);
-  const host = getPublicEnvironment(config).GOOVEE_PUBLIC_HOST;
+  const host = getPublicEnvironment(config)?.host;
   const hostRouted = Boolean(config && isHostRouted(config));
 
   /* Empty for a tenant named by its host, whose addresses carry no segment of

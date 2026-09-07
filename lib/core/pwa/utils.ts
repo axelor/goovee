@@ -3,7 +3,7 @@ import https from 'node:https';
 import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
-import {getGlobalConfig, getTenantConfig} from '@/tenant/config';
+import {getDeploymentConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {tenantURLs} from '@/lib/core/url/scope';
@@ -65,10 +65,10 @@ const TEMPORARY_ERROR_CODES = new Set([
 const SOCKET_TIMEOUT_MESSAGE = 'Socket timeout';
 
 /* One agent and one set of slots serve the whole process, so the ceiling is the
- * deployment's and comes from "$global". A value it cannot use is refused when
- * the document is read, named there, rather than corrected silently here. */
+ * deployment's. A value it cannot use is refused when the configuration is
+ * read, named there, rather than corrected silently here. */
 export function getMaxConnections(): number {
-  return getGlobalConfig().pushMaxConnections ?? DEFAULT_MAX_CONNECTIONS;
+  return getDeploymentConfig().push?.maxConnections ?? DEFAULT_MAX_CONNECTIONS;
 }
 
 /* One agent and one set of slots for the process, so devices on the same push
@@ -147,14 +147,14 @@ export function getVapidDetails(
   tenantId: string,
   config: TenantConfig | null,
 ): VapidDetails | null {
-  const publicKey = config?.publicEnv?.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
+  const publicKey = config?.public.webPush?.publicKey;
   const privateKey = config?.webPush?.privateKey;
   const subject = config?.webPush?.subject;
 
   if (!publicKey || !privateKey || !subject) {
     return reportBadVapidConfig(
       tenantId,
-      'publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY, webPush.privateKey and webPush.subject must all be set',
+      'PUBLIC_WEB_PUSH_PUBLIC_KEY, WEB_PUSH_PRIVATE_KEY and WEB_PUSH_SUBJECT must all be set for the tenant',
     );
   }
 

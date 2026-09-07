@@ -60,7 +60,7 @@ function MobileSidebar({
     closeSidebar();
   }, [pathname, closeSidebar]);
 
-  const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
+  const mattermostUrl = env.mattermost?.host || '';
   const displayContact = config?.isDisplayContact;
   const contactEmail = config?.contactEmailAddress?.address;
   const showHome = config?.isHomepageDisplay;

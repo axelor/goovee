@@ -47,7 +47,8 @@ export default async function Page(props: {
 
   const tenantConfig = getTenantConfig(tenantId);
 
-  const host = getPublicEnvironment(tenantConfig).GOOVEE_PUBLIC_HOST!;
+  /* Non-null: the tenant layout above refuses a segment naming no tenant. */
+  const host = getPublicEnvironment(tenantConfig)!.host;
 
   /* A session here is always this tenant's — `getSession` resolves it through the
    * instance the address names — so any session at all means the visitor is

@@ -125,7 +125,7 @@ export type RoutingIndex = {
 /**
  * Reads the document's routing into the form the request path uses.
  *
- * `deploymentOrigin` is `$global.betterAuthUrl`, the origin serving the
+ * `deploymentOrigin` is the configured `origin`, the origin serving the
  * addresses that name no tenant.
  *
  * One host-routed tenant per host is a precondition, not an assumption this
@@ -146,7 +146,7 @@ export function buildRoutingIndex(
   let routesByHost = false;
 
   for (const [id, config] of tenants) {
-    const origin = config.publicEnv.GOOVEE_PUBLIC_HOST;
+    const origin = config.public.host;
 
     /* Parsed once, and both collections hold the same spelling because they
      * hold the same value. */

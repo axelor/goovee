@@ -98,8 +98,7 @@ export default async function Layout(props: {
         );
   }
 
-  const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
-  const baseUrl = absoluteRoot(host);
+  const baseUrl = absoluteRoot(tenant.config.public.host);
 
   const found = await findWorkspaces({
     url: baseUrl,

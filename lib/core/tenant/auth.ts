@@ -27,8 +27,8 @@ export function getAOSAuthHeaders(auth: AOSAuth): Record<string, string> {
  * tenant must be selected on every request via X-Tenant-ID. */
 export function getAOSHeaders(aos: AOS): Record<string, string> {
   const headers = getAOSAuthHeaders(aos.auth);
-  if (aos.aosTenantId) {
-    headers['X-Tenant-ID'] = aos.aosTenantId;
+  if (aos.tenantId) {
+    headers['X-Tenant-ID'] = aos.tenantId;
   }
   return headers;
 }
