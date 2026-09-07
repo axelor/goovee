@@ -217,7 +217,12 @@
             "type": "object",
             "properties": {
               "host": {"type": "string", "minLength": 1},
-              "port": {"type": "number"},
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535,
+                "description": "TCP port the SMTP server listens on, commonly 587 for STARTTLS or 465 with secure set."
+              },
               "secure": {"type": "boolean"},
               "user": {"type": "string", "minLength": 1},
               "password": {"type": "string", "minLength": 1},

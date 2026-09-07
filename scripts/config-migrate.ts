@@ -383,7 +383,7 @@ function renderEnv(document: ConfigInput): string {
     '# Written by pnpm config:migrate from the variables of the previous',
     '# release. Review it, fill in any blank value, then use it as the',
     "# deployment's .env (or pass it with docker run --env-file) in place",
-    '# of the old variables, which are no longer read. See .env.example for',
+    '# of the old variables, which are no longer read. See env.example for',
     '# every setting.',
     '',
   ];
@@ -456,13 +456,20 @@ overwriting an existing file.`,
       );
     }
 
+    /* Where the file has to be before anything reads it: the loader looks for
+     * `portal.config*.json` in the working directory, and `portal.env` is a
+     * name nothing looks for at all. Saying "run config:check" without that
+     * step would send an operator who wrote the file anywhere else to a check
+     * reporting no configuration. */
     out.ok(
-      `Wrote ${outPath} — review it, fill any blank value, then run ` +
-        `\`pnpm config:check\` against it.` +
+      `Wrote ${outPath} — review it and fill any blank value. ` +
         (format === 'json'
-          ? ` It is read from the server's working directory; the old ` +
-            `variables are no longer read and can go.`
-          : ''),
+          ? `Then put it in the server's working directory as ` +
+            `${CONFIG_FILE_STEM}.json and run \`pnpm config:check\` there; ` +
+            `the old variables are no longer read and can go.`
+          : `Then put it in place as the deployment's \`.env\` (or pass it ` +
+            `with \`docker run --env-file\`) and run \`pnpm config:check\` ` +
+            `there; the old variables are no longer read and can go.`),
     );
   },
 });

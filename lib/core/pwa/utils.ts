@@ -3,6 +3,7 @@ import https from 'node:https';
 import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
+import {envNameFor, TENANTS_KEY} from '@/config/names';
 import {getDeploymentConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
 import type {WorkspaceSubPath} from '@/lib/core/url';
@@ -151,17 +152,24 @@ export function getVapidDetails(
   const privateKey = config?.webPush?.privateKey;
   const subject = config?.webPush?.subject;
 
+  /* Named as the variables the operator sets, spelled for this tenant, so the
+   * message names something they can search their environment for. */
+  const settingName = (...path: string[]) =>
+    envNameFor([TENANTS_KEY, tenantId, ...path]);
+
   if (!publicKey || !privateKey || !subject) {
     return reportBadVapidConfig(
       tenantId,
-      'PUBLIC_WEB_PUSH_PUBLIC_KEY, WEB_PUSH_PRIVATE_KEY and WEB_PUSH_SUBJECT must all be set for the tenant',
+      `${settingName('public', 'webPush', 'publicKey')}, ` +
+        `${settingName('webPush', 'privateKey')} and ` +
+        `${settingName('webPush', 'subject')} must all be set`,
     );
   }
 
   if (!subject.startsWith('mailto:') && !subject.startsWith('https://')) {
     return reportBadVapidConfig(
       tenantId,
-      'webPush.subject must start with mailto: or https:',
+      `${settingName('webPush', 'subject')} must start with mailto: or https:`,
     );
   }
 

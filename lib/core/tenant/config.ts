@@ -87,7 +87,7 @@ function tenantMap(
  * under none.
  *
  * What a valid configuration holds is declared in @/config/schema, and from that
- * same declaration `pnpm config:generate` writes the .env.example, the JSON
+ * same declaration `pnpm config:generate` writes the env.example, the JSON
  * example and the JSON Schema an operator writes their configuration from.
  *
  * Loading is synchronous so configuration is also available to module-init
@@ -206,7 +206,7 @@ function read(): ParsedConfig {
     throw new Error(
       `No configuration found: no ${envNameFor([])} variable is set and ` +
         `there is no ${CONFIG_FILE_STEM}.json in ${process.cwd()}. See ` +
-        `.env.example and ${CONFIG_FILE_STEM}.example.json.` +
+        `env.example and ${CONFIG_FILE_STEM}.example.json.` +
         (legacy.length
           ? `\nThe environment carries variables an earlier release read ` +
             `(${legacy.slice(0, 5).join(', ')}${legacy.length > 5 ? ', …' : ''}); ` +

@@ -185,7 +185,7 @@ are present.
 Rename each old variable to the one beside it. To spell any other key from the
 document, uppercase its path and join it with underscores, with the tenant entry
 as `PORTAL_TENANT_D_…`: `tenants.d.aos.auth.apiKey` becomes
-`PORTAL_TENANT_D_AOS_AUTH_API_KEY`. See `.env.example` in the source for every
+`PORTAL_TENANT_D_AOS_AUTH_API_KEY`. See `env.example` in the source for every
 setting.
 
 | Was                                         | Now                                                        |
@@ -236,7 +236,7 @@ setting.
 
 Leave out every variable of a group the deployment does not use; that turns the
 group off for the tenant. Treat every variable with no counterpart above as
-optional; `.env.example` lists them all.
+optional; `env.example` lists them all.
 
 #### In either spelling
 

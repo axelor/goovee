@@ -41,7 +41,10 @@ Here is the project structure:
 └── ...
 ```
 
-Check the `.env` file in the root directory and add the necessary environment variables:
+Copy `env.example` to `.env` in the root directory and fill in the required
+settings. Nearly every setting is one `PORTAL_*` variable; `env.example`
+describes all of them, including the one build-time variable that is not.
+`pnpm config:check` reports what was read.
 
 Some important commands:
 
@@ -57,10 +60,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## ORM
 
 The application make use of `@goovee/orm` for data access.
-Make sure to set the database url in `.env` file under the `DATABASE_URL` property :
+Each tenant has its own database, named by that tenant's own variable in `.env`:
 
 ```
-DATABASE_URL=postgres://<user>:<password>@<host>:<port>/<db-name>
+PORTAL_TENANT_<ID>_DB_URL=postgres://<user>:<password>@<host>:<port>/<db-name>
 ```
 
 Then, you can define models inside the goovee/schema folder. After each change in the schema folder, you need to re-run the generation command `pnpm generate` to propagate the changes inside the ORM client.

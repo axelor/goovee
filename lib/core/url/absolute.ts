@@ -10,7 +10,8 @@ import {getBasePath} from '@/lib/core/path/base-path';
  * them. The origin a root is built on is passed in rather than read, and comes
  * from wherever its caller holds one — a tenant's own host, read from the
  * tenant's configuration on the server and from `useEnvironment()` in the
- * browser, or the deployment's auth origin, which `$global` holds.
+ * browser, or the deployment's own `origin`, which answers the addresses naming
+ * no tenant.
  */
 
 /**

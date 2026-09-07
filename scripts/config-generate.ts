@@ -21,7 +21,7 @@ import {
 
 const SCHEMA_SOURCE = 'lib/core/config/schema.ts';
 
-const ENV_EXAMPLE_FILE = '.env.example';
+const ENV_EXAMPLE_FILE = 'env.example';
 const JSON_EXAMPLE_FILE = `${CONFIG_FILE_STEM}.example.json`;
 
 /* The tenant the examples are written for. Any lowercase alphanumeric id works;

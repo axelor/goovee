@@ -1,0 +1,7 @@
+# A deployment's own configuration, which the format glob would otherwise pick
+# up: it sits in the working directory under this name, holds database and
+# payment secrets, and is not this repository's to rewrite. The two generated
+# references are, and are checked on CI, so they stay in.
+/portal.config*.json
+!/portal.config.example.json
+!/portal.config.schema.json

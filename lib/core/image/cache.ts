@@ -30,7 +30,7 @@ import {
  */
 
 /**
- * Bytes the cache may occupy, from `"$global".imageCacheMaxBytes`.
+ * Bytes the cache may occupy, from the deployment's `imageCache.maxBytes`.
  *
  * One directory beside the build holds every tenant's derivatives, so the budget
  * is the deployment's rather than any tenant's. Entries are keyed by the absolute

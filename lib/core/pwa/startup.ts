@@ -42,6 +42,6 @@ function report(): void {
   console.log(
     `[PUSH][STARTUP] push notifications are configured for ${names}; up to ` +
       `${getMaxConnections()} notifications are delivered at once ` +
-      `(set $global.pushMaxConnections to change)`,
+      `(set PORTAL_PUSH_MAX_CONNECTIONS to change)`,
   );
 }

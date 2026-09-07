@@ -53,7 +53,7 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
   const withTenant: ScriptOptions = command =>
     (spec.options ? spec.options(command) : command).option(
       '--tenant <id>',
-      'Tenant id (defaults to "$global.defaultTenant" where the document declares one)',
+      'Tenant id (defaults to PORTAL_DEFAULT_TENANT where it is set)',
     );
 
   runParsed<Values & TenantValues, Args>(
@@ -68,8 +68,8 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
       const requireTenant = (): string =>
         selected ??
         out.fail(
-          `--tenant is required: the document declares no "$global.defaultTenant". ` +
-            `It names ${configuredIds.join(', ')}.`,
+          `--tenant is required: PORTAL_DEFAULT_TENANT is not set. ` +
+            `The configuration names ${configuredIds.join(', ')}.`,
         );
 
       /* `opened` is set only once there is something to release, so a tenant

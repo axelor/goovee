@@ -13,9 +13,11 @@
  * a name is split on underscores, and the tokens are matched against the keys of
  * each group in turn, joining as many as it takes to spell one. That is what
  * lets every variable be typed with underscores alone — no hyphens, no case —
- * and still land on the right key. The schema is checked once, as it is first
- * read, for two keys that would spell the same way, so the match is never
- * ambiguous.
+ * and still land on the right key. Two keys of one group that would spell the
+ * same way are refused as the group is first read; a collision spanning levels
+ * — `web.push.key` beside `webPush.key` — is invisible to that check and is
+ * refused instead when a variable resolves both ways, so an ambiguous name is
+ * never settled by search order.
  *
  * A variable that names nothing is a fault, not noise: the prefix says it was
  * meant for this, so a misspelling is reported against the name and the keys
