@@ -23,6 +23,12 @@ In a checkout of the portal source, beside the deployment's current `.env`, run:
 NODE_ENV=production pnpm config:migrate
 ```
 
+`NODE_ENV=production` is what makes the script read the deployment's own `.env`
+files — the four `next start` reads, in the same order. Without it the
+development files are read in its place, so a value the deployment keeps in
+`.env.production` is migrated from whatever `.env.development` holds, and
+nothing says so.
+
 It writes `portal.config.json` from the old variables: the deployment's settings,
 `"defaultTenant": "d"`, and every tenant value under `tenants.d`. Review the
 file, fill in any blank value, and keep it for step 2. Drop the old `.env`
@@ -249,8 +255,11 @@ Write that origin as a scheme and a host only, with the port where it is not the
 default. Do not add a path, query, fragment or trailing slash; start-up refuses
 them.
 
-Set the default tenant (`defaultTenant`, `PORTAL_DEFAULT_TENANT`) to the tenant
-id, so that `/` serves it. Without it `/` answers not-found.
+The default tenant (`defaultTenant`, `PORTAL_DEFAULT_TENANT`) decides which
+tenant `/` serves. A deployment configuring one tenant needs no value — that
+tenant is the only answer and is filled in — so leave what the script wrote as
+it is. It becomes required as soon as a second tenant is added and either is
+reached under a path segment, and start-up then says so.
 
 Set the Stripe webhook secret (`payments.stripe.webhookSecret`,
 `PORTAL_TENANT_D_PAYMENTS_STRIPE_WEBHOOK_SECRET`) if the deployment takes bank
@@ -453,8 +462,10 @@ PORTAL_TENANT_ACME_PUBLIC_HOST=https://acme.example.com
 Give the host to no other tenant.
 
 Leave `PORTAL_DEFAULT_TENANT` as it is, unless the new host is the one
-`PORTAL_ORIGIN` names. In that case set the default tenant to this tenant or
-remove it; the configuration is refused otherwise.
+`PORTAL_ORIGIN` names. In that case set the default tenant to this tenant;
+naming any other is refused, because `/` on that origin would then have two
+answers. Removing it instead works only where no tenant is left that is reached
+under a path segment — one of those requires a default.
 
 ### Configure the proxy
 

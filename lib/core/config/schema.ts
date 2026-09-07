@@ -504,7 +504,7 @@ export const deploymentConfigSchema = z.strictObject({
     .string()
     .min(1)
     .describe(
-      'Tenant serving the addresses that name none of their own: "/", and a script run with no --tenant. Must name a configured tenant. Left out, "/" answers not-found and a visitor has to open an address naming a tenant.',
+      'Tenant serving the addresses that name none of their own: "/", and a script run with no --tenant. Must name a configured tenant. A deployment configuring one tenant leaves this out — that tenant is the only answer and is filled in. Beyond one it is required as soon as any tenant is reached under a path segment, since "/" on the origin such a tenant is served on names no tenant. A deployment whose tenants are all reached by host may leave it out; each tenant then answers "/" on the origin it holds, a script needs --tenant, and "/" on the deployment\'s own origin answers not-found unless a tenant holds that host too.',
     )
     .optional(),
   push: z
@@ -704,14 +704,66 @@ function checkMailCeilings(tenants: TenantEntry[]): ConfigIssue[] {
   return issues;
 }
 
-/* Checked against the tenants, because the two are configured separately.
+/*
+ * Checked against the tenants, because the two are configured separately.
  * Rename or drop a tenant and this can be left pointing at one that is not
- * there, and the addresses it serves answer not-found with no explanation. */
+ * there, and the addresses it serves answer not-found with no explanation.
+ *
+ * Required where a tenant is reached under a path segment, because such a
+ * tenant sits on an origin whose own `/` serves no tenant: a visitor who types
+ * the bare origin arrives at the deployment's entry, which has nothing to
+ * resolve without this and answers not-found. `checkHostRouting` refuses a
+ * path-routed tenant sharing a host with a host-routed one, so routing alone
+ * never gives such an origin a tenant to answer its `/` — where this is
+ * demanded, the unclaimed address is really there, and naming a tenant here is
+ * what answers it.
+ *
+ * A deployment whose tenants are all reached by host is exempt. Its own origin
+ * may still have an unanswered `/`, where no tenant holds that host, but that
+ * is an infrastructure address — it carries `/deployment` and the sign-in
+ * fallback, and a tenant address reached there is sent to the tenant's own
+ * origin — so an operator is left to decide whether `/` on it leads anywhere
+ * rather than made to hand it to one tenant of several.
+ *
+ * A single-tenant deployment declares nothing either way: one tenant is the
+ * only answer, so the loader fills it in.
+ *
+ * A tenant that omits `routing` is path-routed, which is what the filter below
+ * reads. A value that is neither spelling is refused by the property's own
+ * type, which stops the configuration before this runs — unlike a failed
+ * refinement, which arrives here with its value in place — so the routing seen
+ * here is always one the tenant validly declared.
+ */
 function checkDefaultTenant(
   defaultTenant: string | undefined,
-  ids: string[],
+  tenants: TenantEntry[],
 ): ConfigIssue[] {
-  if (!defaultTenant || ids.includes(defaultTenant)) {
+  const ids = tenants.map(([id]) => id);
+
+  if (defaultTenant) {
+    if (ids.includes(defaultTenant)) {
+      return [];
+    }
+
+    return [
+      {
+        path: ['defaultTenant'],
+        message:
+          `"${defaultTenant}" names no configured tenant; the tenants are ` +
+          `${ids.join(', ')}.`,
+      },
+    ];
+  }
+
+  if (ids.length < 2) {
+    return [];
+  }
+
+  const pathRouted = tenants
+    .filter(([, config]) => config.routing !== 'host')
+    .map(([id]) => id);
+
+  if (!pathRouted.length) {
     return [];
   }
 
@@ -719,8 +771,14 @@ function checkDefaultTenant(
     {
       path: ['defaultTenant'],
       message:
-        `"${defaultTenant}" names no configured tenant; the tenants are ` +
-        `${ids.join(', ')}.`,
+        `is required: ` +
+        (pathRouted.length === 1
+          ? `tenant "${pathRouted[0]}" is reached under a path segment, so ` +
+            `"/" on the origin it is served on names no tenant.`
+          : `tenants ${pathRouted.join(', ')} are reached under a path ` +
+            `segment, so "/" on the origins they are served on names no ` +
+            `tenant.`) +
+        ` Name the tenant "/" leads to; the tenants are ${ids.join(', ')}.`,
     },
   ];
 }
@@ -861,8 +919,9 @@ function checkHostRouting(
         `"/" on ${deployment.origin} is claimed twice: "${deploymentOwner}" is ` +
         `routed by host there, so it answers every address of that origin, while ` +
         `${name(['defaultTenant'])} sends "/" to "${defaultTenant}". Name ` +
-        `"${deploymentOwner}" there, drop it, or serve "${deploymentOwner}" on ` +
-        `a host of its own.`,
+        `"${deploymentOwner}" there, or serve "${deploymentOwner}" on a host of ` +
+        `its own. Leaving it unset works only where no tenant is reached under ` +
+        `a path segment, which requires one.`,
     });
   }
 
@@ -965,7 +1024,10 @@ export const configSchema = z
       ...checkTenantIds(ids),
       ...(tenants.length
         ? [
-            ...checkDefaultTenant(ctx.value.defaultTenant, ids),
+            /* The tenants whole, not `settled`: what a tenant is named, and
+             * how it is routed, is answered by its own entry however the rest
+             * of that entry fared. */
+            ...checkDefaultTenant(ctx.value.defaultTenant, tenants),
             ...checkOriginSchemes(ctx.value.origin, settled),
             ...checkHostRouting(
               ctx.value.origin,

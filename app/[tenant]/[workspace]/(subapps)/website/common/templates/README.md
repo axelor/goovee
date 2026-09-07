@@ -537,8 +537,9 @@ Populate the database with template definitions and demo content.
 ## Commands
 
 Every command below takes the tenant as `--tenant <id>`, and answers `--help` with
-its own options. The tenant may be left out only when `PORTAL_DEFAULT_TENANT` is
-set, in which case that tenant is used.
+its own options. The tenant may be left out where the deployment resolves a
+default tenant, in which case that tenant is used: a deployment configuring one
+tenant always does, and beyond one `PORTAL_DEFAULT_TENANT` names it.
 
 ```bash
 # Seed template structure (components and fields)

@@ -234,7 +234,27 @@ function read(): ParsedConfig {
     );
   }
 
-  const {tenants: entries, ...deployment} = result.data;
+  const {tenants: entries, ...parsed} = result.data;
+
+  const ids = Object.keys(entries);
+
+  /* One tenant is the only tenant the addresses naming none can mean, so it is
+   * filled in rather than asked for: a deployment that declared it would be
+   * repeating what it already said. Written into the configuration rather than
+   * answered by `getDefaultTenantId` alone, so that everything reading the
+   * deployment's settings — `/deployment/info`, `pnpm config:check` — reports
+   * the tenant `/` actually leads to.
+   *
+   * Filled after the parse, so the checks that ran against what was written
+   * see the same document an operator sees. Nothing is lost by that: only an
+   * absent value is filled, and the value filled is the one configured tenant
+   * — which is also the only tenant either check could accept here, so neither
+   * would have refused it. It carries no entry in `sources`, which is right:
+   * no variable and no file supplied it. */
+  const deployment =
+    !parsed.defaultTenant && ids.length === 1
+      ? {...parsed, defaultTenant: ids[0]}
+      : parsed;
 
   const tenants = tenantMap(entries);
 
@@ -290,11 +310,17 @@ export function getRoutingIndex(): RoutingIndex {
 
 /**
  * The tenant used by addresses that name none: `/`, and a script run without
- * `--tenant`. Null unless one is declared, and then those addresses have to be
- * told which tenant they are for.
+ * `--tenant`.
  *
- * The configuration is checked at load, so any name returned here is one it
- * declares.
+ * Always answered for a deployment configuring one tenant, which the load fills
+ * in. Beyond one it is declared, and required as soon as any tenant is reached
+ * under a path segment — so this is null only where every tenant is reached by
+ * host and none was named, and then those addresses have to be told which
+ * tenant they are for. Null during a `next build` that carries no
+ * configuration as well, which stands in a placeholder naming no tenant.
+ *
+ * The configuration is checked at load, so any name returned here names a
+ * configured tenant.
  */
 export function getDefaultTenantId(): string | null {
   return load().deployment.defaultTenant ?? null;

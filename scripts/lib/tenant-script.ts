@@ -53,7 +53,7 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
   const withTenant: ScriptOptions = command =>
     (spec.options ? spec.options(command) : command).option(
       '--tenant <id>',
-      'Tenant id (defaults to PORTAL_DEFAULT_TENANT where it is set)',
+      "Tenant id (defaults to the deployment's default tenant, where it has one)",
     );
 
   runParsed<Values & TenantValues, Args>(
@@ -68,8 +68,10 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
       const requireTenant = (): string =>
         selected ??
         out.fail(
-          `--tenant is required: PORTAL_DEFAULT_TENANT is not set. ` +
-            `The configuration names ${configuredIds.join(', ')}.`,
+          `--tenant is required: this deployment resolves no default tenant. ` +
+            `Pass it, or configure one — PORTAL_DEFAULT_TENANT as a variable, ` +
+            `defaultTenant in a portal.config file. The configuration names ` +
+            `${configuredIds.join(', ')}.`,
         );
 
       /* `opened` is set only once there is something to release, so a tenant
