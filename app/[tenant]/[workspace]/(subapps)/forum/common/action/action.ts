@@ -155,10 +155,9 @@ export async function exitGroup({id, groupID}: ExitGroupInput) {
   }
 }
 
-export async function joinGroup({groupID, userId}: JoinGroupInput) {
+export async function joinGroup({groupID}: JoinGroupInput) {
   const parsed = JoinGroupSchema.safeParse({
     groupID,
-    userId,
   });
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
@@ -194,7 +193,7 @@ export async function joinGroup({groupID, userId}: JoinGroupInput) {
             },
           },
           member: {
-            select: {id: userId},
+            select: {id: user.id},
           },
           notificationSelect: NOTIFICATION_VALUES.ALL_ON_MY_POST,
           isPin: false,
