@@ -230,7 +230,7 @@ function renderEnvExample(): string {
     '## Build-time ##',
     '',
     ...commentBlock(FOOTER),
-    'NEXT_PUBLIC_BASE_PATH=',
+    '#NEXT_PUBLIC_BASE_PATH=',
     '',
   );
 

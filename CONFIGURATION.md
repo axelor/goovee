@@ -48,8 +48,8 @@ underscores, a tenant's keys under `PORTAL_TENANT_<ID>_`:
 | `tenants.acme.oauth.google.clientId` | `PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_ID` |
 
 Write each setting in one place. Where both carry it, the variable wins — section
-16 covers the layering and names the generated files that list both spellings of
-every setting.
+16 covers the layering. [`env.example`](env.example) lists every variable, and
+[`portal.config.schema.json`](portal.config.schema.json) every key.
 
 One setting is a variable and nothing else: `NEXT_PUBLIC_BASE_PATH`, the path
 prefix the portal is served under. It is fixed into the application when the
@@ -133,7 +133,7 @@ PORTAL_TENANT_ACME_PUBLIC_HOST=https://portal.example.com
 
 The `$schema` line is optional. With it, editors such as VS Code offer
 autocompletion and underline mistakes while the file is edited. Point it at
-`portal.config.schema.json` from the portal source.
+[`portal.config.schema.json`](portal.config.schema.json).
 
 Every section from here on gives both spellings: the keys as the file holds them,
 then the variables that carry the same settings. `<ID>` stands for the tenant id,
@@ -1103,9 +1103,7 @@ The server process reads `PORT`, `HOSTNAME` and `NODE_ENV` as any Node server
 does. `PORT` changes the port the portal listens on; it defaults to 3000.
 `NODE_ENV` also chooses which `.env` and `portal.config` layers are read.
 
-`env.example` in the portal source lists every variable with its default;
-`pnpm config:generate` rewrites it, `portal.config.example.json` and
-`portal.config.schema.json` from the schema.
+[`env.example`](env.example) lists every variable with its default.
 
 ---
 

@@ -1,8 +1,15 @@
-# Multi-tenancy migration runbook
+# Migrating to per-tenant configuration
 
 Move a Goovee deployment off the environment variables of the previous release
-and onto the configuration that replaces them. Perform the steps in order, on
-the updated AOS and portal builds, before they serve traffic.
+and onto the per-tenant configuration that replaces them. Follow this runbook
+when upgrading:
+
+- **2.2.x or earlier → 2.3.0 or later**
+- **1.10.x or earlier → 1.11.0 or later**
+
+The steps are the same on both lines. Perform them in order, on the updated AOS
+and portal builds, before they serve traffic. [CONFIGURATION.md](../CONFIGURATION.md)
+describes every setting written here.
 
 ---
 
@@ -49,7 +56,7 @@ it, the variable wins without a warning.
 Write the document below with the deployment's values, strip the comments, and
 save it as `portal.config.json`. Each comment names the old variable the key
 replaces. Keep the `$schema` line so an editor completes and checks the keys
-against `portal.config.schema.json` from the source.
+against [`portal.config.schema.json`](../portal.config.schema.json).
 
 <!-- prettier-ignore -->
 ```jsonc
@@ -191,8 +198,7 @@ are present.
 Rename each old variable to the one beside it. To spell any other key from the
 document, uppercase its path and join it with underscores, with the tenant entry
 as `PORTAL_TENANT_D_…`: `tenants.d.aos.auth.apiKey` becomes
-`PORTAL_TENANT_D_AOS_AUTH_API_KEY`. See `env.example` in the source for every
-setting.
+`PORTAL_TENANT_D_AOS_AUTH_API_KEY`. See [`env.example`](../env.example) for every setting.
 
 | Was                                         | Now                                                        |
 | ------------------------------------------- | ---------------------------------------------------------- |
@@ -242,7 +248,7 @@ setting.
 
 Leave out every variable of a group the deployment does not use; that turns the
 group off for the tenant. Treat every variable with no counterpart above as
-optional; `env.example` lists them all.
+optional; [`env.example`](../env.example) lists them all.
 
 #### In either spelling
 
