@@ -41,19 +41,19 @@ Here is the project structure:
 └── ...
 ```
 
-Copy `env.example` to `.env` in the root directory and fill in the required
-settings. Nearly every setting is one `PORTAL_*` variable; `env.example`
-describes all of them, including the one build-time variable that is not.
-`pnpm config:check` reports what was read.
+To start the app, run these in order:
 
-Some important commands:
+1. Install the dependencies: `pnpm i`
+2. Copy [`env.example`](env.example) to `.env` in the root directory. The
+   settings left uncommented there are the required ones; fill them in.
+3. Confirm the settings are valid: `pnpm config:check`
+4. Generate the ORM client: `pnpm generate`
+5. Compile the website stylesheets: `pnpm website:sass`
+6. Build the project: `pnpm build`
+7. Start the app: `pnpm start`
 
-- Install the dependencies : `pnpm i`
-- Generate ORM client : `pnpm generate`
-- Compile sass for website: `pnpm website:sass`
-- Build the project : `pnpm build`
-- Start the app : `pnpm start`
-- Run development server : `pnpm dev`
+`pnpm dev` replaces the last two steps with a development server, which serves
+the app without building it first.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
@@ -70,34 +70,10 @@ Then, you can define models inside the goovee/schema folder. After each change i
 
 Check [Goovee ORM](https://github.com/axelor/goovee-orm) for more information about its usage.
 
-## Release
+## Documentation
 
-Releases must be triggered from `main` or `release/*` branches.
-
-**1. Merge development branches into the release branch**
-
-Merge your development branches (`dev`, `wip`, `dev-1.6`, etc.) into `main` or the target `release/*` branch.
-
-**2. Prepare the release**
-
-```bash
-pnpm release:prepare
-```
-
-**3. Push and trigger the release**
-
-```bash
-git push origin <branch>
-pnpm release
-```
-
-**4. Merge back and bump the version**
-
-Merge release branch back into your development branches, then bump the version to prepare for the next cycle:
-
-```bash
-pnpm release:bump <major|minor|patch>
-```
+- [CONFIGURATION.md](CONFIGURATION.md) — every setting a deployment carries, written as environment variables or as a JSON file, and how to check them before starting the portal.
+- [MIGRATION.md](MIGRATION.md) — which runbooks an upgrade needs, by the version being upgraded from.
 
 ## License
 
