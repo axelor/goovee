@@ -12,6 +12,7 @@ import {
 } from '@/constants';
 import {findRegistrationLocalization} from '@/orm/localizations';
 import {
+  activateOnPortal,
   findContactByEmail,
   findContactById,
   findGooveeUserByEmail,
@@ -150,6 +151,7 @@ export async function registerByInvite({
       firstName,
       password,
       client,
+      aos: getTenantConfig(tenantId)?.aos ?? null,
       contactConfig,
       existingRecord,
       partnerId: invite.partner.id,
@@ -385,6 +387,7 @@ export async function register({
     password,
     workspaceURL,
     client,
+    aos: getTenantConfig(tenantId)?.aos ?? null,
     localizationId: localization?.id,
   });
 
@@ -558,7 +561,6 @@ async function registerAosContactAsAdmin({
       password: password && (await hash(password)),
       fullName: `${$name} ${firstName || ''}`,
       simpleFullName: `${$name} ${firstName || ''}`,
-      isActivatedOnPortal: true,
       localization: localization?.id
         ? {select: {id: localization.id}}
         : undefined,
@@ -586,6 +588,12 @@ async function registerAosContactAsAdmin({
       ),
     );
   }
+
+  await activateOnPortal({
+    partnerId: $contact.id,
+    client,
+    aos: getTenantConfig(tenantId)?.aos ?? null,
+  });
 }
 
 async function findActiveAdminContactForWorkspace({
@@ -666,6 +674,7 @@ export async function registerByKeycloak({
       companyName: name || email,
       workspaceURL,
       client,
+      aos: getTenantConfig(tenantId)?.aos ?? null,
       localizationId: localization?.id,
     } as any);
   } catch (err) {
