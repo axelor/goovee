@@ -31,6 +31,7 @@ Goovee is a modern web portal built with Next.js for clients and partners, provi
 | **v1.8.x**          | 8.5.19+                                                    |
 | **v1.9.x**          | 8.5.20+                                                    |
 | **v1.10.x**         | 8.5.21+                                                    |
+| **v1.11.x**         | 8.5.22+                                                    |
 
 ## Usage
 

@@ -1,6 +1,0 @@
-{
-  "title": "Fix the email update row layout in My account",
-  "type": "fix",
-  "description": "Editing the email address on the My account page revealed the OTP field and its buttons inside a column that could not shrink below the buttons' width, so the Generate OTP and Cancel buttons were pushed outside the card. The row now lays the email field, the OTP field and the buttons out side by side and wraps them onto the next line when the width is insufficient.",
-  "scope": ["core"]
-}
