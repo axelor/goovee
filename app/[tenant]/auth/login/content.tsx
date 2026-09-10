@@ -6,7 +6,6 @@ import {useSearchParams} from 'next/navigation';
 import {useAuthClient} from '@/lib/auth-client';
 import Image from 'next/image';
 import {MdOutlineRefresh, MdArrowForward} from 'react-icons/md';
-import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
 
 // ---- CORE IMPORTS ---- //
 import {i18n, l10n} from '@/locale';
@@ -62,7 +61,6 @@ export default function Content({
 
     return tenantScope.forRouter(`${path}${query ? `?${query}` : ''}`);
   };
-  const {isPending} = authClient.useSession();
   const env = useEnvironment();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,22 +139,10 @@ export default function Content({
     });
   };
 
-  if (isPending) {
-    return (
-      <Dialog open>
-        {/* A spinner and nothing else, so the title carries the whole meaning. */}
-        <DialogContent
-          className="space-y-2"
-          hideClose
-          aria-describedby={undefined}>
-          <DialogTitle className="sr-only">{i18n.t('Loading')}</DialogTitle>
-          <div className="flex items-center justify-center">
-            <MdOutlineRefresh className="h-6 w-6 animate-spin" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  /* No gate on the session here. `Locale` above renders nothing until the
+   * session has answered once, so this form is only ever mounted with an answer
+   * already in hand — and covering it with a spinner on every later refetch
+   * would blink over a form the visitor is in the middle of filling. */
 
   const successMessage = searchParams.get('success');
   const showSso = showGoogleOauth || showKeycloakOauth;

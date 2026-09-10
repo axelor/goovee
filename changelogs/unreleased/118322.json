@@ -1,0 +1,6 @@
+{
+  "title": "Keep what is typed on the sign-in and sign-up screens across a tab switch",
+  "type": "fix",
+  "description": "The tenant shell renders nothing while the translations load, and it treated a session that is merely being rechecked as a session it was still waiting for. The session is rechecked on every window refocus, and on the authentication screens there is no session to hold on to while that request is in flight, so leaving the tab and coming back unmounted the whole tree and took the half-filled sign-in, sign-up and password-reset forms down with it. The tree is now held back only until the translations first land, and the bundle is no longer reloaded on a refocus that changes no locale.",
+  "scope": ["core"]
+}
