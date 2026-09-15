@@ -12,9 +12,9 @@ import {getSkip} from '@/utils/pagination';
 import {formatNumber} from '@/locale/server/formatters';
 import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
-import {buildPendingStripeBankTransferIntents} from '@/lib/core/payment/stripe/service';
-import {findPendingHubPispPayments} from '@/lib/core/payment/hubpisp/orm';
-import {findPendingStripeBankTransfers} from '@/lib/core/payment/stripe/orm';
+import {buildPendingStripeBankTransferIntents} from '@/payment/stripe/service';
+import {findPendingHubPispPayments} from '@/payment/hubpisp/orm';
+import {findPendingStripeBankTransfers} from '@/payment/stripe/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import type {

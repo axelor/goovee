@@ -13,7 +13,7 @@ import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {useStagedUpload} from '@/upload/use-staged-upload';
 import {i18n} from '@/locale';
 import {AutosizeTextarea, Button, Input, ProgressFill} from '@/ui/components';
 import {

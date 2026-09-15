@@ -10,7 +10,7 @@ import type {
   CreateProps,
   TrackingField,
 } from '../../types';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 type CommentsListProps = {
   recordId: ID;

@@ -10,12 +10,12 @@ import {
   findPaymentContext,
   markPaymentAsFailed,
   markPaymentAsProcessed,
-} from '@/lib/core/payment/common/orm';
+} from '@/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {UP2PAY_ERRORS, UP2PAY_ERROR_MESSAGES} from '@/payment/up2pay/constants';
 import {readPEMFile, verifySignature} from '@/payment/up2pay/crypto';
-import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
-import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
+import {notifyPaymentUpdate} from '@/payment/sse';
+import {PAYMENT_SOURCE} from '@/payment/common/type';
 import {buildSignatureMessage} from '@/payment/up2pay/utils';
 
 // ---- LOCAL IMPORTS ---- //

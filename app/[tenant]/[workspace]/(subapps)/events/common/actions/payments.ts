@@ -11,8 +11,8 @@ import {createStripeOrder} from '@/payment/stripe/actions';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
 import {isPaymentOptionAvailable} from '@/utils/payment';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
 

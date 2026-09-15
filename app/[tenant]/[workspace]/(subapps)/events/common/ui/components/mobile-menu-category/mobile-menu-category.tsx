@@ -9,7 +9,7 @@ import {Sheet, SheetContent, Portal} from '@/ui/components';
 import {AccordionMenu} from '@/ui/components/accordion-menu/accordion-menu';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useSearchParams} from '@/ui/hooks';
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 import type {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //

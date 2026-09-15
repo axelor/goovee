@@ -16,7 +16,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {getProductImageURL} from '@/utils/files';
-import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
+import {formatDate, formatDateTime} from '@/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -33,7 +33,7 @@ import type {
   DetailOrder,
   OrderAddress,
 } from '@/subapps/orders/common/types/orders';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 const Content = ({order}: {order: DetailOrder}) => {
   const {

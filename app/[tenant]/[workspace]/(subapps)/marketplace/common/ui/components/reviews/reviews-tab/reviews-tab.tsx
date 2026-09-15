@@ -28,7 +28,7 @@ import {ReportReviewButton} from '../report-review-button';
 import {Rating} from '../../shared/rating';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 interface ReviewsTabProps {
   product: SingleProduct;

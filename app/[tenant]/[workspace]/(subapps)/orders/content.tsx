@@ -17,7 +17,7 @@ import {SUBAPP_CODES, URL_PARAMS} from '@/constants';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useSearchQuery} from '@/ui/hooks';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate} from '@/locale/formatters';
 import type {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //

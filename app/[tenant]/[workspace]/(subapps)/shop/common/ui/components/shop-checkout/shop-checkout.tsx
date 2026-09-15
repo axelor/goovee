@@ -14,7 +14,7 @@ import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
 import {computeTotal} from '@/utils/cart';
 import {calculateAdvanceAmount} from '@/utils/payment';
-import {formatNumber} from '@/lib/core/locale/formatters';
+import {formatNumber} from '@/locale/formatters';
 import type {Cloned} from '@/types/util';
 import type {CartItem, ComputedProduct, PartnerAddress} from '@/types';
 import type {Subapp} from '@/orm/workspace';
@@ -36,7 +36,7 @@ import {
 } from '@/subapps/shop/common/utils/category-style';
 import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 import {findProduct} from '@/subapps/shop/common/actions/cart';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 export interface ShopCheckoutLabels {
   backToCart: string;

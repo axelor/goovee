@@ -2,9 +2,9 @@ import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getTenantConfig} from '@/tenant/config';
-import {isHostRouted} from '@/lib/core/tenant/routing';
-import {ownsAddressedOrigin, tenantURLs} from '@/lib/core/url/scope';
-import {buildManifest} from '@/lib/core/pwa/manifest';
+import {isHostRouted} from '@/tenant/routing';
+import {ownsAddressedOrigin, tenantURLs} from '@/url/scope';
+import {buildManifest} from '@/pwa/manifest';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
  * app is identified by it, launches on the tenant's landing workspace there, and

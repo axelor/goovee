@@ -1,11 +1,11 @@
 // ---- CORE IMPORTS ---- //
-import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
-import {HubPispTransferType} from '@/lib/core/payment/hubpisp/types';
-import {BANK_TRANSFER_STATUS} from '@/lib/core/payment/stripe/constants';
-import {BankAccountType} from '@/lib/core/payment/stripe/types';
+import {HubPispLocalInstrument} from '@/payment/hubpisp/constants';
+import {HubPispTransferType} from '@/payment/hubpisp/types';
+import {BANK_TRANSFER_STATUS} from '@/payment/stripe/constants';
+import {BankAccountType} from '@/payment/stripe/types';
 import {ActionResponse, ErrorResponse, SuccessResponse} from '@/types/action';
-import {PaymentSource} from '@/lib/core/payment/common/type';
-import {PaymentUpdateStatus} from '@/lib/core/payment/sse/constants';
+import {PaymentSource} from '@/payment/common/type';
+import {PaymentUpdateStatus} from '@/payment/sse/constants';
 
 export type PaymentSSEProps = {
   source: PaymentSource;

@@ -29,7 +29,7 @@ import {useToast} from '@/ui/hooks/use-toast';
 import {
   useStagedUpload,
   type StagedUploadStatus,
-} from '@/lib/core/upload/use-staged-upload';
+} from '@/upload/use-staged-upload';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {getFileSizeText} from '@/utils/files';
 

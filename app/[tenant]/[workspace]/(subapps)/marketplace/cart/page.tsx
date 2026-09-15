@@ -11,8 +11,8 @@ import {
 
 import {Link} from '@/ui/components/link';
 import {CartContent} from '../common/ui/components/cart/cart-content';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 
 export default async function CartPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

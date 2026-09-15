@@ -19,7 +19,7 @@ import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
 import {computeTotal} from '@/utils/cart';
-import {formatNumber} from '@/lib/core/locale/formatters';
+import {formatNumber} from '@/locale/formatters';
 import type {CartItem, ComputedProduct, Product} from '@/types';
 
 import type {EnrichedCartItem} from '@/subapps/shop/common/types';

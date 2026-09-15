@@ -15,8 +15,8 @@ import {z} from 'zod';
 import {findPartnerInvoicingAddresses, recordOrder} from '../orm';
 import {createMarketplaceOrder} from '../service';
 import {getMarketplaceConfig} from '../orm/config';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {getPartnerId} from '@/utils';
 import {
   CartProductIdsSchema,

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 const rest = axios.create();
 

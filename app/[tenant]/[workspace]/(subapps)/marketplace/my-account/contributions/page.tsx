@@ -31,8 +31,8 @@ import {NoticeBanner} from '../../common/ui/components/shared/notice-banner';
 import {OverviewTab} from '../../common/ui/components/contributions/my-contributions-overview-tab';
 import {ProductsTab} from '../../common/ui/components/contributions/products-tab';
 import {canManageProducts} from '../../common/utils/auth-helper';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 import {PublisherAccessRequest} from '../../common/ui/components/contributions/publisher-access-request';
 import {
@@ -40,7 +40,7 @@ import {
   myContributionsSearchParamsSchema,
   type MyContributionsSearchParams,
 } from '../../common/utils/validators';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

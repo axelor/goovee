@@ -3,9 +3,9 @@ import {NextRequest, NextResponse} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/lib/core/comments';
-import {accessStatus} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {isCommentEnabled} from '@/comments';
+import {accessStatus} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 

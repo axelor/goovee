@@ -7,7 +7,7 @@ import {Cloned, Maybe} from '@/types/util';
 import type {Entry, ListEntry} from '../../../types';
 import {getPartnerImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 export type CardProps = {
   item: ListEntry | Entry | Cloned<Entry> | Cloned<ListEntry>;

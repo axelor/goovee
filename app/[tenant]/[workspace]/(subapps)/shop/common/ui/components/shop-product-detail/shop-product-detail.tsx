@@ -22,7 +22,7 @@ import type {ShopCategory} from '@/subapps/shop/common/ui/components';
 import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 import {ShopQuantityStepper} from '@/subapps/shop/common/ui/components/shop-quantity-stepper';
 import type {ComputedProduct} from '@/types';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 export interface ShopProductDetailLabels {
   categoriesTitle: string;

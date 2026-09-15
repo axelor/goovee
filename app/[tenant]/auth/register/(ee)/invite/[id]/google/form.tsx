@@ -20,11 +20,11 @@ import {
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
 import {useToast} from '@/ui/hooks';
-import {useEnvironment} from '@/lib/core/environment';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {toWorkspaceURI} from '@/lib/core/url/absolute';
+import {useEnvironment} from '@/environment';
+import {withBasePath} from '@/path/base-path';
+import {toWorkspaceURI} from '@/url/absolute';
 import {isSameOrigin} from '@/utils/same-origin';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 // ---- LOCAL IMPORTS ----//
 

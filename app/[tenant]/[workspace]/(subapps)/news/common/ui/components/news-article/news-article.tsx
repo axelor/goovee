@@ -11,7 +11,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {InnerHTML} from '@/ui/components';
 import {Link} from '@/ui/components/link';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //

@@ -5,7 +5,7 @@ import {MdArrowBack, MdChevronRight, MdDownload} from 'react-icons/md';
 
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {formatDateTime} from '@/lib/core/locale/formatters';
+import {formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
 
 import {DocFileIcon} from '../doc-file-icon';

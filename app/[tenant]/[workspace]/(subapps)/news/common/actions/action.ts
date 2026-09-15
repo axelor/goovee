@@ -9,9 +9,9 @@ import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
-import type {WorkspaceSubPath} from '@/lib/core/url';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import type {WorkspaceSubPath} from '@/url';
 import {addComment, findComments} from '@/comments/orm';
 import {
   CreateComment,

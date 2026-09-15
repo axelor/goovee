@@ -16,7 +16,7 @@ import {
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {formatDateTime} from '@/lib/core/locale/formatters';
+import {formatDateTime} from '@/locale/formatters';
 import {i18n} from '@/locale';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components';
 

@@ -1,5 +1,5 @@
 import type {JSX} from 'react';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 import {$createCodeNode} from '@lexical/code';
 import {

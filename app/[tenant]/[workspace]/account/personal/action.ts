@@ -3,12 +3,12 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {manager} from '@/lib/core/tenant';
+import {manager} from '@/tenant';
 import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/proxy';
 import {getTranslation, t} from '@/locale/server';
 import {getPartnerId} from '@/utils';
-import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import {redeemUpload} from '@/upload/staged-upload';
 import {
   PartnerTypeMap,
   findGooveeUserByEmail,
@@ -19,14 +19,14 @@ import {UserType} from '@/auth/types';
 import {generateOTP} from '@/otp/actions';
 import {findOne, isValid, markUsed} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {withMattermostEmailSync} from '@/lib/core/mattermost';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {withMattermostEmailSync} from '@/mattermost';
 import {z} from 'zod';
 import {
   EmailUpdateOTPSchema,
   type EmailUpdateOTP,
-} from '@/lib/core/auth/validation-utils';
+} from '@/auth/validation-utils';
 import {
   UpdatePersonalSchema,
   type UpdatePersonal,

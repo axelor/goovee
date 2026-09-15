@@ -1,8 +1,8 @@
 // ---- CORE IMPORTS ---- //
 import {formatNumber} from '@/locale/server/formatters';
-import {findStripePaymentIntent} from '@/lib/core/payment/stripe/actions';
+import {findStripePaymentIntent} from '@/payment/stripe/actions';
 import {getAmountFromStripe} from '@/utils/stripe';
-import {getBankDetailsFromInstructions} from '@/lib/core/payment/stripe/utils';
+import {getBankDetailsFromInstructions} from '@/payment/stripe/utils';
 import type {BankTransferDetailsType} from '@/ui/components/payment/types';
 
 type HasPaymentIntent = {

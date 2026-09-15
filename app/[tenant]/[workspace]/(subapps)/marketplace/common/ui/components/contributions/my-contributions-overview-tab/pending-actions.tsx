@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import {Link} from '@/ui/components/link';

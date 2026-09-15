@@ -10,7 +10,7 @@ import {formatRelativeTime} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Link} from '@/ui/components/link';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';

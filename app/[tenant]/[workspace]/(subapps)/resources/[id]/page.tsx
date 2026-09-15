@@ -2,8 +2,8 @@ import {notFound} from 'next/navigation';
 import React from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {t} from '@/locale/server';
 import {fetchFile, fetchFiles} from '@/subapps/resources/common/orm/dms';
 import {clone} from '@/utils';

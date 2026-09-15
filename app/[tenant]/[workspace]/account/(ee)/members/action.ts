@@ -5,8 +5,8 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {findWorkspaceMembers} from '@/orm/workspace';
 import {isAdminContact, isPartner, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';

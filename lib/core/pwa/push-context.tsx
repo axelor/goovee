@@ -8,11 +8,11 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import {useEnvironment} from '@/lib/core/environment';
+import {useEnvironment} from '@/environment';
 import {NotificationDTO} from './types';
 import {useAuthSession} from '@/auth/client';
 import {pushChannelName, MSG_TYPE} from './sw-constants';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 interface PushContextType {
   permission: NotificationPermission;

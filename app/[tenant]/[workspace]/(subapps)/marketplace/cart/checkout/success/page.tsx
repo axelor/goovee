@@ -5,7 +5,7 @@ import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/login-url';
 import {getPartnerId} from '@/utils';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 import {CheckCircle2, Download} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {notFound, redirect, unauthorized} from 'next/navigation';
@@ -15,9 +15,9 @@ import {
 } from '../../../common/constants/gradients';
 import {findPurchases} from '../../../common/orm';
 import {ProductIcon} from '../../../common/ui/components/shared/product-icon';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 /* Reached after payment with the new order's id in `?orderId=`. The order is
  * re-read partner-scoped, so a tampered id cannot surface someone else's

@@ -20,7 +20,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useNavigationVisibility} from '@/ui/hooks';
 import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
-import {useEnvironment} from '@/lib/core/environment';
+import {useEnvironment} from '@/environment';
 import {Notification} from './notification';
 import {Link} from '@/ui/components/link';
 import {useAuthSession} from '@/auth/client';

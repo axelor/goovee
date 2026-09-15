@@ -4,8 +4,8 @@ import {
   incrementInstallCount,
 } from '@/subapps/marketplace/common/orm';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getPartnerId} from '@/utils';
 import {findFile, streamFile} from '@/utils/download';
 import {NextRequest, NextResponse, after} from 'next/server';

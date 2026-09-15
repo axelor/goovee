@@ -19,7 +19,7 @@ import {SUBAPP_CODES, URL_PARAMS} from '@/constants';
 import {useSearchQuery} from '@/ui/hooks';
 import type {PageInfo} from '@/types';
 import {cn} from '@/utils/css';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate} from '@/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Quotation} from '@/subapps/quotations/common/types/quotations';

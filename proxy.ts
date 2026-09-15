@@ -1,11 +1,8 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {
-  isDeploymentSegment,
-  isReservedSegment,
-} from '@/lib/core/path/reserved-segments';
-import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
+import {isDeploymentSegment, isReservedSegment} from '@/path/reserved-segments';
+import {addressedHost, isHostRouted} from '@/tenant/routing';
 import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 
 export const TENANT_HEADER = 'x-tenant-id';
@@ -41,7 +38,7 @@ export const config = {
 };
 
 /* The path given here already has the base path removed: next.config.mjs and
- * @/lib/core/path/base-path both read NEXT_PUBLIC_BASE_PATH, and Next strips the
+ * @/path/base-path both read NEXT_PUBLIC_BASE_PATH, and Next strips the
  * configured basePath before `pathname` can be read. Stripping it again would
  * cut those characters off the tenant name. */
 export function extractTenant(url: string) {

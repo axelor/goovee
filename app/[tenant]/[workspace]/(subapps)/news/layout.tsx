@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ----//
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';

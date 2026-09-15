@@ -12,7 +12,7 @@ import {AccountToggle} from '../common/ui/components';
 import {updatePreference} from './action';
 import type {PreferenceResponse} from '@/orm/notification';
 import type {UpdateNotificationPreference} from '../common/utils/validators';
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 import {startTransition, useOptimistic} from 'react';
 
 type PreferenceUpdate =

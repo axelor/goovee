@@ -8,8 +8,8 @@ import {TENANT_HEADER} from '@/proxy';
 import {t} from '@/locale/server';
 import {ADDRESS_TYPE, SUBAPP_CODES} from '@/constants';
 import {getSession} from '@/auth';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {clone, getPartnerId} from '@/utils';
 import {

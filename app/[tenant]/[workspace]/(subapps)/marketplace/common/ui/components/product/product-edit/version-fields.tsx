@@ -1,7 +1,7 @@
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import type {UseStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import type {UseStagedUpload} from '@/upload/use-staged-upload';
 import type {Cloned} from '@/types/util';
 import {RichTextEditor} from '@/ui/components';
 import {

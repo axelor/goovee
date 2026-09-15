@@ -5,8 +5,8 @@ import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {
   findContactByEmail,
   findGooveeUserByEmail,
@@ -17,7 +17,7 @@ import {
 import NotificationManager, {NotificationType} from '@/notification';
 import {APP_TITLE} from '@/constants';
 import {getPartnerId} from '@/utils';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {tenantURLs} from '@/url/scope';
 
 // ---- LOCAL IMPORTS ---- //
 import {getAccountConfig} from '../../../common/orm/config';

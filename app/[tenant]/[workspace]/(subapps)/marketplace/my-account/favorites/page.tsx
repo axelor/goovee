@@ -31,8 +31,8 @@ import {getMarketplaceConfig} from '../../common/orm/config';
 import {PriceTypeSelect} from '../../common/ui/components/product/price-type-select';
 import {ProductTypeSelect} from '../../common/ui/components/product/product-type-select';
 import {MyFavoritesTable} from '../../common/ui/components/favorites/my-favorites-table';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {FavoritesSearch} from './search';
 import {
   myAccountParamsSchema,

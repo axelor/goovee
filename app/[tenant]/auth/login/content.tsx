@@ -1,6 +1,6 @@
 'use client';
 
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 import React, {useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {useAuthClient} from '@/auth/client';
@@ -13,10 +13,10 @@ import {useToast} from '@/ui/hooks';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
-import {useEnvironment} from '@/lib/core/environment';
+import {useEnvironment} from '@/environment';
 import {isSameOrigin} from '@/utils/same-origin';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {isVectorImage} from '@/lib/core/image/vector';
+import {withBasePath} from '@/path/base-path';
+import {isVectorImage} from '@/image/vector';
 import {
   AuthShell,
   AuthField,

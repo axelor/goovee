@@ -21,7 +21,7 @@ import {useSearchQuery} from '@/ui/hooks';
 import {SUBAPP_CODES, URL_PARAMS} from '@/constants';
 import type {PageInfo} from '@/types';
 import {cn} from '@/utils/css';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate} from '@/locale/formatters';
 import type {StatusKey} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //

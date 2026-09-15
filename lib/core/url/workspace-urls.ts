@@ -1,4 +1,4 @@
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 import {absoluteRoot} from './absolute';
 import type {WorkspaceSubPath} from './index';

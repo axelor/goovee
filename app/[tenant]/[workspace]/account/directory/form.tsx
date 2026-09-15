@@ -50,7 +50,7 @@ import {
   PARTNER_PICTURE_PURPOSE,
   PARTNER_PICTURE_MAX_FILE_SIZE,
 } from '../common/constants';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {useStagedUpload} from '@/upload/use-staged-upload';
 import {
   AccountToggle,
   PictureUploadAction,

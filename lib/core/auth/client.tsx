@@ -7,7 +7,7 @@ import {
 } from 'better-auth/client/plugins';
 import {createAuthClient} from 'better-auth/react';
 
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 import type {Auth} from './server';
 import type {Credentials} from './credentials';

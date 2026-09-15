@@ -1,13 +1,13 @@
 import {createHash} from 'node:crypto';
 import https from 'node:https';
-import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
+import {DeliverySlots} from '@/concurrency/delivery-slots';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
 import {envNameFor, TENANTS_KEY} from '@/config/names';
 import {getDeploymentConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
-import type {WorkspaceSubPath} from '@/lib/core/url';
-import {tenantURLs} from '@/lib/core/url/scope';
+import type {WorkspaceSubPath} from '@/url';
+import {tenantURLs} from '@/url/scope';
 import {processWide} from '@/runtime/process-wide';
 import type {
   NotificationPayload,

@@ -1,7 +1,7 @@
 'use client';
 
 // ---- CORE IMPORTS ---- //
-import {CommentsSkeleton} from '@/lib/core/comments';
+import {CommentsSkeleton} from '@/comments';
 import {Skeleton} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //

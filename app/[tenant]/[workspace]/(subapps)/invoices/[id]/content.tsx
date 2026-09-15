@@ -11,13 +11,13 @@ import {Button, StatusPill} from '@/ui/components';
 import {i18n} from '@/locale';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate} from '@/locale/formatters';
 import {useToast} from '@/ui/hooks';
 import type {StatusKey} from '@/ui/components';
 import {
   PaymentUpdateStatus,
   PAYMENT_UPDATE_STATUS,
-} from '@/lib/core/payment/sse/constants';
+} from '@/payment/sse/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //

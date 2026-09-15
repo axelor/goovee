@@ -10,9 +10,9 @@ import {zodResolver} from '@hookform/resolvers/zod';
 // ---- CORE IMPORTS ---- //
 import {UserType} from '@/auth/types';
 import {i18n, l10n} from '@/locale';
-import {useEnvironment} from '@/lib/core/environment';
+import {useEnvironment} from '@/environment';
 import {isSameOrigin} from '@/utils/same-origin';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {useToast} from '@/ui/hooks';
 import {
   Form,
@@ -45,7 +45,7 @@ import {Link} from '@/ui/components/link';
 // ---- LOCAL IMPORTS ---- //
 import {subscribe} from '../../actions';
 import {WorkspaceForRegistration} from '@/orm/workspace';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const formSchema = z
   .object({

@@ -9,12 +9,12 @@ import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone} from '@/utils';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {ID} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
-import {redeemUpload} from '@/lib/core/upload/staged-upload';
-import type {WorkspaceSubPath} from '@/lib/core/url';
+import {redeemUpload} from '@/upload/staged-upload';
+import type {WorkspaceSubPath} from '@/url';
 import {filterPrivate} from '@/orm/filter';
 import {
   CreateComment,

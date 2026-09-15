@@ -3,8 +3,8 @@ import 'server-only';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {manager, type Tenant} from '@/tenant';
-import {currentWorkspace} from '@/lib/core/url/current';
-import type {ServerWorkspaceScope} from '@/lib/core/url/scope';
+import {currentWorkspace} from '@/url/current';
+import type {ServerWorkspaceScope} from '@/url/scope';
 import {findWorkspace, type Subapp, type Workspace} from '@/orm/workspace';
 import type {User} from '@/types';
 

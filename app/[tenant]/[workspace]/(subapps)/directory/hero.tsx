@@ -4,8 +4,8 @@ import type {VariantProps} from 'class-variance-authority';
 
 // ---- CORE IMPORTS ---- //
 import {IMAGE_URL} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {i18n} from '@/lib/core/locale';
+import {withBasePath} from '@/path/base-path';
+import {i18n} from '@/locale';
 import {HeroSearch} from '@/ui/components';
 import {BannerVariants} from '@/ui/components/banner';
 

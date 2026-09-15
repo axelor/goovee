@@ -1,7 +1,7 @@
 'use server';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {
   findDefaultDeliveryAddress,
   findDefaultInvoicingAddress,

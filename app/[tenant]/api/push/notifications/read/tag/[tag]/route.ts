@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 
 export async function POST(
   _request: NextRequest,

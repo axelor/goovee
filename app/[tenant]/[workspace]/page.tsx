@@ -2,13 +2,13 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {findSubapps} from '@/orm/workspace';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 import {getLoginURL} from '@/utils/login-url';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {getShellConfig} from './orm/config';
 import {ClientRedirection} from './client';
 import {Home} from './home';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 export default async function Page() {
   const access = await ensureAccess({allowGuest: true});

@@ -39,8 +39,8 @@ import {VersionsTab} from '../../common/ui/components/versions/versions-tab';
 import {canManageProducts} from '../../common/utils/auth-helper';
 import {hasDirectoryAccess} from '../../common/utils/directory';
 import {PartnerProfileLink} from '../../common/ui/components/shared/partner-profile-link';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 import {getPartnerId} from '@/utils';
 import {
@@ -50,7 +50,7 @@ import {
 } from '../../common/utils/validators';
 import {formatVersionNumber} from '../../common/utils/version-number';
 import {isPaid} from '../../common/utils/price';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;

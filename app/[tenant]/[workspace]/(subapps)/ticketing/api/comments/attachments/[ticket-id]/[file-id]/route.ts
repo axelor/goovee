@@ -5,8 +5,8 @@ import {findFile, streamFile} from '@/utils/download';
 import {isCommentEnabled} from '@/comments';
 
 import {findTicketAccess} from '../../../../../common/orm/tickets';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getTicketingConfig} from '../../../../../common/orm/config';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 

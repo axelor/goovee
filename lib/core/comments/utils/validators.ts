@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {uploadTokenSchema} from '@/upload/validators';
 
 import {MAX_ATTACHMENTS, SORT_TYPE} from '../constants';
 

@@ -8,22 +8,22 @@ import {
   findPaymentContext,
   markPaymentAsExpired,
   updatePaymentContextData,
-} from '@/lib/core/payment/common/orm';
-import {fetchPaymentLinkStatus} from '@/lib/core/payment/hubpisp';
-import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
-import {fetchPaymentRequestStatus} from '@/lib/core/payment/hubpisp/paymentRequest';
-import {pollPaymentRequestStatus} from '@/lib/core/payment/hubpisp/poll';
-import {applyTransactionStatus} from '@/lib/core/payment/hubpisp/process';
-import {getHubPispSettings} from '@/lib/core/payment/hubpisp/settings';
+} from '@/payment/common/orm';
+import {fetchPaymentLinkStatus} from '@/payment/hubpisp';
+import {HUBPISP_CONSENT_STATUS} from '@/payment/hubpisp/constants';
+import {fetchPaymentRequestStatus} from '@/payment/hubpisp/paymentRequest';
+import {pollPaymentRequestStatus} from '@/payment/hubpisp/poll';
+import {applyTransactionStatus} from '@/payment/hubpisp/process';
+import {getHubPispSettings} from '@/payment/hubpisp/settings';
 import type {
   PaymentLinkStatusResult,
   PaymentRequestStatusResult,
-} from '@/lib/core/payment/hubpisp/types';
+} from '@/payment/hubpisp/types';
 import {PaymentOption} from '@/types';
-import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
+import type {HubPispLocalInstrument} from '@/payment/hubpisp/constants';
 import {manager} from '@/tenant';
 import type {TenantConfig} from '@/tenant';
-import {HubPispApiError} from '@/lib/core/payment/hubpisp/utils';
+import {HubPispApiError} from '@/payment/hubpisp/utils';
 
 /**
  * The payment link is not queryable right away when BPCE fires the webhook:

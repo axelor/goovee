@@ -5,7 +5,7 @@ import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
 import {getTenantConfig} from '@/tenant/config';
 import {getPublicEnvironment} from '@/environment';
-import {absoluteRoot} from '@/lib/core/url/absolute';
+import {absoluteRoot} from '@/url/absolute';
 
 // ---- LOCAL IMPORTS ---- //
 import {firstValue, resolveAuthTenantId} from './tenant';

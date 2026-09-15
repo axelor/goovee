@@ -15,10 +15,10 @@ import {isCommentEnabled} from '@/comments';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
-import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
+import {formatDate, formatDateTime} from '@/locale/formatters';
 import {InnerHTML} from '@/ui/components';
 import {Link} from '@/ui/components/link';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //

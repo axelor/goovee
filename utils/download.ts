@@ -4,12 +4,8 @@ import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {
-  isResizable,
-  parseImageRequest,
-  resolveDerivative,
-} from '@/lib/core/image';
-import {IMAGE_MIME} from '@/lib/core/image/constants';
+import {isResizable, parseImageRequest, resolveDerivative} from '@/image';
+import {IMAGE_MIME} from '@/image/constants';
 import {filterPrivate} from '@/orm/filter';
 import {resolveStoragePath} from '@/storage/index';
 import type {Client} from '@/goovee/.generated/client';

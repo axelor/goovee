@@ -1,7 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import {revalidateEverything} from '@/lib/core/url/revalidate';
+import {revalidateEverything} from '@/url/revalidate';
 
 import {deleteInviteById} from '@/app/[tenant]/[workspace]/account/common/orm/invites';
 import {getSession} from '@/auth';
@@ -11,10 +11,10 @@ import {manager} from '@/tenant';
 import {
   InviteSubscribeSchema,
   type InviteSubscribe,
-} from '@/lib/core/auth/validation-utils';
+} from '@/auth/validation-utils';
 
 import {findInviteById} from '../../../common/orm/register';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 function error(message: string): {error: true; message: string} {
   return {

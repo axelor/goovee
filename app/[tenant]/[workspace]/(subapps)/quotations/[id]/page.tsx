@@ -3,8 +3,8 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {findSubappAccess} from '@/orm/workspace';
 import {PartnerKey} from '@/types';
 import {SUBAPP_CODES} from '@/constants';

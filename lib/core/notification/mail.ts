@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
+import {DeliverySlots} from '@/concurrency/delivery-slots';
 import type {TenantConfig} from '@/tenant';
 import nodemailer, {type Transporter} from 'nodemailer';
 import type SMTPPool from 'nodemailer/lib/smtp-pool';

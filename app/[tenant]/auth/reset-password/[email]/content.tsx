@@ -29,7 +29,7 @@ import {
   PasswordInput,
   authButtonClass,
 } from '../../common/ui/auth-shell';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;

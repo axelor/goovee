@@ -2,8 +2,8 @@
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
 import {SUBAPP_PAGE} from '@/constants';

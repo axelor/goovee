@@ -18,8 +18,8 @@ import {
 import {getMarketplaceConfig} from '../../../common/orm/config';
 import {PublisherApplyForm} from '../../../common/ui/components/contributions/publisher-apply-form';
 import {canManageProducts} from '../../../common/utils/auth-helper';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {myContributionsParamsSchema} from '../../../common/utils/validators';
 
 export default async function PublisherApplyPage(props: {

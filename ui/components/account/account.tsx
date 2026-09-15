@@ -28,7 +28,7 @@ import {getInitials} from '@/utils/names';
 import {Link} from '@/ui/components/link';
 import {useAuthSession} from '@/auth/client';
 import {useSignOut} from '@/ui/hooks';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 export function Account({
   baseURL = '',

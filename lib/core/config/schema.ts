@@ -28,14 +28,8 @@ import path from 'path';
 
 import {z} from 'zod';
 
-import {
-  getMaxConnections,
-  mailAccountKey,
-} from '@/lib/core/notification/mail-account';
-import {
-  isReservedSegment,
-  reservedSegments,
-} from '@/lib/core/path/reserved-segments';
+import {getMaxConnections, mailAccountKey} from '@/notification/mail-account';
+import {isReservedSegment, reservedSegments} from '@/path/reserved-segments';
 import {canonicalHost} from '@/tenant/routing';
 
 import {envNameFor, TENANTS_KEY} from './names';

@@ -3,7 +3,7 @@
 import {t} from '@/locale/server';
 import type {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
-import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import {redeemUpload} from '@/upload/staged-upload';
 import {clone} from '@/utils';
 import {getTotal} from '@/utils/pagination';
 import {BigDecimal} from '@goovee/orm';
@@ -35,8 +35,8 @@ import {canManageProducts} from '../utils/auth-helper';
 import {getMarketplaceConfig} from '../orm/config';
 import {MARKETPLACE_BUNDLE_PURPOSE} from '../constants/uploads';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {getPartnerId} from '@/utils';
 import {parseVersionNumber} from '../utils/version-number';
 

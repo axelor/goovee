@@ -17,7 +17,7 @@ import {useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {subscribe} from './action';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 export default function Subscribe({
   workspaceURL,

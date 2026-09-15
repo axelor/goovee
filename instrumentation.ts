@@ -2,19 +2,19 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
 
   // Schedule the staged-upload reaper (non-blocking — just arms timers).
-  const {startStagedUploadReaper} = await import('@/lib/core/upload/startup');
+  const {startStagedUploadReaper} = await import('@/upload/startup');
   startStagedUploadReaper();
 
   // Report whether images can be resized. Never throws, never blocks startup.
-  const {checkImageResizing} = await import('@/lib/core/image/startup');
+  const {checkImageResizing} = await import('@/image/startup');
   void checkImageResizing();
 
   // Report whether mail can be delivered. Never throws, never blocks startup.
-  const {checkMailTransport} = await import('@/lib/core/notification/startup');
+  const {checkMailTransport} = await import('@/notification/startup');
   void checkMailTransport();
 
   // Report whether push notifications can be sent.
-  const {checkPushConfig} = await import('@/lib/core/pwa/startup');
+  const {checkPushConfig} = await import('@/pwa/startup');
   checkPushConfig();
 
   /* Prepares every database and connects every tenant in the background, then
@@ -23,7 +23,7 @@ export async function register() {
    * one tenant failing never holds up the rest. */
   const [{startTenants}, {resumeHubPispPolling}] = await Promise.all([
     import('@/tenant/startup'),
-    import('@/lib/core/payment/hubpisp/startup'),
+    import('@/payment/hubpisp/startup'),
   ]);
 
   startTenants(tenantId => resumeHubPispPolling({tenantId}));

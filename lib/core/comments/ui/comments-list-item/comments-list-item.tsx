@@ -54,7 +54,7 @@ import type {
 import {isTrackObject, parseCommentContent} from '../../utils/helpers';
 import {CommentInput} from '../comment-input';
 import {CommentAttachments, CommentTracks} from '../comments-list';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 interface CommentListItemProps {
   recordId: ID;

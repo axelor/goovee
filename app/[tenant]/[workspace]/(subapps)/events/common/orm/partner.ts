@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 import {and} from '@/utils/orm';
 import type {AOSPartner} from '@/goovee/.generated/models';
 import {getPartnerId} from '@/utils';

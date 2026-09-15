@@ -6,8 +6,8 @@ import {useAuthSession} from '@/auth/client';
 // ---- CORE IMPORTS ---- //
 import {useAppLang} from '@/ui/hooks';
 import {i18n, l10n} from '@/locale';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import {useTenantScope} from '@/url/tenant-context';
+import type {TenantScope} from '@/url/tenant-urls';
 
 /**
  * Loads the tenant's translations and holds the tree back until they are in.

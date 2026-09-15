@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {findFile, streamFile} from '@/utils/download';
 import {manager} from '@/tenant';
 import {filterPrivate} from '@/orm/filter';
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 import {and} from '@/utils/orm';
 import type {AOSProduct} from '@/goovee/.generated/models';
 

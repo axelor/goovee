@@ -5,9 +5,9 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ---- //
 import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
-import {t} from '@/lib/core/locale/server';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {t} from '@/locale/server';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +18,7 @@ import {
 } from '@/ui/components/pagination';
 import {clone} from '@/utils';
 import {getPaginationButtons, getPages, getSkip} from '@/utils/pagination';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -32,7 +32,7 @@ import {MapSkeleton} from './common/ui/components/map/map-skeleton';
 import {getOrderBy} from './common/utils';
 import Hero from './hero';
 import {Client} from '@/goovee/.generated/client';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 const ITEMS_PER_PAGE = 7;
 
