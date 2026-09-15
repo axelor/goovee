@@ -2,7 +2,7 @@
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 
 // ---- LOCAL IMPORTS ---- //
 import {searchFiles} from '@/subapps/resources/common/orm/dms';

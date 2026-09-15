@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {uploadTokenSchema} from '@/upload/validators';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
 import {VERSION_NUMBER_PATTERN} from '../../../../utils/version-number';
 import {productSchema} from '../product-form/validator';

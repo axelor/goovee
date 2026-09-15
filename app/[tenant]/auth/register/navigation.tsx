@@ -9,7 +9,7 @@ import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {AuthShell, authButtonClass} from '../common/ui/auth-shell';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 export default function Navigation({
   showGoogleOauth,

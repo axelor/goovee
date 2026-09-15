@@ -1,7 +1,7 @@
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 type PartnerAvatarProps = {
   partner: {

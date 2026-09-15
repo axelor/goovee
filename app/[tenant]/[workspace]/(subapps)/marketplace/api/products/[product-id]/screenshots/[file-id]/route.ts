@@ -2,8 +2,8 @@ import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {findFile, streamFile} from '@/utils/download';
 import {getPartnerId} from '@/utils';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getProductScreenshot} from '../../../../../common/orm';
 
 /**

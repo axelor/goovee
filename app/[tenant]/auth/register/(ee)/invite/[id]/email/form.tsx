@@ -25,10 +25,10 @@ import {Input} from '@/ui/components/input';
 import {Separator} from '@/ui/components';
 import {cn} from '@/utils/css';
 import {useAuthClient} from '@/auth/client';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 import {Link} from '@/ui/components/link';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const formSchema = z
   .object({

@@ -3,7 +3,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {getAuth} from '@/auth/server';
 import {getPublicEnvironment} from '@/environment';
-import {absoluteRoot} from '@/lib/core/url/absolute';
+import {absoluteRoot} from '@/url/absolute';
 import {
   findDefaultPartnerWorkspace,
   findWorkspace,

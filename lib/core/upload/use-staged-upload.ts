@@ -4,7 +4,7 @@ import {throttle} from 'lodash-es';
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {MAX_UPLOAD_RECOVERIES, UPLOAD_CHUNK_SIZE} from './constants';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 /** Server response from the stage route — the opaque token, never a meta_file id. */
 export interface StagedUpload {

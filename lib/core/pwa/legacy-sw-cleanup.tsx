@@ -2,7 +2,7 @@
 
 import {useEffect} from 'react';
 
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 /*
  * One-time upgrade cleanup. The pre-multi-tenancy build registered a single

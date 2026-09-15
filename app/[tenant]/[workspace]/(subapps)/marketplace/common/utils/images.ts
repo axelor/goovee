@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 
 /**
  * URL for a marketplace product screenshot, served by the marketplace image

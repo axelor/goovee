@@ -5,8 +5,8 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder, findStripeOrder} from '@/payment/stripe/actions';
@@ -15,7 +15,7 @@ import {computeTotal} from '@/utils/cart';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
-import {markPaymentAsProcessed} from '@/lib/core/payment/common/orm';
+import {markPaymentAsProcessed} from '@/payment/common/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import {

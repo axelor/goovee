@@ -9,10 +9,10 @@ import {runScript} from '@/scripts/lib/script';
 /* Safe to import here, unlike the configuration loader: these modules read
  * nothing, so importing them cannot settle what the configuration holds. */
 import {isFileSource} from '@/config/document';
-import {isHostRouted} from '@/lib/core/tenant/routing';
+import {isHostRouted} from '@/tenant/routing';
 /* Reaches `getBasePath`, whose module reads NEXT_PUBLIC_BASE_PATH as it is
  * evaluated, which the import above of `@/load-swc-env` has already filled in. */
-import {absoluteRoot} from '@/lib/core/url/absolute';
+import {absoluteRoot} from '@/url/absolute';
 
 /*
  * Answers the question a deployment otherwise answers by starting: is this

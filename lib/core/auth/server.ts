@@ -35,8 +35,8 @@ import {
   OAuthInviteRegisterSchema,
   OAuthRegisterSchema,
 } from './validation-utils';
-import {deploymentRootPath, withBasePath} from '@/lib/core/path/base-path';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {deploymentRootPath, withBasePath} from '@/path/base-path';
+import {tenantURLs} from '@/url/scope';
 import {processWide} from '@/runtime/process-wide';
 
 const ERROR_CODES = defineErrorCodes({

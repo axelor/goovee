@@ -8,8 +8,8 @@ import type {Client} from '@/goovee/.generated/client';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
-import {CommentsSkeleton, isCommentEnabled} from '@/lib/core/comments';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import {CommentsSkeleton, isCommentEnabled} from '@/comments';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //

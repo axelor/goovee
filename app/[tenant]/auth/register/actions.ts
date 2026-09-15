@@ -1,7 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import {revalidateEverything} from '@/lib/core/url/revalidate';
+import {revalidateEverything} from '@/url/revalidate';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -11,10 +11,7 @@ import {
   findWorkspaces,
 } from '@/orm/workspace';
 import {manager} from '@/tenant';
-import {
-  SubscribeSchema,
-  type Subscribe,
-} from '@/lib/core/auth/validation-utils';
+import {SubscribeSchema, type Subscribe} from '@/auth/validation-utils';
 import type {ActionResponse, ErrorResponse} from '@/types/action';
 
 function error(message: string): ErrorResponse {

@@ -3,10 +3,7 @@ import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import type {Client, GooveeClient} from '@/goovee/.generated/client';
-import {
-  COMMENT_ATTACHMENT_PURPOSE,
-  MAX_FILE_SIZE,
-} from '@/lib/core/comments/constants';
+import {COMMENT_ATTACHMENT_PURPOSE, MAX_FILE_SIZE} from '@/comments/constants';
 import {resolveStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 import {

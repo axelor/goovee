@@ -13,7 +13,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
 // ---- CORE IMPORTS ---- //
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 

@@ -3,8 +3,8 @@ import {notFound, redirect} from 'next/navigation';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {clone, htmlToNormalString} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';

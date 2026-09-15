@@ -7,7 +7,7 @@ import {legacyNamesIn} from '@/config/legacy';
 import {envNameFor} from '@/config/names';
 import {configSchema} from '@/config/schema';
 import {schemaAt, shapeOf} from '@/config/walk';
-import {taintSecret} from '@/lib/core/security/taint';
+import {taintSecret} from '@/security/taint';
 
 import {buildRoutingIndex, type RoutingIndex} from './routing';
 import type {DeploymentConfig, TenantConfig} from './types';

@@ -4,7 +4,7 @@ import {useState} from 'react';
 import {EllipsisVertical} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/ui/components';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate} from '@/locale/formatters';
 import type {Cloned} from '@/types/util';
 import {BankTransferDetails} from './bank-transfer-details';
 import type {BankTransferDetailsType} from '../types';

@@ -4,8 +4,8 @@ import {NextRequest, NextResponse} from 'next/server';
 import {isFileOfRecord} from '@/comments/orm';
 import {isCommentEnabled} from '@/comments';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {accessStatus} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 

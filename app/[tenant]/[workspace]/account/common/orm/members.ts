@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_WITH_ROLES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 import {isAdminContact, isPartner} from '@/orm/partner';
 import {findSubapps, findWorkspaceMembers} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';

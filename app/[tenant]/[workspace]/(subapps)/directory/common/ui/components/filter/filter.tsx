@@ -6,7 +6,7 @@ import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 import {useSearchParams} from '@/ui/hooks';
 import {
   Form,

@@ -3,12 +3,12 @@
 import {useEffect, useLayoutEffect, useRef} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {useTenantScope} from '@/lib/core/url/tenant-context';
-import {PaymentSource} from '@/lib/core/payment/common/type';
+import {useTenantScope} from '@/url/tenant-context';
+import {PaymentSource} from '@/payment/common/type';
 import {
   PaymentUpdateStatus,
   PAYMENT_UPDATE_STATUS,
-} from '@/lib/core/payment/sse/constants';
+} from '@/payment/sse/constants';
 
 interface UsePaymentSSEOptions {
   source: PaymentSource | undefined;

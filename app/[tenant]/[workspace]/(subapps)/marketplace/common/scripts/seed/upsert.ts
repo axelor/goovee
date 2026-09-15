@@ -4,7 +4,7 @@ import type {
   AOSMarketplaceProductVersion,
 } from '@/goovee/.generated/models';
 import {getFileSizeText} from '@/utils/files';
-import {MetaFileStoreType} from '@/lib/core/upload/file';
+import {MetaFileStoreType} from '@/upload/file';
 import {sql} from '@/utils/template-string';
 import {BigDecimal, type CreateArgs} from '@goovee/orm';
 import {MARKETPLACE_ICONS} from '../../constants/icons';

@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import type {ShellConfig} from './orm/config';
 import {Link} from '@/ui/components/link';
 import type {Cloned} from '@/types/util';

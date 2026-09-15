@@ -1,4 +1,4 @@
-import {PaymentSource} from '@/lib/core/payment/common/type';
+import {PaymentSource} from '@/payment/common/type';
 import {processWide} from '@/runtime/process-wide';
 import {PAYMENT_UPDATE_STATUS, type PaymentUpdateStatus} from './constants';
 

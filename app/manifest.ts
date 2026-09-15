@@ -1,8 +1,8 @@
 import type {MetadataRoute} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {buildManifest} from '@/lib/core/pwa/manifest';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {buildManifest} from '@/pwa/manifest';
+import {withBasePath} from '@/path/base-path';
 
 /* The deployment-level manifest, linked from the screens the deployment renders
  * for an address that names no tenant — not-found and unauthorized. Tenant pages

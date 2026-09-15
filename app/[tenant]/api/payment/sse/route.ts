@@ -4,8 +4,8 @@ import {NextResponse} from 'next/server';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {subscribe, unsubscribe} from '@/lib/core/payment/sse';
-import {PaymentSourceSchema} from '@/lib/core/payment/common/validators';
+import {subscribe, unsubscribe} from '@/payment/sse';
+import {PaymentSourceSchema} from '@/payment/common/validators';
 import {IdSchema} from '@/utils/validators';
 import {listTenantIds} from '@/tenant/config';
 

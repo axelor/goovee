@@ -1,6 +1,6 @@
 import {notFound, redirect} from 'next/navigation';
 
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 
 // Legacy consolidated route — superseded by the per-tab rail.
 export default async function Page() {

@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 import Content from './content';
 import {t} from '@/locale/server';
 

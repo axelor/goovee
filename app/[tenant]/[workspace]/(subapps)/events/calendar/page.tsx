@@ -1,9 +1,9 @@
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';

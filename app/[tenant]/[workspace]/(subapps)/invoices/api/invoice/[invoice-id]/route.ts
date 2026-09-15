@@ -2,11 +2,11 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {RELATED_MODELS, SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {ensureTokenAccess} from '@/access/ensure-token-access';
+import {accessStatus} from '@/access/denial';
 import {findLatestDMSFileByName, streamFile} from '@/utils/download';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, type User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';

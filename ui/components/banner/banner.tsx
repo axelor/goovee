@@ -5,7 +5,7 @@ import {cva, type VariantProps} from 'class-variance-authority';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
-import {isVectorImage} from '@/lib/core/image/vector';
+import {isVectorImage} from '@/image/vector';
 import {cn} from '@/utils/css';
 
 const bannerVariants = cva('absolute inset-0 z-1 pointer-events-none', {

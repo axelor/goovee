@@ -2,9 +2,9 @@ import {NextRequest, NextResponse} from 'next/server';
 
 import {isFileOfRecord} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/lib/core/comments';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {isCommentEnabled} from '@/comments';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 

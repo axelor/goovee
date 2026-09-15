@@ -1,6 +1,6 @@
 import type {Client} from '@/goovee/.generated/client';
-import {CONTEXT_STATUS} from '@/lib/core/payment/common/orm';
-import {PAYMENT_TYPE} from '@/lib/core/payment/common/type';
+import {CONTEXT_STATUS} from '@/payment/common/orm';
+import {PAYMENT_TYPE} from '@/payment/common/type';
 
 export async function findPendingStripeBankTransfers({
   client,

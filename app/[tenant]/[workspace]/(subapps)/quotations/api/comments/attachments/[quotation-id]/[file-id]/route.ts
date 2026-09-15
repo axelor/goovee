@@ -3,9 +3,9 @@ import {NextRequest, NextResponse} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/lib/core/comments';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {isCommentEnabled} from '@/comments';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getQuotationsConfig} from '../../../../../common/orm/config';
 import {PartnerKey} from '@/types';
 import {findFile, streamFile} from '@/utils/download';

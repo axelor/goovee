@@ -10,8 +10,8 @@ import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
-import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
+import {PAYMENT_SOURCE} from '@/payment/common/type';
+import {PaymentUpdateStatus} from '@/payment/sse';
 
 // ---- LOCAL IMPORTS ---- //
 import {

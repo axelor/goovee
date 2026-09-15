@@ -10,7 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';

@@ -5,7 +5,7 @@ import {
   RoleSelectSchema,
   NotificationAppCodeSchema,
 } from '@/utils/validators';
-import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {uploadTokenSchema} from '@/upload/validators';
 import {Authorization, Role} from '../types';
 
 /* -------- Profile picture -------- */

@@ -17,10 +17,10 @@ import {
 import {cn} from '@/utils/css';
 import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getTicketingConfig} from './common/orm/config';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
 
 // ---- LOCAL IMPORTS ---- //

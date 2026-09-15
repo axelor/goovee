@@ -1,9 +1,9 @@
 //---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import type {Cloned} from '@/types/util';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {ensureTokenAccess} from '@/access/ensure-token-access';
+import {accessMessage} from '@/access/denial';
 import {SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, User} from '@/types';

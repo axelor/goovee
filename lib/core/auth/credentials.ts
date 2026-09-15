@@ -6,7 +6,7 @@ import {z} from 'zod';
 
 import {compare, hash} from '@/auth/utils';
 import {getTranslation} from '@/locale/server';
-import {register} from '@/lib/core/auth/orm';
+import {register} from '@/auth/orm';
 import {generateOTP as coreGenerateOTP} from '@/otp/actions';
 import {Scope} from '@/otp/constants';
 import {create as createOTP, findOne, isValid, markUsed} from '@/otp/orm';
@@ -19,11 +19,11 @@ import {
 import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
 import {listTenantIds} from '@/tenant/config';
-import {withMattermostSync} from '@/lib/core/mattermost';
+import {withMattermostSync} from '@/mattermost';
 import {APP_TITLE, RESET_PASSWORD} from '@/constants';
 import {findInviteById} from '@/app/[tenant]/auth/register/common/orm/register';
-import {registerByInvite} from '@/lib/core/auth/orm';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {registerByInvite} from '@/auth/orm';
+import {tenantURLs} from '@/url/scope';
 import {
   EmailRegisterOTPSchema,
   InviteEmailRegisterOTPSchema,
@@ -31,7 +31,7 @@ import {
   EmailInviteRegisterSchema,
   RequestResetPasswordSchema,
   ResetPasswordSchema,
-} from '@/lib/core/auth/validation-utils';
+} from '@/auth/validation-utils';
 
 const ERROR_CODES = defineErrorCodes({
   INVALID_EMAIL_OR_PASSWORD: 'Invalid email or password',

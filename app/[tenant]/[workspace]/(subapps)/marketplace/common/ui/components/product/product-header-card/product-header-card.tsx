@@ -5,7 +5,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/login-url';
 import {Download, FileText, Heart} from 'lucide-react';
@@ -21,7 +21,7 @@ import {ProductIcon} from '../../shared/product-icon';
 import {ProductTypeBadge} from '../../shared/product-type-badge';
 import {Rating} from '../../shared/rating';
 import {TooltipDate} from '../../shared/tooltip-date';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 export interface ProductHeaderCardProps {
   product: SingleProduct;

@@ -6,7 +6,7 @@ import {
   currentTenantScope,
   currentWorkspace,
   getCurrentPath,
-} from '@/lib/core/url/current';
+} from '@/url/current';
 import {t} from '@/locale/server';
 import {getLoginURL} from '@/utils/login-url';
 import type {AccessReason} from './ensure-access';

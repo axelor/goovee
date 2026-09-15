@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //

@@ -18,7 +18,7 @@ import type {
   AOSPortalCmsSite,
 } from '@/goovee/.generated/models';
 import type {Client} from '@/goovee/.generated/client';
-import {MetaFileStoreType} from '@/lib/core/upload/file';
+import {MetaFileStoreType} from '@/upload/file';
 import {getFileSizeText} from '@/utils/files';
 import {xml} from '@/utils/template-string';
 import type {CreateArgs, SelectArg} from '@goovee/orm';

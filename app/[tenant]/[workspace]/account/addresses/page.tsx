@@ -2,7 +2,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone, getPartnerId} from '@/utils';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {PartnerKey} from '@/types';

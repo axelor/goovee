@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {NextRequest, NextResponse} from 'next/server';
 import {
   findWebsiteBySlug,

@@ -42,12 +42,12 @@ import {useResponsive} from '@/ui/hooks';
 import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
-import {useEnvironment} from '@/lib/core/environment';
+import {useEnvironment} from '@/environment';
 import {Notification} from './notification';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {Link} from '@/ui/components/link';
 import {useAuthSession} from '@/auth/client';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 function Logo({
   workspace,

@@ -10,12 +10,12 @@ import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {TENANT_HEADER} from '@/proxy';
 import {manager} from '@/tenant';
-import {withMattermostSync} from '@/lib/core/mattermost';
+import {withMattermostSync} from '@/mattermost';
 import {CHANGE_PASSWORD} from '@/constants';
 import {
   ChangePasswordSchema,
   type ChangePassword,
-} from '@/lib/core/auth/validation-utils';
+} from '@/auth/validation-utils';
 
 export async function changePassword(data: ChangePassword) {
   const validation = ChangePasswordSchema.safeParse(data);

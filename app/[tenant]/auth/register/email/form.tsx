@@ -48,7 +48,7 @@ import {
   authButtonClass,
   authInputClass,
 } from '../../common/ui/auth-shell';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const formSchema = z
   .object({

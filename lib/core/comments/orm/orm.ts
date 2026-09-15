@@ -6,7 +6,7 @@ import {ORDER_BY} from '@/constants';
 import {AOSMailMessage} from '@/goovee/.generated/models';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
-import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import {redeemUpload} from '@/upload/staged-upload';
 import type {ID} from '@/types';
 import {sql} from '@/utils/template-string';
 

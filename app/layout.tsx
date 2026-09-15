@@ -17,7 +17,7 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {LegacyServiceWorkerCleanup} from '@/pwa/legacy-sw-cleanup';
-import {addressedHost} from '@/lib/core/tenant/routing';
+import {addressedHost} from '@/tenant/routing';
 import {getRoutingIndex} from '@/tenant/config';
 import {Toaster} from '@/ui/components/toaster';
 
@@ -28,7 +28,7 @@ import {
   APP_TITLE_TEMPLATE,
   DEFAULT_APP_TITLE,
 } from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import './globals.css';
 import 'swiper/css';
 import 'swiper/css/free-mode';

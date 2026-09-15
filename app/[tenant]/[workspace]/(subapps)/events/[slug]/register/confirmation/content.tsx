@@ -11,7 +11,7 @@ import {
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import {formatDateTime} from '@/lib/core/locale/formatters';
+import {formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
 import type {Cloned} from '@/types/util';
 import {Link} from '@/ui/components/link';

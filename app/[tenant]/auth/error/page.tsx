@@ -15,7 +15,7 @@ import {Link} from '@/ui/components/link';
 import {getPublicEnvironment} from '@/environment';
 import {getTenantConfig} from '@/tenant/config';
 import {isSameOrigin} from '@/utils/same-origin';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {tenantURLs} from '@/url/scope';
 
 // ---- LOCAL IMPORTS ---- //
 import {firstValue, resolveAuthTenantId} from '../common/tenant';

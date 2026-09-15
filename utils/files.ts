@@ -1,8 +1,8 @@
 import type {ID} from '@/types';
 
 // ---- CORE IMPORTS ---- //
-import {withBasePath} from '@/lib/core/path/base-path';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import {withBasePath} from '@/path/base-path';
+import type {TenantScope} from '@/url/tenant-urls';
 
 const KILOBYTE = 1024;
 const MEGABYTE = KILOBYTE * 1024;

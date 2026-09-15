@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import {redeemUpload} from '@/upload/staged-upload';
 import type {ID} from '@/types';
 import {MARKETPLACE_SCREENSHOT_PURPOSE} from '../constants/uploads';
 

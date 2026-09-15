@@ -10,8 +10,8 @@ import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 import {getTicketingConfig} from '../../../common/orm/config';
 import type {TicketingConfig} from '../../../common/orm/config';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {
   Breadcrumb,
   BreadcrumbItem,

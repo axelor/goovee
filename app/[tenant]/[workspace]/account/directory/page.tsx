@@ -2,7 +2,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {findGooveeUserByEmail, isAdminContact} from '@/orm/partner';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';

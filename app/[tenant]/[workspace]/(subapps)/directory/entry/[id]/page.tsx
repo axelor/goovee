@@ -5,9 +5,9 @@ import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
-import {t, tattr} from '@/lib/core/locale/server';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
+import {t, tattr} from '@/locale/server';
 import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
 import {getPartnerImageURL} from '@/utils/files';
@@ -19,8 +19,8 @@ import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
-import {currentTenantScope} from '@/lib/core/url/current';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import {currentTenantScope} from '@/url/current';
+import type {TenantScope} from '@/url/tenant-urls';
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;
 }) {

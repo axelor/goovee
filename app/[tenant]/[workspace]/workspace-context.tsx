@@ -8,12 +8,9 @@ import {useTheme} from '@/app/theme';
 import {Theme} from '@/types/theme';
 import {type Workspace} from '@/orm/workspace';
 import {useEnvironment} from '@/environment';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
-import {buildTenantScope, type TenantScope} from '@/lib/core/url/tenant-urls';
-import {
-  buildWorkspaceScope,
-  type WorkspaceScope,
-} from '@/lib/core/url/workspace-urls';
+import {useTenantScope} from '@/url/tenant-context';
+import {buildTenantScope, type TenantScope} from '@/url/tenant-urls';
+import {buildWorkspaceScope, type WorkspaceScope} from '@/url/workspace-urls';
 
 export const WorkspaceContext = React.createContext<{
   tenant: string;

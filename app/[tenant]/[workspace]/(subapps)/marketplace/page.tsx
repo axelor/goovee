@@ -36,8 +36,8 @@ import {ProductCard} from './common/ui/components/product/product-card';
 import {PriceTypeSelect} from './common/ui/components/product/price-type-select';
 import {ProductSortSelect} from './common/ui/components/product/product-sort-select';
 import {ProductTypeSelect} from './common/ui/components/product/product-type-select';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getMarketplaceConfig} from './common/orm/config';
 import {
   PAGE_SIZE,

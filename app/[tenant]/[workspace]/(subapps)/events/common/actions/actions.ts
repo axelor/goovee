@@ -15,16 +15,16 @@ import {addComment, findComments} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, tattr, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
-import type {WorkspaceSubPath} from '@/lib/core/url';
+import type {WorkspaceSubPath} from '@/url';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {ID, PaymentOption} from '@/types';
 import {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
 import {clone, scale} from '@/utils';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
-import type {PaymentContext} from '@/lib/core/payment/common/type';
+import type {PaymentContext} from '@/payment/common/type';
 import {getPaymentModeId} from '@/utils/payment';
 
 // ---- LOCAL IMPORTS ---- //

@@ -2,7 +2,7 @@ import type {MetadataRoute} from 'next';
 
 // ---- CORE IMPORTS ---- //
 import {APP_DESCRIPTION, APP_TITLE, DEFAULT_APP_TITLE} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 type ManifestAddresses = {
   /* Identity of the installed app, resolved against the origin. Distinct per
