@@ -42,6 +42,8 @@ import {
 import {MAX_BUNDLE_SIZE} from '@/subapps/marketplace/common/ui/components/versions/version-form/validator';
 import {
   ACCEPTED_IMAGE_TYPES,
+  MARKETPLACE_BUNDLE_PURPOSE,
+  MARKETPLACE_SCREENSHOT_PURPOSE,
   MAX_IMAGE_SIZE,
 } from '@/subapps/marketplace/common/constants/uploads';
 
@@ -86,80 +88,100 @@ const ATTACHMENT_UPLOAD_TTL_MS = 60 * 60 * 1000; // 1h
  * Purpose → upload policy. Each feature registers its own `<app>:<kind>` entry;
  * `maxBytes` caps the upload (enforced as a streaming limit by the route) and
  * the optional `file` schema validates type/content.
+ *
+ * A Map, not an object, so a lookup cannot reach `Object.prototype`: indexing
+ * an object with `constructor` or `__proto__` returns a truthy non-policy,
+ * which reads as satisfying every check the policy is there to enforce.
  */
-export const UPLOAD_PURPOSES = {
+const UPLOAD_PURPOSES = new Map<string, UploadPolicy>([
   /* Comment attachments — shared by ticketing, news, events, quotations and
    * forum comments. Any file type is accepted, as with the legacy inline
    * upload. */
-  [COMMENT_ATTACHMENT_PURPOSE]: {
-    maxBytes: MAX_FILE_SIZE,
-    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
-  },
+  [
+    COMMENT_ATTACHMENT_PURPOSE,
+    {
+      maxBytes: MAX_FILE_SIZE,
+      ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+    },
+  ],
   /* Forum post attachments — images and documents, staged on pick and redeemed
    * when the post is created. Restricted to the types the pickers accepted (any
    * image, plus pdf/doc/docx/xls/xlsx); the size cap is enforced server-side
    * while streaming. */
-  [FORUM_POST_ATTACHMENT_PURPOSE]: {
-    maxBytes: FORUM_MAX_FILE_SIZE,
-    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
-    file: z
-      .file()
-      .refine(
-        f =>
-          f.type.startsWith('image/') ||
-          FORUM_ATTACHMENT_DOC_MIMES.includes(f.type),
-        {error: 'Unsupported file type'},
-      ),
-  },
+  [
+    FORUM_POST_ATTACHMENT_PURPOSE,
+    {
+      maxBytes: FORUM_MAX_FILE_SIZE,
+      ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+      file: z
+        .file()
+        .refine(
+          f =>
+            f.type.startsWith('image/') ||
+            FORUM_ATTACHMENT_DOC_MIMES.includes(f.type),
+          {error: 'Unsupported file type'},
+        ),
+    },
+  ],
   /* Profile / company pictures — a single image staged on pick and redeemed
    * when linked to the partner. Restricted to images; the size cap is enforced
    * server-side while streaming. */
-  [PARTNER_PICTURE_PURPOSE]: {
-    maxBytes: PARTNER_PICTURE_MAX_FILE_SIZE,
-    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
-    file: z.file().refine(f => f.type.startsWith('image/'), {
-      error: 'Only images are allowed',
-    }),
-  },
+  [
+    PARTNER_PICTURE_PURPOSE,
+    {
+      maxBytes: PARTNER_PICTURE_MAX_FILE_SIZE,
+      ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+      file: z.file().refine(f => f.type.startsWith('image/'), {
+        error: 'Only images are allowed',
+      }),
+    },
+  ],
   /* DMS resource files — staged on pick and redeemed when the aOSDMSFile rows
    * are created. Any file type is accepted; the size cap is enforced
    * server-side while streaming. */
-  [RESOURCE_DMS_UPLOAD_PURPOSE]: {
-    maxBytes: RESOURCE_MAX_FILE_SIZE,
-    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
-  },
+  [
+    RESOURCE_DMS_UPLOAD_PURPOSE,
+    {
+      maxBytes: RESOURCE_MAX_FILE_SIZE,
+      ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+    },
+  ],
   /*
    * A `.zip` filename is accepted alongside the zip mimes because some
    * browsers send octet-stream for `.zip`. The same rule is spelled out in
    * `BundleDropzone`'s accept attribute, so a change here needs one there.
    */
-  'marketplace:bundle': {
-    maxBytes: MAX_BUNDLE_SIZE,
-    file: z
-      .file()
-      .refine(
-        file =>
-          file.type === 'application/zip' ||
-          file.type === 'application/x-zip-compressed' ||
-          file.name.toLowerCase().endsWith('.zip'),
-        {error: 'Bundle must be a .zip file'},
-      ),
-  },
+  [
+    MARKETPLACE_BUNDLE_PURPOSE,
+    {
+      maxBytes: MAX_BUNDLE_SIZE,
+      file: z
+        .file()
+        .refine(
+          file =>
+            file.type === 'application/zip' ||
+            file.type === 'application/x-zip-compressed' ||
+            file.name.toLowerCase().endsWith('.zip'),
+          {error: 'Bundle must be a .zip file'},
+        ),
+    },
+  ],
   /* Raster formats only: SVG can carry embedded scripts and external refs, so
    * accepting user-supplied SVG here would serve an XSS vector. */
-  'marketplace:screenshot': {
-    maxBytes: MAX_IMAGE_SIZE,
-    file: z.file().mime([...ACCEPTED_IMAGE_TYPES], {
-      error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed',
-    }),
-  },
-} satisfies Record<string, UploadPolicy>;
-
-export type UploadPurpose = keyof typeof UPLOAD_PURPOSES;
+  [
+    MARKETPLACE_SCREENSHOT_PURPOSE,
+    {
+      maxBytes: MAX_IMAGE_SIZE,
+      file: z.file().mime([...ACCEPTED_IMAGE_TYPES], {
+        error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed',
+      }),
+    },
+  ],
+]);
 
 /** Look up a registered purpose's policy, or undefined if the purpose is unknown. */
 export function getUploadPolicy(purpose: string): UploadPolicy | undefined {
-  return (UPLOAD_PURPOSES as Record<string, UploadPolicy>)[purpose];
+  return UPLOAD_PURPOSES.get(purpose);
 }
 
 /** Display metadata plus the redeem token, returned once a session completes. */

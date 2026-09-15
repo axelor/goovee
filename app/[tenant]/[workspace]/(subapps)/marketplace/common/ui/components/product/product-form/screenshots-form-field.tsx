@@ -30,6 +30,7 @@ import {FormMessageSpace} from '../../shared/form-message-space';
 import {useScreenshotStaging} from '../product-edit/screenshot-staging-context';
 import {
   ACCEPTED_IMAGE_TYPES,
+  MARKETPLACE_SCREENSHOT_PURPOSE,
   MAX_IMAGES,
   MAX_IMAGE_SIZE,
 } from '../../../../constants/uploads';
@@ -446,7 +447,7 @@ export function ScreenshotsFormField({
     for (const file of accepted) {
       const objectUrl = URL.createObjectURL(file);
       const {ids, done} = screenshotUpload.upload([file], {
-        purpose: 'marketplace:screenshot',
+        purpose: MARKETPLACE_SCREENSHOT_PURPOSE,
         /* Refuse an oversized image here rather than send it and have the route
          * reject it. The purpose registry on the server stays the real check. */
         maxBytes: MAX_IMAGE_SIZE,

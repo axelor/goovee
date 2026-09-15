@@ -33,6 +33,7 @@ import {
 import {VERSIONS_PAGE_SIZE} from '../ui/components/versions/version-form/validator';
 import {canManageProducts} from '../utils/auth-helper';
 import {getMarketplaceConfig} from '../orm/config';
+import {MARKETPLACE_BUNDLE_PURPOSE} from '../constants/uploads';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -398,7 +399,7 @@ export async function saveProductWithVersions(
         if (row.bundleToken) {
           uploadedFileId = await redeemUpload({
             token: row.bundleToken,
-            purpose: 'marketplace:bundle',
+            purpose: MARKETPLACE_BUNDLE_PURPOSE,
             owner: access.user.id,
             client: txClient,
           });
