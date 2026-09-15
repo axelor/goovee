@@ -55,10 +55,15 @@ export class LRUCache<K, V> {
     const node = this.cache.get(key);
 
     if (node) {
-      // Update value and move node to head
+      const displaced = node.value;
       node.value = value;
       node.expiresAt = this.expiry();
       this.moveToHead(node);
+
+      /* The displaced value has left the cache as surely as an evicted one. */
+      if (displaced !== value) {
+        this.onEvict?.(displaced);
+      }
     } else {
       if (this.cache.size >= this.capacity) {
         this.removeTail();
