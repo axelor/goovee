@@ -17,3 +17,13 @@ export const ACCEPTED_IMAGE_TYPES = [
   'image/gif',
   'image/avif',
 ] as const;
+
+/* Staged-upload purpose under which a product's version bundle is pre-uploaded
+ * (registered in lib/core/upload/staged-upload.ts) and redeemed when the
+ * version is created. */
+export const MARKETPLACE_BUNDLE_PURPOSE = 'marketplace:bundle';
+
+/* Staged-upload purpose under which product screenshots are pre-uploaded
+ * (registered in lib/core/upload/staged-upload.ts) and redeemed when the
+ * product is saved. */
+export const MARKETPLACE_SCREENSHOT_PURPOSE = 'marketplace:screenshot';

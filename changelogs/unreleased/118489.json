@@ -1,0 +1,6 @@
+{
+  "title": "Reject upload purposes that name a prototype property",
+  "type": "security",
+  "description": "The upload purpose registry was looked up by indexing an object, so a purpose of `constructor`, `__proto__`, `toString` or `valueOf` returned a truthy non-policy and passed every check the policy exists to enforce: the route's unknown-purpose guard, the size cap and the mime/content schema. An authenticated request could stage unbounded, untyped bytes into the tenant's storage. The registry is now a Map, so a lookup cannot reach `Object.prototype`.",
+  "scope": ["core"]
+}

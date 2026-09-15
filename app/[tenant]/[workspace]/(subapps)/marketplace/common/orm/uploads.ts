@@ -1,6 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import type {ID} from '@/types';
+import {MARKETPLACE_SCREENSHOT_PURPOSE} from '../constants/uploads';
 
 /* One ordered screenshot from the product form: an already-saved picture
  * (referenced by its AOSMarketplaceProductPicture row id) or a freshly-picked
@@ -74,7 +75,7 @@ export async function syncProductImages({
     } else {
       const metaId = await redeemUpload({
         token: img.token,
-        purpose: 'marketplace:screenshot',
+        purpose: MARKETPLACE_SCREENSHOT_PURPOSE,
         owner,
         client,
       });
