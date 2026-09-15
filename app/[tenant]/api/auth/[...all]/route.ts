@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 import {toNextJsHandler} from 'better-auth/next-js';
 
 // ---- CORE IMPORTS ---- //
-import {getAuth} from '@/lib/auth';
+import {getAuth} from '@/auth/server';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {addressedHost} from '@/lib/core/tenant/routing';
 import {getTenantConfig} from '@/tenant/config';

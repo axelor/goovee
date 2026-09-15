@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {pushChannelName, MSG_TYPE} from './sw-constants';
 import {useTenantScope} from '@/lib/core/url/tenant-context';
 

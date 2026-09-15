@@ -1,4 +1,4 @@
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {useMemo, useState} from 'react';
 import {
   MdFavoriteBorder,

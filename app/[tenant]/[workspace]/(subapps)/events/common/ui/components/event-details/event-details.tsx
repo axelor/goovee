@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {
   MdArrowForward,
   MdOutlineCalendarToday,

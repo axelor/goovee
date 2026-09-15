@@ -46,7 +46,7 @@ import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {useTenantScope} from '@/lib/core/url/tenant-context';
 
 function Logo({

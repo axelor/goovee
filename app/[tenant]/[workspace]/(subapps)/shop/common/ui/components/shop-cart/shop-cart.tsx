@@ -3,7 +3,7 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import Image from 'next/image';
 import {Link} from '@/ui/components/link';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {usePathname} from 'next/navigation';
 import {
   MdArrowForward,

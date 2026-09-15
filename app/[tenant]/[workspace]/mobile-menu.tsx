@@ -23,7 +23,7 @@ import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {Link} from '@/ui/components/link';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import type {Subapp, Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';

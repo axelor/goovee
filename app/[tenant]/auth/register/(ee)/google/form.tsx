@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';

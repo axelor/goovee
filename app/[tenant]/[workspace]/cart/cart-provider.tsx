@@ -4,7 +4,7 @@ import type {ReactNode} from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {getitem, setitem} from '@/storage/local';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 

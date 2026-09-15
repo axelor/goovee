@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {useToast} from '@/ui/hooks';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
