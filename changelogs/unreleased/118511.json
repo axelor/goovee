@@ -1,6 +1,0 @@
-{
-  "title": "Connect each tenant once and keep its database client for the life of the process",
-  "type": "fix",
-  "description": "Requests that addressed a tenant at the same time each opened a database client, only one of which was kept, and each of them synchronised the schema, so concurrent openings could deadlock in PostgreSQL and fail with \"Error connecting tenant\". Route handlers and page renders also held separate clients, connecting every tenant twice, and past twenty tenants the hourly upload sweep evicted clients that requests were still using. A tenant is now connected once per process however many requests arrive together and from whichever part of the server; the schema is brought up to date once per database, at startup or on the first request for it, and one server at a time when several run against the same database; no client is disconnected while in use; a tenant whose database is unreachable is retried at most once every ten seconds; and startup prepares databases five at a time, so one that is unreachable holds up only the databases queued behind it.",
-  "scope": ["core"]
-}

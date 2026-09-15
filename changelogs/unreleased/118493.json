@@ -1,6 +1,0 @@
-{
-  "title": "Declare the manifest's dependency on the request host",
-  "type": "fix",
-  "description": "The per-tenant manifest builds its scope, start_url and id from the host the request was addressed to, but is sent as publicly cacheable for an hour under an address that is the same on every origin. A shared cache keyed without the host could therefore serve one origin's manifest on another, where the scope falls outside the page's service worker and the app silently stops being installable. The response now sends Vary: Host, X-Forwarded-Host.",
-  "scope": ["core"]
-}
