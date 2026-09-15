@@ -42,11 +42,6 @@
       "name": "image",
       "type": "ManyToOne",
       "target": "AOSMetaFile"
-    },
-    {
-      "name": "thumbnailImage",
-      "type": "ManyToOne",
-      "target": "AOSMetaFile"
     }
   ]
 }

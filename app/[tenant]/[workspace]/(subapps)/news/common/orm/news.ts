@@ -262,14 +262,12 @@ export async function findNewsImageBySlug({
   client,
   user,
   archived = false,
-  isFullView = false,
 }: {
   slug: string;
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
-  isFullView?: boolean;
 }): Promise<string | undefined> {
   if (!workspace) return;
 
@@ -281,13 +279,10 @@ export async function findNewsImageBySlug({
       categorySet: {workspace: {id: workspace.id}},
       AND: [filterPrivate({user}), archivedFilter],
     },
-    select: {image: {id: true}, thumbnailImage: {id: true}},
+    select: {image: {id: true}},
   });
 
-  if (isFullView) {
-    return news?.image?.id;
-  }
-  return news?.thumbnailImage?.id || news?.image?.id;
+  return news?.image?.id;
 }
 
 export async function isAttachmentOfNews({

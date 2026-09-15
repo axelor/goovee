@@ -598,7 +598,6 @@ export async function findEvents({
             name: true,
             color: true,
             image: {id: true},
-            thumbnailImage: {id: true},
           },
         },
         eventImage: {id: true},

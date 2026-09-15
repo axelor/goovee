@@ -1,0 +1,6 @@
+{
+  "title": "Serve every image from the original file",
+  "type": "change",
+  "description": "Images are served from the original file and resized at the width the page asks for, so the thumbnails the back office generated beside the originals are no longer read.",
+  "scope": ["core", "events", "forum", "news", "shop"]
+}

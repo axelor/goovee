@@ -21,9 +21,6 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {searchParams} = new URL(request.url);
-  const isFullView = searchParams.get('isFullView') === 'true';
-
   const {slug} = params;
 
   const access = await ensureAccess({
@@ -48,7 +45,6 @@ export async function GET(
     workspace: access.workspace,
     client,
     user,
-    isFullView,
   });
 
   if (!imageId) {

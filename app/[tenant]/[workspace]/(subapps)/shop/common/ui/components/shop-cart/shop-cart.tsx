@@ -394,7 +394,7 @@ function CartLine({
   const catName = cat?.name ?? null;
   const hue = getCategoryHue(catName);
 
-  const imageId = product?.thumbnailImage?.id || product?.images?.[0];
+  const imageId = product?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenantScope) : null;
 
   const productHref = scope.forRouter(

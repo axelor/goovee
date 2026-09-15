@@ -58,11 +58,6 @@
       "target": "AOSMetaFile"
     },
     {
-      "type": "ManyToOne",
-      "name": "thumbnailImage",
-      "target": "AOSMetaFile"
-    },
-    {
       "type": "OneToMany",
       "name": "portalImageList",
       "target": "AOSProductPicture",

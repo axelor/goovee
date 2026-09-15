@@ -129,8 +129,6 @@ export function ShopProductDetail({
 
   const images = useMemo(() => {
     const ids: string[] = [];
-    if (product?.thumbnailImage?.id)
-      ids.push(String(product.thumbnailImage.id));
     if (product?.picture?.id) ids.push(String(product.picture.id));
     if (Array.isArray(product?.portalImageList)) {
       for (const item of product.portalImageList) {
@@ -453,8 +451,7 @@ export function ShopProductDetail({
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
                 {relatedProducts.map(r => {
                   const rProduct = r?.product ?? r;
-                  const rImageId =
-                    rProduct?.thumbnailImage?.id || rProduct?.images?.[0];
+                  const rImageId = rProduct?.images?.[0];
                   const rImage = rImageId
                     ? getProductImageURL(rImageId, tenantScope)
                     : null;

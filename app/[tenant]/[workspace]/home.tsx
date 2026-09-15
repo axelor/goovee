@@ -226,9 +226,7 @@ function HeroNewsCard({
     article;
   const category = categorySet?.[0];
   const imageURL = image?.id
-    ? scope.forBrowser(
-        `/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
-      )
+    ? scope.forBrowser(`/${SUBAPP_CODES.news}/api/news/${slug}/image`)
     : withBasePath(NO_IMAGE_URL);
 
   return (

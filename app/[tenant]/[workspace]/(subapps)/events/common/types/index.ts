@@ -26,7 +26,6 @@ export type Category = {
   color: string | null;
   description: string | null;
   image: {id: string; version: number} | null;
-  thumbnailImage: {id: string; version: number} | null;
 };
 
 export type ListEvent = {
@@ -44,10 +43,6 @@ export type ListEvent = {
         name: string | null;
         color: string | null;
         image: {
-          id: string;
-          version: number;
-        } | null;
-        thumbnailImage: {
           id: string;
           version: number;
         } | null;

@@ -73,14 +73,5 @@ function isEventCategoryImage({
   fileId: string;
   category: Category;
 }) {
-  if (category.image?.id && String(fileId) === String(category.image.id)) {
-    return true;
-  }
-  if (
-    category.thumbnailImage?.id &&
-    String(fileId) === String(category.thumbnailImage.id)
-  ) {
-    return true;
-  }
-  return false;
+  return !!category.image?.id && String(fileId) === String(category.image.id);
 }

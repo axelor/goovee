@@ -463,12 +463,10 @@ export function MagazineHub({
 
 function getEventImageURL(event: ListEvent, scope: WorkspaceScope): string {
   if (!event) return withBasePath(NO_IMAGE_URL);
-  const categoryWithImage = event.eventCategorySet?.find(
-    cat => cat.thumbnailImage?.id || cat.image?.id,
-  );
+  const categoryWithImage = event.eventCategorySet?.find(cat => cat.image?.id);
   if (categoryWithImage) {
     return scope.forBrowser(
-      `/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`,
+      `/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.image?.id}`,
     );
   }
   if (event.eventImage?.id) {
