@@ -1,7 +1,7 @@
 import type {ReadonlyHeaders} from 'next/dist/server/web/spec-extension/adapters/headers';
 import {headers} from 'next/headers';
 
-import {getAuth} from '@/lib/auth';
+import {getAuth} from './server';
 import {TENANT_HEADER} from '@/proxy';
 
 const getSessionBase = async (headerList: ReadonlyHeaders) => {

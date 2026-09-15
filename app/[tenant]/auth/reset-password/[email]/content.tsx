@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Link} from '@/ui/components/link';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {PasswordSchema} from '@/utils/validators';
 
 // ---- LOCAL IMPORTS ---- //

@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from 'react';
 import {z} from 'zod';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useToast} from '@/ui/hooks/use-toast';

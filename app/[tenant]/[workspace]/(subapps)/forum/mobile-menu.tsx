@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {MdOutlineForum} from 'react-icons/md';
 import {useRouter} from 'next/navigation';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 
 // ---- CORE IMPORTS ---- //
 import {

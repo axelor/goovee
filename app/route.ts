@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {sessionTenantIds} from '@/lib/auth';
+import {sessionTenantIds} from '@/auth/server';
 import {getDefaultTenantId} from '@/tenant/config';
 
 import {resolveLanding} from './landing';

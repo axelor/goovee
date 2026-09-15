@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 
 // ---- CORE IMPORTS ---- //
 import {useAppLang} from '@/ui/hooks';

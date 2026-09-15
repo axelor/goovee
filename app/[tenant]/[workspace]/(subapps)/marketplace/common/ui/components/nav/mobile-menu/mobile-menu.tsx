@@ -2,7 +2,7 @@
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {i18n} from '@/locale';
 import {Icon, Portal} from '@/ui/components';
 import {Sheet, SheetContent, SheetTitle} from '@/ui/components/sheet';

@@ -2,7 +2,7 @@
 
 import {useState, useEffect, useMemo} from 'react';
 import {usePathname} from 'next/navigation';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';

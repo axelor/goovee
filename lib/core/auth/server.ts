@@ -27,14 +27,14 @@ import {customSession} from 'better-auth/plugins';
 import {
   buildOAuthProviders,
   findOAuthRegistration,
-} from './core/auth/(ee)/oauth-providers';
-import {buildCredentials} from './core/auth/credentials';
-import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
+} from './(ee)/oauth-providers';
+import {buildCredentials} from './credentials';
+import {register, registerByInvite, registerByKeycloak} from './orm';
 import {
   KeycloakRegisterSchema,
   OAuthInviteRegisterSchema,
   OAuthRegisterSchema,
-} from './core/auth/validation-utils';
+} from './validation-utils';
 import {deploymentRootPath, withBasePath} from '@/lib/core/path/base-path';
 import {tenantURLs} from '@/lib/core/url/scope';
 import {processWide} from '@/runtime/process-wide';

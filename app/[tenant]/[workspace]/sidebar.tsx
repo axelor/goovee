@@ -5,7 +5,7 @@ import Image from 'next/image';
 import {usePathname, useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {cn} from '@/utils/css';
 import {Icon} from '@/ui/components';
 import {

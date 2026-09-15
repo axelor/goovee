@@ -3,7 +3,7 @@
 import {useTenantScope} from '@/lib/core/url/tenant-context';
 import React, {useState} from 'react';
 import {useSearchParams} from 'next/navigation';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import Image from 'next/image';
 import {MdOutlineRefresh, MdArrowForward} from 'react-icons/md';
 
