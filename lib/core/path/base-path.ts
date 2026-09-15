@@ -11,7 +11,7 @@ const BASE_PATH = normalizePathPrefix(process.env.NEXT_PUBLIC_BASE_PATH);
  *
  * - No-op if no base path is configured
  * - Skips external URLs and hash fragments
- * - Safe to call multiple times (won't double-prefix)
+ * - Joins once: the path handed in must not carry the base path already
  *
  * Use for raw URL strings that Next.js does not rewrite automatically
  * (e.g. image src, fetch URLs, service workers, manifests, static assets).
