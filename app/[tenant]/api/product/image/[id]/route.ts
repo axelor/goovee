@@ -33,17 +33,12 @@ export async function GET(
       ...and<AOSProduct>([
         filterPrivate({user}),
         {
-          OR: [
-            {picture: {id}},
-            {thumbnailImage: {id}},
-            {portalImageList: {picture: {id}}},
-          ],
+          OR: [{picture: {id}}, {portalImageList: {picture: {id}}}],
         },
       ]),
     },
     select: {
       picture: {id: true},
-      thumbnailImage: {id: true},
       portalImageList: {
         where: {picture: {id}},
         select: {picture: {id: true}},
@@ -53,8 +48,7 @@ export async function GET(
 
   if (
     id === product?.picture?.id ||
-    product?.portalImageList?.some(i => i?.picture?.id === id) ||
-    id === product?.thumbnailImage?.id
+    product?.portalImageList?.some(i => i?.picture?.id === id)
   ) {
     const file = await findFile({
       id,

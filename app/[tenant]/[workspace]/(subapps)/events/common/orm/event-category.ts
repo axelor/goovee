@@ -38,7 +38,6 @@ export async function findEventCategories({
       color: true,
       description: true,
       image: {id: true},
-      thumbnailImage: {id: true},
     },
   });
 

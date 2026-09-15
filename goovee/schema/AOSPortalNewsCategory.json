@@ -51,11 +51,6 @@
     {
       "name": "archived",
       "type": "Boolean"
-    },
-    {
-      "name": "thumbnailImage",
-      "type": "ManyToOne",
-      "target": "AOSMetaFile"
     }
   ]
 }

@@ -50,7 +50,6 @@ export interface Product extends Model {
   code: string;
   slug: string;
   description?: string;
-  thumbnailImage?: {id: string};
   images?: Array<string>;
   salePrice: number;
   costPrice: number;

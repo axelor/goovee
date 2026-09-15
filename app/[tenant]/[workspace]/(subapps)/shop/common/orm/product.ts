@@ -39,7 +39,6 @@ type RawProduct = {
   allowCustomNote: boolean | null;
   _count?: string;
   saleCurrency: {symbol: string | null} | null;
-  thumbnailImage: {id: string} | null;
   picture: {id: string} | null;
   portalImageList: Array<{picture: {id: string} | null}> | null;
   productCompanyList: Array<{
@@ -111,9 +110,6 @@ const getProductFields = ({
     ...(shouldHidePrices ? {} : {salePrice: true}),
     featured: true,
     createdOn: true,
-    thumbnailImage: {
-      id: true,
-    },
     picture: {
       id: true,
     },

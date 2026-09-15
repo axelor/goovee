@@ -395,10 +395,6 @@ export async function findGroupById(
       image: {
         fileName: true,
       },
-      thumbnailImage: {
-        id: true,
-        fileName: true,
-      },
     },
   });
   return group;

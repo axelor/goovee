@@ -46,9 +46,7 @@ export function NewsArticleHero({
   } = config;
 
   const src = article?.image?.id
-    ? scope.forBrowser(
-        `/${SUBAPP_CODES.news}/api/news/${article.slug}/image?isFullView=true`,
-      )
+    ? scope.forBrowser(`/${SUBAPP_CODES.news}/api/news/${article.slug}/image`)
     : withBasePath(NO_IMAGE_URL);
   const cat = article?.categorySet?.[0]?.name;
   const showAuthor = isShowPublicationAuthor && !!article?.author;

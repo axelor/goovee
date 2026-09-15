@@ -69,7 +69,7 @@ export function ShopProductCard({
   const [adding, setAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
-  const imageId = p?.thumbnailImage?.id || p?.images?.[0];
+  const imageId = p?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenantScope) : null;
 
   const categoryName = category?.name ?? null;
