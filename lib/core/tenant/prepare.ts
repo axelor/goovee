@@ -1,6 +1,5 @@
+import {memoizeAsync} from '@/cache/memoize';
 import {createClient} from '@/goovee/.generated/client';
-
-import {shareAttempt} from './single-flight';
 
 /*
  * Serialises schema work on one database across every server process that
@@ -65,5 +64,7 @@ async function prepare(url: string): Promise<void> {
 export function prepareDatabase(url: string): Promise<void> {
   const prepared = (global.__preparedDatabases ??= new Map());
 
-  return shareAttempt(prepared, url, () => prepare(url), PREPARE_COOLDOWN_MS);
+  return memoizeAsync(prepared, url, () => prepare(url), {
+    failureTtlMs: PREPARE_COOLDOWN_MS,
+  });
 }

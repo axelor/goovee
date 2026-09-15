@@ -1,8 +1,8 @@
+import {memoizeAsync} from '@/cache/memoize';
 import {createClient} from '@/goovee/.generated/client';
 import {ensureStorageDir} from '@/storage/index';
 import {getTenantConfig} from './config';
 import {prepareDatabase} from './prepare';
-import {shareAttempt} from './single-flight';
 import type {Tenant, TenantConfig} from './types';
 
 /*
@@ -105,11 +105,11 @@ export class TenantManager {
     try {
       /* Concurrent callers for a cold tenant share one connection attempt, so
        * the registry never holds a client that nothing references. */
-      return await shareAttempt(
+      return await memoizeAsync(
         this.registry,
         id,
         () => connectTenant(id, config),
-        CONNECT_COOLDOWN_MS,
+        {failureTtlMs: CONNECT_COOLDOWN_MS},
       );
     } catch (err) {
       throw new Error(`Error connecting tenant "${id}"`, {cause: err});
