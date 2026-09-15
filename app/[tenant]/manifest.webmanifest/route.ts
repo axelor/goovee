@@ -70,6 +70,11 @@ export async function GET(
         /* Tenant-static (changes only on deploy/config), so let the browser
          * hold it rather than re-fetch on every navigation. */
         'Cache-Control': 'public, max-age=3600',
+        /* The entry above follows the host the request was addressed to, while
+         * this address is the same on every origin. Both headers `addressedHost`
+         * reads are named, since a deployment may set either one. Without them a
+         * cache keyed without the host serves one origin's entry on another. */
+        Vary: 'Host, X-Forwarded-Host',
       },
     },
   );
