@@ -1,0 +1,6 @@
+{
+  "title": "The authentication error screen no longer links wherever its query string says",
+  "type": "security",
+  "description": "The \"Back to Workspace\" button on the authentication error screen took its destination from a query parameter and used it as given, so a crafted link showed the portal's own error screen — its wording and styling intact — above a prominent button leading to another site. An address that does not land on the portal itself is now refused, and the button falls back to the entry of the tenant whose screen it is.",
+  "scope": ["core"]
+}
