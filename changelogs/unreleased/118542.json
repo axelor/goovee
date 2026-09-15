@@ -1,6 +1,0 @@
-{
-  "title": "Keep the base path on browser addresses when a tenant or workspace is named after it",
-  "type": "fix",
-  "description": "Under a base path, a tenant or workspace whose name matched the base path segment lost it from the addresses the app builds for the browser: the tenant's manifest link and its start address, redirects set after sign-in and account changes, and the page a push notification opens. The base path is now always added.",
-  "scope": ["core"]
-}
