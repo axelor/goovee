@@ -146,5 +146,10 @@ async function startAll(onReady?: TenantReadyListener): Promise<void> {
  * after it is connected; a failure there is logged and never stops the rest.
  */
 export function startTenants(onReady?: TenantReadyListener): void {
-  void startAll(onReady);
+  /* Every step inside already catches its own failures, so this is the guard
+   * for a step added later that does not: an unhandled rejection here would
+   * take the process down with it. */
+  startAll(onReady).catch((err: unknown) => {
+    console.error('[TENANT][STARTUP] Starting the tenants failed:', err);
+  });
 }

@@ -7,6 +7,10 @@ import {processWide} from '@/runtime/process-wide';
  * shares it. Advisory locks are scoped to the database they are taken in, so a
  * single constant is enough: two processes preparing different databases never
  * meet, and two preparing the same one take turns.
+ *
+ * The key space is the database's, shared with anything else that takes
+ * advisory locks there, AOS included. A collision would corrupt nothing; it
+ * would make unrelated work and this preparation wait on each other.
  */
 const SCHEMA_LOCK_KEY = 7364812001;
 
@@ -20,7 +24,9 @@ const PREPARED_DATABASES = 'tenant/prepared-databases';
 async function prepare(url: string): Promise<void> {
   /* A client of its own, released as soon as the work is done. The schema is a
    * property of the database, not of whichever client the request path opens
-   * later, so preparing it must not wait for one of those to exist. */
+   * later, so preparing it must not wait for one of those to exist. The query
+   * features the request path's client is given shape how queries are written,
+   * not how the schema is synchronised, so this one is built without them. */
   const client = createClient({url});
 
   await client.$connect();
