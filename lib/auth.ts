@@ -37,6 +37,7 @@ import {
 } from './core/auth/validation-utils';
 import {deploymentRootPath, withBasePath} from '@/lib/core/path/base-path';
 import {tenantURLs} from '@/lib/core/url/scope';
+import {processWide} from '@/runtime/process-wide';
 
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
@@ -337,13 +338,11 @@ function authOrigins(): string[] {
  *
  * Built on first use rather than at module scope: `next build` evaluates this
  * file with a placeholder document that names no tenant, so a map composed up
- * front would be baked empty into the image. Held on `globalThis` because a
- * module is evaluated once per bundler layer and again on every recompile, and
- * a second set of instances would mint sessions the first set cannot read.
+ * front would be baked empty into the image. Held process-wide because a second
+ * set of instances, built by another module graph or after a recompile, would
+ * mint sessions the first set cannot read.
  */
-declare global {
-  var __tenantAuth: Map<string, ReturnType<typeof buildAuth>> | undefined;
-}
+const AUTH_INSTANCES = 'auth/instances';
 
 /* For a tenant the document does not name. Random per process, so nothing it
  * signs survives a restart and no cookie written under a real tenant's secret
@@ -537,7 +536,7 @@ function buildAuth(tenantId: string) {
  * tell apart from a refusal.
  */
 export function getAuth(tenantId: string): Auth {
-  const instances = (global.__tenantAuth ??= new Map());
+  const instances = processWide(AUTH_INSTANCES, () => new Map<string, Auth>());
 
   /* The id reaching here is a path segment, and nothing upstream checks it
    * against the document: a route handler takes it from `params`, and

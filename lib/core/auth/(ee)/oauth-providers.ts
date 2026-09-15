@@ -1,6 +1,7 @@
 import {genericOAuth} from 'better-auth/plugins';
 import type {GenericOAuthConfig} from 'better-auth/plugins';
 
+import {processWide} from '@/runtime/process-wide';
 import {getTenantConfig} from '@/tenant/config';
 
 const GOOGLE_DISCOVERY_URL =
@@ -20,19 +21,14 @@ export type OAuthRegistration = {
  * tenant addressed later would otherwise wipe the entries of one addressed
  * earlier, leaving that tenant's callbacks resolving no registration.
  *
- * Held on `globalThis` for the reason the instance cache is: a module is
- * evaluated once per bundler layer and again on every recompile, and the
- * instances that filled this survive that. A fresh map beside surviving
- * instances would answer every callback with no registration at all.
+ * Held process-wide, like the auth instances that fill it: those survive a
+ * recompile, and a fresh map beside surviving instances would answer every
+ * callback with no registration at all.
  */
-declare global {
-  var __oauthRegistrations: Map<string, OAuthRegistration> | undefined;
-}
-
-const registrations = (global.__oauthRegistrations ??= new Map<
-  string,
-  OAuthRegistration
->());
+const registrations = processWide(
+  'auth/oauth-registrations',
+  () => new Map<string, OAuthRegistration>(),
+);
 
 /* A generic provider sends a code challenge only when it is asked to, where a
  * built-in one always does. Carrying pkce in the type is what keeps the next
