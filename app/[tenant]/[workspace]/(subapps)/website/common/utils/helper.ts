@@ -8,7 +8,7 @@ import {
   MetaSelection,
   ImageType,
 } from '../types/templates';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
 type FileURLProps = {
   websiteSlug: string;

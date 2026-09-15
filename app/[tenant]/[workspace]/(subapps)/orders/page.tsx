@@ -2,8 +2,8 @@ import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {DEFAULT_LIMIT, SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
 import {PartnerKey} from '@/types';

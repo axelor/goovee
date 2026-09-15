@@ -3,12 +3,12 @@ import type {Cloned} from '@/types/util';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ----//
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import {ORDER_BY, SUBAPP_CODES} from '@/constants';
-import {t} from '@/lib/core/locale/server';
+import {t} from '@/locale/server';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';

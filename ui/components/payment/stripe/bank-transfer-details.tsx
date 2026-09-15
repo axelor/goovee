@@ -5,7 +5,7 @@ import {AlertCircle, Copy} from 'lucide-react';
 import {MdDoneAll} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 import {
   Accordion,
   AccordionContent,
@@ -22,7 +22,7 @@ import {
   BankAddress,
   NormalizedBankDetails,
 } from '@/ui/components/payment/types';
-import {BANK_ACCOUNT_TYPE} from '@/lib/core/payment/stripe/constants';
+import {BANK_ACCOUNT_TYPE} from '@/payment/stripe/constants';
 
 interface BankTransferDetailsProps {
   details: {

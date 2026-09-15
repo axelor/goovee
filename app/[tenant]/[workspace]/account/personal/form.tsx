@@ -61,8 +61,8 @@ import {
   PARTNER_PICTURE_MAX_FILE_SIZE,
 } from '../common/constants';
 import {getLoginURL} from '@/utils/login-url';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {withBasePath} from '@/path/base-path';
+import {useStagedUpload} from '@/upload/use-staged-upload';
 
 const formSchema = z
   .object({

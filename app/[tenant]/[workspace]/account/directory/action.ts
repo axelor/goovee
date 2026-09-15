@@ -1,7 +1,7 @@
 'use server';
 import {t} from '@/locale/server';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {
   findGooveeUserByEmail,
   isAdminContact,
@@ -14,7 +14,7 @@ import {
   updateCompanyProfileImageSchema,
   type UpdateCompanyProfileImageValues,
 } from './schema';
-import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import {redeemUpload} from '@/upload/staged-upload';
 import {PARTNER_PICTURE_PURPOSE} from '../common/constants';
 
 export async function updateDirectorySettings({

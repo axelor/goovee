@@ -1,4 +1,5 @@
-import {PaymentSource} from '@/lib/core/payment/common/type';
+import {PaymentSource} from '@/payment/common/type';
+import {processWide} from '@/runtime/process-wide';
 import {PAYMENT_UPDATE_STATUS, type PaymentUpdateStatus} from './constants';
 
 export {PAYMENT_UPDATE_STATUS};
@@ -6,17 +7,12 @@ export type {PaymentUpdateStatus};
 
 type SSEController = ReadableStreamDefaultController<Uint8Array>;
 
-// Use global to survive module re-instantiation under Turbopack / HMR
-declare global {
-  // eslint-disable-next-line no-var
-  var __sseSubscribers: Map<string, Set<SSEController>> | undefined;
-}
-
-if (!global.__sseSubscribers) {
-  global.__sseSubscribers = new Map();
-}
-
-const subscribers = global.__sseSubscribers;
+/* One set of subscribers for the process: a payment update must reach the
+ * stream that subscribed to it whichever module graph delivers the update. */
+const subscribers = processWide(
+  'payment/sse-subscribers',
+  () => new Map<string, Set<SSEController>>(),
+);
 
 function getKey(
   tenant: string,

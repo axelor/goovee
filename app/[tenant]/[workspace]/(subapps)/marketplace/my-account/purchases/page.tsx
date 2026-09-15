@@ -28,8 +28,8 @@ import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
 import {findPurchases} from '../../common/orm';
 import {MyPurchasesTable} from '../../common/ui/components/purchases/my-purchases-table';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {
   myPurchasesParamsSchema,
   myPurchasesSearchParamsSchema,

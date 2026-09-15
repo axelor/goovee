@@ -2,8 +2,8 @@ import {Link} from '@/ui/components/link';
 import {MdArrowForward, MdStar} from 'react-icons/md';
 
 import {SUBAPP_CODES} from '@/constants';
-import {formatDateTime} from '@/lib/core/locale/formatters';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import {formatDateTime} from '@/locale/formatters';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {cn} from '@/utils/css';
 
 import {FolderLogoIcon} from '../folder-logo-icon';

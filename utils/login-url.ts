@@ -1,4 +1,4 @@
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 /**
  * The address of a tenant's sign-in screen, carrying what the visitor should be

@@ -22,7 +22,7 @@ import {Input} from '@/ui/components/input';
 import {ProgressFill} from '@/ui/components';
 import {Textarea} from '@/ui/components/textarea';
 import {useToast} from '@/ui/hooks/use-toast';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {useStagedUpload} from '@/upload/use-staged-upload';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';

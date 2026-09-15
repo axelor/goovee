@@ -4,9 +4,9 @@ import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {currentWorkspace} from '@/lib/core/url/current';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {currentWorkspace} from '@/url/current';
+import {accessMessage} from '@/access/denial';
 import {getLoginURL} from '@/utils/login-url';
 import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
@@ -16,7 +16,7 @@ import {
   findProductAccess,
   setPartnerFavorite,
 } from '../orm';
-import {currentTenantScope} from '@/lib/core/url/current';
+import {currentTenantScope} from '@/url/current';
 
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),

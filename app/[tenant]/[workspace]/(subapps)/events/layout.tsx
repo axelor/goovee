@@ -1,8 +1,8 @@
 // ---- CORE IMPORTS ----//
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
-import {t} from '@/lib/core/locale/server';
+import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';

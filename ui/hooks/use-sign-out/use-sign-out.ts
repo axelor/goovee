@@ -1,7 +1,7 @@
 'use client';
 
 import {useCallback} from 'react';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {usePushNotifications} from '@/pwa/push-context';
 
 /* NOTE: Use this hook instead of calling authClient.signOut() directly.

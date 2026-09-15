@@ -8,8 +8,8 @@ import {canManageProducts} from '../utils/auth-helper';
 import {findPublisherAccess} from '../orm';
 import {getMarketplaceConfig} from '../orm/config';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {getPartnerId} from '@/utils';
 
 const requestPublisherAccessSchema = z.object({

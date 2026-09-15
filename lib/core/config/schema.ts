@@ -28,14 +28,8 @@ import path from 'path';
 
 import {z} from 'zod';
 
-import {
-  getMaxConnections,
-  mailAccountKey,
-} from '@/lib/core/notification/mail-account';
-import {
-  isReservedSegment,
-  reservedSegments,
-} from '@/lib/core/path/reserved-segments';
+import {getMaxConnections, mailAccountKey} from '@/notification/mail-account';
+import {isReservedSegment, reservedSegments} from '@/path/reserved-segments';
 import {canonicalHost} from '@/tenant/routing';
 
 import {envNameFor, TENANTS_KEY} from './names';
@@ -636,7 +630,7 @@ function checkStorageIsolation(tenants: TenantEntry[]): ConfigIssue[] {
  * unreadable. Shared, the two tenants can open each other's sessions, and a
  * cookie renamed from one to the other is then accepted — read as the tenant its
  * payload names, which chooses the database, while the address chose the
- * instance. The session guard in lib/auth.ts refuses that mismatch; this refuses
+ * instance. The session guard in lib/core/auth/server.ts refuses that mismatch; this refuses
  * the configuration that makes it reachable. */
 function checkSecretIsolation(tenants: TenantEntry[]): ConfigIssue[] {
   const issues: ConfigIssue[] = [];

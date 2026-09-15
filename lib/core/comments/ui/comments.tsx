@@ -1,6 +1,6 @@
 'use client';
 
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import Image from 'next/image';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {

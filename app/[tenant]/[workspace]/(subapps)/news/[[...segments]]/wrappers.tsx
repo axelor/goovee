@@ -7,7 +7,7 @@ import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import type {User} from '@/types';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsConfig} from '@/subapps/news/common/orm/config';
@@ -28,7 +28,7 @@ import {
   RELATED_FILES,
   RELATED_NEWS,
 } from '@/subapps/news/common/constants';
-import {Comments, COMMENTS, SORT_TYPE} from '@/lib/core/comments';
+import {Comments, COMMENTS, SORT_TYPE} from '@/comments';
 import {
   createComment,
   fetchComments,

@@ -11,8 +11,8 @@ import 'server-only';
 import {z} from 'zod';
 
 import {getPublicEnvironment} from '@/environment/utils';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {addressedHost, isHostRouted} from '@/lib/core/tenant/routing';
+import {withBasePath} from '@/path/base-path';
+import {addressedHost, isHostRouted} from '@/tenant/routing';
 import {getRoutingIndex, getTenantConfig} from '@/tenant/config';
 
 import {absoluteRoot} from './absolute';

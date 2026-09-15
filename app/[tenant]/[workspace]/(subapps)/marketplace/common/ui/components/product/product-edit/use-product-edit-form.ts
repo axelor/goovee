@@ -1,6 +1,6 @@
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {useStagedUpload} from '@/upload/use-staged-upload';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
 import {zodResolver} from '@hookform/resolvers/zod';

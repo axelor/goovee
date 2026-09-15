@@ -11,8 +11,8 @@ import {canRegisterForWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
 import {getTenantConfig} from '@/tenant/config';
 import {isSameOrigin} from '@/utils/same-origin';
-import {absoluteRoot} from '@/lib/core/url/absolute';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {absoluteRoot} from '@/url/absolute';
+import {tenantURLs} from '@/url/scope';
 
 import {resolveAuthTenantId} from '../common/tenant';
 import {

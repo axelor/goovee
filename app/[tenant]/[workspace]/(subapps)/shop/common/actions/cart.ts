@@ -1,7 +1,7 @@
 'use server';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import type {Product} from '@/types';

@@ -1,14 +1,14 @@
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import NotificationManager, {NotificationType} from '@/lib/core/notification';
+import {getSession} from '@/auth';
+import NotificationManager, {NotificationType} from '@/notification';
 import {html} from '@/utils/template-string';
 import {findEvent} from '../orm/event';
 import {generateIcs} from './index';
-import {formatDate} from '@/lib/core/locale/server/formatters';
+import {formatDate} from '@/locale/server/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 

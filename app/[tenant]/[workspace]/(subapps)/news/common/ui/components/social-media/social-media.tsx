@@ -5,7 +5,7 @@ import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {i18n} from '@/locale';
 import {Skeleton} from '@/ui/components';
 import {useEnvironment} from '@/environment';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //

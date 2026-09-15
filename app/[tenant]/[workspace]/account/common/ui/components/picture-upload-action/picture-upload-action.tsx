@@ -4,7 +4,7 @@ import {MdClose, MdPause, MdPlayArrow, MdRefresh} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import type {StagedUploadStatus} from '@/lib/core/upload/use-staged-upload';
+import type {StagedUploadStatus} from '@/upload/use-staged-upload';
 
 const BUTTON_CLASS =
   'grid place-items-center rounded-full bg-white/90 transition-colors hover:bg-white';

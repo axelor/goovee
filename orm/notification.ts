@@ -9,7 +9,7 @@ import type {
   UpdateArgs,
 } from '@goovee/orm';
 import {SUBAPP_CODES} from '@/constants';
-import type {WorkspaceSubPath} from '@/lib/core/url';
+import type {WorkspaceSubPath} from '@/url';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {NotificationAppCode} from '@/utils/validators';

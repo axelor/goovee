@@ -1,10 +1,10 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 import {isFileOfRecord} from '@/comments/orm';
-import {SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/lib/core/comments';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ModelMap, SUBAPP_CODES} from '@/constants';
+import {isCommentEnabled} from '@/comments';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 
@@ -56,7 +56,15 @@ export async function GET(
     return new NextResponse('Forbidden', {status: 403});
   }
 
-  if (!(await isFileOfRecord({recordId: postId, fileId, client}))) {
+  if (
+    !(await isFileOfRecord({
+      recordId: postId,
+      fileId,
+      modelName: ModelMap[SUBAPP_CODES.forum]!,
+      trackingField: 'publicBody',
+      client,
+    }))
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 

@@ -3,8 +3,8 @@ import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ----//
 import {clone} from '@/utils';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {DEFAULT_PAGE, SUBAPP_CODES} from '@/constants';
 

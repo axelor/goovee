@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Button,
 } from '@/ui/components';
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 
 type BankTransferConfirmDialogProps = {
   open: boolean;

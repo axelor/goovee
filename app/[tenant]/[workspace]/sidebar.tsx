@@ -5,7 +5,7 @@ import Image from 'next/image';
 import {usePathname, useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {cn} from '@/utils/css';
 import {Icon} from '@/ui/components';
 import {
@@ -25,7 +25,7 @@ import {
 import {APP_TITLE, SUBAPP_CODES, SUBAPP_PAGE, CHAT_TYPE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
-import {useEnvironment} from '@/lib/core/environment';
+import {useEnvironment} from '@/environment';
 import {Link} from '@/ui/components/link';
 import type {Subapp} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';

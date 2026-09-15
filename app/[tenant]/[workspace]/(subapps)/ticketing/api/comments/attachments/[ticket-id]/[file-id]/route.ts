@@ -5,10 +5,10 @@ import {findFile, streamFile} from '@/utils/download';
 import {isCommentEnabled} from '@/comments';
 
 import {findTicketAccess} from '../../../../../common/orm/tickets';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {getTicketingConfig} from '../../../../../common/orm/config';
-import {SUBAPP_CODES} from '@/constants';
+import {ModelMap, SUBAPP_CODES} from '@/constants';
 
 export async function GET(
   request: NextRequest,
@@ -65,6 +65,8 @@ export async function GET(
     !(await isFileOfRecord({
       recordId: ticketId,
       fileId,
+      modelName: ModelMap[SUBAPP_CODES.ticketing]!,
+      trackingField: 'publicBody',
       client,
     }))
   ) {

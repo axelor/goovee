@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';

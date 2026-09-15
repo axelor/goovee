@@ -3,8 +3,8 @@ import {notFound} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {findSubapps} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {t} from '@/lib/core/locale/server';
+import {ensureAccess} from '@/access/ensure-access';
+import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';

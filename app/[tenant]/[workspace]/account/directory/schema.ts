@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {uploadTokenSchema} from '@/upload/validators';
 
 /* `token` redeems a staged upload (company picture pre-uploaded on pick); a
  * null/absent token clears the current picture. */

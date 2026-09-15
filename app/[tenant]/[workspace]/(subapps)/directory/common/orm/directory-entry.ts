@@ -1,6 +1,6 @@
 import type {AOSPartner} from '@/goovee/.generated/models';
 import type {Client} from '@/goovee/.generated/client';
-import {t} from '@/lib/core/locale/server';
+import {t} from '@/locale/server';
 import type {ID} from '@/types';
 import type {OrderByOptions} from '@goovee/orm';
 

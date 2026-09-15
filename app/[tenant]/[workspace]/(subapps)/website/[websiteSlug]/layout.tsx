@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {SUBAPP_CODES} from '@/constants';
 import {Website} from '@/types';
 import {clone} from '@/utils';

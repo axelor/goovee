@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {Separator} from '@/ui/components/separator';
 import {SUBAPP_CODES} from '@/constants';
 import {findPreferences} from '@/orm/notification';

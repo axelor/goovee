@@ -2,7 +2,7 @@
 
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY, SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //

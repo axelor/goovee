@@ -12,8 +12,8 @@ import {clone} from '@/utils';
 import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
 import {CheckoutContent} from '../../common/ui/components/checkout/checkout-content';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getMarketplaceConfig} from '../../common/orm/config';
 
 export default async function CheckoutPage(props: {

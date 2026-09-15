@@ -12,9 +12,9 @@ import NotificationManager, {
   type MailNotificationData,
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
-import type {WorkspaceSubPath} from '@/lib/core/url';
-import {tenantURLs, type ServerWorkspaceScope} from '@/lib/core/url/scope';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceSubPath} from '@/url';
+import {tenantURLs, type ServerWorkspaceScope} from '@/url/scope';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {

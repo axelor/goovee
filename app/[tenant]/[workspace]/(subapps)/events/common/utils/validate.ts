@@ -6,7 +6,7 @@ import {findPaypalOrder} from '@/payment/paypal/actions';
 import {findStripeOrder} from '@/payment/stripe/actions';
 import {PaymentOption} from '@/types';
 import type {ActionResponse} from '@/types/action';
-import type {PaymentOrder} from '@/lib/core/payment/common/type';
+import type {PaymentOrder} from '@/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {error} from './index';

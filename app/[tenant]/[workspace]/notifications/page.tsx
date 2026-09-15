@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 
 // ---- LOCAL IMPORTS ---- //
 import {UnreadNotificationsList} from './unread-list';

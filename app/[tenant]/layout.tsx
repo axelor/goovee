@@ -13,13 +13,13 @@ import {findTheme} from '@/orm/theme';
 import {PushProvider} from '@/pwa/push-context';
 import {SerwistProvider} from '@/pwa/serwist';
 import {getTenantConfig, listTenantIds} from '@/tenant/config';
-import {tenantURLs} from '@/lib/core/url/scope';
-import {TenantProvider} from '@/lib/core/url/tenant-context';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {tenantURLs} from '@/url/scope';
+import {TenantProvider} from '@/url/tenant-context';
+import {withBasePath} from '@/path/base-path';
 
 import Theme from '@/app/theme';
 import Locale from '@/app/locale';
-import {AuthClientProvider} from '@/lib/auth-client';
+import {AuthClientProvider} from '@/auth/client';
 
 /* Point the manifest link at this tenant's manifest, so installing from one of
  * its pages installs an app that launches into this tenant; overrides the root

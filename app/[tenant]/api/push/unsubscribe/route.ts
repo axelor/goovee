@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
 import {treeifyError} from 'zod';
-import {PushSubscriptionSchema} from '@/lib/core/pwa/types';
+import {PushSubscriptionSchema} from '@/pwa/types';
 
 export async function POST(
   request: NextRequest,

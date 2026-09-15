@@ -12,8 +12,8 @@ import {
   SUBAPP_CODES,
   SUBAPP_PAGE,
 } from '@/constants';
-import {parseCommentContent} from '@/lib/core/comments';
-import {t} from '@/lib/core/locale/server';
+import {parseCommentContent} from '@/comments';
+import {t} from '@/locale/server';
 import type {User, OverlayColor} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
@@ -22,8 +22,8 @@ import {InnerHTML} from '@/ui/components/inner-html';
 import {Skeleton} from '@/ui/components/skeleton/skeleton';
 import {FileIcon} from '@/ui/components/file-icon';
 import {cn} from '@/utils/css';
-import {withBasePath} from '@/lib/core/path/base-path';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import {withBasePath} from '@/path/base-path';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {Link} from '@/ui/components/link';
 import {HeroSearch} from '@/ui/components';
 

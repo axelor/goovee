@@ -1,7 +1,7 @@
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import type {UseStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import type {UseStagedUpload} from '@/upload/use-staged-upload';
 import type {Cloned} from '@/types/util';
 import {RichTextEditor} from '@/ui/components';
 import {
@@ -16,6 +16,7 @@ import {cn} from '@/utils/css';
 import {getFileSizeText} from '@/utils/files';
 import {useRef, type RefObject} from 'react';
 import {useFormContext, type FieldPath} from 'react-hook-form';
+import {MARKETPLACE_BUNDLE_PURPOSE} from '../../../../constants/uploads';
 import type {CompatibilityVersion} from '../../../../orm';
 import {FormMessageSpace} from '../../shared/form-message-space';
 import {
@@ -117,7 +118,7 @@ export function VersionFields({
     if (prior) bundleUpload.remove(prior);
     commitBundleToken(rowKey, undefined);
     const {ids, done} = bundleUpload.upload([file], {
-      purpose: 'marketplace:bundle',
+      purpose: MARKETPLACE_BUNDLE_PURPOSE,
       /* Refuse an oversized bundle here rather than send it and have the route
        * reject it. The purpose registry on the server stays the real check. */
       maxBytes: MAX_BUNDLE_SIZE,

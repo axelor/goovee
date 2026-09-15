@@ -9,8 +9,8 @@ import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {formatDate} from '@/locale/formatters';
 import type {Client} from '@/goovee/.generated/client';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {
   Breadcrumb,
   BreadcrumbItem,

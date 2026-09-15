@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Link} from '@/ui/components/link';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {PasswordSchema} from '@/utils/validators';
 
 // ---- LOCAL IMPORTS ---- //
@@ -29,7 +29,7 @@ import {
   PasswordInput,
   authButtonClass,
 } from '../../common/ui/auth-shell';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;

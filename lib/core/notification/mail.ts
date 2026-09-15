@@ -1,9 +1,11 @@
 import {randomUUID} from 'node:crypto';
-import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
+import {DeliverySlots} from '@/concurrency/delivery-slots';
 import type {TenantConfig} from '@/tenant';
 import nodemailer, {type Transporter} from 'nodemailer';
 import type SMTPPool from 'nodemailer/lib/smtp-pool';
 import type Mail from 'nodemailer/lib/mailer';
+
+import {processWide} from '@/runtime/process-wide';
 
 import {NotificationService, type MailNotificationData} from '.';
 import {
@@ -157,10 +159,10 @@ function describeMailBacklog(mail: MailSettings, queued: number): string {
  * accounts get separate pools, so one tenant's fan-out cannot occupy another's
  * connections or queue.
  *
- * Held in a global because an orphaned pooled transport leaks its open sockets,
- * and this module is evaluated once per bundler layer and again on every
- * Turbopack recompile. In development that outlives the settings it was built
- * from, so an edited mail account leaves its previous pool behind until restart.
+ * Held process-wide because an orphaned pooled transport leaks its open sockets,
+ * and a map of this module's own would be replaced on every recompile. In
+ * development that outlives the settings it was built from, so an edited mail
+ * account leaves its previous pool behind until restart.
  *
  * A plain map rather than a bounded cache: the accounts cannot outnumber the
  * document's tenants, and closing one to evict it drops the messages it still
@@ -170,16 +172,10 @@ function describeMailBacklog(mail: MailSettings, queued: number): string {
  */
 type MailPool = {transporter: Transporter; slots: DeliverySlots};
 
-declare global {
-  var __mailPools: Map<string, MailPool> | undefined;
-}
+const MAIL_POOLS = 'notification/mail-pools';
 
 function getPools(): Map<string, MailPool> {
-  if (!global.__mailPools) {
-    global.__mailPools = new Map<string, MailPool>();
-  }
-
-  return global.__mailPools;
+  return processWide(MAIL_POOLS, () => new Map<string, MailPool>());
 }
 
 /**

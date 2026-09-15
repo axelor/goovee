@@ -23,18 +23,18 @@ import {
   updatePartner,
 } from '@/orm/partner';
 import {findWorkspaceByURL} from '@/orm/workspace';
-import {revalidateEverything} from '@/lib/core/url/revalidate';
-import {getTranslation} from '../locale/server';
+import {revalidateEverything} from '@/url/revalidate';
+import {getTranslation} from '@/locale/server';
 import {UserType} from './types';
-import {absoluteRoot} from '@/lib/core/url/absolute';
-import {tenantURLs} from '@/lib/core/url/scope';
-import {type Tenant, type TenantConfig} from '../tenant';
+import {absoluteRoot} from '@/url/absolute';
+import {tenantURLs} from '@/url/scope';
+import {type Tenant, type TenantConfig} from '@/tenant';
 import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {hash} from './utils';
-import {getPublicEnvironment} from '../environment/utils';
+import {getPublicEnvironment} from '@/environment/utils';
 import {getTenantConfig} from '@/tenant/config';
-import {withMattermostSync} from '../mattermost/user-api';
+import {withMattermostSync} from '@/mattermost/user-api';
 import type {Client} from '@/goovee/.generated/client';
 
 export type RegisterInviteDTO = OAuthInviteRegister & {

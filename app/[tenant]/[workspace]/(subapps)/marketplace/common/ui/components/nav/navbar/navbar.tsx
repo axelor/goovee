@@ -2,7 +2,7 @@
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 import {i18n} from '@/locale';
 import {Portal} from '@/ui/components';
 import {useResponsive} from '@/ui/hooks';

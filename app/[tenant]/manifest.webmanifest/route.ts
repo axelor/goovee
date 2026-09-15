@@ -2,9 +2,9 @@ import {NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getTenantConfig} from '@/tenant/config';
-import {isHostRouted} from '@/lib/core/tenant/routing';
-import {ownsAddressedOrigin, tenantURLs} from '@/lib/core/url/scope';
-import {buildManifest} from '@/lib/core/pwa/manifest';
+import {isHostRouted} from '@/tenant/routing';
+import {ownsAddressedOrigin, tenantURLs} from '@/url/scope';
+import {buildManifest} from '@/pwa/manifest';
 
 /* Per-tenant web app manifest. All three addresses are the tenant's entry: the
  * app is identified by it, launches on the tenant's landing workspace there, and
@@ -70,6 +70,11 @@ export async function GET(
         /* Tenant-static (changes only on deploy/config), so let the browser
          * hold it rather than re-fetch on every navigation. */
         'Cache-Control': 'public, max-age=3600',
+        /* The entry above follows the host the request was addressed to, while
+         * this address is the same on every origin. Both headers `addressedHost`
+         * reads are named, since a deployment may set either one. Without them a
+         * cache keyed without the host serves one origin's entry on another. */
+        Vary: 'Host, X-Forwarded-Host',
       },
     },
   );
