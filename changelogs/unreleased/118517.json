@@ -1,0 +1,6 @@
+{
+  "title": "Import every lib/core module through its alias",
+  "type": "change",
+  "description": "Every module under lib/core has an import alias and is imported through it, from application code and from other modules alike, and a lint rule refuses the long path so the two spellings cannot drift apart again. The Better Auth server instance and browser client live under lib/core/auth as server and client, beside the rest of the authentication code.",
+  "scope": ["core"]
+}
