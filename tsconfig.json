@@ -27,6 +27,7 @@
       "@/core/*": ["./lib/core"],
       "@/auth": ["./lib/core/auth/index"],
       "@/auth/*": ["./lib/core/auth/*"],
+      "@/cache/*": ["./lib/core/cache/*"],
       "@/payment/*": ["./lib/core/payment/*"],
       "@/locale": ["./lib/core/locale/index"],
       "@/locale/*": ["./lib/core/locale/*"],
