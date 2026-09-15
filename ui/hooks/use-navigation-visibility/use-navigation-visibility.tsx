@@ -2,11 +2,11 @@
 
 import {useState, useEffect, useMemo} from 'react';
 import {usePathname} from 'next/navigation';
-import {useAuthSession} from '@/lib/auth-client';
+import {useAuthSession} from '@/auth/client';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {subPathOf} from '@/lib/core/url';
+import {subPathOf} from '@/url';
 import {fetchEvent} from '@/app/[tenant]/[workspace]/(subapps)/events/common/actions/actions';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 

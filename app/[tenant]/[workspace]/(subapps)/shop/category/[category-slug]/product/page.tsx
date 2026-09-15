@@ -1,7 +1,7 @@
 import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 
 export default async function Page() {
   const scope = await currentWorkspace();

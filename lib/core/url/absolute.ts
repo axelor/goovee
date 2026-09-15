@@ -1,4 +1,4 @@
-import {getBasePath} from '@/lib/core/path/base-path';
+import {getBasePath} from '@/path/base-path';
 
 /*
  * The root an absolute address stands on, and the strip that turns a stored

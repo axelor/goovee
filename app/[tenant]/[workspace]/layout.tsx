@@ -4,14 +4,14 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {currentTenantScope, currentWorkspace} from '@/lib/core/url/current';
+import {currentTenantScope, currentWorkspace} from '@/url/current';
 import {findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/login-url';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {tenantURLs} from '@/lib/core/url/scope';
-import {absoluteRoot} from '@/lib/core/url/absolute';
+import {ensureAccess} from '@/access/ensure-access';
+import {tenantURLs} from '@/url/scope';
+import {absoluteRoot} from '@/url/absolute';
 import {getPublicEnvironment} from '@/environment';
 
 // ---- LOCAL IMPORTS ---- //

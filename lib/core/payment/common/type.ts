@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {PaymentOption} from '@/types';
-import {ContextStatus} from '@/lib/core/payment/common/orm';
+import {ContextStatus} from '@/payment/common/orm';
 
 export type PaymentOrder = {
   amount: number;

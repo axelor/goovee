@@ -2,9 +2,9 @@ import {notFound} from 'next/navigation';
 import {uniqBy} from 'lodash-es';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureAccess} from '@/access/ensure-access';
 import {PartnerTypeMap, findGooveeUserByEmail} from '@/orm/partner';
-import {t} from '@/lib/core/locale/server';
+import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';

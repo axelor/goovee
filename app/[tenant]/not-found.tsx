@@ -4,7 +4,7 @@ import {MdHome} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {ErrorScreen} from '@/ui/components/error-screen';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 /**
  * The tenant's own not-found, for an address that named this tenant and got no

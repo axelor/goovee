@@ -17,7 +17,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {cn} from '@/utils/css';
 import {getProductImageURL} from '@/utils/files';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate} from '@/locale/formatters';
 import {SORT_TYPE, Comments, CommentsSkeleton} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
@@ -36,7 +36,7 @@ import {
   getQuoteJourney,
   getQuoteTone,
 } from '@/subapps/quotations/common/utils/quotations';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 const Content = ({
   quotation,

@@ -1,7 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
@@ -48,7 +48,7 @@ import {
   authButtonClass,
   authInputClass,
 } from '../../common/ui/auth-shell';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const formSchema = z
   .object({

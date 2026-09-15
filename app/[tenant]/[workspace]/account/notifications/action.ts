@@ -2,8 +2,8 @@
 
 import {z} from 'zod';
 import {t} from '@/locale/server';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import {updatePreferences} from '@/orm/notification';
 import {
   UpdateNotificationPreferenceSchema,

@@ -9,8 +9,8 @@ import {
   resolveNewListingCurrency,
 } from '../../../common/orm';
 import {canManageProducts} from '../../../common/utils/auth-helper';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {getMarketplaceConfig} from '../../../common/orm/config';
 
 /**

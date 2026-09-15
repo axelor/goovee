@@ -4,8 +4,8 @@ import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
 import type {Cloned} from '@/types/util';
 import {clone} from '@/utils';
 

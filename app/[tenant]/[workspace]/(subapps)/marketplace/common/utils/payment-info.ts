@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {PaymentOrder} from '@/lib/core/payment/common/type';
+import type {PaymentOrder} from '@/payment/common/type';
 import {findPayboxOrder} from '@/payment/paybox/actions';
 import {findPaypalOrder} from '@/payment/paypal/actions';
 import {findStripeOrder} from '@/payment/stripe/actions';

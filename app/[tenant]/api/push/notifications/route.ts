@@ -1,8 +1,8 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
-import {getSession} from '@/lib/core/auth';
-import {fromStoredLink} from '@/lib/core/url/persisted-link';
-import {NotificationDTO} from '@/lib/core/pwa/types';
+import {getSession} from '@/auth';
+import {fromStoredLink} from '@/url/persisted-link';
+import {NotificationDTO} from '@/pwa/types';
 
 export async function GET(
   _request: NextRequest,

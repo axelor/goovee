@@ -1,4 +1,4 @@
-import {taintSecret} from '@/lib/core/security/taint';
+import {taintSecret} from '@/security/taint';
 import {NextResponse, after} from 'next/server';
 import {headers} from 'next/headers';
 import Stripe from 'stripe';
@@ -12,18 +12,15 @@ import {
   findPaymentContext,
   markPaymentAsFailed,
   markPaymentAsProcessed,
-} from '@/lib/core/payment/common/orm';
+} from '@/payment/common/orm';
 import {PaymentOption} from '@/types';
-import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
+import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/payment/common/type';
 import {getAmountFromStripe} from '@/utils/stripe';
 import {manager} from '@/tenant';
 import {scale} from '@/utils';
 import {DEFAULT_CURRENCY_SCALE} from '@/constants';
-import {cancelInvalidPendingBankTransfers} from '@/lib/core/payment/stripe/actions';
-import {
-  notifyPaymentUpdate,
-  PAYMENT_UPDATE_STATUS,
-} from '@/lib/core/payment/sse';
+import {cancelInvalidPendingBankTransfers} from '@/payment/stripe/actions';
+import {notifyPaymentUpdate, PAYMENT_UPDATE_STATUS} from '@/payment/sse';
 // --- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
 import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';

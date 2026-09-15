@@ -1,7 +1,7 @@
 'use client';
 import {useRouter} from 'next/navigation';
 import {useEffect} from 'react';
-import {formatDateTime, formatRelativeTime} from '@/lib/core/locale/formatters';
+import {formatDateTime, formatRelativeTime} from '@/locale/formatters';
 import {
   Tooltip,
   TooltipContent,

@@ -23,8 +23,8 @@ import type {
 import {PaymentOption} from '@/types';
 import {BankTransferDetails} from './bank-transfer-details';
 import {BankTransferConfirmDialog} from './bank-transfer-confirmation-dialog';
-import {BANK_TRANSFER_STATUS} from '@/lib/core/payment/stripe/constants';
-import {PAYMENT_UPDATE_STATUS} from '@/lib/core/payment/sse/constants';
+import {BANK_TRANSFER_STATUS} from '@/payment/stripe/constants';
+import {PAYMENT_UPDATE_STATUS} from '@/payment/sse/constants';
 
 export function Stripe<TData>({
   disabled,

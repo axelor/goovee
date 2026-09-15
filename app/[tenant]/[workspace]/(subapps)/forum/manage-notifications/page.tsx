@@ -1,7 +1,7 @@
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //

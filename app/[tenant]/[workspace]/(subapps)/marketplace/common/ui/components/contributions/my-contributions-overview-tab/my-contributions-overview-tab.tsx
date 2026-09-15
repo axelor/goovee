@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import type {ID} from '@/types';
 import {Suspense} from 'react';
 import {
@@ -23,7 +23,7 @@ import {
   SalesStatCard,
   StatCardInnerSkeleton,
 } from './stats-cards';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 interface OverviewTabProps {
   mainPartnerId: ID;

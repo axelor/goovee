@@ -12,7 +12,7 @@ import {
   markPaymentAsFailed,
   markPaymentAsCancelled,
   CONTEXT_STATUS,
-} from '@/lib/core/payment/common/orm';
+} from '@/payment/common/orm';
 import {findPendingStripeBankTransfers} from './orm';
 import {PaymentOption} from '@/types';
 import type {Tenant} from '@/tenant';
@@ -20,7 +20,7 @@ import type {Client} from '@/goovee/.generated/client';
 import {
   type PaymentContextData,
   type PaymentOrder,
-} from '@/lib/core/payment/common/type';
+} from '@/payment/common/type';
 import {getBankDetailsFromInstructions, getBankTransferConfig} from './utils';
 import type {BankTransferIntentResult} from '@/ui/components/payment/types';
 import {

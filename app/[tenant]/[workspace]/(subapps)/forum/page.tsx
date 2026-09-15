@@ -1,8 +1,8 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
 import {isCommentEnabled} from '@/comments';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {clone} from '@/utils';

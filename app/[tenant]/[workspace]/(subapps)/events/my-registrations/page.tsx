@@ -11,9 +11,9 @@ import {
 } from 'react-icons/md';
 
 // ---- CORE IMPORTS ----//
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
@@ -22,7 +22,7 @@ import type {Workspace} from '@/orm/workspace';
 import {Button} from '@/ui/components';
 import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
-import {t} from '@/lib/core/locale/server';
+import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE, LIMIT} from '@/subapps/events/common/constants';

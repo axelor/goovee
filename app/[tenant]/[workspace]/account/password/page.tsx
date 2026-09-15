@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {t} from '@/lib/core/locale/server';
+import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import PasswordForm from './form';

@@ -1,7 +1,7 @@
 import 'server-only';
 
 import {getPublicEnvironment} from '@/environment/utils';
-import {isHostRouted} from '@/lib/core/tenant/routing';
+import {isHostRouted} from '@/tenant/routing';
 import {getTenantConfig} from '@/tenant/config';
 
 import {absoluteRoot} from './absolute';

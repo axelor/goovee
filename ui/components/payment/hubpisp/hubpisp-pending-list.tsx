@@ -1,14 +1,14 @@
 'use client';
 
 // ---- CORE IMPORTS ---- //
-import {i18n} from '@/lib/core/locale';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {i18n} from '@/locale';
+import {formatDate} from '@/locale/formatters';
 import type {Cloned} from '@/types/util';
 import {
   HUBPISP_LOCAL_INSTRUMENT,
   type HubPispLocalInstrument,
-} from '@/lib/core/payment/hubpisp/constants';
-import type {PendingHubPispContext} from '@/lib/core/payment/hubpisp/orm';
+} from '@/payment/hubpisp/constants';
+import type {PendingHubPispContext} from '@/payment/hubpisp/orm';
 
 const BADGE_CLASS: Record<HubPispLocalInstrument, string> = {
   [HUBPISP_LOCAL_INSTRUMENT.INST]: 'bg-blue-100 text-blue-700',

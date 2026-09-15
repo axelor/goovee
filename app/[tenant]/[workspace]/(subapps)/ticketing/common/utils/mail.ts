@@ -2,9 +2,9 @@ import sanitizeHtml from 'sanitize-html';
 
 // ---- CORE IMPORTS ---- //
 import type {Comment} from '@/comments';
-import type {Track} from '@/lib/core/comments';
-import {DEFAULT_LOCALE} from '@/lib/core/locale';
-import {getTranslation} from '@/lib/core/locale/server';
+import type {Track} from '@/comments';
+import {DEFAULT_LOCALE} from '@/locale';
+import {getTranslation} from '@/locale/server';
 import {getTenantConfig} from '@/tenant/config';
 import NotificationManager, {NotificationType} from '@/notification';
 import {html} from '@/utils/template-string';

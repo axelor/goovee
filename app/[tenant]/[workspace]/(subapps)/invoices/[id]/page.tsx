@@ -4,14 +4,14 @@ import {notFound} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {denyPage} from '@/lib/core/access/denial';
-import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
+import {ensureAccess} from '@/access/ensure-access';
+import {denyPage} from '@/access/denial';
+import {ensureTokenAccess} from '@/access/ensure-token-access';
 import {SUBAPP_CODES} from '@/constants';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
+import {canSettleStripeBankTransfer} from '@/payment/stripe';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';

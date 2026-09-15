@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {uploadTokenSchema} from '@/upload/validators';
 import {COVER_STYLES} from '../../../../constants/gradients';
 import {ICON_CODES} from '../../../../constants/icons';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';

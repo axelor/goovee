@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {XCircle} from 'lucide-react';

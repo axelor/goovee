@@ -6,10 +6,10 @@ import {after} from 'next/server';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
-import type {WorkspaceSubPath} from '@/lib/core/url';
+import type {WorkspaceSubPath} from '@/url';
 import {getQuotationsConfig} from '../orm/config';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {clone} from '@/utils';
 import {addComment, findComments} from '@/comments/orm';
 import {

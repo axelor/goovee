@@ -8,8 +8,8 @@ import {BadgeList, Separator, Skeleton} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatRelativeTime} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
-import {i18n} from '@/lib/core/locale';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {i18n} from '@/locale';
+import {withBasePath} from '@/path/base-path';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //

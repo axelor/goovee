@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 import {t} from '@/locale/server';
 import type {ID} from '@/types';
 import {getSkip, getTotal} from '@/utils/pagination';

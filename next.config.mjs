@@ -11,6 +11,14 @@ const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH);
 const nextConfig = {
   output: 'standalone',
   /*
+   * The server is built as two module graphs, and the ORM decides how to treat
+   * a value with `instanceof` checks against its own classes. Bundled, each
+   * graph would hold its own copy of those classes, and a database client
+   * shared between the graphs would not recognise a decimal built on the other
+   * side. Loaded once by Node, there is one copy for the whole process.
+   */
+  serverExternalPackages: ['@goovee/orm'],
+  /*
    * Images are addressed by our own loader and served by the routes that already
    * hold them, so access is checked on every request. Naming a loader also turns
    * off the framework's optimisation endpoint, whose cache is keyed on the

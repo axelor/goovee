@@ -4,7 +4,7 @@ import {after} from 'next/server';
 import {ZodIssueCode} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import type {WorkspaceSubPath} from '@/lib/core/url';
+import type {WorkspaceSubPath} from '@/url';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone, uniqueById} from '@/utils';
@@ -20,8 +20,8 @@ import {
   isCommentEnabled,
 } from '@/comments';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessMessage} from '@/access/denial';
 import {getTicketingConfig} from '../orm/config';
 
 // ---- LOCAL IMPORTS ---- //

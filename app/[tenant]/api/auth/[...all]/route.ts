@@ -2,9 +2,9 @@ import {NextResponse} from 'next/server';
 import {toNextJsHandler} from 'better-auth/next-js';
 
 // ---- CORE IMPORTS ---- //
-import {getAuth} from '@/lib/auth';
-import {withBasePath} from '@/lib/core/path/base-path';
-import {addressedHost} from '@/lib/core/tenant/routing';
+import {getAuth} from '@/auth/server';
+import {withBasePath} from '@/path/base-path';
+import {addressedHost} from '@/tenant/routing';
 import {getTenantConfig} from '@/tenant/config';
 
 type AuthHandler = (request: Request) => Promise<Response>;
@@ -15,9 +15,10 @@ type AuthHandler = (request: Request) => Promise<Response>;
  * different one. */
 type RouteContext = {params: Promise<{tenant: string}>};
 
-/* Next strips the base path before a route sees the request, and better-auth
- * builds its own addresses from the pathname it is handed — so the prefix is
- * put back before the handler reads it. A deployment with no base path leaves
+/* Next takes the base path off once before a route sees the request, and
+ * better-auth builds its own addresses from the pathname it is handed — so one
+ * join puts the prefix back before the handler reads it, also where the tenant
+ * is itself named after the base path. A deployment with no base path leaves
  * the pathname untouched and falls through unchanged. */
 const withRestoredBasePath =
   (handler: AuthHandler): AuthHandler =>

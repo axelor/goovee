@@ -3,7 +3,7 @@
 import {createContext, useContext, type RefObject} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import type {UseStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import type {UseStagedUpload} from '@/upload/use-staged-upload';
 
 /**
  * Screenshot staging shared down to the screenshots field. The upload hook and

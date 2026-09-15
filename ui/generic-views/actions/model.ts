@@ -2,7 +2,7 @@ import axios from 'axios';
 import {headers} from 'next/headers';
 import {getAOSHeaders} from '@/tenant/auth';
 
-import {manager} from '@/lib/core/tenant';
+import {manager} from '@/tenant';
 import {TENANT_HEADER} from '@/proxy';
 
 export async function getModelData(model: string) {

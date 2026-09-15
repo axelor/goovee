@@ -2,14 +2,11 @@
 import type {Client} from '@/goovee/.generated/client';
 import {getTenantConfig} from '@/tenant/config';
 import {formatNumber} from '@/locale/server/formatters';
-import {
-  CONTEXT_STATUS,
-  markPaymentAsExpired,
-} from '@/lib/core/payment/common/orm';
-import {fetchPaymentLinkStatus} from '@/lib/core/payment/hubpisp';
-import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
+import {CONTEXT_STATUS, markPaymentAsExpired} from '@/payment/common/orm';
+import {fetchPaymentLinkStatus} from '@/payment/hubpisp';
+import {HUBPISP_CONSENT_STATUS} from '@/payment/hubpisp/constants';
 import {PaymentOption} from '@/types';
-import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
+import type {HubPispLocalInstrument} from '@/payment/hubpisp/constants';
 
 export type PendingHubPispContext = {
   contextId: string;

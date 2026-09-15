@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {IdSchema} from '@/utils/validators';
-import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {uploadTokenSchema} from '@/upload/validators';
 import {SORT_TYPE} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //

@@ -1,8 +1,8 @@
 // ---- CORE IMPORTS ---- //
 import type {Cloned} from '@/types/util';
-import type {PaymentUpdateStatus} from '@/lib/core/payment/sse';
-import {BankAccountType} from '@/lib/core/payment/stripe/types';
-import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
+import type {PaymentUpdateStatus} from '@/payment/sse';
+import {BankAccountType} from '@/payment/stripe/types';
+import {HubPispLocalInstrument} from '@/payment/hubpisp/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';

@@ -7,10 +7,10 @@ import {
 } from 'better-auth/client/plugins';
 import {createAuthClient} from 'better-auth/react';
 
-import {withBasePath} from '@/lib/core/path/base-path';
+import {withBasePath} from '@/path/base-path';
 
-import type {Auth} from './auth';
-import type {Credentials} from './core/auth/credentials';
+import type {Auth} from './server';
+import type {Credentials} from './credentials';
 
 /**
  * A client bound to one tenant's authentication endpoint.

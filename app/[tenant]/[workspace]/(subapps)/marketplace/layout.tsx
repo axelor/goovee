@@ -2,7 +2,7 @@ import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {findSubappAccess} from '@/orm/workspace';
 import {manager} from '@/tenant';
-import {currentWorkspace} from '@/lib/core/url/current';
+import {currentWorkspace} from '@/url/current';
 import {notFound} from 'next/navigation';
 import type {ReactNode} from 'react';
 import {MobileMenu} from './common/ui/components/nav/mobile-menu';

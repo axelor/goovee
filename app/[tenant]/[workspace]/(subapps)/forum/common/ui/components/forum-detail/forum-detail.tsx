@@ -35,7 +35,7 @@ import {
   COMMENT_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
 } from '@/comments/constants';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {useStagedUpload} from '@/upload/use-staged-upload';
 import {useToast} from '@/ui/hooks/use-toast';
 
 // ---- LOCAL IMPORTS ---- //
@@ -54,7 +54,7 @@ import type {
   ReactionSummary,
   VoteValue,
 } from '@/subapps/forum/common/orm/reaction';
-import type {TenantScope} from '@/lib/core/url/tenant-urls';
+import type {TenantScope} from '@/url/tenant-urls';
 
 const EMPTY_SUMMARY: ReactionSummary = {
   likes: 0,

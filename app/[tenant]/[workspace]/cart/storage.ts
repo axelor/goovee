@@ -1,4 +1,4 @@
-import type {WorkspaceScope} from '@/lib/core/url/workspace-urls';
+import type {WorkspaceScope} from '@/url/workspace-urls';
 
 /**
  * Collision-proof storage key for a per-app cart. Every cart in the workspace

@@ -11,7 +11,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import {t} from '@/locale/server';
-import {tenantURLs} from '@/lib/core/url/scope';
+import {tenantURLs} from '@/url/scope';
 import {TENANT_HEADER} from '@/proxy';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
@@ -29,23 +29,23 @@ import {findPaymentContext, markPaymentAsProcessed} from '@/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {getHubPispTransferTypes} from '@/payment/hubpisp/utils';
-import {formatNumber} from '@/lib/core/locale/server/formatters';
-import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
+import {formatNumber} from '@/locale/server/formatters';
+import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/payment/common/type';
 import {
   CURRENCY_CODE,
   UP2PAY_REDIRECT_STATUS,
-} from '@/lib/core/payment/up2pay/constants';
+} from '@/payment/up2pay/constants';
 import {
   HUBPISP_LOCAL_INSTRUMENT,
   HUBPISP_REDIRECT_STATUS,
   HUBPISP_TRANSFER_TYPE,
-} from '@/lib/core/payment/hubpisp/constants';
+} from '@/payment/hubpisp/constants';
 import {
   BANK_TRANSFER_STATUS,
   STRIPE_CANCELLATION_REASONS,
-} from '@/lib/core/payment/stripe/constants';
-import type {CountryCode} from '@/lib/core/payment/stripe/types';
-import {canSettleStripeBankTransfer} from '@/lib/core/payment/stripe';
+} from '@/payment/stripe/constants';
+import type {CountryCode} from '@/payment/stripe/types';
+import {canSettleStripeBankTransfer} from '@/payment/stripe';
 import {scale} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //

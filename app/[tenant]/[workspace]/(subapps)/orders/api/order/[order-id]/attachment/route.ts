@@ -2,8 +2,8 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/access/ensure-access';
+import {accessStatus} from '@/access/denial';
 import {findFile, streamFile} from '@/utils/download';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey} from '@/types';

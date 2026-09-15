@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {useToast} from '@/ui/hooks';
-import {useAuthClient} from '@/lib/auth-client';
+import {useAuthClient} from '@/auth/client';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -26,7 +26,7 @@ import {
   AuthInput,
   authButtonClass,
 } from '../common/ui/auth-shell';
-import {useTenantScope} from '@/lib/core/url/tenant-context';
+import {useTenantScope} from '@/url/tenant-context';
 
 const formSchema = z.object({
   email: z.email().min(1, 'Email is required'),

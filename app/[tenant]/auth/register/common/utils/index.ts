@@ -4,7 +4,7 @@ import {getPublicEnvironment} from '@/environment';
 import {getTenantConfig} from '@/tenant/config';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {absoluteRoot} from '@/lib/core/url/absolute';
+import {absoluteRoot} from '@/url/absolute';
 import {resolveAuthTenantId} from '../../../common/tenant';
 
 /**

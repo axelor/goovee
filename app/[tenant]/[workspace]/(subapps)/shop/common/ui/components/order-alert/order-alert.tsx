@@ -1,6 +1,6 @@
 'use client';
 
-import {i18n} from '@/lib/core/locale';
+import {i18n} from '@/locale';
 import {useState, useEffect} from 'react';
 
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';

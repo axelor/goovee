@@ -4,7 +4,7 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import type {GooveeClient} from '@/goovee/.generated/client';
 import {manager} from '@/tenant';
-import {getSession} from '@/lib/core/auth';
+import {getSession} from '@/auth';
 import {
   appendChunk,
   createSession,
@@ -13,8 +13,8 @@ import {
   getUploadPolicy,
   releaseSessionQuietly,
   type AppendOutcome,
-} from '@/lib/core/upload/staged-upload';
-import {byteCountHeader, fileIdHeader} from '@/lib/core/upload/validators';
+} from '@/upload/staged-upload';
+import {byteCountHeader, fileIdHeader} from '@/upload/validators';
 
 export const runtime = 'nodejs';
 
