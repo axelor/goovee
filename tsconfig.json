@@ -44,6 +44,7 @@
       "@/environment": ["./lib/core/environment/index"],
       "@/environment/*": ["./lib/core/environment/*"],
       "@/pwa/*": ["./lib/core/pwa/*"],
+      "@/runtime/*": ["./lib/core/runtime/*"],
       "@/product/*": ["./lib/core/product/*"],
       "@/service": ["./lib/core/service/index"],
       "@/service/*": ["./lib/core/service/*"]

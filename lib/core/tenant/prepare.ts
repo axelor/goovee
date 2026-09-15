@@ -1,5 +1,6 @@
 import {memoizeAsync} from '@/cache/memoize';
 import {createClient} from '@/goovee/.generated/client';
+import {processWide} from '@/runtime/process-wide';
 
 /*
  * Serialises schema work on one database across every server process that
@@ -12,14 +13,9 @@ const SCHEMA_LOCK_KEY = 7364812001;
 /** How long a failed preparation stands before the next caller may retry it. */
 export const PREPARE_COOLDOWN_MS = 10_000;
 
-/*
- * Held on `globalThis` for the reason the tenant registry is (`./manager`): the
- * server is built as two module graphs, and a module-level map would prepare
- * every database once per graph.
- */
-declare global {
-  var __preparedDatabases: Map<string, Promise<void>> | undefined;
-}
+/* Process-wide like the tenant registry: a map of this module's own would
+ * prepare every database once per module graph. */
+const PREPARED_DATABASES = 'tenant/prepared-databases';
 
 async function prepare(url: string): Promise<void> {
   /* A client of its own, released as soon as the work is done. The schema is a
@@ -62,7 +58,10 @@ async function prepare(url: string): Promise<void> {
  * same promise. Keyed by url because several tenants may share one database.
  */
 export function prepareDatabase(url: string): Promise<void> {
-  const prepared = (global.__preparedDatabases ??= new Map());
+  const prepared = processWide(
+    PREPARED_DATABASES,
+    () => new Map<string, Promise<void>>(),
+  );
 
   return memoizeAsync(prepared, url, () => prepare(url), {
     failureTtlMs: PREPARE_COOLDOWN_MS,

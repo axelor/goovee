@@ -1,5 +1,6 @@
 import {memoizeAsync} from '@/cache/memoize';
 import {createClient} from '@/goovee/.generated/client';
+import {processWide} from '@/runtime/process-wide';
 import {ensureStorageDir} from '@/storage/index';
 import {getTenantConfig} from './config';
 import {prepareDatabase} from './prepare';
@@ -19,16 +20,12 @@ export const CONNECT_COOLDOWN_MS = 10_000;
  * idle sockets on its own, and the process exiting is what closes the pools —
  * they hold nothing that needs flushing first.
  *
- * Held on `globalThis` for the reason the auth instances are (`lib/auth.ts`):
- * the server is built as two module graphs, route handlers with the middleware
- * and instrumentation in one and page renders in the other, and a module-level
- * map would exist once in each, connecting every tenant twice. A recompile in
- * development evaluates this module again as well. The registry outlives both,
- * so a tenant is connected once per process whichever side asks first.
+ * Held process-wide rather than in this module: each module graph would
+ * otherwise hold a registry of its own and connect every tenant twice, and a
+ * development recompile would open a third. One registry, so a tenant is
+ * connected once per process whichever side asks first.
  */
-declare global {
-  var __tenantRegistry: Map<Tenant['id'], Promise<Tenant>> | undefined;
-}
+const TENANT_REGISTRY = 'tenant/registry';
 
 async function connectTenant(
   id: Tenant['id'],
@@ -84,7 +81,10 @@ async function connectTenant(
  */
 export class TenantManager {
   private get registry(): Map<Tenant['id'], Promise<Tenant>> {
-    return (global.__tenantRegistry ??= new Map());
+    return processWide(
+      TENANT_REGISTRY,
+      () => new Map<Tenant['id'], Promise<Tenant>>(),
+    );
   }
 
   /** Null for a missing id or one the configuration document does not name; a connection failure throws. */

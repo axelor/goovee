@@ -8,6 +8,7 @@ import {getDeploymentConfig, getTenantConfig} from '@/tenant/config';
 import type {TenantConfig} from '@/tenant';
 import type {WorkspaceSubPath} from '@/lib/core/url';
 import {tenantURLs} from '@/lib/core/url/scope';
+import {processWide} from '@/runtime/process-wide';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -74,25 +75,22 @@ export function getMaxConnections(): number {
 
 /* One agent and one set of slots for the process, so devices on the same push
  * service reuse a connection instead of handshaking per message, and an audience
- * costs the slot count rather than its own size. This module is evaluated once
- * per bundler layer, and again on every Turbopack recompile, so the globals are
- * what keep them shared. */
-declare global {
-  var __pushAgent: https.Agent | undefined;
-  var __pushDeliverySlots: DeliverySlots | undefined;
-}
+ * costs the slot count rather than its own size. Held process-wide so that both
+ * module graphs, and every recompile, share the same two. */
+const PUSH_AGENT = 'pwa/push-agent';
+const PUSH_DELIVERY_SLOTS = 'pwa/push-delivery-slots';
 
 function getAgent(): https.Agent {
-  if (!global.__pushAgent) {
-    global.__pushAgent = new https.Agent({
-      keepAlive: true,
-      /* Per origin. The slots are what bound the process, since an audience can
-       * span several push services. */
-      maxSockets: getMaxConnections(),
-    });
-  }
-
-  return global.__pushAgent;
+  return processWide(
+    PUSH_AGENT,
+    () =>
+      new https.Agent({
+        keepAlive: true,
+        /* Per origin. The slots are what bound the process, since an audience
+         * can span several push services. */
+        maxSockets: getMaxConnections(),
+      }),
+  );
 }
 
 function describePushBacklog(queued: number): string {
@@ -100,14 +98,10 @@ function describePushBacklog(queued: number): string {
 }
 
 function getDeliverySlots(): DeliverySlots {
-  if (!global.__pushDeliverySlots) {
-    global.__pushDeliverySlots = new DeliverySlots(
-      getMaxConnections(),
-      describePushBacklog,
-    );
-  }
-
-  return global.__pushDeliverySlots;
+  return processWide(
+    PUSH_DELIVERY_SLOTS,
+    () => new DeliverySlots(getMaxConnections(), describePushBacklog),
+  );
 }
 
 export type VapidDetails = {
