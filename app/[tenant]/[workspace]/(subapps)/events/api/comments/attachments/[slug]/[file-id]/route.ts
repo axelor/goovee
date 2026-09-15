@@ -3,7 +3,7 @@ import {NextRequest, NextResponse} from 'next/server';
 // ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
 import {isCommentEnabled} from '@/comments';
-import {SUBAPP_CODES} from '@/constants';
+import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {accessStatus} from '@/lib/core/access/denial';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
@@ -60,7 +60,15 @@ export async function GET(
     return new NextResponse('Forbidden', {status: 403});
   }
 
-  if (!(await isFileOfRecord({recordId: event.id, fileId, client}))) {
+  if (
+    !(await isFileOfRecord({
+      recordId: event.id,
+      fileId,
+      modelName: ModelMap[SUBAPP_CODES.events]!,
+      trackingField: 'publicBody',
+      client,
+    }))
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 

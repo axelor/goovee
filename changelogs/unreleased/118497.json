@@ -1,0 +1,6 @@
+{
+  "title": "Comment attachments are served only for the record they belong to",
+  "type": "security",
+  "description": "A comment attachment was matched to its record by the record's number alone, without the model that number belongs to. A visitor able to open one record could download attachments of comments on a record of any other model carrying the same number, including records of workspaces they have no access to. The file is now matched on model and number together, and served only when the comment carrying it is one the subapp shows.",
+  "scope": ["core"]
+}

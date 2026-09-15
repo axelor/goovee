@@ -1,4 +1,4 @@
-import type {QueryOptions} from '@goovee/orm';
+import type {QueryOptions, WhereOptions} from '@goovee/orm';
 import path from 'path';
 
 // ---- CORE IMPORTS ---- //
@@ -65,6 +65,11 @@ function getSelectFields({
   return select;
 }
 
+/**
+ * Changing the clauses in commentsOfRecord also needs a change to the WHERE
+ * below, which repeats them as raw SQL and reads publicBody for every subapp
+ * rather than the subapp's own tracking field.
+ */
 async function getPopularCommentsBySorting({
   skip = 0,
   limit,
@@ -441,6 +446,33 @@ export async function addComment(
   return [comment, parentComment];
 }
 
+/**
+ * Builds the clauses that reach a record's portal comments: the record the
+ * message belongs to, the test that puts it on the portal side, and the
+ * exclusion of archived messages. The record is named by model and id together
+ * — a mail message points at its record through the pair, and every table
+ * numbers its rows from one, so the id alone names a row of every model at
+ * once. A message belongs to the portal side when it carries the subapp's
+ * tracking field or is marked a public note. Callers share this so a query
+ * cannot come to bind on one half of the pair, or to test a field the comment
+ * list does not.
+ */
+function commentsOfRecord({
+  recordId,
+  modelName,
+  trackingField,
+}: {
+  recordId: ID;
+  modelName: string;
+  trackingField: TrackingField;
+}): WhereOptions<AOSMailMessage>[] {
+  return [
+    {relatedId: Number(recordId), relatedModel: modelName},
+    {OR: [{[trackingField]: {ne: null}}, {isPublicNote: true}]},
+    {OR: [{archived: false}, {archived: null}]},
+  ];
+}
+
 export async function findComments(
   props: FindCommentsProps,
 ): Promise<FindCommentsData> {
@@ -484,12 +516,7 @@ export async function findComments(
 
   let comments = await client.aOSMailMessage.find({
     where: and<AOSMailMessage>([
-      {
-        relatedId: Number(recordId),
-        relatedModel: modelName,
-        OR: [{[trackingField]: {ne: null}}, {isPublicNote: true}],
-      },
-      {OR: [{archived: false}, {archived: null}]},
+      ...commentsOfRecord({recordId, modelName, trackingField}),
       exclude && exclude.length && {id: {notIn: exclude}},
       !showRepliesInMainThread && {parentMailMessage: {id: {eq: null}}},
     ]),
@@ -518,16 +545,9 @@ export async function findComments(
   });
 
   const totalCommentThreadCount = await client.aOSMailMessage.count({
-    where: {
-      AND: [
-        {
-          relatedId: Number(recordId),
-          relatedModel: modelName,
-          OR: [{publicBody: {ne: null}}, {isPublicNote: true}],
-        },
-        {OR: [{archived: false}, {archived: null}]},
-      ],
-    },
+    where: and<AOSMailMessage>(
+      commentsOfRecord({recordId, modelName, trackingField}),
+    ),
   });
 
   return {
@@ -537,25 +557,33 @@ export async function findComments(
   };
 }
 
+/**
+ * Binds a file to the record it is served under. The check reaches the comment
+ * through the same clauses the comment list does, so a file passes the same
+ * test as the comment that carries it.
+ */
 export async function isFileOfRecord({
   fileId,
   recordId,
+  modelName,
+  trackingField,
   client,
 }: {
   client: Client;
   recordId: ID;
   fileId: ID;
+  modelName: string;
+  trackingField: TrackingField;
 }): Promise<boolean> {
   if (!recordId) {
     throw new Error(await t('RecordId is required.'));
   }
 
   const comment = await client.aOSMailMessage.findOne({
-    where: {
-      relatedId: Number(recordId),
-      mailMessageFileList: {attachmentFile: {id: fileId}},
-      OR: [{archived: false}, {archived: null}],
-    },
+    where: and<AOSMailMessage>([
+      ...commentsOfRecord({recordId, modelName, trackingField}),
+      {mailMessageFileList: {attachmentFile: {id: fileId}}},
+    ]),
     select: {id: true},
   });
   return Boolean(comment);

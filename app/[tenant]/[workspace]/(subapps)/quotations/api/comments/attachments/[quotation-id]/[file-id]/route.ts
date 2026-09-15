@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
-import {SUBAPP_CODES} from '@/constants';
+import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
@@ -76,7 +76,15 @@ export async function GET(
     return new NextResponse('Forbidden', {status: 403});
   }
 
-  if (!(await isFileOfRecord({recordId: quotationId, fileId, client}))) {
+  if (
+    !(await isFileOfRecord({
+      recordId: quotationId,
+      fileId,
+      modelName: ModelMap[SUBAPP_CODES.quotations]!,
+      trackingField: 'body',
+      client,
+    }))
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
