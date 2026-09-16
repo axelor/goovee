@@ -1,4 +1,5 @@
 import {taintSecret} from '@/security/taint';
+import {RequestBodyTooLarge, readTextWithin} from '@/security/request-body';
 import {NextResponse, after} from 'next/server';
 import {headers} from 'next/headers';
 import Stripe from 'stripe';
@@ -24,6 +25,13 @@ import {notifyPaymentUpdate, PAYMENT_UPDATE_STATUS} from '@/payment/sse';
 // --- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
 import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
+
+/*
+ * Largest event this endpoint will hold. An event carries one object and its
+ * previous attributes; the largest the payment events below produce is a few
+ * tens of kilobytes.
+ */
+const MAX_EVENT_BYTES = 1024 * 1024;
 
 export const STRIPE_EVENTS = {
   PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
@@ -93,7 +101,22 @@ export async function POST(
 ) {
   const {tenant: tenantId} = await props.params;
 
-  const body = await req.text();
+  /* The signature covers the raw body, so the body is read before anything
+   * about the sender is established. */
+  let body: string;
+  try {
+    body = await readTextWithin(req, MAX_EVENT_BYTES);
+  } catch (error) {
+    if (error instanceof RequestBodyTooLarge) {
+      console.error(
+        `[STRIPE] Refused an event over ${MAX_EVENT_BYTES} bytes for tenant '${tenantId}'; Stripe retries a refused endpoint and then disables it`,
+      );
+
+      return new NextResponse('Payload too large', {status: 413});
+    }
+    throw error;
+  }
+
   const $headers = await headers();
   const signature = $headers.get('Stripe-Signature');
 

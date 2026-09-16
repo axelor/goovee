@@ -6,6 +6,14 @@ import {getAuth} from '@/auth/server';
 import {withBasePath} from '@/path/base-path';
 import {addressedHost} from '@/tenant/routing';
 import {getTenantConfig} from '@/tenant/config';
+import {RequestBodyTooLarge, readBytesWithin} from '@/security/request-body';
+
+/*
+ * Largest body an authentication endpoint will hold. Every endpoint mounted
+ * here takes an address, a secret, a token or a code — scalar fields of a few
+ * hundred characters at most.
+ */
+const MAX_AUTH_BYTES = 64 * 1024;
 
 type AuthHandler = (request: Request) => Promise<Response>;
 
@@ -70,8 +78,38 @@ const handlerFor = (
     }
 
     const handlers = toNextJsHandler(getAuth(tenant));
+    const handler = withAddressedHost(withRestoredBasePath(handlers[method]));
 
-    return withAddressedHost(withRestoredBasePath(handlers[method]))(request);
+    if (method === 'GET') return handler(request);
+
+    /* better-auth picks a reader from the content type and reads the whole
+     * body, whatever its size, before any of these endpoints establishes
+     * anything about the sender.
+     *
+     * Read as bytes and handed on unchanged, so the endpoints receive exactly
+     * what was sent whatever the content type. */
+    let body: Uint8Array<ArrayBuffer>;
+    try {
+      body = await readBytesWithin(request, MAX_AUTH_BYTES);
+    } catch (error) {
+      if (error instanceof RequestBodyTooLarge) {
+        console.error(
+          `[AUTH] Refused a body over ${MAX_AUTH_BYTES} bytes for tenant '${tenant}'`,
+        );
+
+        return new NextResponse('Payload too large', {status: 413});
+      }
+      throw error;
+    }
+
+    return handler(
+      new Request(request.url, {
+        method,
+        headers: request.headers,
+        body,
+        signal: request.signal,
+      }),
+    );
   };
 };
 

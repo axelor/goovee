@@ -63,6 +63,18 @@ function notFound(req: NextRequest, headers: Headers) {
   return NextResponse.rewrite(url, {request: {headers}});
 }
 
+/**
+ * Resolves the tenant a request is addressed to, and hands the route tree an
+ * address carrying it.
+ *
+ * Reads the address and the headers only. The request body is never available
+ * here: the Next patch under `patches/` stops the framework cloning it for this
+ * function, so that a route handler receives the body as it arrives rather than
+ * after the whole of it has been held in memory. Reading `req.body` below would
+ * find nothing, and restoring the clone to make it readable would take that
+ * stream away from every route handler — the staged uploads and the webhooks
+ * among them. The patch's `NOTE: [Proxy body clone]` states the rest.
+ */
 export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;
 
