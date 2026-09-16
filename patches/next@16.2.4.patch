@@ -1,0 +1,36 @@
+diff --git a/dist/server/next-server.js b/dist/server/next-server.js
+index dc85a99969a1de863e2e1a140924cf96cddf7b61..3af7792633b84886d476ef92d64a0b5068455ab6 100644
+--- a/dist/server/next-server.js
++++ b/dist/server/next-server.js
+@@ -1184,10 +1184,27 @@ class NextNodeServer extends _baseserver.default {
+                 throw new _utils.MiddlewareNotFoundError();
+             }
+             const adapterFn = middlewareModule.default || middlewareModule;
+-            const hasRequestBody = ![
+-                'HEAD',
+-                'GET'
+-            ].includes(params.request.method) && Boolean(requestData.body);
++            /*
++             * NOTE: [Proxy body clone]
++             *
++             * Upstream clones the body of every request that carries one, so a
++             * proxy can read a body that can be read only once
++             * (vercel/next.js#35131). Ours reads the headers and the URL only,
++             * and the clone costs every route handler its stream: the body is
++             * held in memory up to `proxyClientMaxBodySize` (10MB) and
++             * truncated past it, and an aborted request never reaches the
++             * handler, so an upload chunk that stops in flight loses the bytes
++             * that did arrive. Upstream closed #69424 by capping the buffer
++             * rather than by streaming.
++             *
++             * `false` puts every request on the path GET and HEAD already take:
++             * `cloneBodyStream()` is never called, so `finalize()` — guarded by
++             * this same flag and by its own `if (buffered)` — never replaces the
++             * request body, and the handler reads from the socket.
++             *
++             * Nothing in proxy.ts may read the request body while this stands.
++             */
++            const hasRequestBody = false;
+             try {
+                 result = await adapterFn({
+                     handler: middlewareModule.proxy || middlewareModule.middleware || middlewareModule,

@@ -2,7 +2,8 @@ import {NextRequest, NextResponse} from 'next/server';
 import {z} from 'zod';
 import {manager} from '@/tenant';
 import {getSession} from '@/auth';
-import {PushSubscriptionSchema} from '@/pwa/types';
+import {MAX_SUBSCRIPTION_BYTES, PushSubscriptionSchema} from '@/pwa/types';
+import {RequestBodyTooLarge, readTextWithin} from '@/security/request-body';
 
 export async function POST(
   request: NextRequest,
@@ -26,7 +27,27 @@ export async function POST(
   }
   const {client} = tenant;
 
-  const json = await request.json();
+  let body: string;
+  try {
+    body = await readTextWithin(request, MAX_SUBSCRIPTION_BYTES);
+  } catch (error) {
+    if (error instanceof RequestBodyTooLarge) {
+      console.error(
+        `[PUSH] Refused a subscription over ${MAX_SUBSCRIPTION_BYTES} bytes for tenant '${tenantId}'`,
+      );
+
+      return new NextResponse('Payload too large', {status: 413});
+    }
+    throw error;
+  }
+
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch {
+    return NextResponse.json({error: 'Invalid subscription'}, {status: 400});
+  }
+
   const result = PushSubscriptionSchema.safeParse(json);
 
   if (!result.success) {
