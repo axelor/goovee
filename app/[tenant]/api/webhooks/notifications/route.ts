@@ -24,6 +24,7 @@ import {
 } from '@/utils/validators';
 import {User} from '@/types';
 import {APP_TITLE} from '@/constants';
+import {RequestBodyTooLarge, readTextWithin} from '@/security/request-body';
 
 type App = NonNullable<Awaited<ReturnType<typeof findAppByCode>>>;
 
@@ -316,6 +317,13 @@ async function sendNotifications(data: {
 
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
+/*
+ * Largest payload this endpoint will hold. The mail body is the only part that
+ * grows, and it has no limit of its own at the source; a refusal here is
+ * unrecoverable, since nothing redelivers a notification.
+ */
+const MAX_PAYLOAD_BYTES = 8 * 1024 * 1024;
+
 function isValidTimestamp(timestamp: number) {
   const current = Date.now();
   const ts = Number(timestamp);
@@ -345,9 +353,23 @@ export async function POST(
 ) {
   const {tenant: tenantId} = await props.params;
 
-  const body = await request.text();
+  /* The signature covers the raw body, so the body is read before anything
+   * about the sender is established. */
+  let body: string;
+  try {
+    body = await readTextWithin(request, MAX_PAYLOAD_BYTES);
+  } catch (error) {
+    if (error instanceof RequestBodyTooLarge) {
+      console.error(
+        `[NOTIFICATIONS] Refused a payload over ${MAX_PAYLOAD_BYTES} bytes for tenant '${tenantId}'; nothing redelivers it, so the notification is lost`,
+      );
 
-  let payload;
+      return response('Payload too large', 413);
+    }
+    throw error;
+  }
+
+  let payload: unknown;
   try {
     payload = JSON.parse(body);
   } catch {
