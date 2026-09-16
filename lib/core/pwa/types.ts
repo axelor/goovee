@@ -13,6 +13,12 @@ export const PushSubscriptionSchema = z.object({
 
 export type PushSubscriptionDTO = z.infer<typeof PushSubscriptionSchema>;
 
+/*
+ * Largest body an endpoint taking one of these will hold. A subscription is an
+ * address and two keys, well under a kilobyte.
+ */
+export const MAX_SUBSCRIPTION_BYTES = 64 * 1024;
+
 export type NotificationDTO = {
   id: string;
   version: number;
