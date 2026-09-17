@@ -1,0 +1,6 @@
+{
+  "title": "Hide the comment attachment and send controls from visitors who are not signed in",
+  "type": "fix",
+  "description": "A visitor who is not signed in now sees only the invitation to sign in where the comment composer would be. The attachment button, the send button and the reply link are no longer shown, so an upload that can never be accepted can no longer be started.",
+  "scope": ["core", "news", "events"]
+}
