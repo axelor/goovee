@@ -14,6 +14,7 @@ import {
   findGooveeUserByEmail,
   findPartnerById,
   updatePartner,
+  updatePartnerViaAOS,
 } from '@/orm/partner';
 import {UserType} from '@/auth/types';
 import {generateOTP} from '@/otp/actions';
@@ -293,32 +294,40 @@ export async function update(data: UpdatePersonal) {
   }
 
   try {
+    /* The partner fields go through AOS's REST API so that its audit listener
+       records the change in the partner's tracking history. An HTTP write
+       cannot take part in a database transaction, so it runs first and on its
+       own: should the rest fail, the profile is updated, the email is not, and
+       the one-time code stays usable — the contact simply retries.
+       The code and the email address stay together, which is the pair that
+       actually matters: the code is what authorises that email change. */
+    await updatePartnerViaAOS({
+      data: {
+        id: partner.id,
+        version: partner.version,
+        registrationCode: identificationNumber,
+        fixedPhone: companyNumber,
+        firstName,
+        name: isCompany ? companyName : name,
+        linkedinLink: isCompany ? undefined : linkedInLink,
+        ...(partner.isContact && mainPartner
+          ? {
+              mainPartner: {
+                select: {
+                  id: mainPartner,
+                },
+              },
+            }
+          : {}),
+      },
+      client,
+      aos: tenant.config.aos,
+    });
+
     await client.$transaction(async txClient => {
       if (otpId !== undefined) {
         await markUsed({id: otpId, client: txClient});
       }
-
-      await updatePartner({
-        data: {
-          id: partner.id,
-          version: partner.version,
-          registrationCode: identificationNumber,
-          fixedPhone: companyNumber,
-          firstName,
-          name: isCompany ? companyName : name,
-          linkedinLink: isCompany ? undefined : linkedInLink,
-          ...(partner.isContact && mainPartner
-            ? {
-                mainPartner: {
-                  select: {
-                    id: mainPartner,
-                  },
-                },
-              }
-            : {}),
-        },
-        client: txClient,
-      });
 
       if (isEmailChanging && partner.emailAddress) {
         const {id, version} = partner.emailAddress;

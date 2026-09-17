@@ -1,0 +1,6 @@
+{
+  "title": "Record portal profile, address and registration changes in the ERP tracking history",
+  "type": "feature",
+  "description": "Profile updates, address creation and updates, and portal registration now go through the AOS REST API instead of writing to the shared database, so that AOS records them itself and the back office can see what a contact changed and when. A note carries the previous and the new value of every tracked field, and lands on the record that changed: profile changes on the partner, address changes on the address. A registration is traced through the portal activation flag, which AOS now sets. Three consequences are worth knowing. These writes need AOS to be reachable, so editing a profile or an address fails while it is down, the one exception being registration, which falls back to a direct write and completes untraced rather than costing someone their account. Notes are attributed to the API service account, not to the contact. And what gets traced is decided entirely by the <track> declarations on the AOS side, so a field appears only once declared there; deletions are never traced, AOS does not track them.",
+  "scope": ["core"]
+}
