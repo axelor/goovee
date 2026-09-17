@@ -3,7 +3,8 @@ import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 
 export const CartItemSchema = z.object({
   product: IdSchema,
-  quantity: z.union([z.string(), z.number()]),
+  /* Whole units only — the stepper emits digits and nothing else is a quantity. */
+  quantity: z.coerce.number().int().positive(),
   note: z.string().optional(),
 });
 export type CartItemInput = z.infer<typeof CartItemSchema>;
