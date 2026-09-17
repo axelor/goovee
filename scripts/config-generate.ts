@@ -28,6 +28,24 @@ const JSON_EXAMPLE_FILE = `${CONFIG_FILE_STEM}.example.json`;
  * one is short and reads as a placeholder. */
 const EXAMPLE_TENANT = 'acme';
 
+/*
+ * Groups the examples write out although the schema leaves them optional. A
+ * storage provider's settings are optional only because another provider's
+ * could stand in their place; the examples name the first provider, so its
+ * group is the one an operator copying them has to fill in.
+ */
+const EXAMPLE_GROUPS = new Set([
+  [TENANTS_KEY, '<id>', 'aos', 'storage', 'filesystem'].join('.'),
+]);
+
+function shownInExample(keyPath: string[]): boolean {
+  const spelled = keyPath.map((key, index) =>
+    index === 1 && keyPath[0] === TENANTS_KEY ? '<id>' : key,
+  );
+
+  return EXAMPLE_GROUPS.has(spelled.join('.'));
+}
+
 // 78 columns; an 80-column terminal shows a wrapped line without scrolling.
 const WIDTH = 78;
 
@@ -167,7 +185,8 @@ function renderGroup(
 
   for (const [key, child] of groups) {
     const description = descriptionOf(child);
-    const childRequired = required && !isOptional(child);
+    const childRequired =
+      required && (!isOptional(child) || shownInExample([...keyPath, key]));
 
     lines.push(`# --- ${envNameFor([...keyPath, key])}_… ---`);
     if (description) {
@@ -259,12 +278,17 @@ function exampleValue(schema: z.ZodType): unknown {
  * group whose every member is optional — the AOS credentials, one of two ways —
  * is written with its first setting rather than empty, so the example shows
  * there is something to fill in. The tenants come as the one example tenant. */
-function exampleGroup(schema: z.ZodType): Record<string, unknown> {
+function exampleGroup(
+  schema: z.ZodType,
+  keyPath: string[] = [],
+): Record<string, unknown> {
   const shape = shapeOf(schema);
   if (!shape) return {};
 
   const entries = Object.entries(shape);
-  const required = entries.filter(([, child]) => !isOptional(child));
+  const required = entries.filter(
+    ([key, child]) => !isOptional(child) || shownInExample([...keyPath, key]),
+  );
   const shown = required.length ? required : entries.slice(0, 1);
 
   const result: Record<string, unknown> = {};
@@ -273,9 +297,15 @@ function exampleGroup(schema: z.ZodType): Record<string, unknown> {
     const tenantSchema = recordValueOf(child);
 
     result[key] = tenantSchema
-      ? {[EXAMPLE_TENANT]: exampleGroup(tenantSchema)}
+      ? {
+          [EXAMPLE_TENANT]: exampleGroup(tenantSchema, [
+            ...keyPath,
+            key,
+            EXAMPLE_TENANT,
+          ]),
+        }
       : shapeOf(child)
-        ? exampleGroup(child)
+        ? exampleGroup(child, [...keyPath, key])
         : exampleValue(child);
   }
 

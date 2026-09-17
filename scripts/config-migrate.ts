@@ -282,7 +282,14 @@ function buildTenant(): TenantConfigInput {
     aos: {
       url: process.env.AOS_URL ?? '',
       tenantId: process.env.AOS_TENANT_ID || undefined,
-      storage: process.env.DATA_STORAGE || path.join(process.cwd(), 'storage'),
+      /* The release before kept files on the local disk only, so a migrated
+       * configuration names the filesystem provider with the directory it used. */
+      storage: {
+        provider: 'filesystem',
+        filesystem: {
+          dir: process.env.DATA_STORAGE || path.join(process.cwd(), 'storage'),
+        },
+      },
       /* Blanks rather than nothing where neither credential was set: a blank
        * to fill in is reviewable, and the load then refuses the pair as
        * incomplete rather than reporting a whole group missing. */

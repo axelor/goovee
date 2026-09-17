@@ -46,7 +46,7 @@ async function connectTenant(
     },
   });
 
-  const store = createStore(config.aos);
+  const store = createStore(config.aos, id);
 
   try {
     await client.$connect();

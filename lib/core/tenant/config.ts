@@ -18,6 +18,18 @@ function taintTenantConfig(config: TenantConfig) {
     ['AOS API key', config.aos.auth.apiKey],
     ['AOS password', config.aos.auth.password],
     ['Webhook secret', config.aos.webhookSecret],
+    [
+      'Object storage access key',
+      config.aos.storage.provider === 's3'
+        ? config.aos.storage.s3.accessKey
+        : undefined,
+    ],
+    [
+      'Object storage secret key',
+      config.aos.storage.provider === 's3'
+        ? config.aos.storage.s3.secretKey
+        : undefined,
+    ],
     ['PayPal secret key', config.payments?.paypal?.clientSecret],
     ['Stripe secret key', config.payments?.stripe?.clientSecret],
     ['Stripe webhook secret', config.payments?.stripe?.webhookSecret],

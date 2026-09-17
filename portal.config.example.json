@@ -5,7 +5,11 @@
     "acme": {
       "sessionSecret": "",
       "db": {"url": ""},
-      "aos": {"url": "", "storage": "", "auth": {"apiKey": ""}},
+      "aos": {
+        "url": "",
+        "storage": {"provider": "filesystem", "filesystem": {"dir": ""}},
+        "auth": {"apiKey": ""}
+      },
       "public": {"host": ""}
     }
   }

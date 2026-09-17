@@ -30,6 +30,12 @@ import {z} from 'zod';
 
 import {getMaxConnections, mailAccountKey} from '@/notification/mail-account';
 import {isReservedSegment, reservedSegments} from '@/path/reserved-segments';
+import {filesystemRoot, objectPrefix} from '@/storage/paths';
+import {
+  DEFAULT_PART_SIZE,
+  MAX_PART_SIZE,
+  MIN_PART_SIZE,
+} from '@/storage/s3-limits';
 import {canonicalHost} from '@/tenant/routing';
 
 import {envNameFor, TENANTS_KEY} from './names';
@@ -232,47 +238,192 @@ const aosAuthSchema = z
     'AOS credentials: an API key (AOS 9+, generated in AOS under Preferences → API Keys), or a username and password for basic auth. The API key wins when both are set.',
   );
 
-const aosSchema = z
+/*
+ * The store a tenant's files live in — the one its AOS instance is configured
+ * with, since the two applications read and write the same files.
+ *
+ * Laid out as AOP lays out its own settings: a switch naming the provider, and
+ * a group of settings per provider beside it. Written that way rather than as
+ * one shape per provider because the environment spells a setting as a path of
+ * keys, so every provider's settings have to sit under a key of their own for
+ * a variable to name them. Adding a provider is a value in the enum and a
+ * group beside the others; the store implementations are registered in
+ * lib/core/storage.
+ */
+const filesystemStorageSchema = z
   .strictObject({
-    url: z
+    dir: z
       .string()
       .min(1)
       .describe(
-        'Base URL of the AOS instance, e.g. https://erp.example.com/axelor-erp. Unique per tenant in topology A (dedicated AOS); shared across tenants in topology B (AOS multi-tenancy).',
+        `The AOS instance's data.upload.dir base path (created on first connect; back it with a mounted volume so uploads survive). When ${name([TENANTS_KEY, '<id>', 'aos', 'tenantId'])} is set — a tenant on a shared multi-tenant AOS instance — the portal reads and writes files under <dir>/<tenantId> to match AOP's per-tenant subdirectory; a dedicated instance uses this path as-is.`,
       ),
-    tenantId: z
-      .string()
-      .describe(
-        'AOS-side tenant id — independent of the portal tenant id. Set it when this tenant lives on a shared AOS instance with AOS multi-tenancy (topology B): every AOS call then carries X-Tenant-ID with this value. Leave unset for a dedicated AOS instance (topology A).',
-      )
-      .optional(),
-    storage: z
-      .string()
-      .min(1)
-      .describe(
-        `The AOS instance's data.upload.dir base path (created on first connect; back it with a mounted volume so uploads survive). When ${name([TENANTS_KEY, '<id>', 'aos', 'tenantId'])} is set (topology B), the portal reads and writes files under <storage>/<tenantId> to match AOP's per-tenant subdirectory; a dedicated instance (topology A) uses this path as-is.`,
-      ),
-    auth: aosAuthSchema,
-    webhookSecret: z
-      .string()
-      .describe(
-        'Secret AOS uses to sign notification webhooks for this tenant. Set the same value in the AOS portal configuration.',
-      )
-      .optional(),
   })
-  /* The per-tenant storage root, settled once, mirroring AOP's
-   * FileSystemStore.getRootPath(): a tenant on a shared multi-tenant AOS keeps
-   * its files under <data.upload.dir>/<tenantId>, while a dedicated instance
-   * (or the AOP "default" tenant) uses <data.upload.dir> as-is. The portal reads
-   * and writes the AOS filesystem directly, so every storage consumer can use
-   * config.aos.storage verbatim without re-deriving the subdirectory. */
-  .transform(aos => ({
-    ...aos,
-    storage:
-      aos.tenantId && aos.tenantId !== 'default'
-        ? path.join(aos.storage, aos.tenantId)
-        : aos.storage,
-  }));
+  .describe(
+    'The AOS instance keeps its files on a filesystem the portal can reach: its data.upload.dir, mounted into the portal at the path given here.',
+  );
+
+const s3StorageSchema = z
+  .strictObject({
+    endpoint: z
+      .string()
+      .min(1)
+      .describe(
+        'Address of the service, scheme included, e.g. https://minio.example.com:9000 — the value of data.object-storage.endpoint with its scheme. Leave unset for AWS S3 itself, which the region names.',
+      )
+      .optional(),
+    region: z
+      .string()
+      .min(1)
+      .describe(
+        "Region the requests are signed for. AWS S3 requires the bucket's own; a service outside AWS accepts any value, and us-east-1 is used when unset.",
+      )
+      .optional(),
+    bucket: z
+      .string()
+      .min(1)
+      .describe(
+        'The bucket, as data.object-storage.bucket names it. It has to exist already: the portal does not create it, and checks it is reachable when the tenant connects, which needs the s3:ListBucket permission besides the object permissions.',
+      ),
+    accessKey: z
+      .string()
+      .min(1)
+      .describe(
+        `Access key of the account, set together with ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 's3', 'secretKey'])}. Leave both unset to let the client find credentials on its own — the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY variables, a shared credentials file, or the role of the machine the portal runs on.`,
+      )
+      .optional(),
+    secretKey: z
+      .string()
+      .min(1)
+      .describe('Secret key going with the access key.')
+      .optional(),
+    pathStyle: z
+      .boolean()
+      .describe(
+        'Address an object as <endpoint>/<bucket>/<key> rather than <bucket>.<endpoint>/<key> — data.object-storage.path-style. Most services outside AWS need true. Defaults to false.',
+      )
+      .optional(),
+    encryption: z
+      .enum(['SSE-S3', 'SSE-KMS'])
+      .describe(
+        `Server-side encryption asked for on every upload, as data.object-storage.encryption spells it: SSE-S3 for keys the service manages, SSE-KMS for a key of your own named by ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 's3', 'kmsKeyId'])}. Unset leaves the bucket's own default in force.`,
+      )
+      .optional(),
+    kmsKeyId: z
+      .string()
+      .min(1)
+      .describe(
+        'The KMS key encrypting uploads — data.object-storage.encryption-kms-key-id. Read only with SSE-KMS.',
+      )
+      .optional(),
+    storageClass: z
+      .string()
+      .min(1)
+      .describe(
+        "Storage class every upload is written with, e.g. STANDARD or STANDARD_IA — data.object-storage.storage-class. Unset leaves the bucket's default.",
+      )
+      .optional(),
+    partSize: z
+      .int()
+      .min(MIN_PART_SIZE)
+      .max(MAX_PART_SIZE)
+      .default(DEFAULT_PART_SIZE)
+      .describe(
+        `Bytes every part but the last carries when a file reaches the bucket part by part. The S3 API takes no less than ${MIN_PART_SIZE} (5 MiB) and no more than ${MAX_PART_SIZE} (5 GiB); defaults to ${DEFAULT_PART_SIZE} (16 MiB). Larger parts mean fewer requests to the bucket and more bytes held on local disk while one is gathered; smaller parts the reverse. A file that never fills a part is stored in one request once it is whole.`,
+      ),
+  })
+  .describe(
+    `The AOS instance keeps its files in an S3-compatible bucket, configured by its data.object-storage.* settings; the same values go here. When ${name([TENANTS_KEY, '<id>', 'aos', 'tenantId'])} is set — a tenant on a shared multi-tenant AOS instance — every key is put behind <tenantId>/ to match AOP's per-tenant prefix; a dedicated instance writes keys as they are.`,
+  );
+
+const storageProviderSchema = z.enum(['filesystem', 's3']);
+
+export type StorageProvider = z.infer<typeof storageProviderSchema>;
+
+const storageSchema = z
+  .strictObject({
+    provider: storageProviderSchema.describe(
+      `Where this tenant's files are kept — the same place its AOS instance keeps them. "filesystem" reads and writes the instance's data.upload.dir, configured under ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 'filesystem'])}_…; "s3" reads and writes the bucket its data.object-storage.* settings name, configured under ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 's3'])}_….`,
+    ),
+    filesystem: filesystemStorageSchema.optional(),
+    s3: s3StorageSchema.optional(),
+  })
+  /* Settled into one shape per provider, so the application reads the settings
+   * of the provider that was chosen and no other. The group the provider names
+   * is required, and only that group is kept: a group left over from a
+   * previous choice is refused rather than ignored, since leaving it in place
+   * is how a deployment ends up believing it moved its files and did not. */
+  .transform((storage, ctx) => {
+    const kept: Record<string, unknown> = {provider: storage.provider};
+
+    for (const provider of storageProviderSchema.options) {
+      const settings = storage[provider];
+
+      if (provider === storage.provider) {
+        if (!settings) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [provider],
+            message: `is required when ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 'provider'])} is ${provider}`,
+          });
+        }
+        kept[provider] = settings;
+      } else if (settings) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [provider],
+          message: `is set while ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 'provider'])} is ${storage.provider}; remove it, or change the provider`,
+        });
+      }
+    }
+
+    if (storage.s3 && !!storage.s3.accessKey !== !!storage.s3.secretKey) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['s3', storage.s3.accessKey ? 'secretKey' : 'accessKey'],
+        message:
+          'is required: the access key and the secret key are set together',
+      });
+    }
+
+    if (storage.s3?.kmsKeyId && storage.s3.encryption !== 'SSE-KMS') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['s3', 'kmsKeyId'],
+        message: `is read only when ${name([TENANTS_KEY, '<id>', 'aos', 'storage', 's3', 'encryption'])} is SSE-KMS`,
+      });
+    }
+
+    return kept as
+      | {
+          provider: 'filesystem';
+          filesystem: z.output<typeof filesystemStorageSchema>;
+        }
+      | {provider: 's3'; s3: z.output<typeof s3StorageSchema>};
+  });
+
+const aosSchema = z.strictObject({
+  url: z
+    .string()
+    .min(1)
+    .describe(
+      'Base URL of the AOS instance, e.g. https://erp.example.com/axelor-erp. Unique per tenant when each tenant has a dedicated AOS instance; the same for every tenant sharing one multi-tenant AOS instance.',
+    ),
+  tenantId: z
+    .string()
+    .describe(
+      'AOS-side tenant id — independent of the portal tenant id. Set it when this tenant lives on a shared AOS instance with AOS multi-tenancy: every AOS call then carries X-Tenant-ID with this value, and files are read and written under the subdirectory or key prefix AOP gives that tenant. Leave unset for a dedicated AOS instance.',
+    )
+    .optional(),
+  storage: storageSchema,
+  auth: aosAuthSchema,
+  webhookSecret: z
+    .string()
+    .describe(
+      'Secret AOS uses to sign notification webhooks for this tenant. Set the same value in the AOS portal configuration.',
+    )
+    .optional(),
+});
 
 const paymentsSchema = z
   .strictObject({
@@ -519,6 +670,17 @@ export const deploymentConfigSchema = z.strictObject({
         .optional(),
     })
     .optional(),
+  upload: z
+    .strictObject({
+      tempDir: z
+        .string()
+        .min(1)
+        .describe(
+          "Directory a tenant using object storage stages an upload in, under one subdirectory per tenant; it holds at most one part per upload in flight. A tenant on a filesystem stages in its own storage directory and ignores this. Defaults to <temp>/portal/uploads under the operating system's temporary directory. Point it at a volume that survives a restart to let an interrupted upload resume from the exact byte it reached rather than the last whole part.",
+        )
+        .optional(),
+    })
+    .optional(),
 });
 
 export type TenantConfig = z.output<typeof tenantConfigSchema>;
@@ -527,11 +689,12 @@ export type DeploymentConfig = z.output<typeof deploymentConfigSchema>;
 /** What the browser is handed about a tenant: the `public` group, parsed. */
 export type PublicConfig = TenantConfig['public'];
 
-/* The shapes as they are written, before the parse settles the storage root and
- * the Keycloak issuer. Anything that writes a configuration builds these rather
- * than the parsed shapes, so a value it emits is one an operator could have
- * typed. Giving a setting a default or a coercion parts the two further, so a
- * writer must never reach for the parsed shapes instead. */
+/* The shapes as they are written, before the parse settles the storage settings
+ * into one shape per provider and the Keycloak issuer's trailing slash. Anything
+ * that writes a configuration builds these rather than the parsed shapes, so a
+ * value it emits is one an operator could have typed. Giving a setting a default
+ * or a coercion parts the two further, so a writer must never reach for the
+ * parsed shapes instead. */
 export type TenantConfigInput = z.input<typeof tenantConfigSchema>;
 export type DeploymentConfigInput = z.input<typeof deploymentConfigSchema>;
 
@@ -582,43 +745,80 @@ function checkHubPispCertIsolation(tenants: TenantEntry[]): ConfigIssue[] {
   return issues;
 }
 
-/* Cross-tenant invariant. Uploads are recorded as a path relative to the tenant's
- * storage root, so two tenants resolving to the same root share one namespace:
- * each would resolve the other's recorded paths, and the retention sweep would
- * delete from a directory holding another tenant's blobs. The roots compared here
- * are the resolved ones — a tenant on a shared AOS already has its AOS tenant id
- * subdirectory baked in — so tenants sharing one AOS legitimately pass. */
+/*
+ * Where a tenant's files sit, as the store will place them: the directory a
+ * filesystem tenant resolves to, or the bucket and prefix an object-storage
+ * tenant writes under. Spelled so that one root containing another reads as a
+ * prefix of it — a directory ends in a separator, a bucket prefix in the slash
+ * every key of it opens with — so a plain string comparison settles nesting.
+ */
+function storageRoot(config: TenantConfig): {
+  setting: string[];
+  root: string;
+} {
+  const {storage, tenantId} = config.aos;
+
+  if (storage.provider === 's3') {
+    const {endpoint, bucket} = storage.s3;
+
+    /* Two spellings of one service — a trailing slash, a capital in the host —
+     * name the same bucket, so the endpoint is compared as the origin it
+     * parses to; one that does not parse is compared as written, and none at
+     * all means AWS itself. */
+    const service =
+      endpoint === undefined
+        ? 'aws'
+        : URL.canParse(endpoint)
+          ? new URL(endpoint).origin.toLowerCase()
+          : endpoint;
+
+    return {
+      setting: ['aos', 'storage', 's3', 'bucket'],
+      root: `${service}/${bucket}/${objectPrefix(tenantId)}`,
+    };
+  }
+
+  return {
+    setting: ['aos', 'storage', 'filesystem', 'dir'],
+    root: filesystemRoot(storage.filesystem.dir, tenantId) + path.sep,
+  };
+}
+
+/* Cross-tenant invariant. Uploads are recorded as a key relative to the tenant's
+ * part of its store, so two tenants resolving to the same part share one
+ * namespace: each would resolve the other's recorded keys, and the retention
+ * sweep would delete another tenant's files. The roots compared here are the
+ * ones the stores use — a tenant on a shared AOS already has its AOS tenant id
+ * subdirectory or prefix in it — so tenants sharing one AOS legitimately pass.
+ *
+ * Containment, not just equality: a tenant that keeps the base path (no AOS
+ * tenant id) while another sits in a subdirectory of it would otherwise pass,
+ * and the outer tenant's root then contains the inner one's — its recorded keys
+ * resolve into the inner tenant's files and its retention sweep deletes from
+ * them. */
 function checkStorageIsolation(tenants: TenantEntry[]): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
-  const roots: Array<[string, string]> = []; // [tenant id, resolved storage root]
+  const roots: Array<[string, string]> = []; // [tenant id, storage root]
 
   for (const [id, config] of tenants) {
-    const storage = path.resolve(config.aos.storage);
+    const {setting, root} = storageRoot(config);
 
     for (const [owner, existing] of roots) {
-      /* Containment, not just equality: a tenant that keeps the base path (no
-       * AOS tenant id) while another sits in a subdirectory of it would otherwise
-       * pass, and the outer tenant's root then contains the inner one's — its
-       * recorded paths resolve into the inner tenant's files and its retention
-       * sweep deletes from them. */
-      const nested =
-        storage === existing ||
-        storage.startsWith(existing + path.sep) ||
-        existing.startsWith(storage + path.sep);
+      const nested = root.startsWith(existing) || existing.startsWith(root);
 
       if (nested) {
         issues.push({
-          path: tenantPath(id, 'aos', 'storage'),
+          path: tenantPath(id, ...setting),
           message:
-            `Tenants "${owner}" ("${existing}") and "${id}" ("${storage}") share ` +
+            `Tenants "${owner}" ("${existing}") and "${id}" ("${root}") share ` +
             `a storage root — one contains the other. Give each tenant a ` +
-            `directory of its own, or set ${name(tenantPath('<id>', 'aos', 'tenantId'))} ` +
+            `directory or bucket of its own, or set ${name(tenantPath('<id>', 'aos', 'tenantId'))} ` +
             `on every tenant that shares one AOS instance.`,
         });
       }
     }
 
-    roots.push([id, storage]);
+    roots.push([id, root]);
   }
 
   return issues;
@@ -985,10 +1185,10 @@ export const configSchema = z
    * place and the configuration still arrives here, so a check can read a
    * setting a refinement has just rejected; and a transform behind a failed
    * refinement has not run, so a value can arrive neither as written nor as the
-   * application would use it. A tenant on a shared AOS instance whose
-   * credentials were refused is the case that occurs: its storage root arrives
-   * as written rather than as the per-tenant subdirectory of it the application
-   * uses, which reads as a tenant holding the directory its neighbours sit in.
+   * application would use it. A tenant whose storage settings were refused is
+   * the case that occurs: its storage arrives as the flat group an operator
+   * wrote rather than settled into the one provider's shape the application
+   * reads, and a check reading the provider's settings off it finds nothing.
    *
    * So the checks comparing tenants against each other are given only the
    * tenants whose own settings reported nothing. Comparing against a value that

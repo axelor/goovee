@@ -105,7 +105,10 @@ Start from this skeleton and complete it through the sections that follow:
       },
       "aos": {
         "url": "https://erp.example.com/axelor-erp",
-        "storage": "/var/lib/portal/acme/upload",
+        "storage": {
+          "provider": "filesystem",
+          "filesystem": {"dir": "/var/lib/portal/acme/upload"}
+        },
         "auth": {
           "apiKey": ""
         }
@@ -126,7 +129,8 @@ PORTAL_DEFAULT_TENANT=acme
 PORTAL_TENANT_ACME_SESSION_SECRET=
 PORTAL_TENANT_ACME_DB_URL=postgres://portal:secret@localhost:5432/portal-acme
 PORTAL_TENANT_ACME_AOS_URL=https://erp.example.com/axelor-erp
-PORTAL_TENANT_ACME_AOS_STORAGE=/var/lib/portal/acme/upload
+PORTAL_TENANT_ACME_AOS_STORAGE_PROVIDER=filesystem
+PORTAL_TENANT_ACME_AOS_STORAGE_FILESYSTEM_DIR=/var/lib/portal/acme/upload
 PORTAL_TENANT_ACME_AOS_AUTH_API_KEY=
 PORTAL_TENANT_ACME_PUBLIC_HOST=https://portal.example.com
 ```
@@ -180,6 +184,23 @@ Leave it out unless push delivery is slow.
 Disk the resized-image cache may use, in bytes. One cache serves every tenant.
 Defaults to `2147483648`, which is 2 GiB.
 
+### `upload.tempDir` / `PORTAL_UPLOAD_TEMP_DIR` — optional
+
+Directory a tenant using object storage stages an upload in, under one
+subdirectory per tenant. Defaults to `portal/uploads` inside the operating
+system's temporary directory.
+
+It has to be a local filesystem, not a network mount.
+
+Read only by the `s3` provider (section 6.2), and it holds at most one part's
+worth per upload in flight — so size it as `partSize` times the uploads you
+expect at once. The `filesystem` provider stages in its own storage directory
+instead and ignores this.
+
+Point it at a volume that survives a restart to let an upload interrupted by one
+resume from the exact byte it reached; on the default it resumes from the last
+whole part instead.
+
 ---
 
 ## 6. Configure a tenant
@@ -222,7 +243,8 @@ Point it at an empty database and the portal starts, but there is no workspace
 (the last segment of a tenant's address — section 7.4) and no user: every page
 answers "not found" and nobody can sign in.
 
-`db.url`, `aos.url` and `aos.storage` must all address **the same AOS instance**.
+`db.url`, `aos.url` and `aos.storage` must all address **the same AOS instance**:
+the store named under `aos.storage` is the one that instance keeps its files in.
 Every tenant needs its own database.
 
 ### 6.2 The AOS connection
@@ -230,7 +252,10 @@ Every tenant needs its own database.
 ```json
 "aos": {
   "url": "https://erp.example.com/axelor-erp",
-  "storage": "/var/lib/portal/acme/upload",
+  "storage": {
+    "provider": "filesystem",
+    "filesystem": {"dir": "/var/lib/portal/acme/upload"}
+  },
   "auth": {
     "apiKey": "abcd1234…"
   },
@@ -240,14 +265,53 @@ Every tenant needs its own database.
 
 ```
 PORTAL_TENANT_<ID>_AOS_URL=https://erp.example.com/axelor-erp
-PORTAL_TENANT_<ID>_AOS_STORAGE=/var/lib/portal/acme/upload
+PORTAL_TENANT_<ID>_AOS_STORAGE_PROVIDER=filesystem
+PORTAL_TENANT_<ID>_AOS_STORAGE_FILESYSTEM_DIR=/var/lib/portal/acme/upload
 PORTAL_TENANT_<ID>_AOS_AUTH_API_KEY=abcd1234…
 PORTAL_TENANT_<ID>_AOS_WEBHOOK_SECRET=…
 ```
 
 - **`url`** — where the AOS instance answers, including its application path.
-- **`storage`** — the AOS instance's `data.upload.dir`, as AOS is configured with
-  it. Point it at a mounted volume.
+- **`storage`** — where the AOS instance keeps its files; the portal reads and
+  writes the same place. `provider` is `filesystem` or `s3`, and the group of
+  the same name holds that provider's settings:
+
+  - `filesystem.dir` — the instance's `data.upload.dir`, as AOS is configured
+    with it. Point it at a mounted volume. The portal stages each upload in an
+    `.uploads-in-progress` directory inside it and moves the finished file into
+    place, so leave that directory out of a backup or a copy of the files: what
+    it holds belongs to no record yet, and the portal clears it of anything
+    abandoned.
+  - `s3` — the instance's `data.object-storage.*` settings, one for one:
+    `endpoint` (with its scheme; leave it out for AWS S3 itself), `region`,
+    `bucket`, `accessKey` and `secretKey` (leave both out to let the client find
+    credentials on its own), `pathStyle`, `encryption` (`SSE-S3` or `SSE-KMS`),
+    `kmsKeyId` and `storageClass`. The bucket has to exist: the portal does not
+    create it, and checks it is reachable when the tenant connects, which needs
+    the `s3:ListBucket` permission beside the object permissions.
+
+    One setting has no AOS counterpart. `partSize` is how many bytes each part
+    of an upload carries: 5 MiB to 5 GiB, defaulting to 16 MiB. Larger parts
+    mean fewer requests to the bucket and more bytes held in `upload.tempDir`;
+    smaller parts the reverse.
+
+    Give the bucket a lifecycle rule aborting incomplete multipart uploads, with
+    a window of **at least 25 hours**; a few days is safe. A shorter window
+    aborts uploads that are still being filled.
+
+    ```
+    PORTAL_TENANT_<ID>_AOS_STORAGE_PROVIDER=s3
+    PORTAL_TENANT_<ID>_AOS_STORAGE_S3_ENDPOINT=https://minio.example.com:9000
+    PORTAL_TENANT_<ID>_AOS_STORAGE_S3_BUCKET=files
+    PORTAL_TENANT_<ID>_AOS_STORAGE_S3_ACCESS_KEY=…
+    PORTAL_TENANT_<ID>_AOS_STORAGE_S3_SECRET_KEY=…
+    PORTAL_TENANT_<ID>_AOS_STORAGE_S3_PATH_STYLE=true
+    ```
+
+  Set exactly the group the provider names; a configuration carrying the other
+  provider's group is refused. Moving a tenant from one provider to the other
+  is a migration — see [migrations/object-storage.md](migrations/object-storage.md).
+
 - **`auth`** — how the portal signs in to AOS. Two forms:
 
   - `apiKey` — AOS 9 and later. Generate it in AOS under
@@ -273,7 +337,10 @@ the same `url` and add `aos.tenantId`, the name AOS knows the tenant by:
 "aos": {
   "url": "https://erp.example.com/axelor-erp",
   "tenantId": "acme-db",
-  "storage": "/var/lib/portal/shared/upload",
+  "storage": {
+    "provider": "filesystem",
+    "filesystem": {"dir": "/var/lib/portal/shared/upload"}
+  },
   "auth": {"apiKey": "…"}
 }
 ```
@@ -283,10 +350,12 @@ PORTAL_TENANT_<ID>_AOS_TENANT_ID=acme-db
 ```
 
 `db.url` still names each tenant's own database. `url` and `storage` are the same
-for every tenant on the instance, and each needs its own `aos.tenantId`: files are
-read and written under `<storage>/<aos.tenantId>`.
+for every tenant on the instance, and each needs its own `aos.tenantId`: on a
+filesystem, files are read and written under `<dir>/<aos.tenantId>`; in a bucket,
+under the key prefix `<aos.tenantId>/`.
 
-The value `default` means no subdirectory — files sit directly under `storage`.
+The value `default` means no subdirectory and no prefix — files sit directly
+under `dir`, or at the top of the bucket.
 
 The AOS tenant name is independent of the portal tenant id; the two may differ.
 
@@ -865,7 +934,10 @@ webhook. This takes one value on each side, and the two must match.
 ```json
 "aos": {
   "url": "https://erp.example.com/axelor-erp",
-  "storage": "/var/lib/portal/acme/upload",
+  "storage": {
+    "provider": "filesystem",
+    "filesystem": {"dir": "/var/lib/portal/acme/upload"}
+  },
   "auth": {"apiKey": "…"},
   "webhookSecret": "a-long-random-string"
 }
@@ -993,7 +1065,10 @@ block and one `payments` block.
       "db": {"url": "postgres://portal:secret@db.example.com:5432/portal-acme"},
       "aos": {
         "url": "https://erp-acme.example.com/axelor-erp",
-        "storage": "/var/lib/portal/acme/upload",
+        "storage": {
+          "provider": "filesystem",
+          "filesystem": {"dir": "/var/lib/portal/acme/upload"}
+        },
         "auth": {"apiKey": "abcd1234…"},
         "webhookSecret": "hZ4t…"
       },
@@ -1020,7 +1095,16 @@ block and one `payments` block.
       "db": {"url": "postgres://portal:secret@db.example.com:5432/portal-bolt"},
       "aos": {
         "url": "https://erp-bolt.example.com/axelor-erp",
-        "storage": "/var/lib/portal/bolt/upload",
+        "storage": {
+          "provider": "s3",
+          "s3": {
+            "endpoint": "https://minio.example.com:9000",
+            "bucket": "portal-bolt",
+            "accessKey": "…",
+            "secretKey": "…",
+            "pathStyle": true
+          }
+        },
         "auth": {"username": "portal", "password": "…"}
       },
       "mail": {
@@ -1050,7 +1134,8 @@ PORTAL_TENANT_ACME_SESSION_SECRET=Zq8n…
 PORTAL_TENANT_ACME_ROUTING=host
 PORTAL_TENANT_ACME_DB_URL=postgres://portal:secret@db.example.com:5432/portal-acme
 PORTAL_TENANT_ACME_AOS_URL=https://erp-acme.example.com/axelor-erp
-PORTAL_TENANT_ACME_AOS_STORAGE=/var/lib/portal/acme/upload
+PORTAL_TENANT_ACME_AOS_STORAGE_PROVIDER=filesystem
+PORTAL_TENANT_ACME_AOS_STORAGE_FILESYSTEM_DIR=/var/lib/portal/acme/upload
 PORTAL_TENANT_ACME_AOS_AUTH_API_KEY=abcd1234…
 PORTAL_TENANT_ACME_AOS_WEBHOOK_SECRET=hZ4t…
 PORTAL_TENANT_ACME_PAYMENTS_STRIPE_CLIENT_SECRET=sk_live_…
@@ -1064,7 +1149,12 @@ PORTAL_TENANT_ACME_PUBLIC_WEB_PUSH_PUBLIC_KEY=…
 PORTAL_TENANT_BOLT_SESSION_SECRET=7Kd2…
 PORTAL_TENANT_BOLT_DB_URL=postgres://portal:secret@db.example.com:5432/portal-bolt
 PORTAL_TENANT_BOLT_AOS_URL=https://erp-bolt.example.com/axelor-erp
-PORTAL_TENANT_BOLT_AOS_STORAGE=/var/lib/portal/bolt/upload
+PORTAL_TENANT_BOLT_AOS_STORAGE_PROVIDER=s3
+PORTAL_TENANT_BOLT_AOS_STORAGE_S3_ENDPOINT=https://minio.example.com:9000
+PORTAL_TENANT_BOLT_AOS_STORAGE_S3_BUCKET=portal-bolt
+PORTAL_TENANT_BOLT_AOS_STORAGE_S3_ACCESS_KEY=…
+PORTAL_TENANT_BOLT_AOS_STORAGE_S3_SECRET_KEY=…
+PORTAL_TENANT_BOLT_AOS_STORAGE_S3_PATH_STYLE=true
 PORTAL_TENANT_BOLT_AOS_AUTH_USERNAME=portal
 PORTAL_TENANT_BOLT_AOS_AUTH_PASSWORD=…
 PORTAL_TENANT_BOLT_MAIL_HOST=smtp.example.com
@@ -1201,9 +1291,11 @@ docker run -d \
 them. Single variables can be passed with `-e` instead; their values then appear
 in `docker inspect`.
 
-The mount is the AOS upload storage named by `aos.storage`. Every path in the
+The mount is the AOS upload directory named by `aos.storage.filesystem.dir`; a
+tenant on the `s3` provider needs no mount for its files. Every path in the
 configuration is read inside the container: give container paths, not host paths.
-Mount a Hub PISP tenant's `certsDir` as well.
+Mount a Hub PISP tenant's `certsDir` as well, and give `PORTAL_UPLOAD_TEMP_DIR` a
+volume if interrupted uploads should resume after the container restarts.
 
 #### Or mount the JSON file
 
