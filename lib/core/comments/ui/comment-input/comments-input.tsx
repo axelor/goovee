@@ -184,7 +184,10 @@ export function CommentInput({
     });
   };
 
+  /* `disabled` drops the dropzone's own tab stop and its SPACE/ENTER handler, so
+   * the picker cannot be opened from the keyboard either. */
   const {getRootProps, getInputProps} = useDropzone({
+    disabled,
     maxSize: MAX_FILE_SIZE,
     onDrop,
     onDropRejected,
@@ -196,7 +199,7 @@ export function CommentInput({
         ref={formRef}
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4 w-full">
-        <div className={cn(disabled && 'pointer-events-none')}>
+        <div>
           <FormField
             control={form.control}
             name="text"
@@ -217,33 +220,37 @@ export function CommentInput({
                     }}
                     placeholder={i18n.t(placeholderText)}
                     dummyValue={form.watch('text') || ''}
+                    /* A composer that cannot be submitted offers only its
+                     * placeholder. */
                     endAdornment={
-                      <div className="flex items-start gap-4 pb-1">
-                        {showAttachmentIcon && (
-                          <div
-                            {...getRootProps({
-                              className:
-                                'dropzone self-stretch flex items-center',
-                            })}>
-                            <input {...getInputProps()} />
-                            <MdAttachFile
-                              className={cn(
-                                'size-6 text-black cursor-pointer',
-                                disabled && 'text-gray-dark cursor-none',
-                              )}
-                            />
-                          </div>
-                        )}
-                        <Button
-                          type="submit"
-                          className="px-5 py-1.5 h-9 text-sm font-semibold"
-                          variant="royal"
-                          disabled={isSubmitting || disabled || !isStaged}>
-                          {i18n.t('Send')}
-                        </Button>
-                      </div>
+                      disabled ? null : (
+                        <div className="flex items-start gap-4 pb-1">
+                          {showAttachmentIcon && (
+                            <div
+                              {...getRootProps({
+                                className:
+                                  'dropzone self-stretch flex items-center',
+                              })}>
+                              <input {...getInputProps()} />
+                              <MdAttachFile className="size-6 text-black cursor-pointer" />
+                            </div>
+                          )}
+                          <Button
+                            type="submit"
+                            className="px-5 py-1.5 h-9 text-sm font-semibold"
+                            variant="royal"
+                            disabled={isSubmitting || !isStaged}>
+                            {i18n.t('Send')}
+                          </Button>
+                        </div>
+                      )
                     }
                     {...field}
+                    /* After the field spread, and merged rather than replaced:
+                     * react-hook-form always carries the key, so spreading it
+                     * last would blank this one out, while replacing it would
+                     * drop a form-level disable. */
+                    disabled={disabled || field.disabled}
                   />
                 </FormControl>
               </FormItem>
