@@ -182,12 +182,14 @@ export function Comments(props: CommentsProps) {
           isConversation &&
             'border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0',
           isDisabled &&
-            'bg-gray-light placeholder:text-gray-dark rounded-lg px-3 py-1.5',
+            'bg-gray-light placeholder:text-gray-dark rounded-lg px-3 py-1.5 disabled:opacity-100',
         )}
         placeholderText={
-          isLoggedIn
-            ? i18n.t(placeholder || COMMENT)
-            : i18n.t(DISABLED_COMMENT_PLACEHOLDER)
+          !isLoggedIn
+            ? i18n.t(DISABLED_COMMENT_PLACEHOLDER)
+            : placeholder
+              ? i18n.t(placeholder)
+              : i18n.t(COMMENT)
         }
         onSubmit={handleCreate}
       />
@@ -197,19 +199,22 @@ export function Comments(props: CommentsProps) {
 
     return (
       <div className="sticky bottom-4 flex items-start gap-3 rounded-2xl border border-ink-100 bg-white p-4 shadow-md transition-shadow focus-within:border-royal focus-within:shadow-[0_0_0_3px_rgba(21,84,181,0.12)]">
-        <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-peach-avatar text-[11px] font-bold text-white">
-          {session?.user?.image ? (
-            <Image
-              src={session.user.image}
-              alt=""
-              width={36}
-              height={36}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            getInitials(session?.user?.name ?? session?.user?.email)
-          )}
-        </div>
+        {/* No comment to author, so nobody to picture beside it. */}
+        {!isDisabled && (
+          <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-peach-avatar text-[11px] font-bold text-white">
+            {session?.user?.image ? (
+              <Image
+                src={session.user.image}
+                alt=""
+                width={36}
+                height={36}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              getInitials(session?.user?.name ?? session?.user?.email)
+            )}
+          </div>
+        )}
         <div className="min-w-0 flex-1">{input}</div>
       </div>
     );
