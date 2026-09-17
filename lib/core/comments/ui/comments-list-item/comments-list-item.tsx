@@ -404,20 +404,25 @@ export const CommentListItem = ({
             {showReactions && renderReactions()}
             {commentToDisplay && !disableReply && (
               <div className="flex gap-4 items-center">
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-royal hover:underline font-semibold"
-                  onClick={toggleCommentInput}>
-                  <MdReply className="w-3.5 h-3.5" />
-                  <span className="text-[11px]">{i18n.t('Reply')}</span>
-                </button>
+                {/* Replying needs an account; reading the replies does not. */}
+                {!isDisabled && (
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 text-royal hover:underline font-semibold"
+                    onClick={toggleCommentInput}>
+                    <MdReply className="w-3.5 h-3.5" />
+                    <span className="text-[11px]">{i18n.t('Reply')}</span>
+                  </button>
+                )}
 
                 {parentCommentId === id && !!childMailMessages?.length && (
                   <>
-                    <Separator
-                      orientation="vertical"
-                      className="h-3 bg-ink-200"
-                    />
+                    {!isDisabled && (
+                      <Separator
+                        orientation="vertical"
+                        className="h-3 bg-ink-200"
+                      />
+                    )}
                     <button
                       type="button"
                       className={cn(
@@ -454,7 +459,8 @@ export const CommentListItem = ({
                   isConversation
                     ? 'border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0'
                     : 'border bg-white',
-                  isDisabled && 'bg-gray-light placeholder:text-gray-dark',
+                  isDisabled &&
+                    'bg-gray-light placeholder:text-gray-dark disabled:opacity-100',
                 )}
                 placeholderText={
                   isLoggedIn
