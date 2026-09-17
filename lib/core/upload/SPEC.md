@@ -8,9 +8,14 @@ answered with an opaque, single-use **token** — never a `meta_file` id. At sub
 the consumer **redeems** the token and the server links the file to the record it
 has just created. A staged file that is never redeemed is reclaimed on its own.
 
-The file travels in **parts** against one server-side **upload**. No single
-request carries a whole file, and an interrupted transfer resumes from the bytes
-the server confirms it holds. A file that fits in one part costs one request.
+The file travels in **pieces** against one server-side **upload**. No single
+request carries a whole file — a request is bounded by the server's own request
+timeout, not by memory — and an interrupted transfer resumes from the bytes the
+server confirms it holds. A file that fits in one piece costs one request.
+
+"Piece" throughout means one request's worth. A store that assembles a file from
+**parts** of its own choosing is a separate matter, described under Storage;
+the two sizes are unrelated and a client never sees the second.
 
 Everything is scoped to a **tenant**, and within it to the **user** who staged
 the file. Purpose is checked where it decides an outcome — opening an upload and
@@ -24,26 +29,33 @@ already owns.
 A feature that stages files registers one entry in `UPLOAD_PURPOSES`, named
 `<app>:<kind>`:
 
-| Field      | Required | Meaning                                                        |
-| ---------- | -------- | -------------------------------------------------------------- |
-| `maxBytes` | yes      | Largest file this purpose accepts.                             |
-| `ttlMs`    | no       | How long a staged file survives unredeemed. Defaults to 24h.   |
-| `file`     | no       | Zod schema run against the assembled file — mime, magic bytes. |
+| Field      | Required | Meaning                                                                       |
+| ---------- | -------- | ----------------------------------------------------------------------------- |
+| `maxBytes` | yes      | Largest file this purpose accepts.                                            |
+| `ttlMs`    | no       | How long a staged file survives unredeemed. Defaults to 24h.                  |
+| `declared` | no       | Zod schema run on the name and type the client states, when the upload opens. |
 
-Do not put a size rule in the `file` schema; `maxBytes` covers it and is applied
-far earlier. Set `ttlMs` to the shortest window the feature can live with: it
-bounds how long an abandoned file occupies storage.
+A size rule cannot go in the `declared` schema: it only ever sees the name and
+the type, and `maxBytes` is what bounds the bytes. Do not expect it to prove
+anything about them either — see Validation.
+
+Set `ttlMs` to the shortest window the feature can live with: it bounds how long
+an abandoned file occupies storage. Raising one past the 24h default also obliges
+an edit to CONFIGURATION.md and `migrations/object-storage.md`, which tell an
+operator the lifecycle window a bucket needs as a figure in hours — 25 today,
+being the longest TTL plus the hourly sweep.
 
 An unregistered purpose is refused. Purposes are permanent once shipped — a
 staged file names its purpose, and renaming one strands every upload in flight.
 
 ## Staging from the browser
 
-Use `useStagedUpload({tenant})`. Nothing else should speak the protocol directly.
+Use `useStagedUpload({tenantScope})`. Nothing else should speak the protocol
+directly.
 
 ```ts
 const {uploads, upload, pause, resume, remove, reset, isStaged} =
-  useStagedUpload({tenant});
+  useStagedUpload({tenantScope});
 
 const {ids, done} = upload(files, {purpose, maxBytes});
 ```
@@ -119,7 +131,8 @@ Content-Type: application/octet-stream
 200 → the completion response below, if the body carried the whole file
 409 → X-File-Id, X-File-Offset — the body stopped part-way; the upload exists
       and holds what arrived
-400 → X-File-Size missing, unparseable, or zero
+400 → X-File-Size missing, unparseable or zero, or the purpose refused the
+      declared name and type (the two are told apart by the JSON `error`)
 404 → no such purpose
 413 → larger than the purpose accepts
 ```
@@ -134,9 +147,8 @@ is refused — there is nothing to stage.
 
 A body may be sent with this request, and when it carries the whole file the
 upload is opened, filled and completed in one round trip. Send one only for a
-file that fits in a single part — a body is still one part, and the same size
-and proxy limits apply to it as to any append. Open a larger file with no body
-and send every part as an append.
+file the client is willing to send as a single piece — the same limits apply to
+it as to any append. Open a larger file with no body and send it as appends.
 
 ### Ask where to resume
 
@@ -158,7 +170,7 @@ Content-Type: application/octet-stream
 [body: the part]
 
 204 → X-File-Offset (new)
-400 → X-File-Offset missing or unparseable, or no body sent
+400 → X-File-Offset missing or unparseable
 409 → X-File-Id, X-File-Offset (authoritative) — either the offset did not
       match, or the body stopped part-way and what arrived was kept
 413 → more bytes than the file declared; the upload is released
@@ -167,15 +179,30 @@ Content-Type: application/octet-stream
 
 ### Complete
 
-Implicit, on the part that brings the offset up to `X-File-Size`. The assembled
-file is validated and recorded, and the token is returned:
+Happens on its own with the piece that brings the offset up to `X-File-Size`,
+and can also be asked for: a `PATCH` carrying **no bytes** means "finish this".
 
 ```
+PATCH  /{tenant}/api/upload/stage/{purpose}
+X-File-Id: <id>
+X-File-Offset: <the offset the server holds — compared, as for any piece>
+[empty body]
+
 200 → X-File-Id, X-File-Offset · {token, fileName, sizeText}
+409 → X-File-Id, X-File-Offset — the offset disagrees, or not every byte is
+      there; carry on from the offset given
+404 → no such live upload
 ```
 
-Repeating the final part returns the same token, so a client that never saw the
-answer may simply ask again.
+An empty piece is a piece, so the offset is compared exactly as it is for one
+carrying bytes: ask at `X-File-Size` and a whole file answers the token, while
+anything else answers `409` with the offset to carry on from. A client that has
+lost track sends `HEAD` first.
+
+Completing is idempotent, so a client whose answer was lost — or whose earlier
+completion failed on something that has since passed — asks again and is given
+the same token. Without that an upload whose every byte had arrived could not be
+claimed at all.
 
 ### Give up
 
@@ -219,21 +246,28 @@ Three checks, because the declared length is client input:
 1. The client refuses a file over the `maxBytes` it was given, before any
    request. A convenience, not a control.
 2. `X-File-Size` against the purpose's `maxBytes`, before a byte is read.
-3. Every part against the bytes actually received.
+3. Every piece against the bytes actually received, counted as they pass, so a
+   piece carrying more than the file has left to receive is refused with `413`
+   and the upload given up.
 
 Only the last two are enforcement. A client that skips the first is still
 refused.
 
 ## Validation
 
-A purpose's `file` schema runs once, at completion, against the whole assembled
-file. A rejection answers `400` and gives the upload up, so the bytes are gone
-and there is nothing left to resume from.
+A purpose's `declared` schema runs once, when the upload opens, against the name
+and the type the client states in `X-File-Name` and `X-File-Type`. A rejection
+answers `400` before a byte is transferred.
 
-A rejected file will be rejected again on every attempt, so a client that offers
-a retry should not offer one here. The browser hook does not yet tell this case
-apart from a transient failure: it reports the generic failure message and its
-retry re-sends the whole file to the same refusal.
+**It checks what the client says, not what it sends.** Both values arrive in
+request headers, so neither is evidence about the bytes: a file declaring
+`image/png` and carrying anything at all satisfies every schema here. The check
+keeps an obvious mistake out of a feature and names the reason in the answer.
+
+Nothing validates content, and nothing can at this layer: the pieces reach the
+store as they arrive and no whole file is ever held to inspect. A purpose whose
+safety depends on what a file really contains has to get that where the file is
+served.
 
 ## Expiry
 
@@ -261,7 +295,7 @@ client having given anything up.
     ┌────────────────────┐   ┌──────────────────────────┐
     │ Complete (claim)   │   │  Abandoned (incomplete)  │
     │ meta_file + token  │   └──────────────────────────┘
-    └────────────────────┘         │ REAP: delete the part file
+    └────────────────────┘         │ REAP: release the store's write
        │              │            ▼
 redeem │              │ TTL   ┌──────────────────────────┐
        ▼              ▼       │   Reaped (record kept)   │
@@ -281,59 +315,118 @@ Two sweeps run per tenant, independently: **reap** reclaims storage once an
 upload has expired, and **prune** deletes the leftover record after a retention
 window.
 
-| Record state                         | Redeemable? | Reap                                          | Prune                  |
-| ------------------------------------ | ----------- | --------------------------------------------- | ---------------------- |
-| Incomplete, **within** TTL           | ❌          | —                                             | —                      |
-| Incomplete, **past** TTL (abandoned) | ❌          | **deletes** the part file, sets `reapedAt`    | —                      |
-| Complete, **within** TTL             | ✅          | —                                             | —                      |
-| Complete, **past** TTL (abandoned)   | ❌          | **deletes** blob + meta_file, sets `reapedAt` | —                      |
-| Reaped, **within** retention         | —           | — (skipped, `reapedAt` set)                   | —                      |
-| Reaped, **past** retention           | —           | —                                             | **deletes the record** |
-| Consumed, **within** retention       | spent       | —                                             | —                      |
-| Consumed, **past** retention         | spent       | —                                             | **deletes the record** |
+| Record state                         | Redeemable? | Reap                                            | Prune                  |
+| ------------------------------------ | ----------- | ----------------------------------------------- | ---------------------- |
+| Incomplete, **within** TTL           | ❌          | —                                               | —                      |
+| Incomplete, **past** TTL (abandoned) | ❌          | **releases** the store's write, sets `reapedAt` | —                      |
+| Complete, **within** TTL             | ✅          | —                                               | —                      |
+| Complete, **past** TTL (abandoned)   | ❌          | **deletes** blob + meta_file, sets `reapedAt`   | —                      |
+| Reaped, **within** retention         | —           | — (skipped, `reapedAt` set)                     | —                      |
+| Reaped, **past** retention           | —           | —                                               | **deletes the record** |
+| Consumed, **within** retention       | spent       | —                                               | —                      |
+| Consumed, **past** retention         | spent       | —                                               | **deletes the record** |
 
 A redeemed file belongs to the record that redeemed it, and no sweep ever touches
 it again. Reaping keeps the record, marked `reapedAt`, so a vanished file can be
 accounted for; pruning is what finally removes it.
 
+## Storage
+
+A piece that arrives is handed straight to the tenant's **file store**, which
+takes it up again for each request and decides for itself how to gather one. The
+store is the one the tenant's AOS instance keeps its files in — its upload
+directory, or an S3-compatible bucket — chosen by the tenant's `aos.storage`
+settings; see `lib/core/storage`. The `meta_file` row records the key the store
+holds the file under and the store's kind (`store_type`), as AOP records them.
+
+A session records two things about it: the **key** the file will take, and an
+opaque **state** the store hands back after every piece. The state is the
+store's own bookkeeping and this module never reads it — it is persisted and
+handed back, and that is the whole of the contract. Recording it in the same
+insert that opens the session is what keeps anything the store stages from being
+left untracked.
+
+An interrupted piece resumes from the exact byte it stopped on, whichever store
+holds the file. A bucket reaches that differently from a directory: it cannot be
+appended to, and it refuses any part but the last below 5 MiB, so the bytes that
+do not yet fill a part are gathered in `upload.tempDir` — at most one part's
+worth per upload in flight.
+
+Two cases fall back to the last whole part rather than the exact byte, and both
+cost at most `partSize` of re-sent bytes: a part that reached the bucket whose
+count was never recorded, and a restart that cleared `upload.tempDir`. The
+`filesystem` store has one case of its own, and it is not a boundary: a storage
+directory cleared under a live upload leaves nothing to resume from, and the
+client is sent back to zero.
+
+The store is the authority on how many bytes it holds. Where its count and the
+record's disagree, the record is brought to the store's count and the client is
+answered with it, forward or back. Neither leaves a hole and neither counts a
+byte twice.
+
+Completing makes the file visible under its key before the record says so, so a
+session interrupted between the two leaves a stored file its record does not yet
+name; the sweep finds it through the key it does record.
+
 ## Configuration
 
-Both settings are per tenant, and come from that tenant's configuration —
-nothing here reads a variable of its own.
+Nothing here reads a variable of its own; every setting comes from the tenant's
+or the deployment's configuration.
 
-| Tenant setting                                     | Default  | Controls                                                 |
-| -------------------------------------------------- | -------- | -------------------------------------------------------- |
-| `PORTAL_TENANT_<ID>_UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d) | How long a terminal (consumed or reaped) record is kept. |
-| `PORTAL_TENANT_<ID>_AOS_STORAGE`                   | —        | Blob storage root. Required.                             |
+| Setting                                            | Default                 | Controls                                                                                               |
+| -------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `PORTAL_TENANT_<ID>_UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d)                | How long a terminal (consumed or reaped) record is kept.                                               |
+| `PORTAL_TENANT_<ID>_AOS_STORAGE_…`                 | —                       | The tenant's file store: provider and its settings. Required.                                          |
+| `PORTAL_UPLOAD_TEMP_DIR`                           | `<temp>/portal/uploads` | Where a store that cannot be appended to stages a piece, one subdirectory per tenant. Deployment-wide. |
+| `PORTAL_TENANT_<ID>_AOS_STORAGE_S3_PART_SIZE`      | 16 MiB                  | Bytes per part for an S3 store; no less than 5 MiB, no more than 5 GiB.                                |
 
 The retention is read in hours, fractional allowed; unset, non-positive or
 invalid falls back to the default.
 
-`aos.storage` is the AOS instance's `data.upload.dir` base. A tenant on a shared
-AOS (`aos.tenantId` set) reads and writes under `<aos.storage>/<aos.tenantId>`,
-matching AOP's own per-tenant subdirectory; a dedicated instance uses the path
-as-is. The resolved root is what every path in this module is taken against, and
-it travels with the tenant's database client so the two cannot be paired from
-different tenants.
+The tenant's store and its database client travel together through this module,
+so the two cannot be paired from different tenants. A
+tenant on a shared AOS (`aos.tenantId` set) reads and writes its store under the
+subdirectory or key prefix AOP gives that tenant; a dedicated instance uses the
+store as it is.
 
 Everything else is fixed: per-purpose settings live in the registry, and the
 sweep cadences bound only the lag between expiry and deletion.
 
 ## Limitations
 
-- **Single instance only** — a part file lives on the disk of the instance that
-  received it, the sweeps take no cross-instance lock, and the queue that stops
-  two appends to one upload from interleaving is an in-process map. Scaling out
-  needs shared storage or upload-pinned routing, an advisory lock per sweep, and
-  a shared lock per upload.
-- **Containment is lexical.** A recorded path is verified to resolve inside the
-  tenant's storage root, but a symlink inside that root pointing out of it is not
-  followed or detected. (A tenant's root resolving inside another's — the same
-  directory, or a subdirectory of it — is refused when the configuration is
-  read, so that is not a way in.)
-- **A failed delete leaks.** Storage is given up in the record before it is
-  removed from disk, so an `unlink` that fails leaves a file no later sweep looks
+- **Single instance only.** The sweeps take no cross-instance lock, and the queue
+  that stops two appends to one upload from interleaving is an in-process map.
+  For an S3 store the bytes gathered for the part in flight also sit on the disk
+  of the instance that received them. Scaling out needs upload-pinned routing, an
+  advisory lock per sweep, and a shared lock per upload — a shared staging
+  directory is **not** an alternative to the per-upload lock, and without it is
+  worse than per-instance directories, since two instances gathering one part in
+  the same file leave a file of the right length holding the wrong bytes. The
+  stored files themselves are shared wherever the store is.
+- **A resume survives a restart only as far as the store's own bytes do.** On the
+  `filesystem` store they are in the storage directory and survive. On `s3`,
+  whole parts are in the bucket and survive; the part being gathered is in
+  `PORTAL_UPLOAD_TEMP_DIR`, which defaults to `portal/uploads` inside the
+  operating system's temporary directory — point it at a volume to keep that last part too, or accept
+  resuming from the last part boundary after a restart.
+- **Containment is lexical.** A recorded key is verified to name a location
+  inside the tenant's store and outside the directory that store gathers writes
+  in, but a symlink inside a directory pointing out of it is not followed or
+  detected. (A tenant's store root resolving inside another's — the same
+  directory or bucket prefix, or one under the other — is refused when the
+  configuration is read, so that is not a way in.)
+- **A failed delete leaks.** Giving up on a session releases what the store
+  staged first and only then gives up the record, so a failure there is retried
+  by the next sweep — but the assembled file is deleted after the record has
+  given up its name, so a removal that fails there leaves a file no sweep looks
   for. It is logged; nothing retries it.
+- **Staged bytes no record names are reclaimed by age, not by record.** Each
+  store sweeps its own staging — a bucket's local spill files, a filesystem's
+  `.uploads-in-progress` directory — of anything untouched for longer than the
+  longest a session may live. That is the only reach for a piece that arrived
+  after its record gave up the name it was staged under, which a release or a
+  sweep racing an append leaves behind. A bucket needs a lifecycle rule
+  besides, since a multipart upload carries no age this can read.
 - **No cap on open uploads.** A record is created from headers alone, before any
   bytes arrive. Each is bounded by its TTL, but nothing limits how many one user
   holds at once.

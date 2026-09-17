@@ -1,3 +1,5 @@
+import {Readable} from 'stream';
+
 /*
  * NOTE: [Request body limit]
  *
@@ -45,7 +47,16 @@ async function* chunksWithin(
 
   if (!request.body) return;
 
-  const reader = request.body.getReader();
+  yield* chunksOf(request.body, maxBytes);
+}
+
+/* The counting itself, over any stream: the `content-length` short-circuit
+ * above needs a request, and nothing else here does. */
+async function* chunksOf(
+  body: ReadableStream<Uint8Array>,
+  maxBytes: number,
+): AsyncGenerator<Uint8Array> {
+  const reader = body.getReader();
 
   let held = 0;
 
@@ -67,6 +78,27 @@ async function* chunksWithin(
   } finally {
     await reader.cancel().catch(() => undefined);
   }
+}
+
+/**
+ * A stream that fails past `maxBytes`, for a body already taken off a request.
+ *
+ * For a handler that hands the body to something taking a stream rather than
+ * reading it: the bytes are counted as they pass and none is held, so the limit
+ * costs no memory. The stream errors with `RequestBodyTooLarge` at the byte that
+ * passes the limit, which the consumer surfaces as its own failure. Takes the
+ * body rather than the request, so it offers no short-circuit on a declared
+ * `content-length`; a handler appending piece by piece has only the body.
+ *
+ * See NOTE: [Request body limit].
+ *
+ * @param maxBytes - the most to let through
+ */
+export function limitStream(
+  body: ReadableStream<Uint8Array>,
+  maxBytes: number,
+): Readable {
+  return Readable.from(chunksOf(body, maxBytes));
 }
 
 /**
