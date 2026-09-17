@@ -1,0 +1,6 @@
+{
+  "title": "Keep a tenant's files in an S3-compatible bucket as well as on a filesystem",
+  "type": "feature",
+  "description": "A tenant's files can now live in an S3-compatible bucket instead of a directory, configured from the values its AOS instance already uses for `data.object-storage.*`, so a file written by either application opens in the other. The setting that named the storage directory, `aos.storage` / `PORTAL_TENANT_<ID>_AOS_STORAGE`, is replaced by a `storage` group naming a provider and its settings; the previous spelling is refused, and the runbook at https://github.com/axelor/goovee/blob/main/migrations/object-storage.md covers rewriting it and moving a tenant to a bucket. Uploading a large file no longer pauses at the end while the file is stored, and an upload interrupted part-way carries on from where it stopped. A file of a type its feature does not accept is refused as soon as it is picked, before it is transferred.",
+  "scope": ["core", "events", "forum", "news", "shop", "website"]
+}
