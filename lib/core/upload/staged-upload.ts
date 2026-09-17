@@ -1,10 +1,14 @@
-import fs from 'fs';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import type {Client, GooveeClient} from '@/goovee/.generated/client';
 import {COMMENT_ATTACHMENT_PURPOSE, MAX_FILE_SIZE} from '@/comments/constants';
-import {resolveStoragePath} from '@/storage/index';
+import {
+  StoreKeyError,
+  StoreStateError,
+  type FileStore,
+  type WriteState,
+} from '@/storage/index';
 import type {ID} from '@/types';
 import {
   DEFAULT_RECORD_RETENTION_HOURS,
@@ -12,15 +16,8 @@ import {
   HOUR_MS,
   REAP_BATCH_LIMIT,
 } from './constants';
-import {
-  appendToPart,
-  createMetaFile,
-  derivePartPath,
-  promotePart,
-  removePart,
-  removeSessionFiles,
-  resolvePart,
-} from './file';
+import {limitStream} from '@/security/request-body';
+import {createMetaFile, deriveStoreKey} from './file';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -46,8 +43,9 @@ import {
 
 /**
  * Generic, app-agnostic pre-upload mechanism. A file is *staged* before the
- * entity that will own it exists, uploaded in parts so no single request has to
- * carry the whole file and an interrupted transfer resumes where it stopped.
+ * entity that will own it exists, uploaded in pieces so no single request has
+ * to carry the whole file and an interrupted transfer resumes where it
+ * stopped.
  * Completing a session returns an opaque single-use token (never the `meta_file`
  * id). At submit the consumer *redeems* the token, which re-verifies owner +
  * purpose + freshness and hands back the real id to link.
@@ -63,14 +61,35 @@ export interface UploadPolicy {
    */
   maxBytes: number;
   /**
-   * Optional validation of the materialized file — mime and any custom
-   * `.refine()` (image dimensions, magic bytes, filename, …). Size is handled by
-   * `maxBytes`, so this need not repeat `.max()`. Use the `error` param for
-   * friendly messages.
+   * Optional check run when the session opens, so an unwanted file costs no
+   * transfer.
+   *
+   * Both fields arrive in request headers, so neither is evidence about the
+   * bytes: a file declaring `image/png` and carrying anything satisfies this. A
+   * purpose whose safety depends on what a file contains needs that where the
+   * file is served — nothing here ever holds a whole file to inspect.
    */
-  file?: z.ZodType<File>;
-  /** Override the default 24h time-to-live. */
+  declared?: z.ZodType<DeclaredFile>;
+  /**
+   * Override the default 24h time-to-live.
+   *
+   * A value above the default obliges an edit to the lifecycle-rule figure in
+   * CONFIGURATION.md and migrations/object-storage.md, which state the window a
+   * bucket needs as a number of hours. An operator cannot read this field, so
+   * the number there is the only form of it they have.
+   */
   ttlMs?: number;
+}
+
+/** What a client states about a file when it opens a session for one. */
+export type DeclaredFile = {
+  name: string;
+  type: string;
+};
+
+/** The shape a purpose's `declared` check refines. */
+export function declaredFile(): z.ZodType<DeclaredFile> {
+  return z.object({name: z.string(), type: z.string()});
 }
 
 /**
@@ -84,7 +103,7 @@ const ATTACHMENT_UPLOAD_TTL_MS = 60 * 60 * 1000; // 1h
 /**
  * Purpose → upload policy. Each feature registers its own `<app>:<kind>` entry;
  * `maxBytes` caps the upload (enforced as a streaming limit by the route) and
- * the optional `file` schema validates type/content.
+ * the optional `declared` schema refuses a file by what the client says it is.
  *
  * A Map, not an object, so a lookup cannot reach `Object.prototype`: indexing
  * an object with `constructor` or `__proto__` returns a truthy non-policy,
@@ -110,14 +129,12 @@ const UPLOAD_PURPOSES = new Map<string, UploadPolicy>([
     {
       maxBytes: FORUM_MAX_FILE_SIZE,
       ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
-      file: z
-        .file()
-        .refine(
-          f =>
-            f.type.startsWith('image/') ||
-            FORUM_ATTACHMENT_DOC_MIMES.includes(f.type),
-          {error: 'Unsupported file type'},
-        ),
+      declared: declaredFile().refine(
+        ({type}) =>
+          type.startsWith('image/') ||
+          FORUM_ATTACHMENT_DOC_MIMES.includes(type),
+        {error: 'Unsupported file type'},
+      ),
     },
   ],
   /* Profile / company pictures — a single image staged on pick and redeemed
@@ -128,7 +145,7 @@ const UPLOAD_PURPOSES = new Map<string, UploadPolicy>([
     {
       maxBytes: PARTNER_PICTURE_MAX_FILE_SIZE,
       ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
-      file: z.file().refine(f => f.type.startsWith('image/'), {
+      declared: declaredFile().refine(({type}) => type.startsWith('image/'), {
         error: 'Only images are allowed',
       }),
     },
@@ -152,26 +169,27 @@ const UPLOAD_PURPOSES = new Map<string, UploadPolicy>([
     MARKETPLACE_BUNDLE_PURPOSE,
     {
       maxBytes: MAX_BUNDLE_SIZE,
-      file: z
-        .file()
-        .refine(
-          file =>
-            file.type === 'application/zip' ||
-            file.type === 'application/x-zip-compressed' ||
-            file.name.toLowerCase().endsWith('.zip'),
-          {error: 'Bundle must be a .zip file'},
-        ),
+      declared: declaredFile().refine(
+        ({name, type}) =>
+          type === 'application/zip' ||
+          type === 'application/x-zip-compressed' ||
+          name.toLowerCase().endsWith('.zip'),
+        {error: 'Bundle must be a .zip file'},
+      ),
     },
   ],
-  /* Raster formats only: SVG can carry embedded scripts and external refs, so
-   * accepting user-supplied SVG here would serve an XSS vector. */
+  /* Raster formats only, because SVG carries scripts and external references.
+   * The declared type is the client's own word, so this turns away a mistake
+   * rather than an attempt: whatever keeps a script in a screenshot from running
+   * has to be how the file is served, not this. */
   [
     MARKETPLACE_SCREENSHOT_PURPOSE,
     {
       maxBytes: MAX_IMAGE_SIZE,
-      file: z.file().mime([...ACCEPTED_IMAGE_TYPES], {
-        error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed',
-      }),
+      declared: declaredFile().refine(
+        ({type}) => (ACCEPTED_IMAGE_TYPES as readonly string[]).includes(type),
+        {error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed'},
+      ),
     },
   ],
 ]);
@@ -197,15 +215,14 @@ export interface SessionState {
 }
 
 /**
- * Outcome of appending a chunk. Everything other than `ok` is a protocol-level
+ * Outcome of appending a piece. Everything other than `ok` is a protocol-level
  * refusal that the route turns into a status code; genuine faults throw.
  */
 export type AppendOutcome =
   | {status: 'ok'; offset: number; complete: boolean}
   | {status: 'not-found'}
   | {status: 'complete'}
-  | {status: 'conflict'; offset: number}
-  | {status: 'too-large'};
+  | {status: 'conflict'; offset: number};
 
 /** Outcome of completing a session, once every byte has been received. */
 export type FinalizeOutcome =
@@ -222,6 +239,29 @@ export type FinalizeOutcome =
  */
 function sessionExpiry(policy: UploadPolicy): Date {
   return new Date(Date.now() + (policy.ttlMs ?? DEFAULT_TTL_MS));
+}
+
+/*
+ * The store's bookkeeping, as text.
+ *
+ * A `String` field, because the count and the state are written together in one
+ * statement, and `updateAll` — which is what makes that one statement a
+ * compare-and-set — does not resolve a lazy field. `JSON` and `Text` are both
+ * generated lazily (`select: false`), so either would silently take `{}` there.
+ * Nothing queries into the state, so a field that could be queried buys nothing
+ * either, and the column it generates — a `varchar` of no stated length — holds
+ * far more than the longest state a file can produce.
+ */
+function parseStoreState(value: string | null | undefined): WriteState | null {
+  if (!value) return null;
+
+  try {
+    return JSON.parse(value) as WriteState;
+  } catch {
+    /* Raised as the refusal a store gives for a state of the wrong shape: both
+     * mean the bookkeeping cannot be read, so a caller handles one thing. */
+    throw new StoreStateError(value);
+  }
 }
 
 /*
@@ -252,6 +292,7 @@ export async function createSession({
   purpose,
   owner,
   client,
+  store,
   fileName,
   fileType,
   uploadLength,
@@ -259,6 +300,7 @@ export async function createSession({
   purpose: string;
   owner: ID;
   client: Client;
+  store: FileStore;
   fileName: string;
   fileType: string;
   uploadLength: number;
@@ -268,6 +310,16 @@ export async function createSession({
     throw new Error(`Unknown upload purpose: ${purpose}`);
   }
 
+  /* Refused before a byte is accepted rather than after every byte has been. */
+  if (policy.declared) {
+    policy.declared.parse({name: fileName, type: fileType});
+  }
+
+  const storeKey = deriveStoreKey(fileName);
+  const write = await store.openWrite(storeKey, {contentType: fileType});
+
+  /* The store's bookkeeping goes in with the insert, so nothing it stages is
+   * ever left with no row naming it. */
   const session = await client.stagedUpload.create({
     data: {
       token: crypto.randomUUID(),
@@ -276,7 +328,8 @@ export async function createSession({
       owner: {select: {id: owner}},
       fileName,
       fileType,
-      partPath: derivePartPath(fileName),
+      storeKey,
+      storeState: JSON.stringify(write.state),
       uploadLength: String(uploadLength),
       uploadOffset: '0',
       expiresAt: sessionExpiry(policy),
@@ -327,49 +380,36 @@ async function reconcileLostAppend({
   sessionId,
   owner,
   client,
-  storagePath,
-  partPath,
 }: {
   sessionId: string;
   owner: ID;
   client: Client;
-  storagePath: string;
-  partPath: string;
 }): Promise<AppendOutcome> {
   const current = await client.stagedUpload.findOne({
     where: {sessionId, owner: {id: owner}},
     select: {
       uploadOffset: true,
-      partPath: true,
+      storeKey: true,
       reapedAt: true,
       metaFile: {id: true},
     },
   });
 
-  /* Completed while this append was running. If this append opened the part
-   * after the rename it created a new file under that name, which belongs to
-   * nothing; if it opened before, its writes went into the finished file and
-   * there is nothing here to undo. Best effort either way — the record is
-   * whole, and a failure to tidy up is only a leak. */
-  if (current?.metaFile) {
-    await removePart({partPath, storagePath}).catch(error => {
-      console.error('Stage upload part cleanup failed:', error);
-    });
-    return {status: 'complete'};
-  }
+  /* Completed while this append was running: the file is whole and its record
+   * names it. What this append staged is left alone, since a store assembling
+   * the same key from its own pieces may still be doing so, and taking those
+   * away mid-assembly loses a file every byte of which arrived. */
+  if (current?.metaFile) return {status: 'complete'};
 
   // still filling, another append simply got there first
-  if (current?.partPath && !current.reapedAt) {
+  if (current?.storeKey && !current.reapedAt) {
     return {status: 'conflict', offset: toBytes(current.uploadOffset)};
   }
 
-  /* Released or reaped meanwhile, so these bytes belong to nothing. The sweep
-   * skips a released row, so the part is removed here or not at all — but a
-   * failure to remove it must not turn a gone session into a server fault,
-   * since the caller's answer is the same either way. */
-  await removePart({partPath, storagePath}).catch(error => {
-    console.error('Stage upload part cleanup failed:', error);
-  });
+  /* Released or reaped meanwhile, so these bytes belong to nothing — and are
+   * not necessarily gone, since this append may have staged after the release
+   * aborted the write it found. Left to the store's sweep, which is what
+   * reaches staged bytes no record names. */
   return {status: 'not-found'};
 }
 
@@ -381,8 +421,8 @@ async function reconcileLostAppend({
  * contents are not. A caller sending one part at a time never waits here; one
  * that resumes before its abandoned part finished arriving does.
  *
- * An entry lives only while something is queued behind it, so the map does not
- * grow with every upload the process has ever served.
+ * An entry lives only while an append of its own is in hand, so the map does
+ * not grow with every upload the process has ever served.
  */
 /* Keyed by tenant and session, because `sessionId` is only unique within one
  * tenant's own table — two tenants could otherwise serialise against each
@@ -419,16 +459,19 @@ function queueAppend<T>(key: string, run: () => Promise<T>): Promise<T> {
  * A client is expected to keep one chunk in flight per session. One that does
  * not is made to wait rather than allowed to corrupt its own file.
  */
-export function appendChunk(args: {
+export function appendChunk({
+  tenantId,
+  ...args
+}: {
   tenantId: string;
   sessionId: string;
   owner: ID;
   offset: number;
-  stream: ReadableStream<Uint8Array>;
+  body: ReadableStream<Uint8Array>;
   client: Client;
-  storagePath: string;
+  store: FileStore;
 }): Promise<AppendOutcome> {
-  return queueAppend(`${args.tenantId}:${args.sessionId}`, () =>
+  return queueAppend(`${tenantId}:${args.sessionId}`, () =>
     appendOneChunk(args),
   );
 }
@@ -437,16 +480,16 @@ async function appendOneChunk({
   sessionId,
   owner,
   offset,
-  stream,
+  body,
   client,
-  storagePath,
+  store,
 }: {
   sessionId: string;
   owner: ID;
   offset: number;
-  stream: ReadableStream<Uint8Array>;
+  body: ReadableStream<Uint8Array>;
   client: Client;
-  storagePath: string;
+  store: FileStore;
 }): Promise<AppendOutcome> {
   const row = await client.stagedUpload.findOne({
     where: {
@@ -458,7 +501,8 @@ async function appendOneChunk({
     },
     select: {
       purpose: true,
-      partPath: true,
+      storeKey: true,
+      storeState: true,
       uploadOffset: true,
       uploadLength: true,
       metaFile: {id: true},
@@ -467,37 +511,34 @@ async function appendOneChunk({
 
   if (!row) return {status: 'not-found'};
 
-  /* Checked before the part file, which is cleared the moment a session
+  /* Checked before the store, whose write is given up the moment a session
    * completes: a client whose completion response was lost re-sends its last
    * chunk, and must be told the file is already whole rather than that its
    * session has vanished. */
   if (row.metaFile) return {status: 'complete'};
-  if (!row.partPath) return {status: 'not-found'};
+  const state = parseStoreState(row.storeState);
+
+  if (!row.storeKey || !state) return {status: 'not-found'};
 
   const committed = toBytes(row.uploadOffset);
   const length = toBytes(row.uploadLength);
 
   if (offset !== committed) return {status: 'conflict', offset: committed};
 
-  const policy = getUploadPolicy(row.purpose);
-  if (!policy) {
-    throw new Error(`Unknown upload purpose: ${row.purpose}`);
-  }
+  const write = await store.resumeWrite(row.storeKey, state);
 
-  const written = await appendToPart({
-    partPath: row.partPath,
-    storagePath,
-    stream,
-    offset: committed,
-    maxBytes: Math.min(policy.maxBytes, length),
-  });
-
-  if (written.status === 'too-large') return {status: 'too-large'};
-
-  /* Fewer durable bytes than the record claimed — the count is corrected down
-   * to what survived so the client re-sends from there, rather than a hole
-   * being papered over. */
-  if (written.status === 'short') {
+  /*
+   * The store is the authority on how many bytes it holds, and the record is
+   * brought to it either way rather than bytes being laid at a position neither
+   * agrees on.
+   *
+   * Behind the store — a piece whose commit was refused, a body that tore after
+   * staging what it had — the client is sent forward past bytes it has already
+   * delivered. Ahead of it — a scratch directory cleared — the count comes down
+   * and those bytes are sent again. Correcting only downward would lay a later
+   * piece past bytes nothing counted.
+   */
+  if (write.offset !== committed) {
     const corrected = await client.stagedUpload.updateAll({
       where: {
         sessionId,
@@ -506,60 +547,42 @@ async function appendOneChunk({
         consumedAt: {eq: null},
         reapedAt: {eq: null},
       },
-      set: {uploadOffset: String(written.offset)},
-    });
-
-    /* The correction is refused on a session that completed meanwhile, whose
-     * recorded count is the right one — so the caller is told what the record
-     * holds, not what this append found. */
-    if (!Number(corrected)) return {status: 'conflict', offset: committed};
-
-    return {status: 'conflict', offset: written.offset};
-  }
-
-  /*
-   * The part stopped arriving part-way, but what arrived is durable. It is
-   * committed under the same guard as a whole part, and the caller is answered
-   * with the offset to carry on from rather than being failed — a paused upload
-   * then loses only the bytes that were still on the wire.
-   */
-  if (written.status === 'torn') {
-    const salvaged = await client.stagedUpload.updateAll({
-      where: {
-        sessionId,
-        uploadOffset: {eq: String(committed)},
-        metaFile: {id: {eq: null}},
-        consumedAt: {eq: null},
-        reapedAt: {eq: null},
+      set: {
+        uploadOffset: String(write.offset),
+        storeState: JSON.stringify(write.state),
       },
-      set: {uploadOffset: String(written.offset)},
     });
 
-    /* Refused because the upload moved on meanwhile — completed, released or
-     * reaped while this body drained. Reconciled exactly as an intact part is,
-     * so a part file this append re-created under a name that has since been
-     * promoted away is not left behind. */
-    if (!Number(salvaged))
-      return reconcileLostAppend({
-        sessionId,
-        owner,
-        client,
-        storagePath,
-        partPath: row.partPath,
-      });
-
-    /* The tear happened after the last byte, so the file is whole and finishes
-     * exactly as an intact final part would. */
-    if (written.offset === length) {
-      return {status: 'ok', offset: written.offset, complete: true};
+    /* Refused on a session that moved on meanwhile, whose own record is the
+     * right one — so the caller is told what the record holds. */
+    if (!Number(corrected)) {
+      return reconcileLostAppend({sessionId, owner, client});
     }
 
-    return {status: 'conflict', offset: written.offset};
+    /* Every byte already arrived, so there is nothing left to send: the file is
+     * whole and completes exactly as an intact final piece would. */
+    if (write.offset === length) {
+      return {status: 'ok', offset: write.offset, complete: true};
+    }
+
+    return {status: 'conflict', offset: write.offset};
   }
 
-  /* The commit is conditional on the upload still being the one that was
-   * appended to: the same offset, not completed, and neither released nor
-   * reaped meanwhile. */
+  const policy = getUploadPolicy(row.purpose);
+  if (!policy) {
+    throw new Error(`Unknown upload purpose: ${row.purpose}`);
+  }
+
+  /* Counted as it passes, so a piece carrying more than the file has left to
+   * receive is refused rather than handed to the store. */
+  await write.append(
+    limitStream(body, Math.min(policy.maxBytes, length) - committed),
+  );
+
+  /* Conditional on the upload still being the one that was appended to: the
+   * same offset, not completed, and neither released nor reaped meanwhile. The
+   * store's bookkeeping is recorded with the count, so the two cannot disagree
+   * about which write the bytes went to. */
   const committedRows = await client.stagedUpload.updateAll({
     where: {
       sessionId,
@@ -568,52 +591,45 @@ async function appendOneChunk({
       consumedAt: {eq: null},
       reapedAt: {eq: null},
     },
-    set: {uploadOffset: String(written.offset)},
+    set: {
+      uploadOffset: String(write.offset),
+      storeState: JSON.stringify(write.state),
+    },
   });
 
   if (!Number(committedRows)) {
-    return reconcileLostAppend({
-      sessionId,
-      owner,
-      client,
-      storagePath,
-      partPath: row.partPath,
-    });
+    return reconcileLostAppend({sessionId, owner, client});
   }
 
   return {
     status: 'ok',
-    offset: written.offset,
-    complete: written.offset === length,
+    offset: write.offset,
+    complete: write.offset === length,
   };
 }
 
 /**
- * Complete an upload: validate the assembled file, create its `meta_file` row
- * and hand back the redeem token.
+ * Complete an upload: assemble the file in the store, create its `meta_file`
+ * row and hand back the redeem token.
  *
- * Validation runs here, on the whole file — mime sniffing and content checks
- * cannot be applied to a part in isolation. A failing schema throws, and the
- * route releases the session in response.
- *
- * The part file is renamed to the name the `meta_file` records, and `partPath`
- * is cleared as the blob changes hands. The row and the `meta_file` commit
- * together, leaving no `meta_file` the reaper could not reach through its
+ * The store makes the file visible under the key the `meta_file` records, and
+ * `storeState` is cleared as the file changes hands. The row and the `meta_file`
+ * commit together, leaving no `meta_file` the reaper could not reach through its
  * record.
  *
  * Completing an already-complete upload returns the same token, so a retried
- * final chunk is harmless.
+ * final piece — or an explicit ask to finish — is harmless.
  */
 export async function finalizeSession({
   sessionId,
   owner,
   client,
-  storagePath,
+  store,
 }: {
   sessionId: string;
   owner: ID;
   client: GooveeClient;
-  storagePath: string;
+  store: FileStore;
 }): Promise<FinalizeOutcome> {
   const row = await client.stagedUpload.findOne({
     where: {
@@ -625,10 +641,10 @@ export async function finalizeSession({
     },
     select: {
       token: true,
-      purpose: true,
       fileName: true,
       fileType: true,
-      partPath: true,
+      storeKey: true,
+      storeState: true,
       uploadOffset: true,
       uploadLength: true,
       metaFile: {id: true, fileName: true, sizeText: true},
@@ -648,56 +664,90 @@ export async function finalizeSession({
   }
 
   const size = toBytes(row.uploadOffset);
-  if (!row.partPath || size !== toBytes(row.uploadLength)) {
-    return {status: 'incomplete'};
-  }
+  const state = parseStoreState(row.storeState);
 
-  const policy = getUploadPolicy(row.purpose);
-  if (!policy) {
-    throw new Error(`Unknown upload purpose: ${row.purpose}`);
-  }
+  if (!row.storeKey || !state) return {status: 'incomplete'};
+  if (size !== toBytes(row.uploadLength)) return {status: 'incomplete'};
 
   const fileName = row.fileName ?? 'file';
   const fileType = row.fileType ?? 'application/octet-stream';
-  const partPath = row.partPath;
+  const filePath = row.storeKey;
 
-  if (policy.file) {
-    /*
-     * `fs.openAsBlob` backs the File with the on-disk blob lazily, so mime and
-     * size checks read only metadata and a content `.refine()` reads from disk
-     * on demand rather than pulling the file into memory.
-     */
-    const blob = await fs.openAsBlob(resolvePart(storagePath, partPath), {
-      type: fileType,
+  const write = await store.resumeWrite(filePath, state);
+
+  /*
+   * The record's count is what says the file is whole; the store's is what it
+   * can actually assemble. Fewer there — a scratch directory cleared, a piece
+   * that never landed — and the count comes down to what the store holds so the
+   * client resumes from it, rather than the store being asked to assemble bytes
+   * it does not have.
+   */
+  if (write.offset < size) {
+    await client.stagedUpload.updateAll({
+      where: {
+        sessionId,
+        uploadOffset: {eq: String(size)},
+        metaFile: {id: {eq: null}},
+        consumedAt: {eq: null},
+        reapedAt: {eq: null},
+      },
+      set: {
+        uploadOffset: String(write.offset),
+        storeState: JSON.stringify(write.state),
+      },
     });
-    policy.file.parse(new File([blob], fileName, {type: fileType}));
+
+    return {status: 'incomplete'};
   }
 
-  /* The finished file takes a name of its own, so an append still running
-   * against this session writes to a path that no longer exists. */
-  const filePath = await promotePart({partPath, storagePath});
+  /*
+   * The file becomes visible under its key before the record says so.
+   *
+   * Two callers completing the same session both assemble the same bytes under
+   * the same key, so whichever order they land in, the key holds the right
+   * file. The claim below is what settles which of them owns it: the loser's
+   * transaction rolls back the `meta_file` it made, and its retry reads the
+   * winner's and is answered the same token. A loser may not even reach the
+   * claim — a rename whose source the winner already moved, or a second
+   * completion of one multipart upload, raises here instead.
+   *
+   * A session interrupted between assembling and claiming leaves a stored file
+   * its record does not yet name, which the sweep finds through the key it does
+   * record.
+   */
+  await write.finish({size, contentType: fileType});
 
-  const uploaded = await client.$transaction(async txClient => {
-    const metaFile = await createMetaFile(
-      {fileName, filePath, fileType, size},
-      {client: txClient},
-    );
+  const uploaded = await client
+    .$transaction(async txClient => {
+      const metaFile = await createMetaFile(
+        {fileName, filePath, fileType, size, storeType: store.storeType},
+        {client: txClient},
+      );
 
-    /* The claim is conditional on the session being unclaimed. Completing is
-     * already serialised by the rename above — a second caller finds no part
-     * file to promote — so this guards the record rather than carrying the
-     * whole weight of it. */
-    const claimed = await txClient.stagedUpload.updateAll({
-      where: {sessionId, metaFile: {id: {eq: null}}, partPath: {ne: null}},
-      set: {partPath: null, metaFile: {id: metaFile.id}},
+      /* The claim is conditional on the session being unclaimed and still
+       * within its life, which is what keeps two callers from both completing it
+       * and keeps a session the sweep took over meanwhile from being completed
+       * onto a file the sweep has already deleted. */
+      const claimed = await txClient.stagedUpload.updateAll({
+        where: {
+          sessionId,
+          metaFile: {id: {eq: null}},
+          reapedAt: {eq: null},
+          expiresAt: {gt: new Date()},
+        },
+        set: {storeState: null, metaFile: {id: metaFile.id}},
+      });
+
+      if (!Number(claimed)) {
+        throw new Error('Upload was completed by a concurrent request');
+      }
+
+      return metaFile;
+    })
+    .catch(async (error: unknown) => {
+      await discardUnclaimedFile({sessionId, filePath, client, store});
+      throw error;
     });
-
-    if (!Number(claimed)) {
-      throw new Error('Upload was completed by a concurrent request');
-    }
-
-    return metaFile;
-  });
 
   return {
     status: 'ok',
@@ -706,6 +756,57 @@ export async function finalizeSession({
     sizeText: uploaded.sizeText,
     size,
   };
+}
+
+/**
+ * Take back a stored file whose claim was refused, unless the session was
+ * completed by someone else meanwhile.
+ *
+ * The file is taken back only once the session can no longer be completed:
+ * reaped or gone. Then the sweep has already looked for the key and moved on,
+ * and nothing else would ever reclaim it. A session still in progress is left
+ * alone whatever refused the claim — another caller completing it first, whose
+ * record names this very key since the two assembled the same bytes, or a
+ * passing fault, after which a retry assembles the key again and an abandoned
+ * session is reclaimed by the sweep through the key it records. Best effort:
+ * the caller's error is the one to report, and a file left behind is a leak
+ * rather than a fault.
+ */
+async function discardUnclaimedFile({
+  sessionId,
+  filePath,
+  client,
+  store,
+}: {
+  sessionId: string;
+  filePath: string;
+  client: Client;
+  store: FileStore;
+}): Promise<void> {
+  /* A row that could not be read is not a row that is gone. The claim may have
+   * failed on the very fault that fails this read, while another completion
+   * is about to succeed, so an unknown state leaves the file where it is. */
+  const current = await client.stagedUpload
+    .findOne({
+      where: {sessionId},
+      select: {reapedAt: true, consumedAt: true, metaFile: {id: true}},
+    })
+    .catch((error: unknown) => {
+      console.error(
+        `Stage upload could not re-read session ${sessionId}:`,
+        error,
+      );
+      return undefined;
+    });
+
+  const inProgress =
+    current && !current.metaFile && !current.reapedAt && !current.consumedAt;
+
+  if (current === undefined || current?.metaFile || inProgress) return;
+
+  await store.delete(filePath).catch(error => {
+    console.error(`Stage upload could not discard ${filePath}:`, error);
+  });
 }
 
 /**
@@ -721,13 +822,16 @@ export async function releaseSession({
   sessionId,
   owner,
   client,
-  storagePath,
+  store,
 }: {
   sessionId: string;
   owner: ID;
   client: Client;
-  storagePath: string;
+  store: FileStore;
 }): Promise<void> {
+  /* `consumedAt` is what keeps the release below away from a file that has been
+   * redeemed: past that point the bytes belong to a record, and the write this
+   * would abort is nobody's to abort. */
   const row = await client.stagedUpload.findOne({
     where: {
       sessionId,
@@ -735,35 +839,47 @@ export async function releaseSession({
       consumedAt: {eq: null},
       reapedAt: {eq: null},
     },
-    select: {partPath: true, metaFile: {id: true}},
+    select: {storeKey: true, storeState: true, metaFile: {id: true}},
   });
 
-  if (!row?.partPath || row.metaFile) return;
+  const state = parseStoreState(row?.storeState);
+
+  if (!row || row.metaFile || !row.storeKey || !state) return;
 
   /*
-   * The record gives up the files before they are deleted, and only while it
-   * still holds them. The read above is a moment old; this update is not, so an
-   * upload that completed in between keeps the blob it took over rather than
-   * having it deleted out from under a committed `meta_file`.
-   *
-   * A delete that then fails leaves a file nothing can name. That is a leak, and
-   * it is logged.
+   * The staged bytes go first, before the record gives the write up, so a
+   * failure here leaves the row for the expiry sweep to retry instead of
+   * stranding what the store holds behind a record that no longer names it.
+   * Safe ahead of the claim below because it touches only what was staged: a
+   * completion racing this has either already assembled the file, leaving
+   * nothing to release, or fails on its next step and commits no `meta_file`.
+   */
+  const write = await store.resumeWrite(row.storeKey, state);
+
+  await write.abort();
+
+  /*
+   * The record gives the write up only while it still holds it. The read above
+   * is a moment old; this update is not, so an upload that completed in between
+   * keeps the file it took over rather than having it deleted out from under a
+   * committed `meta_file`.
    */
   const released = await client.stagedUpload.updateAll({
     where: {
       sessionId,
       owner: {id: owner},
-      partPath: {ne: null},
       metaFile: {id: {eq: null}},
       consumedAt: {eq: null},
       reapedAt: {eq: null},
     },
-    set: {partPath: null, reapedAt: new Date()},
+    set: {storeState: null, reapedAt: new Date()},
   });
 
   if (!Number(released)) return;
 
-  await removeSessionFiles({partPath: row.partPath, storagePath});
+  /* The assembled file, in case a completion got that far and its claim never
+   * landed. Behind the claim, which is what proves no `meta_file` names it. */
+  await store.delete(row.storeKey);
 }
 
 /**
@@ -775,7 +891,7 @@ export async function releaseSessionQuietly(args: {
   sessionId: string;
   owner: ID;
   client: Client;
-  storagePath: string;
+  store: FileStore;
 }): Promise<void> {
   await releaseSession(args).catch(error => {
     console.error('Stage upload release error:', error);
@@ -854,11 +970,11 @@ export async function redeemUpload({
  */
 export async function reapExpiredUploads({
   client,
-  storagePath,
+  store,
 }: {
   client: GooveeClient;
-  storagePath: string;
-}): Promise<{reaped: number; failed: number}> {
+  store: FileStore;
+}): Promise<{reaped: number; failed: number; swept: number}> {
   const abandoned = await client.stagedUpload.find({
     where: {
       consumedAt: {eq: null},
@@ -868,7 +984,8 @@ export async function reapExpiredUploads({
     take: REAP_BATCH_LIMIT,
     select: {
       version: true,
-      partPath: true,
+      storeKey: true,
+      storeState: true,
       metaFile: {id: true, version: true, filePath: true},
     },
   });
@@ -878,11 +995,56 @@ export async function reapExpiredUploads({
   for (const row of abandoned) {
     try {
       /*
+       * An unfinished session owns what the store staged for it outright, and
+       * that is released before the record gives up the name it is found by: a
+       * release that fails leaves the row unreaped, so the next pass finds it
+       * again instead of the bytes being billed forever with nothing naming
+       * them. Once finalised the file belongs to the `meta_file` and is removed
+       * through that instead.
+       */
+      try {
+        const state = parseStoreState(row.storeState);
+
+        if (row.storeKey && state && !row.metaFile) {
+          const write = await store.resumeWrite(row.storeKey, state);
+
+          await write.abort();
+        }
+      } catch (error) {
+        /* Bookkeeping this store cannot read, and a key that names no location
+         * in it: neither becomes releasable by trying again, so the row is
+         * reaped rather than left. That is what keeps it mortal — a row that
+         * never reaches an end is found again on every pass, and the prune
+         * pass, which matches only a row that did, never removes it either.
+         *
+         * Nothing reclaimable is stranded by that. What this store staged on
+         * local disk goes to the age sweep below once it is old enough; parts
+         * it already shipped to a bucket go to the rule that expires an
+         * incomplete multipart, which no sweep here reaches; and a state
+         * another store wrote names bytes this one cannot reach at all.
+         * Anything else is left to the handler around this loop, which counts
+         * the row and leaves the next pass to find it. */
+        if (
+          !(error instanceof StoreStateError) &&
+          !(error instanceof StoreKeyError)
+        ) {
+          throw error;
+        }
+
+        /* Expected where a tenant was moved between providers, which is an
+         * operator's own doing, so this is not a fault to be paged about. */
+        console.warn(
+          `[UPLOAD][REAP] staged upload ${row.id} cannot be released by this store; giving up the record:`,
+          error,
+        );
+      }
+
+      /*
        * Mark the row reaped, unlink the meta_file (clearing the FK), and delete
-       * the now-unreferenced meta_file — in one transaction, and before a byte
-       * is removed from disk. A session completing alongside this sweep takes
-       * its blob out of reach that way, instead of having it deleted from under
-       * a committed `meta_file`. The row itself is kept for traceability and
+       * the now-unreferenced meta_file — in one transaction, and before the
+       * file itself goes. A session completing alongside this sweep takes its
+       * file out of reach that way, instead of having it deleted from under a
+       * committed `meta_file`. The row itself is kept for traceability and
        * removed later by the prune pass.
        */
       await client.$transaction(async txClient => {
@@ -891,7 +1053,7 @@ export async function reapExpiredUploads({
             id: row.id,
             version: row.version,
             reapedAt: new Date(),
-            partPath: null,
+            storeState: null,
             metaFile: {select: {id: null}},
           },
         });
@@ -903,21 +1065,19 @@ export async function reapExpiredUploads({
         }
       });
 
-      /* An unfinished session owns its files outright; once finalized the blob
-       * belongs to the meta_file and is removed through that instead. */
-      if (row.partPath) {
-        await removeSessionFiles({partPath: row.partPath, storagePath});
+      /* The key an unfinished session was assembling, in case the file had been
+       * assembled but its claim never landed. */
+      if (row.storeKey && !row.metaFile && store.accepts(row.storeKey)) {
+        await store.delete(row.storeKey);
       }
 
       const recordedPath = row.metaFile?.filePath;
-      const filePath =
-        recordedPath && resolveStoragePath(storagePath, recordedPath);
 
-      if (filePath) {
-        await fs.promises.rm(filePath, {force: true});
+      if (recordedPath && store.accepts(recordedPath)) {
+        await store.delete(recordedPath);
       } else if (recordedPath) {
         console.error(
-          `Staged upload ${row.id} records a path outside the storage directory; leaving the file untouched.`,
+          `Staged upload ${row.id} records a path outside the file store; leaving the file untouched.`,
         );
       }
 
@@ -931,7 +1091,30 @@ export async function reapExpiredUploads({
     }
   }
 
-  return {reaped, failed};
+  /* What the store staged for a write no row names, which nothing above can
+   * reach. Swept by age, past the longest a session may live, so a write still
+   * being filled is never taken from under its own client. */
+  const staleBefore = new Date(Date.now() - longestSessionLife() - HOUR_MS);
+
+  const swept = await store
+    .sweepStaged?.(staleBefore)
+    .catch((error: unknown) => {
+      console.error('[UPLOAD][REAP] staged-file sweep failed:', error);
+      return 0;
+    });
+
+  return {reaped, failed, swept: swept ?? 0};
+}
+
+/** The longest any registered purpose lets a session live. */
+function longestSessionLife(): number {
+  let longest = DEFAULT_TTL_MS;
+
+  for (const policy of UPLOAD_PURPOSES.values()) {
+    longest = Math.max(longest, policy.ttlMs ?? DEFAULT_TTL_MS);
+  }
+
+  return longest;
 }
 
 /**

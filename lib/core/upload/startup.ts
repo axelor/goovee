@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {manager, type TenantClient, type TenantConfig} from '@/tenant';
+import {manager, type Tenant} from '@/tenant';
 import {listTenantIds} from '@/tenant/config';
 
 import {
@@ -33,11 +33,7 @@ let started = false;
  */
 async function forEachTenant(
   label: string,
-  task: (
-    tenantId: string,
-    client: TenantClient,
-    config: TenantConfig,
-  ) => Promise<void>,
+  task: (tenant: Tenant) => Promise<void>,
 ): Promise<void> {
   let tenantIds: string[];
   try {
@@ -51,8 +47,7 @@ async function forEachTenant(
     try {
       const tenant = await manager.getTenant(tenantId);
       if (!tenant) continue;
-      const {client, config} = tenant;
-      await task(tenantId, client, config);
+      await task(tenant);
     } catch (error) {
       console.error(
         `[UPLOAD][${label}] failed for tenant "${tenantId}":`,
@@ -63,24 +58,21 @@ async function forEachTenant(
 }
 
 async function reapTenants(): Promise<void> {
-  await forEachTenant('REAP', async (tenantId, client, config) => {
-    const {reaped, failed} = await reapExpiredUploads({
-      client,
-      storagePath: config.aos.storage,
-    });
+  await forEachTenant('REAP', async ({id, client, store}) => {
+    const {reaped, failed, swept} = await reapExpiredUploads({client, store});
     console.log(
-      `[UPLOAD][REAP] tenant "${tenantId}": reaped ${reaped}, failed ${failed}`,
+      `[UPLOAD][REAP] tenant "${id}": reaped ${reaped}, failed ${failed}, staged files swept ${swept}`,
     );
   });
 }
 
 async function pruneTenants(): Promise<void> {
-  await forEachTenant('PRUNE', async (tenantId, client, config) => {
+  await forEachTenant('PRUNE', async ({id, client, config}) => {
     const {pruned} = await pruneStaleUploads({
       client,
       retentionHours: config.upload?.recordRetentionHours,
     });
-    console.log(`[UPLOAD][PRUNE] tenant "${tenantId}": pruned ${pruned}`);
+    console.log(`[UPLOAD][PRUNE] tenant "${id}": pruned ${pruned}`);
   });
 }
 

@@ -40,7 +40,11 @@
     },
     {
       "type": "String",
-      "name": "partPath"
+      "name": "storeKey"
+    },
+    {
+      "type": "String",
+      "name": "storeState"
     },
     {
       "type": "BigInt",
