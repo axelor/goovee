@@ -1,4 +1,5 @@
 import type {GooveeClient} from '@/goovee/.generated/client';
+import type {FileStore} from '@/storage/index';
 import {
   ArrayFieldTypes,
   COMPONENT_MODEL,
@@ -372,7 +373,7 @@ export async function resetFields(client: GooveeClient) {
   });
 }
 
-export async function seedContents(client: GooveeClient, storagePath: string) {
+export async function seedContents(client: GooveeClient, store: FileStore) {
   const _schemas = metas.map(demo => demo.schema);
   if (!validateSchemas(_schemas)) {
     throw new Error('Invalid schema.');
@@ -385,7 +386,7 @@ export async function seedContents(client: GooveeClient, storagePath: string) {
         schema: formatSchema(schema),
         demos: demos,
         fileCache,
-        storagePath,
+        store,
       });
     });
   });

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     id: bgImageId,
     meta: true,
     client: tenant.client,
-    storage: tenant.config.aos.storage,
+    store: tenant.store,
   });
 
   if (!file) {

@@ -53,7 +53,7 @@ export async function GET(
     id: picture.id,
     meta: true,
     client,
-    storage: access.tenant.config.aos.storage,
+    store: access.tenant.store,
   });
   if (!file) {
     return new NextResponse('File not found', {status: 404});

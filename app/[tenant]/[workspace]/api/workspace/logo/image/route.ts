@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     id: logoId,
     meta: true,
     client: tenant.client,
-    storage: tenant.config.aos.storage,
+    store: tenant.store,
   });
   if (!file) {
     return new NextResponse('File not found', {status: 404});

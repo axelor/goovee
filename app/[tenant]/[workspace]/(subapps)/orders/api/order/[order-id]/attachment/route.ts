@@ -62,7 +62,7 @@ export async function GET(
 
   const file = await findFile({
     client,
-    storage: access.tenant.config.aos.storage,
+    store: access.tenant.store,
     id: reportId,
     meta: true,
   });

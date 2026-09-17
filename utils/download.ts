@@ -1,32 +1,31 @@
-import type {Stats} from 'fs';
-import fs from 'fs';
 import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
+import type {Readable} from 'stream';
 
 // ---- CORE IMPORTS ---- //
 import {isResizable, parseImageRequest, resolveDerivative} from '@/image';
 import {IMAGE_MIME} from '@/image/constants';
 import {filterPrivate} from '@/orm/filter';
-import {resolveStoragePath} from '@/storage/index';
+import type {ByteRange, FileStore} from '@/storage/index';
 import type {Client} from '@/goovee/.generated/client';
 import type {ID, User} from '@/types';
+
+export type {ByteRange} from '@/storage/index';
 
 export async function findFile({
   id,
   meta,
   client,
-  storage,
+  store,
 }: {
   id: ID;
   meta?: boolean;
   client: Client;
-  storage: string | undefined | null;
+  store: FileStore;
 }) {
   if (!id) {
     return null;
   }
-
-  if (!storage) return null;
 
   let record, filePath, fileName, fileType;
 
@@ -44,15 +43,12 @@ export async function findFile({
       return null;
     }
 
-    filePath = resolveStoragePath(storage, record.filePath);
-
-    if (!filePath) {
-      console.error(
-        `Meta file ${id} records a path outside the storage directory.`,
-      );
+    if (!store.accepts(record.filePath)) {
+      console.error(`Meta file ${id} records a path outside the file store.`);
       return null;
     }
 
+    filePath = record.filePath;
     fileName = record.fileName!;
     fileType = record.fileType!;
   } else {
@@ -71,15 +67,12 @@ export async function findFile({
       return null;
     }
 
-    filePath = resolveStoragePath(storage, record.metaFile.filePath);
-
-    if (!filePath) {
-      console.error(
-        `DMS file ${id} records a path outside the storage directory.`,
-      );
+    if (!store.accepts(record.metaFile.filePath)) {
+      console.error(`DMS file ${id} records a path outside the file store.`);
       return null;
     }
 
+    filePath = record.metaFile.filePath;
     fileName = record.metaFile.fileName!;
     fileType = record.metaFile.fileType!;
   }
@@ -89,12 +82,13 @@ export async function findFile({
     fileName,
     filePath,
     fileType,
+    store,
   };
 }
 
 export async function findLatestDMSFileByName({
   client,
-  storage,
+  store,
   user,
   relatedId,
   relatedModel,
@@ -102,7 +96,7 @@ export async function findLatestDMSFileByName({
   skipUserCheck,
 }: {
   client: Client;
-  storage: string | undefined | null;
+  store: FileStore;
   relatedId: any;
   relatedModel: string;
   user?: User;
@@ -112,8 +106,6 @@ export async function findLatestDMSFileByName({
   if (!skipUserCheck && !user) {
     return null;
   }
-
-  if (!storage) return null;
 
   try {
     const record = await client.aOSDMSFile.findOne({
@@ -139,15 +131,14 @@ export async function findLatestDMSFileByName({
 
     if (!record?.metaFile?.filePath) return null;
 
-    const filePath = resolveStoragePath(storage, record.metaFile.filePath);
-
-    if (!filePath) {
+    if (!store.accepts(record.metaFile.filePath)) {
       console.error(
-        `DMS file ${record.id} records a path outside the storage directory.`,
+        `DMS file ${record.id} records a path outside the file store.`,
       );
       return null;
     }
 
+    const filePath = record.metaFile.filePath;
     const fileName = record.metaFile.fileName!;
     const fileType = record.metaFile.fileType!;
 
@@ -156,6 +147,7 @@ export async function findLatestDMSFileByName({
       filePath,
       fileName,
       fileType,
+      store,
     };
   } catch (error) {
     console.error('Error while getting DMS file:', error);
@@ -163,19 +155,15 @@ export async function findLatestDMSFileByName({
   }
 }
 
-/** The part of a file to read, as byte offsets that both include their end. */
-export interface ByteRange {
-  start: number;
-  end: number;
-}
-
 /**
- * Read a file, or a stretch of one, as a stream the response can hold.
+ * Read a file, or a stretch of one, from its store as a stream the response can
+ * hold.
  *
  * Reading is paused as soon as the response has taken as much as it wants and
  * resumed when it asks for more. Without that the file is read as fast as the
- * disk allows and the whole of it accumulates in memory, which for a download
- * of any size costs the server the very thing streaming exists to avoid.
+ * store delivers it and the whole of it accumulates in memory, which for a
+ * download of any size costs the server the very thing streaming exists to
+ * avoid.
  *
  * The file is also closed if the request it was opened for goes away. A
  * response whose client has already left is dropped without ever being read,
@@ -186,47 +174,51 @@ export interface ByteRange {
  * first. It says the server read the file, not that the client received it.
  */
 export function createStream(
-  path: string,
+  open: () => Promise<Readable>,
   {
     signal,
-    range,
     onWholeFileRead,
   }: {
     signal: AbortSignal;
-    range?: ByteRange;
     onWholeFileRead?: () => void;
   },
 ): ReadableStream<Uint8Array> {
-  const downloadStream = fs.createReadStream(path, range);
+  let downloadStream: Readable | null = null;
 
   /* Given a reason rather than closed quietly. A file closed without one
    * reports nothing, leaving the stream around it neither finished nor failed,
    * so anything still holding it would wait on it forever. */
   const close = () => {
-    downloadStream.destroy(new Error('The request for this file went away.'));
+    downloadStream?.destroy(new Error('The request for this file went away.'));
   };
 
-  /* Already gone before the file was even opened: checking access and looking
-   * the record up takes long enough for a client to give up in the meantime. */
-  if (signal.aborted) close();
-  else signal.addEventListener('abort', close, {once: true});
-
   return new ReadableStream({
-    start(controller) {
+    async start(controller) {
+      /* Already gone before the file was even opened: checking access and
+       * looking the record up takes long enough for a client to give up in the
+       * meantime. */
+      if (signal.aborted) {
+        controller.error(new Error('The request for this file went away.'));
+        return;
+      }
+
+      downloadStream = await open();
+
+      if (signal.aborted) close();
+      else signal.addEventListener('abort', close, {once: true});
+
       downloadStream.on('data', (chunk: Buffer) => {
         controller.enqueue(new Uint8Array(chunk));
-        if ((controller.desiredSize ?? 1) <= 0) downloadStream.pause();
+        if ((controller.desiredSize ?? 1) <= 0) downloadStream?.pause();
       });
       downloadStream.on('end', () => {
         onWholeFileRead?.();
         controller.close();
       });
-      downloadStream.on('error', (error: NodeJS.ErrnoException) =>
-        controller.error(error),
-      );
+      downloadStream.on('error', (error: Error) => controller.error(error));
     },
     pull() {
-      downloadStream.resume();
+      downloadStream?.resume();
     },
     cancel: close,
   });
@@ -359,7 +351,7 @@ function bodyFor(
  * modified" and transfers nothing, having still passed through the caller's
  * access check to get that answer.
  *
- * A file served from disk may also be asked for a part at a time, which is what
+ * A file served whole may also be asked for a part at a time, which is what
  * lets a document be shown from its beginning while the rest is still on its
  * way, and lets an interrupted transfer resume. A resized image is not: it is
  * small, already held, and sent in one piece.
@@ -373,12 +365,15 @@ export async function streamFile({
   fileName,
   filePath,
   fileType,
+  store,
   request,
   onWholeFileRead,
 }: {
   fileName: string;
+  /** The key the file is stored under — `meta_file.filePath` as recorded. */
   filePath: string;
   fileType: string;
+  store: FileStore;
   request: NextRequest;
   onWholeFileRead?: () => void;
 }) {
@@ -401,7 +396,11 @@ export async function streamFile({
     try {
       /* Null means the file is one to serve untouched — an animation, or a
        * format we do not render. It falls through to the original below. */
-      const derivative = await resolveDerivative({filePath, ...size});
+      const derivative = await resolveDerivative({
+        store,
+        key: filePath,
+        ...size,
+      });
 
       if (derivative) {
         const tag = `"${derivative.etag}"`;
@@ -466,17 +465,20 @@ export async function streamFile({
   }
 
   try {
-    const stats: Stats = await fs.promises.stat(filePath);
+    const stored = await store.stat(filePath);
+
+    if (!stored) {
+      return new NextResponse('File not found', {status: 404});
+    }
 
     /*
      * What identifies these bytes, for both "still the same?" and "send me the
-     * rest of it". The file's own identity is part of it as well as its length
-     * and time: a file replaced by writing a new one and moving it into place —
-     * a restore from backup, a copy that preserves timestamps — can carry the
-     * same length and time as the one it replaced, and answering "unchanged"
-     * or joining the two halves together would both be wrong.
+     * rest of it": whatever the store says changes when the bytes do, so a file
+     * replaced by another of the same length is told apart from the one it
+     * replaced, and neither answering "unchanged" nor joining the two halves
+     * together goes wrong.
      */
-    const tag = `"src-${stats.ino}-${stats.size}-${stats.mtimeMs}"`;
+    const tag = `"src-${stored.tag}"`;
 
     const headers = new Headers({
       /*
@@ -525,11 +527,11 @@ export async function streamFile({
     const ifRange = request.headers.get('if-range');
     const range =
       ifRange === null || ifRange.trim() === tag
-        ? parseRange(request.headers.get('range'), stats.size)
+        ? parseRange(request.headers.get('range'), stored.size)
         : null;
 
     if (range === 'unsatisfiable') {
-      headers.set('content-range', `bytes */${stats.size}`);
+      headers.set('content-range', `bytes */${stored.size}`);
       return new NextResponse(null, {status: 416, headers});
     }
 
@@ -537,10 +539,12 @@ export async function streamFile({
       headers.set('content-length', String(range.end - range.start + 1));
       headers.set(
         'content-range',
-        `bytes ${range.start}-${range.end}/${stats.size}`,
+        `bytes ${range.start}-${range.end}/${stored.size}`,
       );
       return new NextResponse(
-        bodyFor(request, signal => createStream(filePath, {signal, range})),
+        bodyFor(request, signal =>
+          createStream(() => store.read(filePath, {range}), {signal}),
+        ),
         {
           status: 206,
           headers,
@@ -548,11 +552,11 @@ export async function streamFile({
       );
     }
 
-    headers.set('content-length', String(stats.size));
+    headers.set('content-length', String(stored.size));
 
     return new NextResponse(
       bodyFor(request, signal =>
-        createStream(filePath, {signal, onWholeFileRead}),
+        createStream(() => store.read(filePath), {signal, onWholeFileRead}),
       ),
       {
         status: 200,
@@ -560,6 +564,7 @@ export async function streamFile({
       },
     );
   } catch (err) {
+    console.error(`Could not serve the file ${filePath}:`, err);
     return new NextResponse('Error downloading file', {status: 500});
   }
 }

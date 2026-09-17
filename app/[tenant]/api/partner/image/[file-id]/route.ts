@@ -29,7 +29,7 @@ export async function GET(
     id: partner.picture.id,
     meta: true,
     client: tenant.client,
-    storage: tenant.config.aos.storage,
+    store: tenant.store,
   });
 
   if (!file) {

@@ -1,7 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import {pipeline, Readable} from 'stream';
-import {promisify} from 'util';
+import {Readable} from 'stream';
 
 import type {
   AOSMetaFile,
@@ -18,7 +15,7 @@ import type {
   AOSPortalCmsSite,
 } from '@/goovee/.generated/models';
 import type {Client} from '@/goovee/.generated/client';
-import {MetaFileStoreType} from '@/upload/file';
+import type {FileStore} from '@/storage/index';
 import {getFileSizeText} from '@/utils/files';
 import {xml} from '@/utils/template-string';
 import type {CreateArgs, SelectArg} from '@goovee/orm';
@@ -44,8 +41,6 @@ import {
 } from '../utils/helper';
 import {Website} from '../templates/site';
 import {getFileFromAssets} from '../assets/file-getter';
-
-const pump = promisify(pipeline);
 
 const disableUpdates = false;
 const FILE_PREFIX = 'goovee-template-file';
@@ -548,9 +543,9 @@ export async function createCMSContent(props: {
   schema: TemplateSchema;
   demos: DemoLite<TemplateSchema>[];
   fileCache: Cache<Promise<{id: string}>>;
-  storagePath: string;
+  store: FileStore;
 }) {
-  const {client, demos, schema, fileCache, storagePath} = props;
+  const {client, demos, schema, fileCache, store} = props;
 
   return await Promise.all(
     demos.map(async demo => {
@@ -583,7 +578,7 @@ export async function createCMSContent(props: {
         data: demo.data,
         fields: schema.fields,
         fileCache,
-        storagePath,
+        store,
       });
 
       const contentData: CreateArgs<AOSPortalCmsContent> = {
@@ -639,20 +634,20 @@ async function createMetaFile({
   metaFilePath,
   fileName,
   fileType,
-  storagePath,
+  store,
 }: {
   client: Client;
   originPath: string;
   metaFilePath: string;
   fileName: string;
   fileType: string;
-  storagePath: string;
+  store: FileStore;
 }): Promise<{id: string}> {
   const buffer = await getFileFromAssets(originPath);
-  await pump(
-    Readable.from(buffer),
-    fs.createWriteStream(path.resolve(storagePath, metaFilePath)),
-  );
+  await store.write(metaFilePath, Readable.from(buffer), {
+    size: buffer.length,
+    contentType: fileType,
+  });
 
   const metaFileData: CreateArgs<AOSMetaFile> = {
     fileName,
@@ -660,7 +655,7 @@ async function createMetaFile({
     fileType,
     fileSize: buffer.length.toString(),
     sizeText: getFileSizeText(buffer.length),
-    storeType: MetaFileStoreType.LOCAL,
+    storeType: store.storeType,
   };
 
   const _metaFile = await client.aOSMetaFile.findOne({
@@ -696,14 +691,14 @@ async function getMetaFile({
   fileType,
   filePath: originPath,
   fileCache,
-  storagePath,
+  store,
 }: {
   fileName: string;
   fileType: string;
   client: Client;
   filePath: string;
   fileCache: Cache<Promise<{id: string}>>;
-  storagePath: string;
+  store: FileStore;
 }) {
   const metaFilePath = `${FILE_PREFIX}-${fileName}`;
   const fileCacheKey = `${metaFilePath}-${fileType}-${fileName}`;
@@ -718,7 +713,7 @@ async function getMetaFile({
     metaFilePath,
     fileName,
     fileType,
-    storagePath,
+    store,
   });
 
   fileCache.set(fileCacheKey, metaFilePromise);
@@ -731,9 +726,9 @@ async function createAttrs(props: {
   fields: Field[];
   data: any;
   fileCache: Cache<Promise<{id: string}>>;
-  storagePath: string;
+  store: FileStore;
 }) {
-  const {client, fields, schema, data, fileCache, storagePath} = props;
+  const {client, fields, schema, data, fileCache, store} = props;
   const {attrs, fieldsMap} = fields.reduce<{
     attrs: Record<string, any>;
     fieldsMap: Map<string, Field>;
@@ -769,7 +764,7 @@ async function createAttrs(props: {
                   fields: modelFields,
                   data: record.attrs,
                   fileCache,
-                  storagePath,
+                  store,
                 }),
                 client,
               });
@@ -788,7 +783,7 @@ async function createAttrs(props: {
               schema,
               data: value.attrs,
               fileCache,
-              storagePath,
+              store,
             }),
             client,
           });
@@ -812,7 +807,7 @@ async function createAttrs(props: {
                 filePath: record.filePath,
                 client,
                 fileCache,
-                storagePath,
+                store,
               });
             }),
           );
@@ -824,7 +819,7 @@ async function createAttrs(props: {
             filePath: value.filePath,
             client,
             fileCache,
-            storagePath,
+            store,
           });
           attrs[key] = {id: Number(record.id)};
         }

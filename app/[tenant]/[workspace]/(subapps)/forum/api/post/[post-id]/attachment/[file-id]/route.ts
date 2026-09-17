@@ -53,7 +53,7 @@ export async function GET(
     id: attachment.metaFile.id as string,
     meta: true,
     client,
-    storage: access.tenant.config.aos.storage,
+    store: access.tenant.store,
   });
 
   if (!file) {

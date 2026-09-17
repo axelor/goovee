@@ -1,3 +1,4 @@
+import type {FileStore} from '@/storage/index';
 import {manager, type TenantClient, type TenantConfig} from '@/tenant';
 import {getDefaultTenantId, listTenantIds} from '@/tenant/config';
 import * as out from './output';
@@ -16,6 +17,7 @@ export type TenantHandle = {
   tenantId: string;
   client: TenantClient;
   config: TenantConfig;
+  store: FileStore;
 };
 
 export type TenantScriptContext<
@@ -93,7 +95,12 @@ export function runTenantScript<Values = object, Args extends ScriptArgs = []>(
             );
           }
 
-          opened = {tenantId, client: tenant.client, config: tenant.config};
+          opened = {
+            tenantId,
+            client: tenant.client,
+            config: tenant.config,
+            store: tenant.store,
+          };
           return opened;
         })();
 

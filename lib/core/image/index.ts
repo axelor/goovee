@@ -1,6 +1,9 @@
-import fs from 'fs';
 import type {Sharp} from 'sharp';
+import type {Readable} from 'stream';
 import {z} from 'zod';
+
+// ---- CORE IMPORTS ---- //
+import type {FileStore} from '@/storage/index';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -220,73 +223,93 @@ export interface Derivative {
   read: () => Promise<Buffer | null>;
 }
 
+/** The file to resize: where it is kept, and what it is kept under. */
+interface Source {
+  store: FileStore;
+  key: string;
+}
+
 /**
  * Prepare to serve the file at `width`, or null to serve it whole.
  *
  * Deliberately does no work beyond a `stat`: the tag is derived from the file's
  * identity rather than its contents, so a viewer who already holds the image can
- * be answered before it is read or produced.
+ * be answered before it is read or produced. A file the store does not hold is
+ * served whole too, which is where its absence is reported.
  */
 export async function resolveDerivative({
-  filePath,
+  store,
+  key,
   width,
   quality,
-}: {
-  filePath: string;
+}: Source & {
   width: number;
   quality: number;
 }): Promise<Derivative | null> {
-  const stats = await fs.promises.stat(filePath);
-  const source = `${filePath}:${stats.size}:${stats.mtimeMs}`;
+  const stored = await store.stat(key);
+  if (!stored) return null;
+
+  const source = `${store.id}:${key}:${stored.size}:${stored.tag}`;
 
   if (bypassed.has(source)) return null;
 
-  if (stats.size > MAX_SOURCE_BYTES) {
+  if (stored.size > MAX_SOURCE_BYTES) {
     rememberBypass(source);
     return null;
   }
 
-  const key = derivativeKey({
-    filePath,
-    size: stats.size,
-    modifiedAt: stats.mtimeMs,
+  const cacheKey = derivativeKey({
+    storeId: store.id,
+    key,
+    size: stored.size,
+    tag: stored.tag,
     width,
     quality,
   });
 
   return {
-    etag: key,
-    held: await hasDerivative(key),
-    read: () => produce({key, source, filePath, width, quality}),
+    etag: cacheKey,
+    held: await hasDerivative(cacheKey),
+    read: () =>
+      produce({
+        cacheKey,
+        source,
+        file: {store, key},
+        size: stored.size,
+        width,
+        quality,
+      }),
   };
 }
 
 async function produce({
-  key,
+  cacheKey,
   source,
-  filePath,
+  file,
+  size,
   width,
   quality,
 }: {
-  key: string;
+  cacheKey: string;
   source: string;
-  filePath: string;
+  file: Source;
+  size: number;
   width: number;
   quality: number;
 }): Promise<Buffer | null> {
-  const cached = await readDerivative(key);
+  const cached = await readDerivative(cacheKey);
   if (cached) return cached;
 
-  const existing = inFlight.get(key);
+  const existing = inFlight.get(cacheKey);
   if (existing) return existing;
 
   const work = withSlot(async () => {
-    const buffer = await encode(filePath, width, quality);
+    const buffer = await encode(file, size, width, quality);
     if (!buffer) return null;
 
     /* Stored while the slot is still held, so the number of full-size buffers in
      * memory stays bounded by the number of encoders. */
-    await writeDerivative(key, buffer);
+    await writeDerivative(cacheKey, buffer);
     return buffer;
   })
     .then(buffer => {
@@ -298,21 +321,37 @@ async function produce({
       rememberBypass(source);
       return null;
     })
-    .finally(() => inFlight.delete(key));
+    .finally(() => inFlight.delete(cacheKey));
 
-  inFlight.set(key, work);
+  inFlight.set(cacheKey, work);
   return work;
+}
+
+/** The whole of a stream, in memory. */
+async function readAll(stream: Readable): Promise<Buffer> {
+  const pieces: Buffer[] = [];
+
+  for await (const piece of stream) {
+    pieces.push(piece as Buffer);
+  }
+
+  return Buffer.concat(pieces);
 }
 
 /**
  * Encode the file, or null when it is one to serve untouched.
  *
+ * The file is read whole before anything looks at it. It is bounded by
+ * `MAX_SOURCE_BYTES` and the number of encoders running at once, so this is a
+ * known amount of memory; and the store may be remote, where one read costs
+ * less than a look at the first bytes followed by a second read of the rest.
+ *
  * What the file is comes from its own contents, not from the type recorded
  * against it — a declared type reaches us from whoever uploaded the file and
  * cannot decide whether we hand its bytes to a renderer. The first bytes are
- * read here rather than by the imaging library, because asking that library what
- * a file is already means letting it open the file, which for a vector image
- * means parsing the document we are trying not to parse.
+ * inspected here rather than by the imaging library, because asking that
+ * library what a file is already means letting it open the file, which for a
+ * vector image means parsing the document we are trying not to parse.
  *
  * An animation is passed through whole rather than encoded: reading it as a
  * still would silently return its first frame, and re-encoding the animation
@@ -324,19 +363,24 @@ async function produce({
  * the srcset entry still describes it as the wider candidate.
  */
 async function encode(
-  filePath: string,
+  {store, key}: Source,
+  size: number,
   width: number,
   quality: number,
 ): Promise<Buffer | null> {
-  if (await isBypassedFormat(filePath)) return null;
+  /* Nothing to resize, and a store may refuse to read any part of it. */
+  if (size === 0) return null;
+
+  const bytes = await readAll(await store.read(key));
+
+  if (isBypassedFormat(bytes)) return null;
 
   const sharp = await getSharp();
 
-  const image: Sharp = sharp(filePath, {
+  const image: Sharp = sharp(bytes, {
     limitInputPixels: MAX_INPUT_PIXELS,
     failOn: 'warning',
     autoOrient: true,
-    sequentialRead: true,
   }).timeout({seconds: ENCODE_TIMEOUT_SECONDS});
 
   const {pages} = await image.metadata();
@@ -349,15 +393,8 @@ async function encode(
 }
 
 /** Recognise, from the first bytes alone, a file we will not hand to the encoder. */
-async function isBypassedFormat(filePath: string): Promise<boolean> {
-  const handle = await fs.promises.open(filePath, 'r');
-  try {
-    const head = Buffer.alloc(SIGNATURE_BYTES);
-    const {bytesRead} = await handle.read(head, 0, SIGNATURE_BYTES, 0);
-    const start = head.subarray(0, bytesRead);
+function isBypassedFormat(bytes: Buffer): boolean {
+  const start = bytes.subarray(0, SIGNATURE_BYTES);
 
-    return BYPASS_SIGNATURES.some(({matches}) => matches(start));
-  } finally {
-    await handle.close();
-  }
+  return BYPASS_SIGNATURES.some(({matches}) => matches(start));
 }

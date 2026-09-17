@@ -19,10 +19,10 @@ import {
  * cache is described by one directory listing and no index can fall out of step
  * with the files. A damaged or half-written entry reads as a miss.
  *
- * Entries do not expire. The key covers the source file's length and timestamp,
- * so a replaced file takes a new key and the entry it supersedes falls out by
- * eviction. A replacement that keeps both the length and the timestamp — one
- * restored with its metadata intact, say — is not distinguished.
+ * Entries do not expire. The key covers the source file's length and the tag
+ * its store gives its current bytes, so a replaced file takes a new key and the
+ * entry it supersedes falls out by eviction. A replacement the store cannot tell
+ * from the original is not distinguished.
  *
  * The cache is keyed on the source file and the requested size alone, and holds
  * no notion of who asked for it. That is safe only because every caller checks
@@ -33,9 +33,9 @@ import {
  * Bytes the cache may occupy, from the deployment's `imageCache.maxBytes`.
  *
  * One directory beside the build holds every tenant's derivatives, so the budget
- * is the deployment's rather than any tenant's. Entries are keyed by the absolute
- * source path, which is what keeps one tenant's derivatives distinct from
- * another's — a relative path here would make them collide.
+ * is the deployment's rather than any tenant's. Entries are keyed by the store
+ * as well as the key inside it, which is what keeps one tenant's derivatives
+ * distinct from another's — the key alone would make them collide.
  */
 function maxBytes(): number {
   return getDeploymentConfig().imageCache?.maxBytes ?? DEFAULT_CACHE_MAX_BYTES;
@@ -62,24 +62,26 @@ function cacheDir(): string {
 /**
  * Identifies a derivative by the bytes it was made from and how it was made.
  *
- * The storage path names the blob, and its length and modification time stand in
- * for the contents: the ERP replaces a file in place, keeping the record and the
- * path, so the path alone would go on naming the previous bytes. Two records
- * pointing at one blob share a derivative, which is correct — they are the same
- * image.
+ * The store and the key inside it name the blob, and its length and the store's
+ * change tag stand in for the contents: the ERP replaces a file in place,
+ * keeping the record and the key, so the key alone would go on naming the
+ * previous bytes. Two records pointing at one blob share a derivative, which is
+ * correct — they are the same image.
  */
 export interface DerivativeKey {
-  filePath: string;
+  storeId: string;
+  key: string;
   size: number;
-  modifiedAt: number;
+  tag: string;
   width: number;
   quality: number;
 }
 
 export function derivativeKey({
-  filePath,
+  storeId,
+  key,
   size,
-  modifiedAt,
+  tag,
   width,
   quality,
 }: DerivativeKey): string {
@@ -88,9 +90,10 @@ export function derivativeKey({
     .update(
       [
         CACHE_VERSION,
-        filePath,
+        storeId,
+        key,
         size,
-        modifiedAt,
+        tag,
         width,
         quality,
         IMAGE_FORMAT,

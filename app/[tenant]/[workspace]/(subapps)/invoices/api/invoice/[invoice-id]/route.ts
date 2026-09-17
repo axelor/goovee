@@ -10,6 +10,7 @@ import {currentWorkspace} from '@/url/current';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, type User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
+import type {FileStore} from '@/storage/index';
 
 // ---- LOCAL IMPORTS ---- //
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
@@ -30,7 +31,7 @@ export async function GET(
   const token = request.nextUrl.searchParams.get('token') ?? undefined;
 
   let client: Client;
-  let storage: string | undefined | null;
+  let store: FileStore;
   let invoice: Invoice | null;
   let fileAccess: {skipUserCheck: true} | {user: User};
 
@@ -55,7 +56,7 @@ export async function GET(
       });
     }
     client = access.tenant.client;
-    storage = access.tenant.config.aos.storage;
+    store = access.tenant.store;
     invoice = await findInvoice({
       id: invoiceId,
       token: access.token,
@@ -75,7 +76,7 @@ export async function GET(
       });
     }
     client = access.tenant.client;
-    storage = access.tenant.config.aos.storage;
+    store = access.tenant.store;
     const invoicesWhereClause = getWhereClauseForEntity({
       user: access.user,
       role: access.subapp.role,
@@ -98,7 +99,7 @@ export async function GET(
 
   const file = await findLatestDMSFileByName({
     client,
-    storage,
+    store,
     ...fileAccess,
     relatedId: invoiceId,
     relatedModel: RELATED_MODELS.INVOICE,

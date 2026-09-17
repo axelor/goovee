@@ -154,13 +154,12 @@ async function reportPublisherReachability({
 
 async function seedMarketplace({
   client,
-  config,
+  store,
   tenantId,
   data,
   workspaceURL,
   suppliersInput,
 }: MarketplaceSeed) {
-  const storage = config.aos.storage;
   const publicRoot = path.resolve(process.cwd(), 'public');
 
   out.note(
@@ -255,14 +254,14 @@ async function seedMarketplace({
      * gets a varying number of pictures (0..9, cycling deterministically by
      * index so re-runs stay stable); each picture is its own MetaFile,
      * cycling through these files. */
-    const screenshots = await uploadScreenshotFiles({storage, publicRoot});
+    const screenshots = await uploadScreenshotFiles({store, publicRoot});
 
     /* One tiny zip shipped with this script is used as the bundle for
      * every seeded version. AOS requires `bundleFile` to be non-null;
      * the demo doesn't care what's actually inside. */
     const sharedBundleId = await upsertSharedBundleMetaFile({
       client: txClient,
-      storage,
+      store,
     });
 
     /* Organize license codes by isPaid for random selection during product seeding */
