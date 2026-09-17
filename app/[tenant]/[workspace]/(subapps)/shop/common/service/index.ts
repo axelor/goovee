@@ -7,7 +7,7 @@ import {Workspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
-import type {User} from '@/types';
+import type {ComputedProduct, User} from '@/types';
 import type {SuccessResponse} from '@/types/action';
 import type {CartInput, CartItemInput} from '@/subapps/shop/common/validators';
 import {computeTotal} from '@/utils/cart';
@@ -18,18 +18,33 @@ import {MAIN_PRICE} from '@/constants';
 import {calculateAdvanceAmount} from '@/utils/payment';
 
 // ---- LOCAL IMPORTS ---- //
-import {findProduct} from '@/subapps/shop/common/orm/product';
+import {findProducts} from '@/subapps/shop/common/orm/product';
+import {findCategories} from '@/subapps/shop/common/orm/categories';
+import {getcategoryids} from '@/subapps/shop/common/utils/categories';
 import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {formatNumber} from '@/subapps/shop/common/utils/order';
 
-export async function createOrder({
+/** A cart whose prices came from {@link priceCart}. */
+export type PricedCart = Omit<CartInput, 'items'> & {
+  items: (CartItemInput & {computedProduct: ComputedProduct})[];
+};
+
+/**
+ * Prices a cart from the server's own product data, applying the catalogue
+ * rules the product pages apply.
+ *
+ * `unavailable` — an item is gone, outside this workspace's catalogue, or the
+ * shop is configured not to sell it while out of stock.
+ * `unconfirmed` — the catalogue could not be read at all. Whether that is the
+ * cart or the lookup is not knowable here, so neither is claimed.
+ */
+export async function priceCart({
   cart,
   workspace,
   workspaceConfig,
   user,
   client,
   config,
-  paymentModeId,
 }: {
   cart: CartInput;
   workspace: Workspace | Cloned<Workspace>;
@@ -37,33 +52,67 @@ export async function createOrder({
   user: NonNullable<User>;
   client: Client;
   config: Tenant['config'];
+}): Promise<PricedCart | 'unavailable' | 'unconfirmed'> {
+  /* Scoped to this workspace's catalogue, as the browse path scopes its own.
+   * An empty list drops the category clause rather than matching nothing, so
+   * it has to stop here — the same guard the product pages carry. */
+  const categories = await findCategories(workspace.id, user, client);
+  const categoryids = categories.map(c => getcategoryids(c)).flat();
+  if (!categoryids.length) return 'unconfirmed';
+
+  const {products} = await findProducts({
+    ids: cart.items.map((i: CartItemInput) => i.product),
+    categoryids,
+    workspace,
+    workspaceConfig,
+    user,
+    client,
+    config,
+  });
+
+  /* An unreachable price webservice returns an empty list, exactly as a cart of
+   * products that no longer exist does. The two are not distinguishable here. */
+  if (!products.length) return 'unconfirmed';
+
+  const items = cart.items.map((i: CartItemInput) => ({
+    ...i,
+    computedProduct: products.find(
+      cp => Number(cp?.product?.id) === Number(i.product),
+    ),
+  }));
+
+  /* `canBuy` is false for a product the shop shows but refuses to sell. */
+  const unavailable = items.some(
+    i =>
+      !i.computedProduct ||
+      i.computedProduct.product?.outOfStockConfig?.canBuy === false,
+  );
+  if (unavailable) return 'unavailable';
+
+  return {...cart, items: items as PricedCart['items']};
+}
+
+/**
+ * Takes a cart already priced by {@link priceCart}. Pricing again here would
+ * let a change between checkout and capture put a total on the order that the
+ * customer never paid.
+ */
+export async function createOrder({
+  cart: $cart,
+  workspace,
+  workspaceConfig,
+  user,
+  config,
+  paymentModeId,
+}: {
+  cart: PricedCart;
+  workspace: Workspace | Cloned<Workspace>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
+  user: NonNullable<User>;
+  config: Tenant['config'];
   paymentModeId?: string;
 }): Promise<SuccessResponse<string>> {
   const {aos} = config;
-
-  const computedProducts = await Promise.all(
-    cart.items.map((i: CartItemInput) =>
-      findProduct({
-        id: i.product,
-        workspace,
-        workspaceConfig,
-        user,
-        client,
-        config,
-      }),
-    ),
-  );
-
-  const $cart = {
-    ...cart,
-    items: cart.items.map((i: CartItemInput) => ({
-      ...i,
-      computedProduct:
-        computedProducts.find(
-          cp => Number(cp?.product?.id) === Number(i.product),
-        ) ?? undefined,
-    })),
-  };
 
   const {total} = computeTotal({
     cart: $cart,
@@ -75,7 +124,7 @@ export async function createOrder({
   const partnerId = isContact && mainPartnerId ? mainPartnerId : id;
   const contactId = isContact && mainPartnerId ? id : undefined;
 
-  const {invoicingAddress, deliveryAddress} = cart;
+  const {invoicingAddress, deliveryAddress} = $cart;
   const payInAdvance = workspaceConfig?.payInAdvance;
   const advancePaymentPercentage = workspaceConfig?.advancePaymentPercentage;
 
@@ -98,6 +147,8 @@ export async function createOrder({
     inAti: isAtiPricing,
     items: $cart.items.map(i => {
       const {computedProduct, note, quantity} = i;
+      /* Only reachable for a payment context written before this shipped;
+       * those expire five minutes after creation. */
       if (!computedProduct) return null;
       const {product, price} = computedProduct;
       return {
@@ -163,20 +214,14 @@ export async function requestOrder({
   if (!(session && workspace && workspaceConfig)) return null;
 
   try {
-    const computedProducts = (
-      await Promise.all(
-        cart.items.map(i =>
-          findProduct({
-            id: i.product,
-            workspace,
-            workspaceConfig,
-            user,
-            client,
-            config,
-          }),
-        ),
-      )
-    ).filter(Boolean);
+    const {products: computedProducts} = await findProducts({
+      ids: cart.items.map(i => i.product),
+      workspace,
+      workspaceConfig,
+      user,
+      client,
+      config,
+    });
 
     const $cart = {
       ...cart,
