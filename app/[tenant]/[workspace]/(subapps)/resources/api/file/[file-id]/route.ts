@@ -4,7 +4,6 @@ import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/access/ensure-access';
 import {accessStatus} from '@/access/denial';
-import {resolveStoragePath} from '@/storage/index';
 import {streamFile} from '@/utils/download';
 
 // ---- LOCAL IMPORTS ---- //
@@ -28,8 +27,7 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client} = access.tenant;
-  const storage = access.tenant.config.aos.storage;
+  const {client, store} = access.tenant;
 
   const workspaceURL = access.workspace.url;
 
@@ -43,15 +41,12 @@ export async function GET(
   if (!file?.metaFile?.id || !file.metaFile.filePath) {
     return new NextResponse('File not found', {status: 404});
   }
-  if (!storage) {
-    return new NextResponse('Bad config', {status: 500});
-  }
 
-  const filePath = resolveStoragePath(storage, file.metaFile.filePath);
+  const filePath = file.metaFile.filePath;
 
-  if (!filePath) {
+  if (!store.accepts(filePath)) {
     console.error(
-      `Meta file ${file.metaFile.id} records a path outside the storage directory.`,
+      `Meta file ${file.metaFile.id} records a path outside the file store.`,
     );
     return new NextResponse('File not found', {status: 404});
   }
@@ -63,6 +58,7 @@ export async function GET(
     fileName,
     filePath,
     fileType,
+    store,
     request,
   });
 }

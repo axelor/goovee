@@ -72,7 +72,7 @@ export async function GET(
     id: fileId,
     meta: true,
     client,
-    storage: access.tenant.config.aos.storage,
+    store: access.tenant.store,
   });
 
   if (!file) {

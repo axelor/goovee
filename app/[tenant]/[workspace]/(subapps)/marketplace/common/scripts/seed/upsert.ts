@@ -4,6 +4,7 @@ import type {
   AOSMarketplaceProductVersion,
 } from '@/goovee/.generated/models';
 import {getFileSizeText} from '@/utils/files';
+import type {FileStore} from '@/storage/index';
 import {sql} from '@/utils/template-string';
 import {BigDecimal, type CreateArgs} from '@goovee/orm';
 import {MARKETPLACE_ICONS} from '../../constants/icons';
@@ -13,11 +14,9 @@ import {
   REVIEW_MODERATION_STATUS,
 } from '../../constants/statuses';
 import {DEMO_PREFIX, demoKey} from './constants';
-import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import {Readable} from 'node:stream';
-import {pipeline} from 'node:stream/promises';
 import {syncProductVersionPointers} from '../../orm/versions';
 import {parseVersionNumber} from '../../utils/version-number';
 import {slugify} from '../../utils/slugify';
@@ -180,20 +179,20 @@ const BUNDLE_FILE_PATH = `${DEMO_PREFIX}bundle.zip`;
 
 export async function upsertSharedBundleMetaFile({
   client,
-  storage,
+  store,
 }: {
   client: Client;
-  storage: string;
+  store: FileStore;
 }): Promise<string> {
   const sourcePath = path.resolve(__dirname, BUNDLE_SOURCE_FILE);
   const buffer = await fsp.readFile(sourcePath);
   const filePath = BUNDLE_FILE_PATH;
   const fileType = 'application/zip';
 
-  await pipeline(
-    Readable.from(buffer),
-    fs.createWriteStream(path.resolve(storage, filePath)),
-  );
+  await store.write(filePath, Readable.from(buffer), {
+    size: buffer.length,
+    contentType: fileType,
+  });
 
   const payload = {
     fileName: BUNDLE_SOURCE_FILE,
@@ -232,15 +231,15 @@ type ScreenshotFile = {
   sizeText: string;
 };
 
-/* Writes the shared screenshot files to tenant storage (idempotent
+/* Writes the shared screenshot files to the tenant's file store (idempotent
  * overwrite) and returns their metadata. Creates NO MetaFile rows —
  * per-picture MetaFile rows are created in upsertScreenshots, cycling
  * through these filePaths. */
 export async function uploadScreenshotFiles({
-  storage,
+  store,
   publicRoot,
 }: {
-  storage: string;
+  store: FileStore;
   publicRoot: string;
 }): Promise<ScreenshotFile[]> {
   const files: ScreenshotFile[] = [];
@@ -250,16 +249,17 @@ export async function uploadScreenshotFiles({
     const ext = path.extname(asset).toLowerCase();
     const baseName = path.basename(asset);
     const filePath = `${SCREENSHOT_PREFIX}-${baseName}`;
+    const fileType = MIME_BY_EXT[ext] ?? 'application/octet-stream';
 
-    await pipeline(
-      Readable.from(buffer),
-      fs.createWriteStream(path.resolve(storage, filePath)),
-    );
+    await store.write(filePath, Readable.from(buffer), {
+      size: buffer.length,
+      contentType: fileType,
+    });
 
     files.push({
       fileName: baseName,
       filePath,
-      fileType: MIME_BY_EXT[ext] ?? 'application/octet-stream',
+      fileType,
       fileSize: String(buffer.length),
       sizeText: getFileSizeText(buffer.length),
     });

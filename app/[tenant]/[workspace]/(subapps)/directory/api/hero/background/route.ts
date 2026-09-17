@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     id: bgImageId,
     meta: true,
     client: client,
-    storage: access.tenant.config.aos.storage,
+    store: access.tenant.store,
   });
 
   if (!file) {

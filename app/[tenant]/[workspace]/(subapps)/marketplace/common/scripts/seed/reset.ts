@@ -1,8 +1,6 @@
 import '@/load-swc-env';
 import * as out from '@/scripts/lib/output';
 import {runTenantScript, type TenantHandle} from '@/scripts/lib/tenant-script';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import {DEMO_PREFIX} from './constants';
 
 /* Reset / teardown for the marketplace seed.
@@ -30,12 +28,10 @@ import {DEMO_PREFIX} from './constants';
  *   - Partner / customer accounts referenced as publishers/authors. Only the
  *     publishing rights the seed granted them go, not the accounts.
  *
- * Storage files (the DEMO_PREFIX bundle + screenshots) are removed from
- * disk best-effort after the DB transaction commits. */
+ * Stored files (the DEMO_PREFIX bundle + screenshots) are removed from the
+ * tenant's file store best-effort after the DB transaction commits. */
 
-async function resetMarketplace({client, config, tenantId}: TenantHandle) {
-  const storage = config.aos.storage;
-
+async function resetMarketplace({client, store, tenantId}: TenantHandle) {
   const deleted = await client.$transaction(async txClient => {
     /* Pull the seeded MP rows with the bits we need for the cleanup
      * dance: id+version for optimistic-lock updates, currentVersion +
@@ -238,19 +234,16 @@ async function resetMarketplace({client, config, tenantId}: TenantHandle) {
     return counts;
   });
 
-  // Best-effort: remove the on-disk files matching our prefixes.
+  // Best-effort: remove the stored files matching our prefixes.
   let removedFiles = 0;
   try {
-    const entries = await fs.readdir(storage);
-    for (const name of entries) {
-      if (name.startsWith(DEMO_PREFIX)) {
-        await fs.unlink(path.resolve(storage, name)).catch(() => {});
-        removedFiles++;
-      }
+    for await (const key of store.list(DEMO_PREFIX)) {
+      await store.delete(key).catch(() => {});
+      removedFiles++;
     }
   } catch (err) {
     out.warn(
-      `Could not clean storage dir '${storage}': ${out.describeFailure(err)}`,
+      `Could not clean the file store '${store.id}': ${out.describeFailure(err)}`,
     );
   }
 

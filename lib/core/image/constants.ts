@@ -157,4 +157,4 @@ export const SIGNATURE_BYTES = 512;
  * ladder, or naming scheme. Entries written by an older scheme then miss rather
  * than being served under the new rules.
  */
-export const CACHE_VERSION = 1;
+export const CACHE_VERSION = 2;

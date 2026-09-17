@@ -67,7 +67,7 @@ export async function GET(
 
   const file = await findLatestDMSFileByName({
     client,
-    storage: access.tenant.config.aos.storage,
+    store: access.tenant.store,
     user: access.user,
     relatedId: customerDelivery.id,
     relatedModel: RELATED_MODELS.STOCK_MOVE,
