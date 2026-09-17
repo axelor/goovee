@@ -1,0 +1,6 @@
+{
+  "title": "Keep an upload in progress apart from the files already stored",
+  "type": "fix",
+  "description": "An upload is now gathered in a directory of its own inside the tenant's storage directory rather than beside the files already stored, so a file whose own name ends in `.part` is no longer at risk of being cleaned up with the uploads in progress. An upload interrupted by a dropped connection can be resumed from the byte it reached instead of reporting a server error, an upload request refused before its body is read is answered promptly, and an abandoned upload whose bookkeeping cannot be read is given up rather than retried on every cleanup pass.",
+  "scope": ["core"]
+}
