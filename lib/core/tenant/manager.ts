@@ -1,7 +1,7 @@
 import {memoizeAsync} from '@/cache/memoize';
 import {createClient} from '@/goovee/.generated/client';
 import {processWide} from '@/runtime/process-wide';
-import {ensureStorageDir} from '@/storage/index';
+import {createStore} from '@/storage/index';
 import {getTenantConfig} from './config';
 import {prepareDatabase} from './prepare';
 import type {Tenant, TenantConfig} from './types';
@@ -46,13 +46,17 @@ async function connectTenant(
     },
   });
 
+  const store = createStore(config.aos);
+
   try {
     await client.$connect();
 
-    /* Storage is per-tenant config; make sure the directory exists before any
-     * upload writes to it. */
-    ensureStorageDir(config.aos.storage);
+    /* Made ready here, before anything writes to it, so a store that cannot be
+     * reached fails the tenant's connection rather than its first upload. */
+    await store.prepare();
   } catch (err) {
+    store.close?.();
+
     /* A source that never finished initialising holds no pool, and asking it
      * to release one throws, which would replace the error that matters. */
     if (client.$connected) {
@@ -67,7 +71,7 @@ async function connectTenant(
     throw err;
   }
 
-  return {id, config, client};
+  return {id, config, client, store};
 }
 
 /*

@@ -1,44 +1,30 @@
-import fs from 'fs';
-import path from 'path';
+import type {TenantConfig} from '@/config/schema';
+
+import {FileSystemStore} from './filesystem';
+import type {FileStore} from './store';
+
+export {resolveStoragePath} from './paths';
+export {
+  MetaFileStoreType,
+  StoreKeyError,
+  StoreStateError,
+  type ByteRange,
+  type FileStore,
+  type ReadOptions,
+  type ResumableWrite,
+  type WriteState,
+  type StoredFile,
+  type WriteOptions,
+} from './store';
 
 /**
- * Creates the directory and any missing parent. The path is a per-tenant
- * setting, so there is no process-wide default to fall back on.
+ * The store a tenant's files live in, built from its AOS storage settings and
+ * made ready when the tenant connects.
+ *
+ * The configured directory already names this tenant's own root: a tenant on a
+ * shared AOS instance has its `aos.tenantId` segment joined on as the
+ * configuration is read, so the store is handed the root as it stands.
  */
-export function ensureStorageDir(storagePath: string): void {
-  if (!fs.existsSync(storagePath)) {
-    fs.mkdirSync(storagePath, {recursive: true});
-  }
-}
-
-/**
- * Resolves a path recorded on a file record into an absolute path, and returns
- * `null` unless the result is contained in the storage directory.
- *
- * The recorded path is expected to be relative to the storage root, but nothing
- * guarantees it: the value can reach the database from outside this application
- * and may contain parent-directory segments, or be absolute.
- *
- * The containment check carries the whole guarantee and is not redundant
- * alongside `path.resolve`. `path.resolve` lets an absolute recorded path win
- * outright, so a root of `/var/data/storage` and a recorded `/etc/passwd`
- * resolve to `/etc/passwd`; only the check keeps that value out. Resolving is
- * safe here because the result is verified, and unsafe without it.
- *
- * Comparing against `root + path.sep` rather than `root` alone rejects the
- * escape and also stops a sibling directory such as `/var/data/storage-old`
- * from passing as a prefix of `/var/data/storage`. It rejects `root` itself
- * too, which is a directory and never a file to serve or delete.
- *
- * Containment is lexical: a symlink inside the storage directory pointing out
- * of it is not detected, which keeps this synchronous.
- */
-export function resolveStoragePath(
-  storage: string,
-  recordedPath: string,
-): string | null {
-  const root = path.resolve(storage);
-  const target = path.resolve(root, recordedPath);
-
-  return target.startsWith(root + path.sep) ? target : null;
+export function createStore(aos: TenantConfig['aos']): FileStore {
+  return new FileSystemStore({dir: aos.storage, tenantId: undefined});
 }
