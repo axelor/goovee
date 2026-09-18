@@ -1,12 +1,12 @@
-# 2.0.3 (2026-08-27)
+# 2.0.4 (2026-09-18)
 
 ## Fixes
 
-### Core Platform
+### E-Shop
 
-- Stop translations erroring on a locale that ships no file – #117403
+- Apply current prices and catalogue rules at shop checkout – #118746
   <details>
     <summary>Details</summary>
 
-  A visitor whose locale ships no file of its own — a browser reporting en_GB or de — made the sign-in page and the other pages outside a workspace request an address that was read as a workspace, which failed with a server error and returned a page that was then absorbed into the translations as tens of thousands of stray entries. Those pages now read their translations from the application. A locale naming a region also falls back to its language for the translations shipped with the application, which INCLUDE_LANGUAGE no longer withholds — that setting governs the translations a tenant holds.
+  Shop checkout now reads current product prices when the payment is started, so a catalogue or price-list change made since an item was added to the cart is reflected both in the amount charged and on the resulting order. Checkout also applies the same catalogue rules as the product pages: an item that is no longer available, one the shop is configured not to sell while out of stock, or one that does not belong to the workspace's own catalogue now stops the checkout instead of being ordered. Cart quantities are accepted as whole positive numbers.
   </details>
