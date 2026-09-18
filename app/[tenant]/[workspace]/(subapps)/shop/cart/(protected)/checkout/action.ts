@@ -22,7 +22,7 @@ import {
   computeExpectedAmount,
   formatNumber,
 } from '@/subapps/shop/common/utils/order';
-import {createOrder} from '@/subapps/shop/common/service';
+import {createOrder, priceCart} from '@/subapps/shop/common/service';
 import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import type {ActionResponse} from '@/types/action';
 import {
@@ -140,7 +140,6 @@ export async function paypalCaptureOrder({
         workspace: access.workspace,
         workspaceConfig: config,
         user,
-        client,
         config: tenant.config,
         paymentModeId,
       });
@@ -228,8 +227,33 @@ export async function paypalCreateOrder({cart}: CartOrderInput) {
       message: await t('Unauthorized'),
     };
   }
+  const pricedCart = await priceCart({
+    cart: parsedCartOrder.data.cart,
+    workspace: access.workspace,
+    workspaceConfig: config,
+    user,
+    client,
+    config: access.tenant.config,
+  });
+
+  if (pricedCart === 'unconfirmed') {
+    return {
+      error: true,
+      message: await t(
+        'Something went wrong with your cart. Please clear it and try again.',
+      ),
+    };
+  }
+
+  if (pricedCart === 'unavailable') {
+    return {
+      error: true,
+      message: await t('Some items in your cart are no longer available.'),
+    };
+  }
+
   const {total, currency} = computeTotal({
-    cart,
+    cart: pricedCart,
     config,
     formatNumber,
   });
@@ -253,7 +277,7 @@ export async function paypalCreateOrder({cart}: CartOrderInput) {
     const response = await createPaypalOrder({
       client,
       tenantId,
-      context: cart,
+      context: pricedCart,
       amount: expectedAmount,
       currency: currency?.code,
       email: payerEmail,
@@ -332,8 +356,33 @@ export async function createStripeCheckoutSession({cart}: CartOrderInput) {
     };
   }
 
+  const pricedCart = await priceCart({
+    cart: parsedCartOrder.data.cart,
+    workspace: access.workspace,
+    workspaceConfig: config,
+    user,
+    client,
+    config: access.tenant.config,
+  });
+
+  if (pricedCart === 'unconfirmed') {
+    return {
+      error: true,
+      message: await t(
+        'Something went wrong with your cart. Please clear it and try again.',
+      ),
+    };
+  }
+
+  if (pricedCart === 'unavailable') {
+    return {
+      error: true,
+      message: await t('Some items in your cart are no longer available.'),
+    };
+  }
+
   const {total, currency} = computeTotal({
-    cart,
+    cart: pricedCart,
     config,
     formatNumber,
   });
@@ -366,7 +415,7 @@ export async function createStripeCheckoutSession({cart}: CartOrderInput) {
       name: 'Cart Checkout',
       amount: Number(expectedAmount),
       currency: currencyCode,
-      context: cart,
+      context: pricedCart,
       url: {
         success: access.scope.forExternal(
           `/${SUBAPP_CODES.shop}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
@@ -506,7 +555,6 @@ export async function validateStripePayment({
       workspace: access.workspace,
       workspaceConfig: config,
       user,
-      client,
       config: tenant.config,
       paymentModeId,
     });
@@ -586,8 +634,33 @@ export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
       message: await t('Unauthorized'),
     };
   }
+  const pricedCart = await priceCart({
+    cart: parsedPayboxCreate.data.cart,
+    workspace: access.workspace,
+    workspaceConfig: config,
+    user,
+    client,
+    config: access.tenant.config,
+  });
+
+  if (pricedCart === 'unconfirmed') {
+    return {
+      error: true,
+      message: await t(
+        'Something went wrong with your cart. Please clear it and try again.',
+      ),
+    };
+  }
+
+  if (pricedCart === 'unavailable') {
+    return {
+      error: true,
+      message: await t('Some items in your cart are no longer available.'),
+    };
+  }
+
   const {total, currency} = computeTotal({
-    cart,
+    cart: pricedCart,
     config,
     formatNumber,
   });
@@ -614,7 +687,7 @@ export async function payboxCreateOrder({cart, uri}: PayboxCreateOrderInput) {
       amount: expectedAmount,
       currency: currency?.code,
       email: payerEmail,
-      context: cart,
+      context: pricedCart,
       url: {
         success: access.scope.fromClient(uri, {paybox_response: 'true'}),
         failure: access.scope.fromClient(uri, {paybox_error: 'true'}),
@@ -742,7 +815,6 @@ export async function validatePayboxPayment({
       workspace: access.workspace,
       workspaceConfig: config,
       user,
-      client,
       config: tenant.config,
       paymentModeId,
     });
