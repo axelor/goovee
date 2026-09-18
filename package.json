@@ -1,6 +1,6 @@
 {
   "name": "@goovee/core",
-  "version": "1.10.3",
+  "version": "1.10.4",
   "private": true,
   "scripts": {
     "pdfjs:assets": "node scripts/copy-pdfjs-assets.mjs",
