@@ -1,12 +1,39 @@
-# 2.3.2 (2026-09-16)
+# 2.3.3 (2026-09-18)
 
 ## Fixes
 
 ### Core Platform
 
-- Resume an interrupted upload from the bytes that arrived – #118563
+- Hide the comment attachment and send controls from visitors who are not signed in – #118743
   <details>
     <summary>Details</summary>
 
-  A file is uploaded in parts, and a part interrupted mid-transfer — the connection dropped, the browser closed, a gateway gave up — discarded the bytes of that part that had already reached the server, so the part was sent again from its beginning. The bytes that arrived are now kept and the upload carries on from them. Every route handler that receives a body is also handed it as it arrives rather than after all of it has been held in memory, so a single request body larger than 10 MB is no longer truncated. The handlers that read a whole body — the payment and notification webhooks, authentication, push subscriptions — each state the largest one they accept and answer 413 for anything above it.
+  A visitor who is not signed in now sees only the invitation to sign in where the comment composer would be. The attachment button, the send button and the reply link are no longer shown, so an upload that can never be accepted can no longer be started.
+  </details>
+
+### Events
+
+- Hide the comment attachment and send controls from visitors who are not signed in – #118743
+  <details>
+    <summary>Details</summary>
+
+  A visitor who is not signed in now sees only the invitation to sign in where the comment composer would be. The attachment button, the send button and the reply link are no longer shown, so an upload that can never be accepted can no longer be started.
+  </details>
+
+### News
+
+- Hide the comment attachment and send controls from visitors who are not signed in – #118743
+  <details>
+    <summary>Details</summary>
+
+  A visitor who is not signed in now sees only the invitation to sign in where the comment composer would be. The attachment button, the send button and the reply link are no longer shown, so an upload that can never be accepted can no longer be started.
+  </details>
+
+### E-Shop
+
+- Apply current prices and catalogue rules at shop checkout – #118746
+  <details>
+    <summary>Details</summary>
+
+  Shop checkout now reads current product prices when the payment is started, so a catalogue or price-list change made since an item was added to the cart is reflected both in the amount charged and on the resulting order. Checkout also applies the same catalogue rules as the product pages: an item that is no longer available, one the shop is configured not to sell while out of stock, or one that does not belong to the workspace's own catalogue now stops the checkout instead of being ordered. Cart quantities are accepted as whole positive numbers.
   </details>
