@@ -17,7 +17,7 @@ import {calculateAdvanceAmount} from '@/utils/payment';
 import {formatNumber} from '@/locale/formatters';
 import type {Cloned} from '@/types/util';
 import type {CartItem, ComputedProduct, PartnerAddress} from '@/types';
-import type {Subapp} from '@/orm/workspace';
+import type {OfferedGateway} from '@/payment/offer';
 import type {EnrichedCartItem} from '@/subapps/shop/common/types';
 
 type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
@@ -68,11 +68,13 @@ export interface ShopCheckoutLabels {
 
 export function ShopCheckout({
   config,
-  orderSubapp,
+  gateways,
+  checkoutToken,
   labels,
 }: {
   config: ShopConfig | Cloned<ShopConfig>;
-  orderSubapp?: Subapp | null;
+  gateways: OfferedGateway[];
+  checkoutToken: string;
   labels: ShopCheckoutLabels;
 }) {
   const {scope, tenantScope} = useWorkspace();
@@ -305,7 +307,10 @@ export function ShopCheckout({
                   {/* Payment sits right under the amount. */}
                   {confirmOrder && (
                     <div className="mt-4">
-                      <ShopPayments config={config} orderSubapp={orderSubapp} />
+                      <ShopPayments
+                        gateways={gateways}
+                        checkoutToken={checkoutToken}
+                      />
                     </div>
                   )}
                   <p className="m-0 mt-3.5 text-[11.5px] text-ink-500 text-center leading-[1.5]">

@@ -1,0 +1,79 @@
+{
+  "name": "AOSPortalOrderRequest",
+  "table": "portal_portal_order_request",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "clientPartner",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "contactPartner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "company",
+      "target": "AOSCompany"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "portalWorkspace",
+      "target": "AOSPortalWorkspace"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "paymentMode",
+      "target": "AOSPaymentMode"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "deliveryPartnerAddress",
+      "target": "AOSPartnerAddress"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "invoicingPartnerAddress",
+      "target": "AOSPartnerAddress"
+    },
+    {
+      "type": "Boolean",
+      "name": "inAti"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "total",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "paidAmount",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "saleOrder",
+      "target": "AOSOrder"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "invoice",
+      "target": "AOSInvoice"
+    },
+    {
+      "type": "OneToMany",
+      "name": "lineList",
+      "target": "AOSPortalOrderRequestLine",
+      "mappedBy": "orderRequest"
+    }
+  ]
+}

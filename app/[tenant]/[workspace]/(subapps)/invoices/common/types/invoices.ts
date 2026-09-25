@@ -1,11 +1,10 @@
 // ---- CORE IMPORTS ---- //
 import type {Cloned} from '@/types/util';
-import type {PaymentUpdateStatus} from '@/payment/sse';
-import {BankAccountType} from '@/payment/stripe/types';
-import {HubPispLocalInstrument} from '@/payment/hubpisp/constants';
+import type {OfferedGateway} from '@/payment/offer';
 
 // ---- LOCAL IMPORTS ---- //
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
+import type {PendingTransfer} from '@/subapps/invoices/common/payment/pending';
 
 export type InvoiceListItem = {
   id: string;
@@ -46,55 +45,6 @@ export type Invoice = {
   taxTotal: string | number | null | undefined;
   invoicePaymentList: PaymentListItem[];
   isUnpaid: boolean;
-  pendingStripeBankTransferIntents: {
-    id: string;
-    totalAmount: number;
-    formattedTotalAmount: string;
-    amount: number;
-    currency: string;
-    reference: string;
-    formattedAmount: string;
-    bankDetails: {
-      type: BankAccountType;
-      accountHolderName?: string | undefined;
-      bankName?: string | undefined;
-      country?: string | undefined;
-      iban?: string | undefined;
-      swiftCode?: string | undefined;
-      routingNumber?: string | undefined;
-      accountNumber?: string | undefined;
-      accountType?: string | undefined;
-      bankAddress?:
-        | {
-            line1?: (string | null) | undefined;
-            line2?: (string | null) | undefined;
-            city?: (string | null) | undefined;
-            state?: (string | null) | undefined;
-            postal_code?: (string | null) | undefined;
-            country?: (string | null) | undefined;
-          }
-        | undefined;
-      accountHolderAddress?:
-        | {
-            line1?: (string | null) | undefined;
-            line2?: (string | null) | undefined;
-            city?: (string | null) | undefined;
-            state?: (string | null) | undefined;
-            postal_code?: (string | null) | undefined;
-            country?: (string | null) | undefined;
-          }
-        | undefined;
-    };
-    contextId: string;
-    initiatedDate: Date;
-  }[];
-  pendingHubPispContexts: {
-    contextId: string;
-    amount: string;
-    initiatedDate: Date;
-    localInstrument: HubPispLocalInstrument;
-    resourceId: string;
-  }[];
   company: {
     id: string;
     version: number;
@@ -191,6 +141,10 @@ export type TotalProps = {
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoiceType: string;
   token?: string;
-  onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
-  allowStripeBankTransfer: boolean;
+  /** Transfers on this invoice still waiting on the payer's bank. */
+  pendingTransfers: PendingTransfer[];
+  /** The gateways this tenant and workspace offer, decided on the server. */
+  gateways: OfferedGateway[];
+  /** Minted when the page rendered; a second press finds the same payment. */
+  checkoutToken: string;
 };

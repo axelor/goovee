@@ -11,7 +11,7 @@ import {findProduct as $findProduct} from '@/subapps/shop/common/orm/product';
 import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
-import {requestOrder} from '@/subapps/shop/common/service';
+import {requestQuotation as $requestQuotation} from '@/subapps/shop/common/service';
 import {IdSchema} from '@/utils/validators';
 import {CartSchema, type CartInput} from '@/subapps/shop/common/validators';
 
@@ -66,10 +66,9 @@ export async function requestQuotation({cart}: {cart: CartInput}) {
   );
   if (!workspaceConfig) return null;
 
-  return requestOrder({
+  return $requestQuotation({
     cart,
     workspace: access.workspace,
     workspaceConfig,
-    type: 'quotation',
   });
 }

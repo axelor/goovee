@@ -1,0 +1,61 @@
+{
+  "name": "AOSPortalPaymentSession",
+  "table": "portal_portal_payment_session",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "payment",
+      "target": "AOSPortalPayment",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "gateway",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "idempotencyKey",
+      "required": true,
+      "unique": true
+    },
+    {
+      "type": "BigInt",
+      "name": "amount",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "currencyCode",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "currencyScale",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "sessionRef"
+    },
+    {
+      "type": "String",
+      "name": "status",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "failureReason"
+    },
+    {
+      "type": "DateTime",
+      "name": "expiresOn"
+    }
+  ],
+  "uniques": [
+    {
+      "columns": ["gateway", "sessionRef"]
+    }
+  ]
+}

@@ -3,26 +3,17 @@
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import type {MarketplaceConfig} from '../../../../orm/config';
-import {PaymentOption} from '@/types';
-import type {SuccessResponse} from '@/types/action';
-import type {Cloned} from '@/types/util';
+import {PAYMENT_SOURCE} from '@/payment/domain/types';
+import type {OfferedGateway} from '@/payment/offer';
 import {Button} from '@/ui/components';
-import {Payments} from '@/ui/components/payment';
-import {useToast} from '@/ui/hooks';
 import {Link} from '@/ui/components/link';
-import {useRouter} from 'next/navigation';
-import {
-  checkout,
-  createStripeCheckoutSession,
-  payboxCreateOrder,
-  paypalCreateOrder,
-} from '../../../../actions';
+import {PaymentMethods} from '@/ui/components/payment/payment-methods';
 import {useMarketplaceCart} from '../../../../hooks/use-marketplace-cart';
 import {CartItemCard} from '../../cart/cart-item-card';
 
 type Props = {
-  config: Cloned<MarketplaceConfig>;
+  gateways: OfferedGateway[];
+  checkoutToken: string;
 };
 
 function formatPrice(
@@ -38,27 +29,15 @@ function formatPrice(
 }
 
 /* Checkout content. Reads the browser-persisted cart, renders the line items
- * for visual confirmation, and mounts <Payments> wired to the per-provider
- * session actions. Only product ids are sent: each action revalidates the cart
- * and recomputes prices server-side, so the buyer cannot influence what is
- * charged. */
-export function CheckoutContent({config}: Props) {
-  const router = useRouter();
+ * for visual confirmation, and mounts the payment buttons. Only product ids
+ * are sent: the server revalidates the cart and prices it again, so the buyer
+ * cannot influence what is charged. The outcome is shown by the payment page
+ * the gateway sends the browser back to. */
+export function CheckoutContent({gateways, checkoutToken}: Props) {
   const {scope} = useWorkspace();
   const marketplaceBase = scope.forRouter(`/${SUBAPP_CODES.marketplace}`);
-  const {cart, loaded, clearCart} = useMarketplaceCart();
-  const {toast} = useToast();
+  const {cart, loaded} = useMarketplaceCart();
   const productIds = cart.items.map(item => item.productId);
-
-  const onApprove = async (result: SuccessResponse<{orderId: string}>) => {
-    await clearCart();
-    if (result.message) {
-      toast({variant: 'destructive', title: result.message});
-    }
-    const orderId = result.data?.orderId;
-    const query = orderId ? `?orderId=${encodeURIComponent(orderId)}` : '';
-    router.push(`${marketplaceBase}/cart/checkout/success${query}`);
-  };
 
   if (!loaded) {
     return <div className="h-32 rounded-lg bg-ink-50/40 animate-pulse" />;
@@ -104,39 +83,18 @@ export function CheckoutContent({config}: Props) {
         </span>
       </div>
 
-      <Payments
-        config={config}
-        disabled={false}
-        onValidate={async () => true}
-        onApprove={onApprove}
-        onPaypalCreatedOrder={async () => paypalCreateOrder({productIds})}
-        onPaypalCaptureOrder={async orderID =>
-          checkout({
-            payment: {data: {id: orderID}, mode: PaymentOption.paypal},
-          })
-        }
-        onStripeCreateCheckOutSession={async () =>
-          createStripeCheckoutSession({productIds})
-        }
-        onStripeValidateSession={async ({stripeSessionId}) =>
-          checkout({
-            payment: {data: {id: stripeSessionId}, mode: PaymentOption.stripe},
-          })
-        }
-        onPayboxCreateOrder={async ({uri}) =>
-          payboxCreateOrder({
-            productIds,
-            uri,
-          })
-        }
-        onPayboxValidatePayment={async ({params}) =>
-          checkout({
-            payment: {data: {params}, mode: PaymentOption.paybox},
-          })
-        }
-        successMessage="Purchase completed successfully."
-        errorMessage="Failed to complete purchase."
-      />
+      {gateways.length === 0 ? (
+        <p className="text-sm text-ink-500">
+          {i18n.t('Online payment is not available.')}
+        </p>
+      ) : (
+        <PaymentMethods
+          gateways={gateways}
+          source={PAYMENT_SOURCE.marketplace}
+          intent={{productIds}}
+          checkoutToken={checkoutToken}
+        />
+      )}
     </div>
   );
 }

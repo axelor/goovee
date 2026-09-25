@@ -83,7 +83,7 @@ export async function findPurchases({
  * frozen formatted text. `ordererId` is the logged-in user (the order's `orderedBy`); `ownerId` is
  * the owning main partner set as each line's `owner` (the ownership/access key). The context fields are
  * nullable because a missing value (e.g. no invoicing address) is itself a recoverable failure
- * cause; `paymentContextId` is stored as the id string (PaymentContext is goovee-owned). */
+ * cause. */
 export async function recordOrder({
   client,
   ordererId,
@@ -94,7 +94,6 @@ export async function recordOrder({
   companyId,
   paymentModeId,
   invoicingAddress,
-  paymentContextId,
 }: {
   client: Client;
   ordererId: ID;
@@ -107,7 +106,6 @@ export async function recordOrder({
   companyId: ID | null;
   paymentModeId: ID | null;
   invoicingAddress: {id: ID; formattedFullName: string | null} | null;
-  paymentContextId: ID | null;
 }): Promise<string> {
   /* The cart is validated single-currency at checkout. Link the Currency FK by its ISO code on the
    * order and every line — the code came from pricing a product, so it always matches a record. */
@@ -135,7 +133,6 @@ export async function recordOrder({
           invoicingAddressStr: invoicingAddress.formattedFullName,
         }),
       }),
-      ...(paymentContextId && {paymentContextId}),
       purchaseList: {create: lines},
     },
     select: {id: true},

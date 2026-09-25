@@ -1,4 +1,5 @@
 import {Suspense} from 'react';
+import {cookies} from 'next/headers';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -11,7 +12,9 @@ import {SUBAPP_CODES} from '@/constants';
 import {currentWorkspace} from '@/url/current';
 import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {canSettleStripeBankTransfer} from '@/payment/stripe';
+import {PAYMENT_SOURCE} from '@/payment/domain/types';
+import {offeredGateways} from '@/payment/offer';
+import {mintCheckoutToken} from '@/payment/checkout-token';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -19,6 +22,7 @@ import {SignOutBanner} from './sign-out-banner';
 import {TokenInvalid} from './token-invalid';
 import {getInvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
+import {findPendingTransfers} from '@/subapps/invoices/common/payment/pending';
 import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
 
 type Params = {id: string; tenant: string; workspace: string};
@@ -55,7 +59,6 @@ async function Invoice({
       token: access.token,
       client: access.tenant.client,
       workspaceURL: access.workspace.url,
-      tenantId: access.tenant.id,
     });
     if (!invoice) return <TokenInvalid />;
 
@@ -65,14 +68,27 @@ async function Invoice({
     );
     if (!config) notFound();
 
+    /* A signed-in visitor on a token link is asked to sign out first, so the
+     * viewer here is anonymous and only the return cookie can open a payment. */
+    const pendingTransfers = await findPendingTransfers({
+      tenant: access.tenant,
+      invoiceId: invoice.id,
+      cookies: await cookies(),
+      viewerEmail: null,
+    });
+
     return (
       <Content
         invoice={clone(invoice)}
         config={clone(config)}
         token={access.token}
-        allowStripeBankTransfer={canSettleStripeBankTransfer(
-          access.tenant.config,
-        )}
+        pendingTransfers={pendingTransfers}
+        gateways={await offeredGateways({
+          source: PAYMENT_SOURCE.invoices,
+          paymentOptions: config.paymentOptionSet,
+          tenant: access.tenant,
+        })}
+        checkoutToken={mintCheckoutToken()}
       />
     );
   }
@@ -98,7 +114,6 @@ async function Invoice({
     params: {where: invoicesWhereClause},
     client: access.tenant.client,
     workspaceURL: access.workspace.url,
-    tenantId: access.tenant.id,
   });
   if (!invoice) notFound();
 
@@ -108,13 +123,24 @@ async function Invoice({
   );
   if (!config) notFound();
 
+  const pendingTransfers = await findPendingTransfers({
+    tenant: access.tenant,
+    invoiceId: invoice.id,
+    cookies: await cookies(),
+    viewerEmail: access.user.email,
+  });
+
   return (
     <Content
       invoice={clone(invoice)}
       config={clone(config)}
-      allowStripeBankTransfer={canSettleStripeBankTransfer(
-        access.tenant.config,
-      )}
+      pendingTransfers={pendingTransfers}
+      gateways={await offeredGateways({
+        source: PAYMENT_SOURCE.invoices,
+        paymentOptions: config.paymentOptionSet,
+        tenant: access.tenant,
+      })}
+      checkoutToken={mintCheckoutToken()}
     />
   );
 }

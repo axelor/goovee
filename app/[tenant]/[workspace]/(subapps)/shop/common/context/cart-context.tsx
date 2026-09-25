@@ -21,6 +21,14 @@ export type ShopCart = {
   items: ShopCartItem[];
   invoicingAddress: unknown;
   deliveryAddress: unknown;
+  /* The order requests this cart has already been emptied for, most recent
+   * last. It rides on the cart so it is stored under the cart's own key and
+   * written in the same operation, which is what lets the confirmation page
+   * empty the cart exactly once per order however often it is reopened — and
+   * it is a list rather than one slot because "has this order emptied the
+   * cart?" is a property of the order, not of whichever order came last.
+   * Absent on carts stored before it existed. */
+  clearedFor?: string[];
 };
 
 const defaultCart = (): ShopCart => ({
@@ -31,6 +39,23 @@ const defaultCart = (): ShopCart => ({
 
 const sameProduct = (item: ShopCartItem, productId: Product['id']) =>
   Number(item.product) === Number(productId);
+
+/* How many orders back the cart remembers having been emptied for. Bounded so
+ * a long-lived cart cannot grow without limit; far more than the handful of
+ * confirmations a buyer could still have open. */
+const CLEARED_HISTORY = 10;
+
+/* The one place that decides what `clearedFor` means. It crosses a
+ * persistence boundary, so what comes back from storage is whatever an older
+ * version of this code wrote, and every reader goes through here. */
+const clearedIds = (cart: ShopCart): string[] =>
+  Array.isArray(cart?.clearedFor) ? cart.clearedFor : [];
+
+/** Whether this cart has already been emptied for that order request. */
+export const hasClearedFor = (
+  cart: ShopCart,
+  orderRequestId: string,
+): boolean => clearedIds(cart).includes(orderRequestId);
 
 /** Count semantics for the unified cart icon: sum of item quantities. */
 export const shopCartCount = (stored: unknown): number => {
@@ -230,8 +255,27 @@ export function useCart() {
     [setValue],
   );
 
+  /* Emptying for any other reason — a quotation was requested — keeps the
+   * record of which orders already emptied it, or reopening their confirmation
+   * would empty the cart again. */
   const clearCart = useCallback(
-    () => setValue(() => defaultCart()),
+    () => setValue(prev => ({...defaultCart(), clearedFor: clearedIds(prev)})),
+    [setValue],
+  );
+
+  /* Empties the cart and records the order request it was emptied for, in one
+   * write. The confirmation page is a plain GET the buyer can reopen — by
+   * Back, a bookmark, a forwarded link or a second tab — and reopening it must
+   * not empty a cart they have since refilled. */
+  const clearCartForOrder = useCallback(
+    (orderRequestId: string) =>
+      setValue(prev => ({
+        ...defaultCart(),
+        clearedFor: [
+          ...clearedIds(prev).filter(id => id !== orderRequestId),
+          orderRequestId,
+        ].slice(-CLEARED_HISTORY),
+      })),
     [setValue],
   );
 
@@ -261,6 +305,7 @@ export function useCart() {
     updateQuantity,
     removeItem,
     clearCart,
+    clearCartForOrder,
     getProductNote,
     setProductNote,
     updateAddress,

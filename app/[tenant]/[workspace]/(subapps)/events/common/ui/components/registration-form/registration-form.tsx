@@ -20,7 +20,6 @@ import {
 import {useToast} from '@/ui/hooks/use-toast';
 import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {BadgeList, Button} from '@/ui/components';
-import {useSearchParams} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -52,6 +51,8 @@ export const RegistrationForm = ({
   metaFields = [],
   config,
   user,
+  gateways,
+  checkoutToken,
 }: EventPageCardProps) => {
   const {
     defaultPrice = 0,
@@ -78,10 +79,6 @@ export const RegistrationForm = ({
   const router = useRouter();
   const {scope} = useWorkspace();
   const {toast} = useToast();
-
-  const {searchParams} = useSearchParams();
-  const stripeSessionId = searchParams.get('stripe_session_id');
-  const payboxResponse = searchParams.get('paybox_response');
 
   const isLoggedIn = !!user?.emailAddress;
   //NOTE: temprorary disable contacts list
@@ -500,7 +497,7 @@ export const RegistrationForm = ({
             });
           }}
           mode={'onChange'}
-          {...((canPay && totalPrice > 0) || stripeSessionId || payboxResponse
+          {...(canPay && totalPrice > 0
             ? {
                 submitButton: ({
                   form,
@@ -508,7 +505,8 @@ export const RegistrationForm = ({
                   form: UseFormReturn<Record<string, unknown>>;
                 }) => (
                   <EventPayments
-                    config={config}
+                    gateways={gateways}
+                    checkoutToken={checkoutToken}
                     event={{
                       id: eventId,
                       displayAti: String(eventPrice),

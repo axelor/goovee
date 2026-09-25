@@ -47,8 +47,8 @@ export type ValidatedCart = {
  *   - All items must share a single currency; mixed carts are rejected.
  *
  * Returns the cart re-priced from current DB state — these amounts are
- * authoritative, not the client's. They are stashed in PaymentContext at
- * prepare and asserted against `paidAmount` on the return leg. */
+ * authoritative, not the client's. They are frozen into the payment's
+ * snapshot at prepare, and delivery records the order at those prices. */
 export async function validateCart({
   client,
   workspace,
@@ -167,12 +167,12 @@ export async function validateCart({
   };
 }
 
-/* Time-sensitive re-check used on the payment-return leg. The validated
- * cart (with server-set prices) is already in PaymentContext from
- * the prepare step, so we don't recompute prices here — that would risk
- * rejecting a payment we already captured if a tax/currency line moved
- * between prepare and return. We only re-assert the invariants that can
- * actually change in that window:
+/* Time-sensitive re-check used at delivery, once the payment is captured.
+ * The validated cart (with server-set prices) is already in the payment's
+ * snapshot from the prepare step, so we don't recompute prices here — that
+ * would risk rejecting a payment we already captured if a tax/currency line
+ * moved between prepare and capture. We only re-assert the invariants that
+ * can actually change in that window:
  *   - workspace still allows the buyer to see the product;
  *   - product is still storefront-visible (a published, non-archived
  *     version, and not taken down);
@@ -185,7 +185,7 @@ export async function recheckCartAvailability({
   productIds,
 }: {
   client: Client;
-  workspace: Workspace;
+  workspace: Pick<Workspace, 'id'>;
   mainPartnerId: string;
   productIds: string[];
 }) {

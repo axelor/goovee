@@ -1,0 +1,37 @@
+{
+  "name": "AOSPortalOrderRequestLine",
+  "table": "portal_portal_order_request_line",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "orderRequest",
+      "target": "AOSPortalOrderRequest",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "product",
+      "target": "AOSProduct",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "sequence"
+    },
+    {
+      "type": "Decimal",
+      "name": "quantity",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "unitPrice",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "note"
+    }
+  ]
+}

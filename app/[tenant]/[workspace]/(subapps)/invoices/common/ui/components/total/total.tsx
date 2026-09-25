@@ -21,15 +21,14 @@ import {
 import {formatNumber} from '@/locale/formatters';
 import {useSearchParams} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {BankTransferList} from '@/ui/components/payment/stripe';
-import {HubPispPendingList} from '@/ui/components/payment/hubpisp';
+import {PaymentOption} from '@/types';
+import {isPaymentOptionAvailable} from '@/utils/payment';
 import {cn} from '@/utils/css';
-import {useToast} from '@/ui/hooks/';
-import type {BankTransferDetailsType} from '@/ui/components/payment/types';
-import type {Cloned} from '@/types/util';
+import {formatMoney} from '@/ui/components/payment/transfer-instructions';
 
 // ---- LOCAL IMPORTS ---- //
 import {TotalProps} from '@/subapps/invoices/common/types/invoices';
+import {PendingTransfers} from '@/subapps/invoices/common/ui/components/pending-transfers';
 
 // Parse a formatted currency string into a JS number, tolerating both
 // FR/EU ("1 234,56 €") and US ("1,234.56") locales.
@@ -53,7 +52,6 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import {InvoicePayments} from '@/subapps/invoices/common/ui/components';
-import {cancelStripeBankTransferPaymentIntent} from '@/app/[tenant]/[workspace]/(subapps)/invoices/common/actions';
 
 export function Total({
   isUnpaid,
@@ -61,8 +59,9 @@ export function Total({
   invoice,
   invoiceType,
   token,
-  onPaymentUpdate,
-  allowStripeBankTransfer,
+  pendingTransfers,
+  gateways,
+  checkoutToken,
 }: TotalProps) {
   const {
     inTaxTotal,
@@ -71,8 +70,6 @@ export function Total({
     taxTotal,
     invoicePaymentList,
     currency,
-    pendingStripeBankTransferIntents,
-    pendingHubPispContexts,
   } = invoice;
   const {searchParams} = useSearchParams();
   const type = searchParams.get('type') as INVOICE_PAYMENT_OPTIONS;
@@ -88,17 +85,30 @@ export function Total({
   const canPayInvoice = config.canPayInvoice ?? INVOICE_PAYMENT_OPTIONS.NO;
   const paymentOptionSet = config.paymentOptionSet;
 
+  /* The same rule a start is refused under: while a transfer has received
+   * part of its amount, the payer completes it rather than paying again. */
+  const partlyFundedTransfer = pendingTransfers.find(
+    transfer => transfer.partlyFunded,
+  );
+
   const allowInvoicePayment =
     isUnpaid &&
     allowOnlinePayment &&
     canPayInvoice !== INVOICE_PAYMENT_OPTIONS.NO &&
-    Boolean(paymentOptionSet?.length);
-
-  const remainingAmountValue = parseFloat(amountRemaining?.value || '0');
+    Boolean(paymentOptionSet?.length) &&
+    !partlyFundedTransfer;
 
   const {workspaceURL} = useWorkspace();
+  /* The same conditions the withdrawal is refused under, so the action is not
+   * offered where it would fail. */
+  const cancelScope =
+    allowOnlinePayment &&
+    canPayInvoice !== INVOICE_PAYMENT_OPTIONS.NO &&
+    isPaymentOptionAvailable(paymentOptionSet, PaymentOption.stripe)
+      ? {invoiceId: invoice.id, workspaceURL, token}
+      : null;
 
-  const {toast} = useToast();
+  const remainingAmountValue = parseFloat(amountRemaining?.value || '0');
 
   const formSchema = z.object({
     amount: z
@@ -150,32 +160,6 @@ export function Total({
         ? INVOICE_PAYMENT_OPTIONS.TOTAL
         : INVOICE_PAYMENT_OPTIONS.PARTIAL,
     );
-  };
-
-  const handleStripeIntentCancellation = async (
-    transfer: Cloned<BankTransferDetailsType>,
-  ): Promise<void> => {
-    const {id, contextId} = transfer;
-    try {
-      const response = await cancelStripeBankTransferPaymentIntent({
-        id,
-        contextId,
-        workspaceURL,
-        token,
-      });
-
-      if (response?.error) {
-        toast({
-          variant: 'destructive',
-          title: i18n.t(response.message),
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: i18n.t('Something went wrong while canceling the bank transfer'),
-      });
-    }
   };
 
   const hasPartialPayment = Boolean(invoicePaymentList?.length);
@@ -239,21 +223,16 @@ export function Total({
         </ul>
       )}
 
-      {pendingStripeBankTransferIntents?.length ? (
-        <BankTransferList
-          bankTransfers={pendingStripeBankTransferIntents}
-          onCancelTransfer={handleStripeIntentCancellation}
-        />
-      ) : null}
-      {pendingHubPispContexts?.length ? (
-        <HubPispPendingList pendingContexts={pendingHubPispContexts} />
-      ) : null}
+      <PendingTransfers
+        transfers={pendingTransfers}
+        cancelScope={cancelScope}
+      />
 
       {isUnpaid && (
         <div className="rounded-lg p-4 bg-status-overdue-bg/40 border border-status-overdue-bg flex flex-col gap-2">
           <div className="flex items-baseline justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-status-overdue-fg">
-              {i18n.t('Remaining to pay')}
+              {i18n.t('Amount remaining')}
             </span>
             <span className="text-xl font-bold text-status-overdue-fg tabular-nums">
               {amountRemaining?.formattedValue}
@@ -278,6 +257,18 @@ export function Total({
 
       {invoiceType !== INVOICE.PAID && (
         <>
+          {isUnpaid && partlyFundedTransfer && (
+            <p className="rounded-lg border border-yellow-200 bg-yellow-50/50 p-3 text-sm text-ink-700">
+              {i18n.t(
+                'A bank transfer on this invoice has already received part of its amount. Send the remaining {0} using its bank details above; another payment can be made once it completes.',
+                formatMoney(
+                  partlyFundedTransfer.remaining,
+                  partlyFundedTransfer.currencyCode,
+                  partlyFundedTransfer.currencyScale,
+                ),
+              )}
+            </p>
+          )}
           {allowInvoicePayment && !paymentType && (
             <div className="flex flex-col gap-3">
               <Button
@@ -359,18 +350,11 @@ export function Total({
             </div>
             <Separator className="bg-ink-100" />
             <InvoicePayments
-              config={config}
               invoice={invoice}
               amount={currentAmount}
-              paymentType={paymentType}
-              resetPaymentType={resetPaymentType}
-              resetForm={resetForm}
               token={token}
-              allowStripeBankTransfer={allowStripeBankTransfer}
-              onPaymentUpdate={status => {
-                setPaymentType(null);
-                onPaymentUpdate?.(status);
-              }}
+              gateways={gateways}
+              checkoutToken={checkoutToken}
             />
           </div>
         </>

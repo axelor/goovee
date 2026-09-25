@@ -1,0 +1,149 @@
+{
+  "name": "AOSPortalPayment",
+  "table": "portal_portal_payment",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "reference",
+      "required": true,
+      "unique": true
+    },
+    {
+      "type": "String",
+      "name": "checkoutToken",
+      "unique": true
+    },
+    {
+      "type": "String",
+      "name": "source",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "portalWorkspace",
+      "target": "AOSPortalWorkspace",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "portalAppConfig",
+      "target": "AOSPortalAppConfig"
+    },
+    {
+      "type": "String",
+      "name": "subjectLabel"
+    },
+    {
+      "type": "String",
+      "name": "payer"
+    },
+    {
+      "type": "BigInt",
+      "name": "amount",
+      "required": true
+    },
+    {
+      "type": "BigInt",
+      "name": "capturedAmount"
+    },
+    {
+      "type": "String",
+      "name": "currencyCode",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "currencyScale",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "paymentMode",
+      "target": "AOSPaymentMode"
+    },
+    {
+      "type": "String",
+      "name": "status",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "capturedOn"
+    },
+    {
+      "type": "String",
+      "name": "gateway"
+    },
+    {
+      "type": "String",
+      "name": "providerRef"
+    },
+    {
+      "type": "String",
+      "name": "fulfilmentStatus"
+    },
+    {
+      "type": "String",
+      "name": "fulfilmentIssue"
+    },
+    {
+      "type": "String",
+      "name": "lastError"
+    },
+    {
+      "type": "String",
+      "name": "subjectModel"
+    },
+    {
+      "type": "BigInt",
+      "name": "subjectId"
+    },
+    {
+      "type": "BigInt",
+      "name": "exclusiveSubjectId"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "registeredInvoice",
+      "target": "AOSInvoice"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "registeredSaleOrder",
+      "target": "AOSOrder"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "registeredInvoicePayment",
+      "target": "AOSInvoicePayment"
+    },
+    {
+      "type": "OneToMany",
+      "name": "sessionList",
+      "target": "AOSPortalPaymentSession",
+      "mappedBy": "payment"
+    },
+    {
+      "type": "OneToMany",
+      "name": "eventList",
+      "target": "AOSPortalPaymentEvent",
+      "mappedBy": "payment"
+    },
+    {
+      "type": "OneToMany",
+      "name": "taskList",
+      "target": "AOSPortalPaymentTask",
+      "mappedBy": "payment"
+    },
+    {
+      "type": "DateTime",
+      "name": "resolvedOn"
+    }
+  ],
+  "uniques": [
+    {
+      "columns": ["subjectModel", "exclusiveSubjectId"]
+    }
+  ]
+}

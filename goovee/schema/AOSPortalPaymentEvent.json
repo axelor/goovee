@@ -1,0 +1,76 @@
+{
+  "name": "AOSPortalPaymentEvent",
+  "table": "portal_portal_payment_event",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "payment",
+      "target": "AOSPortalPayment",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "session",
+      "target": "AOSPortalPaymentSession"
+    },
+    {
+      "type": "String",
+      "name": "gateway",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "eventKey",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "type",
+      "required": true
+    },
+    {
+      "type": "BigInt",
+      "name": "amount"
+    },
+    {
+      "type": "String",
+      "name": "currencyCode"
+    },
+    {
+      "type": "Int",
+      "name": "currencyScale"
+    },
+    {
+      "type": "String",
+      "name": "receivedVia",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "receivedOn",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "confirmedOn"
+    },
+    {
+      "type": "String",
+      "name": "providerRef"
+    },
+    {
+      "type": "String",
+      "name": "reason"
+    },
+    {
+      "type": "String",
+      "name": "payload"
+    }
+  ],
+  "uniques": [
+    {
+      "columns": ["gateway", "eventKey"]
+    }
+  ]
+}

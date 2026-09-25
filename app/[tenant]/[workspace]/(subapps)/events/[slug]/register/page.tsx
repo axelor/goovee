@@ -7,6 +7,9 @@ import {findGooveeUserByEmail} from '@/orm/partner';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
+import {PAYMENT_SOURCE} from '@/payment/domain/types';
+import {offeredGateways} from '@/payment/offer';
+import {mintCheckoutToken} from '@/payment/checkout-token';
 
 // ---- LOCAL IMPORTS ---- //
 import {RegistrationForm} from '@/subapps/events/common/ui/components';
@@ -79,6 +82,14 @@ export default async function Page(props: {
     ? await findGooveeUserByEmail(user.email, client).then(clone)
     : null;
 
+  const gateways = workspaceConfig.allowOnlinePaymentForEcommerce
+    ? await offeredGateways({
+        source: PAYMENT_SOURCE.events,
+        paymentOptions: workspaceConfig.paymentOptionSet,
+        tenant: access.tenant,
+      })
+    : [];
+
   return (
     <main className="container mx-auto flex-1 py-6 flex flex-col lg:flex-row gap-6 pb-20">
       <div className="order-2 lg:order-1 space-y-6 w-full">
@@ -87,6 +98,8 @@ export default async function Page(props: {
           metaFields={metaFields}
           config={clone(workspaceConfig)}
           user={partner}
+          gateways={gateways}
+          checkoutToken={mintCheckoutToken()}
         />
       </div>
     </main>

@@ -12,7 +12,7 @@ export async function findCartProducts({
   productIds,
 }: {
   client: Client;
-  workspace: Workspace;
+  workspace: Pick<Workspace, 'id'>;
   mainPartnerId: string;
   productIds: string[];
 }) {
@@ -26,6 +26,9 @@ export async function findCartProducts({
         currentVersion: {id: true, statusSelect: true},
         ...priceSelectFields,
       },
+      /* A fixed order, so the same cart always reads the same: a payment is
+       * found again by what it was priced at, items in order included. */
+      orderBy: {id: 'ASC'},
     }),
     findOwnedProductIds({
       productIds,
@@ -50,7 +53,7 @@ export async function findCartProductsAvailability({
   productIds,
 }: {
   client: Client;
-  workspace: Workspace;
+  workspace: Pick<Workspace, 'id'>;
   mainPartnerId: string;
   productIds: string[];
 }) {

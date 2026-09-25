@@ -40,7 +40,8 @@ export async function validateRegistration({
   values: RegistrationValues;
   workspaceURL: string;
   config: EventsConfig | Cloned<EventsConfig>;
-  user?: User;
+  /** Who registers; only their presence matters, a guest has none. */
+  user?: Pick<User, 'id'>;
   client: Client;
 }): ActionResponse<{participants: Participant[]}> {
   if (!config.allowGuestEventRegistration && !user) {

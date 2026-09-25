@@ -1,0 +1,45 @@
+{
+  "name": "AOSPortalPaymentTask",
+  "table": "portal_portal_payment_task",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "payment",
+      "target": "AOSPortalPayment",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "kind",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "nextRetryOn",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "overdueOn",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "attempts"
+    },
+    {
+      "type": "String",
+      "name": "classification"
+    },
+    {
+      "type": "String",
+      "name": "lastError"
+    }
+  ],
+  "uniques": [
+    {
+      "columns": ["payment", "kind"]
+    }
+  ]
+}

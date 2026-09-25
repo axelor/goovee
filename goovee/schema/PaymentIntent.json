@@ -1,0 +1,22 @@
+{
+  "name": "PaymentIntent",
+  "table": "portal_payment_intent",
+  "synchronize": true,
+  "fields": [
+    {
+      "type": "BigInt",
+      "name": "paymentId",
+      "required": true,
+      "unique": true
+    },
+    {
+      "type": "String",
+      "name": "source",
+      "required": true
+    },
+    {
+      "type": "JSON",
+      "name": "data"
+    }
+  ]
+}

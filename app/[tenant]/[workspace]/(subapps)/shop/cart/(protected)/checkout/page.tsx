@@ -4,11 +4,13 @@ import {notFound, redirect} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/access/ensure-access';
 import {denyPage} from '@/access/denial';
-import {findSubappAccess} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {t} from '@/locale/server';
+import {PAYMENT_SOURCE} from '@/payment/domain/types';
+import {offeredGateways} from '@/payment/offer';
+import {mintCheckoutToken} from '@/payment/checkout-token';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -33,8 +35,6 @@ async function Checkout({
   const {user} = access;
   const {client} = access.tenant;
 
-  const workspaceURL = access.workspace.url;
-
   const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
@@ -42,24 +42,26 @@ async function Checkout({
     redirect(access.scope.forRouter('/shop/cart'));
   }
 
-  const [orderSubapp, hidePriceAndPurchase, labels] = await Promise.all([
-    findSubappAccess({
-      code: SUBAPP_CODES.orders,
-      user,
-      url: workspaceURL,
-      client,
-    }),
+  const [hidePriceAndPurchase, labels] = await Promise.all([
     shouldHidePricesAndPurchase({user, config, client}),
     buildLabels(),
   ]);
 
   if (hidePriceAndPurchase) notFound();
 
+  const gateways = config.allowOnlinePaymentForEcommerce
+    ? await offeredGateways({
+        source: PAYMENT_SOURCE.shop,
+        paymentOptions: config.paymentOptionSet,
+        tenant: access.tenant,
+      })
+    : [];
+
   return (
     <Content
       config={clone(config)}
-      orderSubapp={clone(orderSubapp)}
-      tenant={access.tenant.id}
+      gateways={gateways}
+      checkoutToken={mintCheckoutToken()}
       labels={labels}
     />
   );

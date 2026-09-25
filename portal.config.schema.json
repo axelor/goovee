@@ -208,6 +208,11 @@
                   "live": {
                     "type": "boolean",
                     "description": "true for live payments; defaults to sandbox."
+                  },
+                  "webhookId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Id of the webhook registered for this tenant in the PayPal developer dashboard. PayPal signs each notification, and the signature is checked against this id. Without it, PayPal notifications are refused and a payment is recorded only when the buyer comes back to the site."
                   }
                 },
                 "required": ["clientId", "clientSecret"],
@@ -218,6 +223,12 @@
                 "type": "object",
                 "properties": {
                   "clientSecret": {"type": "string", "minLength": 1},
+                  "bankTransferCountry": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2,
+                    "description": "Two-letter country whose bank account Stripe presents for EUR bank transfers; defaults to FR."
+                  },
                   "webhookSecret": {
                     "type": "string",
                     "description": "Stripe webhook signing secret for this tenant's webhook endpoint. Without it, bank transfer is not offered at checkout."

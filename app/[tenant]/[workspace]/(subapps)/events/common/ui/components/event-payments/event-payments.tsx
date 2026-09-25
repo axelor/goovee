@@ -1,43 +1,37 @@
 'use client';
 
-import {useCallback} from 'react';
-import type {Cloned} from '@/types/util';
-import {useRouter} from 'next/navigation';
 import type {UseFormReturn} from 'react-hook-form';
 
 // ---- CORE IMPORTS ---- //
-import {PaymentOption} from '@/types';
-import {EventsConfig} from '@/subapps/events/common/orm/config';
-import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
-import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {Payments} from '@/ui/components/payment';
+import type {ModelField} from '@/orm/model-fields';
+import {PAYMENT_SOURCE} from '@/payment/domain/types';
+import type {OfferedGateway} from '@/payment/offer';
+import type {Cloned} from '@/types/util';
+import {PaymentMethods} from '@/ui/components/payment/payment-methods';
+import {useToast} from '@/ui/hooks';
 import {scale} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
-import {register} from '@/subapps/events/common/actions/actions';
-import {
-  createStripeCheckoutSession,
-  payboxCreateOrder,
-  paypalCreateOrder,
-} from '@/app/[tenant]/[workspace]/(subapps)/events/common/actions/payments';
+import type {FullEvent} from '../../../orm/event';
 import {mapParticipants} from '@/subapps/events/common/utils';
 import {getCalculatedTotalPrice} from '@/subapps/events/common/utils/payments';
-import type {FullEvent} from '../../../orm/event';
-import type {ModelField} from '@/orm/model-fields';
-import {URL_PARAMS} from '@/subapps/events/common/constants';
-import type {SuccessResponse} from '@/types/action';
-import type {Registration} from '@/subapps/events/common/types';
+
+/**
+ * The payment buttons of a paid registration. The form's values are read when
+ * a button is pressed and sent as the intent; the server validates and prices
+ * them. The outcome is shown by the payment page the gateway sends the browser
+ * back to, which continues to the confirmation page.
+ */
 export function EventPayments({
-  config,
   event,
   form,
   metaFields,
   metaFieldsFacilities,
   additionalFieldSet,
+  gateways,
+  checkoutToken,
 }: {
-  config: EventsConfig | Cloned<EventsConfig>;
   event: Pick<
     Cloned<FullEvent>,
     'id' | 'displayAti' | 'facilityList' | 'priceScale'
@@ -46,141 +40,47 @@ export function EventPayments({
   metaFields: ModelField[];
   metaFieldsFacilities: ModelField[];
   additionalFieldSet: ModelField[] | null | undefined;
+  gateways: OfferedGateway[];
+  checkoutToken: string;
 }) {
   const isValid =
     form.formState.isValid && !Object.keys(form.formState.errors || {}).length;
-
   const {toast} = useToast();
-  const router = useRouter();
-  const {scope} = useWorkspace();
 
-  const redirectToEvents = useCallback(
-    async (result: SuccessResponse<Registration>) => {
-      if (!result.data.event?.slug) return;
-      router.replace(
-        scope.forRouter(
-          `/${SUBAPP_CODES.events}/${result.data.event.slug}/${SUBAPP_PAGE.register}/${SUBAPP_PAGE.confirmation}?${URL_PARAMS.isPaid}=true`,
-        ),
-      );
-    },
-    [scope, router],
-  );
-
-  function getMappedParticipants(
-    form: UseFormReturn<Record<string, unknown>>,
-    metaFields: ModelField[],
-  ) {
-    const values = form.getValues() as Parameters<typeof mapParticipants>[0];
-    return mapParticipants(
-      values,
+  const mappedParticipants = () =>
+    mapParticipants(
+      form.getValues() as Parameters<typeof mapParticipants>[0],
       metaFields,
       metaFieldsFacilities,
       additionalFieldSet ?? [],
     );
-  }
 
-  async function handleFormValidation({
-    form,
-    metaFields,
-  }: {
-    form: UseFormReturn<Record<string, unknown>>;
-    metaFields: ModelField[];
-  }): Promise<boolean> {
-    try {
-      const isValidForm = await form.trigger();
-      const isEmailValid = await form.trigger('emailAddress');
-      if (!isEmailValid) {
-        return false;
-      }
-
-      if (!isValidForm) {
-        return false;
-      }
-
-      const result = getMappedParticipants(form, metaFields);
-      const {total} = getCalculatedTotalPrice(result, event);
-      const $total = Number(scale(total, event.priceScale));
-
-      if (!$total || $total <= 0) {
-        toast({
-          variant: 'destructive',
-          title: i18n.t('Total price must be greater than zero.'),
-        });
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error('validation error:', error);
+  const validate = async (): Promise<boolean> => {
+    const isEmailValid = await form.trigger('emailAddress');
+    const isValidForm = await form.trigger();
+    if (!isEmailValid || !isValidForm) {
       return false;
     }
-  }
+    const {total} = getCalculatedTotalPrice(mappedParticipants(), event);
+    if (Number(scale(total, event.priceScale)) <= 0) {
+      toast({
+        variant: 'destructive',
+        title: i18n.t('The amount must be greater than zero.'),
+      });
+      return false;
+    }
+    return true;
+  };
 
   return (
-    <>
-      <Payments
-        config={config}
-        disabled={!isValid}
-        onValidate={async () => {
-          return await handleFormValidation({
-            form,
-            metaFields,
-          });
-        }}
-        onPaypalCreatedOrder={async () => {
-          const formValues = getMappedParticipants(form, metaFields);
-          return await paypalCreateOrder({
-            values: formValues,
-            eventId: event.id,
-          });
-        }}
-        onPaypalCaptureOrder={async orderID => {
-          return await register({
-            payment: {data: {id: orderID}, mode: PaymentOption.paypal},
-            eventId: event.id,
-          });
-        }}
-        onApprove={redirectToEvents}
-        onStripeCreateCheckOutSession={async () => {
-          const formValues = getMappedParticipants(form, metaFields);
-          return await createStripeCheckoutSession({
-            eventId: event.id,
-            values: formValues,
-          });
-        }}
-        onStripeValidateSession={async ({
-          stripeSessionId,
-        }: {
-          stripeSessionId: string;
-        }) => {
-          return await register({
-            payment: {
-              data: {id: stripeSessionId},
-              mode: PaymentOption.stripe,
-            },
-            eventId: event.id,
-          });
-        }}
-        onPayboxCreateOrder={async ({uri}) => {
-          const formValues = getMappedParticipants(form, metaFields);
-          return await payboxCreateOrder({
-            eventId: event.id,
-            values: formValues,
-            uri,
-          });
-        }}
-        onPayboxValidatePayment={async ({params}) => {
-          return await register({
-            payment: {
-              mode: PaymentOption.paybox,
-              data: {params},
-            },
-            eventId: event.id,
-          });
-        }}
-        successMessage="Event registration completed successfully."
-        errorMessage="Failed to process event registration."
-      />
-    </>
+    <PaymentMethods
+      gateways={gateways}
+      source={PAYMENT_SOURCE.events}
+      intent={() => ({eventId: event.id, values: mappedParticipants()})}
+      checkoutToken={checkoutToken}
+      disabled={!isValid}
+      onValidate={validate}
+    />
   );
 }
 

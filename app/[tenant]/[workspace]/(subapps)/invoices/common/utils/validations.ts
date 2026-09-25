@@ -155,7 +155,6 @@ export async function validatePaymentData({
     type: INVOICE.UNPAID,
     ...invoiceFilter,
     workspaceURL,
-    tenantId,
     client,
   });
   if (!$invoice) {
