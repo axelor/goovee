@@ -7,10 +7,13 @@ import {absoluteRoot} from '@/url/absolute';
 import {
   findDefaultPartnerWorkspace,
   findWorkspace,
+  findWorkspaceByURL,
   findWorkspaces,
 } from '@/orm/workspace';
 import {manager} from '@/tenant';
 import {listTenantIds} from '@/tenant/config';
+import {tenantURLs} from '@/url/scope';
+import {getLoginURL} from '@/utils/login-url';
 import type {User} from '@/types';
 import {getPartnerId} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
@@ -44,11 +47,12 @@ async function opensForVisitor({
 
 /* Resolves where a visitor naming a tenant but no workspace should go: the two
  * such addresses are `/` with a `?tenant=` parameter and `/<tenant>`. Returns an
- * absolute URL, or null when the tenant is not configured or holds nothing this
- * visitor can open. Answering with a value rather than redirecting lets each
- * caller reply in its own terms — a page redirects, a route handler returns a
- * response. The tenant is named by the caller in both cases, so it is checked
- * against the configured ones here rather than trusted.
+ * absolute URL, or null when the tenant is not configured. A tenant holding
+ * nothing this visitor can open still answers: the sign-in screen for a guest,
+ * the no-workspace screen for a signed-in user. Answering with a value rather
+ * than redirecting lets each caller reply in its own terms — a page redirects,
+ * a route handler returns a response. The tenant is named by the caller in both
+ * cases, so it is checked against the configured ones here rather than trusted.
  *
  * The destination is the workspace, not one of its applications: the workspace's
  * own page is what decides whether it opens on its home page or goes straight to
@@ -90,16 +94,7 @@ export async function resolveLanding({
   const user = session?.user;
 
   const baseUrl = absoluteRoot(tenant.config.public.host);
-
-  const workspaces = await findWorkspaces({
-    url: baseUrl,
-    user,
-    client,
-  });
-
-  if (!workspaces?.length) {
-    return null;
-  }
+  const urls = tenantURLs(tenantId);
 
   const workspaceURI = decodeURIComponent(requestedWorkspaceURI || '');
 
@@ -109,11 +104,28 @@ export async function resolveLanding({
     if (await opensForVisitor({url, user, client})) {
       return url;
     }
+
+    /* A guest asking for a workspace that exists but is closed to guests is
+     * asked to sign in to it, as its own page does, rather than being sent to
+     * some other workspace. One naming nothing is passed over, so nobody is
+     * asked to sign in to reach an address that names nothing. */
+    if (!user && (await findWorkspaceByURL({url, client}))) {
+      return `${baseUrl}${getLoginURL(urls, {
+        callbackurl: workspaceURI,
+        workspaceURI,
+      })}`;
+    }
   }
+
+  const workspaces = await findWorkspaces({
+    url: baseUrl,
+    user,
+    client,
+  });
 
   let redirectURL;
 
-  if (user) {
+  if (user && workspaces.length) {
     const partnerId = getPartnerId(user);
 
     const defaultWorkspace = await findDefaultPartnerWorkspace({
@@ -139,5 +151,14 @@ export async function resolveLanding({
     }
   }
 
-  return redirectURL ?? null;
+  if (redirectURL) {
+    return redirectURL;
+  }
+
+  /* Nothing opens for this visitor. A guest may find a workspace once signed
+   * in; a signed-in user is told their account has none, and offered a way to
+   * sign out — sending them to sign in would only bring them back here. */
+  return user
+    ? urls.forExternal('/auth/no-workspace')
+    : `${baseUrl}${getLoginURL(urls)}`;
 }
