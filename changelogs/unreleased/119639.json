@@ -1,5 +1,0 @@
-{
-  "title": "Send guests to the login page and signed-in users without a workspace to a page explaining it, instead of an empty 404",
-  "type": "change",
-  "scope": ["core"]
-}
