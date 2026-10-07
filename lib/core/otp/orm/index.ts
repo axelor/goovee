@@ -1,11 +1,16 @@
 // ---- CORE IMPORTS ---- /
 import {hash, compare as compareHashed} from '@/auth/utils';
-import type {Client} from '@/goovee/.generated/client';
+import type {Client, GooveeClient} from '@/goovee/.generated/client';
 import {clone} from '@/utils';
 import type {ID} from '@/types';
 
 // ---- LOCAL IMPORTS ---- /
 import {computeExpiry, generate as generateOTP, isExpired} from '../utils';
+import {MAX_OTP_FAILED_ATTEMPTS} from '../constants';
+
+function isExhausted(failedAttempts: number | null) {
+  return (failedAttempts ?? 0) >= MAX_OTP_FAILED_ATTEMPTS;
+}
 
 export async function create({
   scope,
@@ -37,6 +42,7 @@ export async function create({
           value: hashedOtp,
           expiresAt,
           used: false,
+          failedAttempts: 0,
         },
         select: {
           entity: true,
@@ -44,6 +50,7 @@ export async function create({
           used: true,
           value: true,
           expiresAt: true,
+          failedAttempts: true,
           createdOn: true,
           updatedOn: true,
         },
@@ -52,7 +59,7 @@ export async function create({
       .then(result => ({...result, otp}));
   };
 
-  const removeOTP = async ({id, version}: any) => {
+  const removeOTP = async ({id, version}: {id: ID; version: number}) => {
     await client.otp.delete({id, version});
   };
 
@@ -64,7 +71,10 @@ export async function create({
   }
 
   if (existing) {
-    if (existing.expiresAt && isExpired(existing.expiresAt)) {
+    if (
+      (existing.expiresAt && isExpired(existing.expiresAt)) ||
+      isExhausted(existing.failedAttempts)
+    ) {
       await removeOTP(existing);
       return createOTP();
     } else {
@@ -99,6 +109,7 @@ export async function findOne({
       used: true,
       value: true,
       expiresAt: true,
+      failedAttempts: true,
       createdOn: true,
       updatedOn: true,
     },
@@ -119,6 +130,7 @@ export async function findOneById({id, client}: {id: ID; client: Client}) {
       used: true,
       value: true,
       expiresAt: true,
+      failedAttempts: true,
       createdOn: true,
       updatedOn: true,
     },
@@ -132,19 +144,41 @@ export async function isValid({
 }: {
   id?: ID;
   value: string;
-  client: Client;
+  client: GooveeClient;
 }) {
   if (!(id && value)) return false;
 
-  const existing = await findOneById({id, client});
+  return client.$transaction(async txClient => {
+    /* Lock the row until the transaction ends without changing it, so parallel
+     * checks of the same code run one after another and each one reads the
+     * failed attempts counted by the ones before it. Callers keep the version
+     * they read before this check, so a correct code must leave it as is. */
+    const locked = await txClient.$raw(
+      'SELECT id FROM portal_otp WHERE id = $1 AND (used IS NULL OR used = false) FOR UPDATE',
+      id,
+    );
 
-  if (!existing?.value) return false;
+    if (!(Array.isArray(locked) && locked.length)) return false;
 
-  if (existing.expiresAt && isExpired(existing.expiresAt)) return false;
+    const existing = await findOneById({id, client: txClient});
 
-  const matched = await compareHashed(value, existing.value);
+    if (!existing?.value) return false;
 
-  return Boolean(matched);
+    if (existing.expiresAt && isExpired(existing.expiresAt)) return false;
+
+    if (isExhausted(existing.failedAttempts)) return false;
+
+    const matched = await compareHashed(value, existing.value);
+
+    if (matched) return true;
+
+    await txClient.otp.updateAll({
+      set: {failedAttempts: (existing.failedAttempts ?? 0) + 1},
+      where: {id},
+    });
+
+    return false;
+  });
 }
 
 export async function markUsed({id, client}: {id: string; client: Client}) {
