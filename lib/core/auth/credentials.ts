@@ -40,7 +40,7 @@ const ERROR_CODES = defineErrorCodes({
   BAD_REQUEST: 'Bad request',
   REGISTRATION_FAILED: 'Registration failed',
   EMAIL_REQUIRED: 'Email is required',
-  USER_NOT_FOUND: 'User not found',
+  INVALID_OR_EXPIRED_CODE: 'Invalid or expired code',
   PASSWORD_RESET_FAILED: 'Error resetting password. Try again.',
 });
 
@@ -675,28 +675,23 @@ export function buildCredentials(tenantId: string) {
             client,
           });
 
-          if (!result) {
-            throw new APIError('BAD_REQUEST', {
-              ...ERROR_CODES.BAD_REQUEST,
-              message: await getTranslation({tenant: tenantId}, 'Bad request'),
-            });
-          }
+          const isValidOTP = result
+            ? await isValid({id: result.id, value: otp, client})
+            : false;
 
-          const isValidOTP = await isValid({id: result.id, value: otp, client});
-          if (!isValidOTP) {
+          const user = isValidOTP
+            ? await findGooveeUserByEmail(email, client)
+            : null;
+
+          /* A missing code, a wrong or expired code and an unknown address all
+           * answer the same, so the response does not tell whether the address
+           * has an account. */
+          if (!result || !isValidOTP || !user) {
             throw new APIError('UNAUTHORIZED', {
-              ...ERROR_CODES.INVALID_OTP,
-              message: await getTranslation({tenant: tenantId}, 'Invalid OTP'),
-            });
-          }
-
-          const user = await findGooveeUserByEmail(email, client);
-          if (!user) {
-            throw new APIError('NOT_FOUND', {
-              ...ERROR_CODES.USER_NOT_FOUND,
+              ...ERROR_CODES.INVALID_OR_EXPIRED_CODE,
               message: await getTranslation(
                 {tenant: tenantId},
-                'You are not registered',
+                'Invalid or expired code',
               ),
             });
           }
