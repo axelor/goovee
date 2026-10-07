@@ -36,19 +36,19 @@ const registrations = processWide(
 type TenantOAuthConfig = GenericOAuthConfig & {pkce: true};
 
 function buildConfigs(tenantId: string): TenantOAuthConfig[] {
-  const oauth = getTenantConfig(tenantId)?.oauth;
+  const auth = getTenantConfig(tenantId)?.auth;
 
-  if (!oauth) return [];
+  if (!auth) return [];
 
   const configs: TenantOAuthConfig[] = [];
 
-  if (oauth.google) {
+  if (auth.google) {
     const providerId = `google-${tenantId}`;
     configs.push({
       providerId,
       discoveryUrl: GOOGLE_DISCOVERY_URL,
-      clientId: oauth.google.clientId,
-      clientSecret: oauth.google.clientSecret,
+      clientId: auth.google.clientId,
+      clientSecret: auth.google.clientSecret,
       scopes: ['openid', 'email', 'profile'],
       pkce: true,
       authorizationUrlParams: {prompt: 'select_account'},
@@ -56,13 +56,13 @@ function buildConfigs(tenantId: string): TenantOAuthConfig[] {
     registrations.set(providerId, {provider: 'google', tenantId});
   }
 
-  if (oauth.keycloak) {
+  if (auth.keycloak) {
     const providerId = `keycloak-${tenantId}`;
     configs.push({
       providerId,
-      discoveryUrl: `${oauth.keycloak.issuer}/.well-known/openid-configuration`,
-      clientId: oauth.keycloak.clientId,
-      clientSecret: oauth.keycloak.clientSecret,
+      discoveryUrl: `${auth.keycloak.issuer}/.well-known/openid-configuration`,
+      clientId: auth.keycloak.clientId,
+      clientSecret: auth.keycloak.clientSecret,
       scopes: ['openid', 'email', 'profile'],
       pkce: true,
     });

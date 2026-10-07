@@ -346,9 +346,13 @@
             "additionalProperties": false,
             "description": "Mattermost integration. The address the browser links to is browser-facing and lives under PORTAL_TENANT_<ID>_PUBLIC_MATTERMOST_HOST."
           },
-          "oauth": {
+          "auth": {
             "type": "object",
             "properties": {
+              "password": {
+                "type": "boolean",
+                "description": "Offer email and password sign-in: the sign-in form, registration by email, password reset and the password screen of the account settings. Defaults to true. Set to false to let visitors sign in through Google or Keycloak only; a tenant that also declares neither offers no sign-in at all and is visited as a guest."
+              },
               "google": {
                 "type": "object",
                 "properties": {
@@ -374,7 +378,7 @@
               }
             },
             "additionalProperties": false,
-            "description": "Per-tenant OAuth applications. Each provider is registered under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>, without the <tenantId> segment for a tenant reached on an origin of its own) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here."
+            "description": "How visitors sign in to this tenant. Google and Keycloak are per-tenant OAuth applications. Each provider is registered under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>, without the <tenantId> segment for a tenant reached on an origin of its own) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here."
           },
           "webPush": {
             "type": "object",

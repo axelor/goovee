@@ -41,11 +41,11 @@ in the directory the portal is started from. This guide writes them as JSON. Eac
 key maps to a variable mechanically — the path uppercased and joined with
 underscores, a tenant's keys under `PORTAL_TENANT_<ID>_`:
 
-| Key                                  | Variable                                    |
-| ------------------------------------ | ------------------------------------------- |
-| `origin`                             | `PORTAL_ORIGIN`                             |
-| `tenants.acme.db.url`                | `PORTAL_TENANT_ACME_DB_URL`                 |
-| `tenants.acme.oauth.google.clientId` | `PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_ID` |
+| Key                                 | Variable                                   |
+| ----------------------------------- | ------------------------------------------ |
+| `origin`                            | `PORTAL_ORIGIN`                            |
+| `tenants.acme.db.url`               | `PORTAL_TENANT_ACME_DB_URL`                |
+| `tenants.acme.auth.google.clientId` | `PORTAL_TENANT_ACME_AUTH_GOOGLE_CLIENT_ID` |
 
 Write each setting in one place. Where both carry it, the variable wins — section
 16 covers the layering. [`env.example`](env.example) lists every variable, and
@@ -794,7 +794,24 @@ the template syntax with the bank before registering: an address ending at
 
 ---
 
-## 10. Configure sign-in with Google or Keycloak
+## 10. Configure sign-in
+
+### Email and password
+
+On unless the tenant turns it off:
+
+```json
+"auth": {"password": false}
+```
+
+```
+PORTAL_TENANT_<ID>_AUTH_PASSWORD=false
+```
+
+Visitors then sign in through Google or Keycloak only. A tenant that also declares
+neither offers no sign-in, and its visitors browse as guests.
+
+### Google and Keycloak
 
 Every tenant registers its own application with the identity provider. There is no
 shared application: a tenant offers Google or Keycloak sign-in only where it
@@ -814,10 +831,10 @@ host routing + /portal   https://acme.example.com/portal/api/auth/oauth2/callbac
 The provider id keeps its `-<tenantId>` suffix in every case; that is part of the
 provider's name, not the address.
 
-### Google
+#### Google
 
 ```json
-"oauth": {
+"auth": {
   "google": {
     "clientId": "….apps.googleusercontent.com",
     "clientSecret": "…"
@@ -826,14 +843,14 @@ provider's name, not the address.
 ```
 
 ```
-PORTAL_TENANT_<ID>_OAUTH_GOOGLE_CLIENT_ID=….apps.googleusercontent.com
-PORTAL_TENANT_<ID>_OAUTH_GOOGLE_CLIENT_SECRET=…
+PORTAL_TENANT_<ID>_AUTH_GOOGLE_CLIENT_ID=….apps.googleusercontent.com
+PORTAL_TENANT_<ID>_AUTH_GOOGLE_CLIENT_SECRET=…
 ```
 
-### Keycloak
+#### Keycloak
 
 ```json
-"oauth": {
+"auth": {
   "keycloak": {
     "clientId": "…",
     "clientSecret": "…",
@@ -843,9 +860,9 @@ PORTAL_TENANT_<ID>_OAUTH_GOOGLE_CLIENT_SECRET=…
 ```
 
 ```
-PORTAL_TENANT_<ID>_OAUTH_KEYCLOAK_CLIENT_ID=…
-PORTAL_TENANT_<ID>_OAUTH_KEYCLOAK_CLIENT_SECRET=…
-PORTAL_TENANT_<ID>_OAUTH_KEYCLOAK_ISSUER=https://id.example.com/realms/acme
+PORTAL_TENANT_<ID>_AUTH_KEYCLOAK_CLIENT_ID=…
+PORTAL_TENANT_<ID>_AUTH_KEYCLOAK_CLIENT_SECRET=…
+PORTAL_TENANT_<ID>_AUTH_KEYCLOAK_ISSUER=https://id.example.com/realms/acme
 ```
 
 `issuer` is the realm address, with or without a trailing slash. Every tenant uses
@@ -1075,7 +1092,7 @@ block and one `payments` block.
       "payments": {
         "stripe": {"clientSecret": "sk_live_…", "webhookSecret": "whsec_…"}
       },
-      "oauth": {
+      "auth": {
         "google": {
           "clientId": "….apps.googleusercontent.com",
           "clientSecret": "…"
@@ -1140,8 +1157,8 @@ PORTAL_TENANT_ACME_AOS_AUTH_API_KEY=abcd1234…
 PORTAL_TENANT_ACME_AOS_WEBHOOK_SECRET=hZ4t…
 PORTAL_TENANT_ACME_PAYMENTS_STRIPE_CLIENT_SECRET=sk_live_…
 PORTAL_TENANT_ACME_PAYMENTS_STRIPE_WEBHOOK_SECRET=whsec_…
-PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_ID=….apps.googleusercontent.com
-PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_SECRET=…
+PORTAL_TENANT_ACME_AUTH_GOOGLE_CLIENT_ID=….apps.googleusercontent.com
+PORTAL_TENANT_ACME_AUTH_GOOGLE_CLIENT_SECRET=…
 PORTAL_TENANT_ACME_WEB_PUSH_PRIVATE_KEY=…
 PORTAL_TENANT_ACME_WEB_PUSH_SUBJECT=mailto:admin@acme.example.com
 PORTAL_TENANT_ACME_PUBLIC_HOST=https://acme.example.com

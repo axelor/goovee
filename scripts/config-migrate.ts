@@ -224,15 +224,15 @@ function webPushFromEnv(): TenantConfigInput['webPush'] {
   };
 }
 
-function oauthFromEnv(): TenantConfigInput['oauth'] {
-  const oauth: NonNullable<TenantConfigInput['oauth']> = {};
+function authFromEnv(): TenantConfigInput['auth'] {
+  const auth: NonNullable<TenantConfigInput['auth']> = {};
 
   if (
     process.env.SHOW_GOOGLE_OAUTH === 'true' &&
     process.env.GOOGLE_CLIENT_ID &&
     process.env.GOOGLE_CLIENT_SECRET
   ) {
-    oauth.google = {
+    auth.google = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     };
@@ -244,14 +244,14 @@ function oauthFromEnv(): TenantConfigInput['oauth'] {
     process.env.KEYCLOAK_SECRET &&
     process.env.KEYCLOAK_ISSUER
   ) {
-    oauth.keycloak = {
+    auth.keycloak = {
       clientId: process.env.KEYCLOAK_ID,
       clientSecret: process.env.KEYCLOAK_SECRET,
       issuer: process.env.KEYCLOAK_ISSUER,
     };
   }
 
-  return Object.keys(oauth).length ? oauth : undefined;
+  return Object.keys(auth).length ? auth : undefined;
 }
 
 function buildDeployment(): DeploymentConfigInput {
@@ -305,7 +305,7 @@ function buildTenant(): TenantConfigInput {
     mail: mailFromEnv(),
     mattermost: mattermostFromEnv(),
     webPush: webPushFromEnv(),
-    oauth: oauthFromEnv(),
+    auth: authFromEnv(),
     includeLanguage: process.env.INCLUDE_LANGUAGE
       ? process.env.INCLUDE_LANGUAGE === 'true'
       : undefined,

@@ -35,6 +35,8 @@ type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
 import {findProduct} from '@/subapps/shop/common/actions/cart';
 import {ShopQuoteModal, type ShopQuoteModalLabels} from '../shop-quote-modal';
 import {getLoginURL} from '@/utils/login-url';
+import {canSignIn} from '@/auth/sign-in-methods';
+import {useSignInMethods} from '@/auth/sign-in-methods-context';
 
 export interface ShopCartLabels {
   breadcrumbRoot: string;
@@ -81,6 +83,10 @@ export function ShopCart({
   const {cart, loaded: cartLoaded, removeItem, updateQuantity} = useCart();
   const {data: session} = useAuthSession();
   const authenticated = !!session?.user?.id;
+  /* A guest of a tenant offering no way to sign in is shown no prompt to sign
+   * in, since the screen it leads to has nothing to offer them. */
+  const signInMethods = useSignInMethods();
+  const showLoginPrompt = !authenticated && canSignIn(signInMethods);
 
   const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
     [],
@@ -312,7 +318,7 @@ export function ShopCart({
                     <MdArrowForward className="text-base" />
                   </Link>
                 )}
-                {!authenticated && (
+                {showLoginPrompt && (
                   <Link
                     href={loginHref}
                     className="w-full mt-[18px] inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-royal text-white text-sm font-bold hover:bg-royal-dark transition-colors">
@@ -326,7 +332,7 @@ export function ShopCart({
                 </Link>
               </div>
 
-              {!hideRequestQuotation && (
+              {!hideRequestQuotation && (authenticated || showLoginPrompt) && (
                 <div className="bg-ink-25 border border-ink-100 rounded-xl p-3.5 flex items-center gap-2.5 text-[12.5px] text-ink-600">
                   <MdDescription className="text-base text-royal shrink-0" />
                   <span className="flex-1">{labels.quoteBannerTitle}</span>

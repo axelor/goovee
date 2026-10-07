@@ -40,8 +40,8 @@ function taintTenantConfig(config: TenantConfig) {
     ['Mail password', config.mail?.password],
     ['Mattermost token', config.mattermost?.token],
     ['VAPID private key', config.webPush?.privateKey],
-    ['Google client secret', config.oauth?.google?.clientSecret],
-    ['Keycloak client secret', config.oauth?.keycloak?.clientSecret],
+    ['Google client secret', config.auth?.google?.clientSecret],
+    ['Keycloak client secret', config.auth?.keycloak?.clientSecret],
   ];
 
   /* Marking happens here, once, as the configuration is read — before any

@@ -18,6 +18,7 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Link} from '@/ui/components/link';
+import {useSignInMethods} from '@/auth/sign-in-methods-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -53,8 +54,13 @@ export default function Menubar({
 }) {
   const pathname = usePathname();
   const {scope} = useWorkspace();
+  const signInMethods = useSignInMethods();
 
-  const tabs = ACCOUNT_TABS.filter(tab => !tab.adminOnly || isAdmin);
+  const tabs = ACCOUNT_TABS.filter(
+    tab =>
+      (!tab.adminOnly || isAdmin) &&
+      (!tab.passwordSignInOnly || signInMethods.password),
+  );
   const initial = (companyName?.trim()?.[0] || 'A').toUpperCase();
 
   return (

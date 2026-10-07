@@ -28,8 +28,8 @@ function segmentFor(key: string): string {
 
 /**
  * The variable carrying the setting at `path`, as a zod issue or a walk of the
- * schema names it: `['tenants', 'acme', 'oauth', 'google', 'clientId']` gives
- * `PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_ID`, and `['origin']` gives
+ * schema names it: `['tenants', 'acme', 'auth', 'google', 'clientId']` gives
+ * `PORTAL_TENANT_ACME_AUTH_GOOGLE_CLIENT_ID`, and `['origin']` gives
  * `PORTAL_ORIGIN`.
  *
  * A tenant id is written as it stands, uppercased, so a placeholder such as

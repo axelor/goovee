@@ -34,7 +34,7 @@ export default async function Page(props: {
   }
 
   const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
+  if (!tenant?.config.auth?.google) return notFound();
   const {client} = tenant;
 
   const workspace = await findWorkspaceForRegistration({
@@ -46,12 +46,5 @@ export default async function Page(props: {
     return notFound();
   }
 
-  return (
-    <Form
-      workspace={workspace}
-      googleProviderId={
-        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
-      }
-    />
-  );
+  return <Form workspace={workspace} googleProviderId={`google-${tenantId}`} />;
 }

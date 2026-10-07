@@ -3,7 +3,7 @@
  *
  * Every variable starting with `PORTAL_` names one setting, and the name spells
  * the setting's path: `PORTAL_ORIGIN` is the deployment's origin,
- * `PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_ID` is the Google client id of the
+ * `PORTAL_TENANT_ACME_AUTH_GOOGLE_CLIENT_ID` is the Google client id of the
  * tenant `acme`. This module turns those variables back into the nested document
  * the schema describes, so the schema stays written in the application's own
  * camelCase and the environment is the only place the uppercase spelling exists.
@@ -154,7 +154,7 @@ function offeringsOf(schema: z.ZodType, path: string[]): string {
 
 /* The deepest group the tokens reach before they stop matching, for the same
  * message: the offerings of the root are rarely what was meant, the offerings of
- * `PORTAL_TENANT_ACME_OAUTH_GOOGLE_` usually are. */
+ * `PORTAL_TENANT_ACME_AUTH_GOOGLE_` usually are. */
 function deepestReached(
   schema: z.ZodType,
   tokens: string[],

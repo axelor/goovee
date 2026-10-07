@@ -1,5 +1,8 @@
 import type {Metadata} from 'next';
+import {notFound} from 'next/navigation';
 import {getSession} from '@/auth';
+import {getSignInMethods} from '@/auth/sign-in-methods';
+import {getTenantConfig} from '@/tenant/config';
 import Content from './content';
 import {t} from '@/locale/server';
 
@@ -18,6 +21,9 @@ export async function generateMetadata(props: {
 export default async function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const tenantId = await resolveAuthTenantId();
+  if (!getSignInMethods(getTenantConfig(tenantId)).password) notFound();
+
   const session = await getSession();
   if (session?.user) {
     return (

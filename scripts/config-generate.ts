@@ -38,12 +38,27 @@ const EXAMPLE_GROUPS = new Set([
   [TENANTS_KEY, '<id>', 'aos', 'storage', 'filesystem'].join('.'),
 ]);
 
-function shownInExample(keyPath: string[]): boolean {
-  const spelled = keyPath.map((key, index) =>
-    index === 1 && keyPath[0] === TENANTS_KEY ? '<id>' : key,
-  );
+/*
+ * Optional groups that leaving out does not turn off, because one of their
+ * settings is on unless written: left out, `auth` keeps email and password
+ * sign-in on. The references say only that the group is optional and leave the
+ * default to the setting's own description.
+ */
+const ON_WHEN_LEFT_OUT_GROUPS = new Set([
+  [TENANTS_KEY, '<id>', 'auth'].join('.'),
+]);
 
-  return EXAMPLE_GROUPS.has(spelled.join('.'));
+/* A group's path as the sets above spell it, with the tenant id as `<id>`. */
+function groupKey(keyPath: string[]): string {
+  return keyPath
+    .map((key, index) =>
+      index === 1 && keyPath[0] === TENANTS_KEY ? '<id>' : key,
+    )
+    .join('.');
+}
+
+function shownInExample(keyPath: string[]): boolean {
+  return EXAMPLE_GROUPS.has(groupKey(keyPath));
 }
 
 // 78 columns; an 80-column terminal shows a wrapped line without scrolling.
@@ -195,7 +210,9 @@ function renderGroup(
     if (!childRequired) {
       lines.push(
         ...comment(
-          'Optional as a whole; leave every variable out to turn it off.',
+          ON_WHEN_LEFT_OUT_GROUPS.has(groupKey([...keyPath, key]))
+            ? 'Optional as a whole.'
+            : 'Optional as a whole; leave every variable out to turn it off.',
         ),
       );
     }

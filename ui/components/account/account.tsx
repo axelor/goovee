@@ -27,6 +27,8 @@ import {getLoginURL} from '@/utils/login-url';
 import {getInitials} from '@/utils/names';
 import {Link} from '@/ui/components/link';
 import {useAuthSession} from '@/auth/client';
+import {canSignIn} from '@/auth/sign-in-methods';
+import {useSignInMethods} from '@/auth/sign-in-methods-context';
 import {useSignOut} from '@/ui/hooks';
 import type {TenantScope} from '@/url/tenant-urls';
 
@@ -64,11 +66,17 @@ export function Account({
   });
 
   const signOut = useSignOut();
+  const signInMethods = useSignInMethods();
 
   const handleLogout = async () => {
     await signOut();
     router.push(loginURL);
   };
+
+  /* A guest of a tenant offering no way to sign in has nothing in this menu. */
+  if (!loggedin && !canSignIn(signInMethods)) {
+    return null;
+  }
 
   return (
     <>

@@ -1,0 +1,6 @@
+{
+  "title": "Turn email and password sign-in on or off per tenant",
+  "type": "feature",
+  "description": "A tenant's sign-in settings now live in an `auth` group holding `google`, `keycloak` and a new `password` setting, which turns email and password sign-in on or off and is on by default. With it off, the login screen offers only the Google and Keycloak buttons, registration and invitations offer Google only, password reset and the account's password screen are not available, and every email and password request is refused. A tenant with it off and neither Google nor Keycloak configured offers no sign-in at all: its login and registration links and the sign-in prompts of the shop cart and the marketplace are hidden, and the login and registration screens state that sign-in is not available. An account created through Google or Keycloak can now set a first password from its account settings after entering a code sent to its email, and then sign in either way. The `oauth` group and its `PORTAL_TENANT_<ID>_OAUTH_*` variables are renamed to `auth` and `PORTAL_TENANT_<ID>_AUTH_*`; the previous spelling is refused, and the runbook at https://github.com/axelor/goovee/blob/main/migrations/sign-in-settings.md covers the rename.",
+  "scope": ["core", "users"]
+}

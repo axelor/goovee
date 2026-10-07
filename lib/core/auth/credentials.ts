@@ -1,5 +1,9 @@
 import {BetterAuthPlugin, defineErrorCodes} from 'better-auth';
-import {APIError, createAuthEndpoint} from 'better-auth/api';
+import {
+  APIError,
+  createAuthEndpoint,
+  createAuthMiddleware,
+} from 'better-auth/api';
 import {setSessionCookie} from 'better-auth/cookies';
 import {after} from 'next/server';
 import {z} from 'zod';
@@ -18,7 +22,8 @@ import {
 } from '@/orm/workspace';
 import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
-import {listTenantIds} from '@/tenant/config';
+import {getTenantConfig, listTenantIds} from '@/tenant/config';
+import {getSignInMethods} from '@/auth/sign-in-methods';
 import {withMattermostSync} from '@/mattermost';
 import {APP_TITLE, RESET_PASSWORD} from '@/constants';
 import {findInviteById} from '@/app/[tenant]/auth/register/common/orm/register';
@@ -42,7 +47,12 @@ const ERROR_CODES = defineErrorCodes({
   EMAIL_REQUIRED: 'Email is required',
   USER_NOT_FOUND: 'User not found',
   PASSWORD_RESET_FAILED: 'Error resetting password. Try again.',
+  PASSWORD_SIGN_IN_DISABLED: 'Email and password sign-in is not available',
 });
+
+/* Every endpoint of this plugin signs in, registers or resets with an email and
+ * a password, so all of them sit under this prefix and are refused together. */
+const CREDENTIALS_PATH_PREFIX = '/credentials/';
 
 const resetPasswordEmailHTML = ({
   otp,
@@ -751,6 +761,28 @@ export function buildCredentials(tenantId: string) {
           };
         },
       ),
+    },
+
+    hooks: {
+      before: [
+        {
+          /* A tenant that turns email and password sign-in off refuses every
+           * endpoint here, whatever its screens show: a request can be sent
+           * without them. */
+          matcher: context =>
+            Boolean(context.path?.startsWith(CREDENTIALS_PATH_PREFIX)) &&
+            !getSignInMethods(getTenantConfig(tenantId)).password,
+          handler: createAuthMiddleware(async () => {
+            throw new APIError('FORBIDDEN', {
+              ...ERROR_CODES.PASSWORD_SIGN_IN_DISABLED,
+              message: await getTranslation(
+                {tenant: tenantId},
+                'Email and password sign-in is not available',
+              ),
+            });
+          }),
+        },
+      ],
     },
 
     rateLimit: [

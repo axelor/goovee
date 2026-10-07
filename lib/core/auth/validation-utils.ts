@@ -144,3 +144,16 @@ export const ChangePasswordSchema = z
   });
 
 export type ChangePassword = z.infer<typeof ChangePasswordSchema>;
+
+export const SetPasswordSchema = z
+  .object({
+    otp: OTPSchema,
+    newPassword: PasswordSchema,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+export type SetPassword = z.infer<typeof SetPasswordSchema>;

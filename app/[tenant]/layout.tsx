@@ -20,6 +20,8 @@ import {withBasePath} from '@/path/base-path';
 import Theme from '@/app/theme';
 import Locale from '@/app/locale';
 import {AuthClientProvider} from '@/auth/client';
+import {getSignInMethods} from '@/auth/sign-in-methods';
+import {SignInMethodsProvider} from '@/auth/sign-in-methods-context';
 
 /* Point the manifest link at this tenant's manifest, so installing from one of
  * its pages installs an app that launches into this tenant; overrides the root
@@ -100,15 +102,17 @@ export default async function TenantLayout(props: {
         visitorPrefix={visitorPrefix}
         host={env.host}>
         <AuthClientProvider visitorPrefix={visitorPrefix}>
-          <Locale>
-            <Theme theme={theme}>
-              <SerwistProvider
-                swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
-                options={{scope: urls.entry(requestHeaders)}}>
-                <PushProvider tenant={tenant}>{props.children}</PushProvider>
-              </SerwistProvider>
-            </Theme>
-          </Locale>
+          <SignInMethodsProvider value={getSignInMethods(config)}>
+            <Locale>
+              <Theme theme={theme}>
+                <SerwistProvider
+                  swUrl={`${withBasePath('/sw.js')}?tenant=${encodeURIComponent(tenant)}`}
+                  options={{scope: urls.entry(requestHeaders)}}>
+                  <PushProvider tenant={tenant}>{props.children}</PushProvider>
+                </SerwistProvider>
+              </Theme>
+            </Locale>
+          </SignInMethodsProvider>
         </AuthClientProvider>
       </TenantProvider>
     </Environment>

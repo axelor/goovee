@@ -10,12 +10,6 @@ export const ROUTES = {
   members: 'members',
   notifications: 'notifications',
   apps: 'apps',
-
-  // Legacy consolidated routes — kept as redirects for backwards compatibility.
-  profile: 'profile',
-  security: 'security',
-  workspace: 'workspace',
-  settings: 'settings',
 };
 
 // ---- Grouped lateral rail (8 original tabs, design "AccountV3Rail") ----
@@ -51,6 +45,8 @@ export type AccountTab = {
   route: string;
   icon: AccountTabIcon;
   adminOnly?: boolean;
+  /* Shown only where the tenant offers email and password sign-in. */
+  passwordSignInOnly?: boolean;
 };
 
 export const ACCOUNT_GROUPS: AccountTabGroup[] = [
@@ -83,6 +79,7 @@ export const ACCOUNT_TABS: AccountTab[] = [
     group: 'Security',
     route: ROUTES.password,
     icon: 'password',
+    passwordSignInOnly: true,
     label: 'Password',
     subtitle: 'Change your password',
     description: 'Use a unique password of at least 12 characters.',
