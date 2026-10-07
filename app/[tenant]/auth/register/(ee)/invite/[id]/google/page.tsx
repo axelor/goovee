@@ -78,14 +78,16 @@ export default async function Page(props: {
     }
   }
 
+  if (!tenant.config.auth?.google) {
+    return notFound();
+  }
+
   return (
     <Form
       email={invite?.emailAddress?.address}
       inviteId={invite.id}
       workspaceURL={invite.workspace?.url}
-      googleProviderId={
-        tenant.config.auth?.google ? `google-${tenantId}` : undefined
-      }
+      googleProviderId={`google-${tenantId}`}
     />
   );
 }
