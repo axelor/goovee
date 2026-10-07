@@ -1,4 +1,9 @@
 import type {Metadata} from 'next';
+import {notFound} from 'next/navigation';
+
+// ---- CORE IMPORTS ---- //
+import {getSignInMethods} from '@/auth/sign-in-methods';
+import {getTenantConfig} from '@/tenant/config';
 
 // ---- LOCAL IMPORTS ---- //
 import {resolveAuthTenantId} from '../../common/tenant';
@@ -20,6 +25,9 @@ export default async function Page(props: {
   params: Promise<{email: string}>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const tenantId = await resolveAuthTenantId();
+  if (!getSignInMethods(getTenantConfig(tenantId)).password) notFound();
+
   return (
     <Content
       params={props.params}

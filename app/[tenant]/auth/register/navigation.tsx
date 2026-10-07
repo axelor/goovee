@@ -12,9 +12,11 @@ import {AuthShell, authButtonClass} from '../common/ui/auth-shell';
 import {useTenantScope} from '@/url/tenant-context';
 
 export default function Navigation({
+  showEmail,
   showGoogleOauth,
   workspaceName,
 }: {
+  showEmail: boolean;
   showGoogleOauth?: boolean;
   workspaceName: string | null;
 }) {
@@ -42,21 +44,25 @@ export default function Navigation({
       </div>
 
       <div className="flex flex-col gap-3.5">
-        <Link
-          href={authHref('/auth/register/email')}
-          className={authButtonClass}>
-          <MdMailOutline className="size-[18px]" />
-          {i18n.t('Sign Up with email')}
-        </Link>
+        {showEmail && (
+          <Link
+            href={authHref('/auth/register/email')}
+            className={authButtonClass}>
+            <MdMailOutline className="size-[18px]" />
+            {i18n.t('Sign Up with email')}
+          </Link>
+        )}
 
         {showGoogleOauth && (
           <>
-            <div className="relative my-1 text-center">
-              <div className="h-px bg-ink-100" />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[12px] text-ink-400">
-                {i18n.t('Or')}
-              </span>
-            </div>
+            {showEmail && (
+              <div className="relative my-1 text-center">
+                <div className="h-px bg-ink-100" />
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[12px] text-ink-400">
+                  {i18n.t('Or')}
+                </span>
+              </div>
+            )}
             <Link
               href={authHref('/auth/register/google')}
               className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border border-ink-150 bg-white px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-25">

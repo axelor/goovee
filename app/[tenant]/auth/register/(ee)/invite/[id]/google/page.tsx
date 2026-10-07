@@ -84,7 +84,7 @@ export default async function Page(props: {
       inviteId={invite.id}
       workspaceURL={invite.workspace?.url}
       googleProviderId={
-        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
+        tenant.config.auth?.google ? `google-${tenantId}` : undefined
       }
     />
   );

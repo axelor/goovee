@@ -2,6 +2,12 @@ import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
+import {
+  canSelfRegister,
+  canSignIn,
+  getSignInMethods,
+} from '@/auth/sign-in-methods';
+import {t} from '@/locale/server';
 import {findWorkspaceForRegistration} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
@@ -11,6 +17,7 @@ import {extractSearchParams, isExistingUser} from './common/utils';
 import {UserExists} from './common/ui/components';
 
 import {generateAuthMetadata} from '../common/workspace';
+import {SignInUnavailable} from '../common/ui/sign-in-unavailable';
 
 export async function generateMetadata(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -51,11 +58,26 @@ export default async function Page(props: {
     return notFound();
   }
 
-  const showGoogleOauth = Boolean(tenant.config.oauth?.google);
+  const signInMethods = getSignInMethods(tenant.config);
+
+  if (!canSelfRegister(signInMethods)) {
+    return (
+      <SignInUnavailable
+        title={await t('Sign Up')}
+        description={
+          canSignIn(signInMethods)
+            ? await t('Registration is not available on this portal.')
+            : await t('Sign-in is not available on this portal.')
+        }
+        workspaceName={workspace.name}
+      />
+    );
+  }
 
   return (
     <Navigation
-      showGoogleOauth={showGoogleOauth}
+      showEmail={signInMethods.password}
+      showGoogleOauth={signInMethods.google}
       workspaceName={workspace.name}
     />
   );

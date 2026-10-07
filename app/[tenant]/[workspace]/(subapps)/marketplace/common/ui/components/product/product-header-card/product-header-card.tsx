@@ -8,6 +8,8 @@ import {InnerHTML} from '@/ui/components/inner-html';
 import type {WorkspaceScope} from '@/url/workspace-urls';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/login-url';
+import {canSignIn, getSignInMethods} from '@/auth/sign-in-methods';
+import {getTenantConfig} from '@/tenant/config';
 import {Download, FileText, Heart} from 'lucide-react';
 import {Link} from '@/ui/components/link';
 import {Suspense} from 'react';
@@ -319,6 +321,11 @@ async function CTAButton({
   }
 
   if (!user) {
+    // A tenant offering no way to sign in has no purchase to offer a guest.
+    if (!canSignIn(getSignInMethods(getTenantConfig(tenantScope.tenantId)))) {
+      return null;
+    }
+
     return (
       <Button variant="royal" size="lg" className="gap-2" asChild>
         <Link

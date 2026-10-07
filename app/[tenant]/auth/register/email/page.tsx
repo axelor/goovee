@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
+import {getSignInMethods} from '@/auth/sign-in-methods';
 import {findWorkspaceForRegistration} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
@@ -34,6 +35,7 @@ export default async function Page(props: {
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
+  if (!getSignInMethods(tenant.config).password) return notFound();
   const {client} = tenant;
 
   const existing = await isExistingUser({workspaceURL, client});

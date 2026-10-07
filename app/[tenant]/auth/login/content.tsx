@@ -27,6 +27,7 @@ import {
 
 export default function Content({
   canRegister,
+  showPasswordSignIn,
   showGoogleOauth = true,
   showKeycloakOauth = true,
   googleProviderId,
@@ -34,6 +35,7 @@ export default function Content({
   workspaceName,
 }: {
   canRegister?: boolean;
+  showPasswordSignIn: boolean;
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
   googleProviderId?: string;
@@ -149,6 +151,18 @@ export default function Content({
   const keycloakButtonImage =
     env.keycloak?.buttonImage || withBasePath('/images/keycloak.svg');
 
+  const signUpLink = canRegister && (
+    <div className="text-center text-[13.5px] text-ink-500">
+      {i18n.t("Don't have an account yet ?")}{' '}
+      <Link
+        href={authHref(`/auth/register`)}
+        aria-disabled={submitting}
+        className="font-bold text-royal hover:underline">
+        {i18n.t('Sign Up')}
+      </Link>
+    </div>
+  );
+
   return (
     <AuthShell workspaceName={workspaceName}>
       <div className="mb-7">
@@ -166,84 +180,84 @@ export default function Content({
         </div>
       )}
 
-      <form className="flex flex-col gap-[18px]" onSubmit={handleSubmit}>
-        <AuthField label={i18n.t('Email')}>
-          <AuthInput
-            type="email"
-            name="email"
-            placeholder={i18n.t('Enter email')}
-            disabled={submitting}
-            value={values.email}
-            onChange={handleChange}
-          />
-        </AuthField>
-
-        <AuthField label={i18n.t('Password')}>
-          <PasswordInput
-            name="password"
-            placeholder={i18n.t('Password')}
-            disabled={submitting}
-            value={values.password}
-            onChange={handleChange}
-          />
-        </AuthField>
-
-        <div className="flex items-center justify-between">
-          <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink-700">
-            <input
-              type="checkbox"
-              className="size-4 cursor-pointer accent-royal"
+      {showPasswordSignIn && (
+        <form className="flex flex-col gap-[18px]" onSubmit={handleSubmit}>
+          <AuthField label={i18n.t('Email')}>
+            <AuthInput
+              type="email"
+              name="email"
+              placeholder={i18n.t('Enter email')}
               disabled={submitting}
-              checked={values.rememberMe}
-              onChange={e =>
-                setValues(v => ({...v, rememberMe: e.target.checked}))
-              }
+              value={values.email}
+              onChange={handleChange}
             />
-            {i18n.t('Remember Me')}
-          </label>
-          <Link
-            href={authHref(`/auth/reset-password`)}
-            aria-disabled={submitting}
-            className="text-[13px] font-semibold text-royal hover:underline">
-            {i18n.t('Forgot password?')}
-          </Link>
-        </div>
+          </AuthField>
 
-        <button type="submit" disabled={submitting} className={authButtonClass}>
-          {submitting ? (
-            <>
-              {i18n.t('Submitting')}
-              <MdOutlineRefresh className="size-5 animate-spin-fast" />
-            </>
-          ) : (
-            <>
-              {i18n.t('Log In')}
-              <MdArrowForward className="size-4" />
-            </>
-          )}
-        </button>
+          <AuthField label={i18n.t('Password')}>
+            <PasswordInput
+              name="password"
+              placeholder={i18n.t('Password')}
+              disabled={submitting}
+              value={values.password}
+              onChange={handleChange}
+            />
+          </AuthField>
 
-        {canRegister && (
-          <div className="text-center text-[13.5px] text-ink-500">
-            {i18n.t("Don't have an account yet ?")}{' '}
+          <div className="flex items-center justify-between">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink-700">
+              <input
+                type="checkbox"
+                className="size-4 cursor-pointer accent-royal"
+                disabled={submitting}
+                checked={values.rememberMe}
+                onChange={event =>
+                  setValues(current => ({
+                    ...current,
+                    rememberMe: event.target.checked,
+                  }))
+                }
+              />
+              {i18n.t('Remember Me')}
+            </label>
             <Link
-              href={authHref(`/auth/register`)}
+              href={authHref(`/auth/reset-password`)}
               aria-disabled={submitting}
-              className="font-bold text-royal hover:underline">
-              {i18n.t('Sign Up')}
+              className="text-[13px] font-semibold text-royal hover:underline">
+              {i18n.t('Forgot password?')}
             </Link>
           </div>
-        )}
-      </form>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className={authButtonClass}>
+            {submitting ? (
+              <>
+                {i18n.t('Submitting')}
+                <MdOutlineRefresh className="size-5 animate-spin-fast" />
+              </>
+            ) : (
+              <>
+                {i18n.t('Log In')}
+                <MdArrowForward className="size-4" />
+              </>
+            )}
+          </button>
+
+          {signUpLink}
+        </form>
+      )}
 
       {showSso && (
         <>
-          <div className="relative my-5 text-center">
-            <div className="h-px bg-ink-100" />
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[12px] text-ink-400">
-              {i18n.t('Or')}
-            </span>
-          </div>
+          {showPasswordSignIn && (
+            <div className="relative my-5 text-center">
+              <div className="h-px bg-ink-100" />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[12px] text-ink-400">
+                {i18n.t('Or')}
+              </span>
+            </div>
+          )}
           <div className="flex flex-col gap-3">
             {showGoogleOauth && (
               <button
@@ -287,6 +301,10 @@ export default function Content({
             )}
           </div>
         </>
+      )}
+
+      {!showPasswordSignIn && signUpLink && (
+        <div className="mt-5">{signUpLink}</div>
       )}
     </AuthShell>
   );

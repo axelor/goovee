@@ -1,5 +1,7 @@
 'use client';
 
+import {canSignIn} from '@/auth/sign-in-methods';
+import {useSignInMethods} from '@/auth/sign-in-methods-context';
 import {i18n} from '@/locale';
 import type {User} from '@/types';
 import type {Cloned} from '@/types/util';
@@ -55,6 +57,7 @@ export function YourReviewCard({
   defaultVersionId,
 }: YourReviewCardProps) {
   const {tenantScope} = useWorkspace();
+  const signInMethods = useSignInMethods();
   const {toast} = useToast();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -67,6 +70,9 @@ export function YourReviewCard({
 
   // ---- Guest ----
   if (!user) {
+    // A tenant offering no way to sign in has no review to ask a guest for.
+    if (!canSignIn(signInMethods)) return null;
+
     return (
       <PromptCard
         title={i18n.t('Share your experience')}

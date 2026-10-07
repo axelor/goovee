@@ -17,8 +17,8 @@
  *
  * The configuration arrives as environment variables, assembled into the nested
  * document this schema describes by ./env, which maps
- * `PORTAL_TENANT_ACME_OAUTH_GOOGLE_CLIENT_ID` onto
- * `tenants.acme.oauth.google.clientId`, and as portal.config*.json files, read
+ * `PORTAL_TENANT_ACME_AUTH_GOOGLE_CLIENT_ID` onto
+ * `tenants.acme.auth.google.clientId`, and as portal.config*.json files, read
  * by ./files, which hold that document as it is. Keys here stay camelCase for
  * the application's sake and the files'; the mapping is what spells them for
  * the environment.
@@ -529,8 +529,14 @@ const mailSchema = z
   })
   .describe('Per-tenant SMTP settings.');
 
-const oauthSchema = z
+const authSchema = z
   .strictObject({
+    password: z
+      .boolean()
+      .describe(
+        `Offer email and password sign-in: the sign-in form, registration by email, password reset and the password screen of the account settings. Defaults to true. Set to false to let visitors sign in through Google or Keycloak only; a tenant that also declares neither offers no sign-in at all and is visited as a guest.`,
+      )
+      .optional(),
     google: z
       .strictObject({
         clientId: z.string().min(1),
@@ -561,7 +567,7 @@ const oauthSchema = z
       .optional(),
   })
   .describe(
-    "Per-tenant OAuth applications. Each provider is registered under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>, without the <tenantId> segment for a tenant reached on an origin of its own) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here.",
+    "How visitors sign in to this tenant. Google and Keycloak are per-tenant OAuth applications. Each provider is registered under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/<tenantId>/api/auth/oauth2/callback/<provider>-<tenantId>, without the <tenantId> segment for a tenant reached on an origin of its own) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here.",
   );
 
 export const tenantConfigSchema = z.strictObject({
@@ -606,7 +612,7 @@ export const tenantConfigSchema = z.strictObject({
       `Mattermost integration. The address the browser links to is browser-facing and lives under ${name([TENANTS_KEY, '<id>', 'public', 'mattermost', 'host'])}.`,
     )
     .optional(),
-  oauth: oauthSchema.optional(),
+  auth: authSchema.optional(),
   webPush: z
     .strictObject({
       privateKey: z.string().min(1),

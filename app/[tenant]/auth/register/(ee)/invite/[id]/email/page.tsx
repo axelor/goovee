@@ -1,10 +1,12 @@
 import type {Metadata} from 'next';
-import {notFound} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
+import {canSignIn, getSignInMethods} from '@/auth/sign-in-methods';
 import {t} from '@/locale/server';
 import {manager} from '@/tenant';
+import {tenantURLs} from '@/url/scope';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';
@@ -13,6 +15,7 @@ import Subscribe from '../subscribe';
 
 import {generateAuthMetadata} from '../../../../../common/workspace';
 import {resolveAuthTenantId} from '@/app/[tenant]/auth/common/tenant';
+import {SignInUnavailable} from '@/app/[tenant]/auth/common/ui/sign-in-unavailable';
 
 export async function generateMetadata(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -78,13 +81,37 @@ export default async function Page(props: {
     }
   }
 
-  const showGoogleOauth = Boolean(tenant.config.oauth?.google);
+  const signInMethods = getSignInMethods(tenant.config);
+
+  /* The invitation mail links here. Without email registration, Google is the
+   * only way to accept it. */
+  if (!signInMethods.password) {
+    if (signInMethods.google) {
+      redirect(
+        tenantURLs(tenantId).forRouter(
+          `/auth/register/invite/${invite.id}/google`,
+        ),
+      );
+    }
+
+    return (
+      <SignInUnavailable
+        title={await t('Sign Up')}
+        description={
+          canSignIn(signInMethods)
+            ? await t('Registration is not available on this portal.')
+            : await t('Sign-in is not available on this portal.')
+        }
+        workspaceName={null}
+      />
+    );
+  }
 
   return (
     <Form
       email={invite?.emailAddress?.address}
       inviteId={invite.id}
-      showGoogleOauth={showGoogleOauth}
+      showGoogleOauth={signInMethods.google}
     />
   );
 }

@@ -50,7 +50,7 @@ export default async function Page(props: {
     <Form
       workspace={workspace}
       googleProviderId={
-        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
+        tenant.config.auth?.google ? `google-${tenantId}` : undefined
       }
     />
   );
