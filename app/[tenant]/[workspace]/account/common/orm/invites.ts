@@ -1,3 +1,5 @@
+import {randomBytes} from 'crypto';
+
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
@@ -65,43 +67,31 @@ export async function deleteInviteById({
   id: string;
   client: Client;
 }) {
-  if (!id) {
-    return null;
-  }
-
   const invite = await findInviteById({id, client});
-  const contactConfig = invite?.contactAppPermissionList?.[0];
 
   if (!invite) {
     return null;
   }
 
-  try {
+  const contactConfigIds = (invite.contactAppPermissionList ?? []).map(
+    contactConfig => contactConfig.id,
+  );
+
+  let version = invite.version;
+
+  if (contactConfigIds.length) {
     const updatedInvite = await client.aOSPortalInvitation.update({
       data: {
         id,
-        version: invite?.version,
-        ...(contactConfig
-          ? {
-              contactAppPermissionList: {
-                remove: [contactConfig.id],
-              },
-            }
-          : {}),
+        version,
+        contactAppPermissionList: {remove: contactConfigIds},
       },
       select: {id: true},
     });
-
-    const result = await client.aOSPortalInvitation.delete({
-      id,
-      version: updatedInvite.version,
-    });
-
-    return result;
-  } catch (err) {
-    console.log(err);
-    return null;
+    version = updatedInvite.version;
   }
+
+  return client.aOSPortalInvitation.delete({id, version});
 }
 
 export async function findInvites({
@@ -202,6 +192,12 @@ export async function findInviteForEmail({
   return invite;
 }
 
+/* The invitation link carries this token, so it must not be guessable: 32
+ * random bytes, base64url so it fits in a URL path segment as is. */
+function generateInviteToken() {
+  return randomBytes(32).toString('base64url');
+}
+
 export async function createInvite({
   workspace,
   client,
@@ -297,8 +293,9 @@ export async function createInvite({
               },
             ],
           },
+          token: generateInviteToken(),
         },
-        select: {id: true},
+        select: {token: true},
       })
       .then(clone);
 

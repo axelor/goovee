@@ -8,11 +8,17 @@ import {
 
 const LocaleSchema = z.string().optional();
 
+/* 32 random bytes in base64url without padding, as set when the invitation
+ * is created. */
+export const InviteTokenSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{43}$/, 'Invalid invite token');
+
 export const OAuthInviteRegisterSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   name: z.string().min(1, 'Name is required'),
   email: z.email(),
-  inviteId: z.string().min(1, 'Invite ID is required'),
+  inviteToken: InviteTokenSchema,
   locale: LocaleSchema,
 });
 
@@ -87,7 +93,7 @@ export type InviteEmailRegister = z.infer<typeof EmailInviteRegisterSchema>;
 
 export const InviteSubscribeSchema = z.object({
   workspaceURL: WorkspaceURLSchema,
-  inviteId: z.string().min(1, 'Invite ID is required'),
+  inviteToken: InviteTokenSchema,
 });
 
 export type InviteSubscribe = z.infer<typeof InviteSubscribeSchema>;
@@ -100,7 +106,7 @@ export const EmailRegisterOTPSchema = z.object({
 export type EmailRegisterOTP = z.infer<typeof EmailRegisterOTPSchema>;
 
 export const InviteEmailRegisterOTPSchema = z.object({
-  inviteId: z.string().min(1, 'Invite ID is required'),
+  inviteToken: InviteTokenSchema,
 });
 
 export type EmailInviteOTP = z.infer<typeof InviteEmailRegisterOTPSchema>;

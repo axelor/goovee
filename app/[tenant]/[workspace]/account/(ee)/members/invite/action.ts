@@ -294,7 +294,7 @@ export async function sendInvites(input: SendInvites) {
         partnerId,
       });
 
-      if (!invite?.id) {
+      if (!invite?.token) {
         inviteError = true;
         continue;
       }
@@ -305,7 +305,7 @@ export async function sendInvites(input: SendInvites) {
         subject: workspace?.name || workspace.url,
         email,
         link: tenantURLs(tenantId).forExternal(
-          `/auth/register/invite/${invite.id}/email`,
+          `/auth/register/invite/${invite.token}/email`,
         ),
       });
     } catch (err) {

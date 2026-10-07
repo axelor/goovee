@@ -21,7 +21,7 @@ import {manager} from '@/tenant';
 import {listTenantIds} from '@/tenant/config';
 import {withMattermostSync} from '@/mattermost';
 import {APP_TITLE, RESET_PASSWORD} from '@/constants';
-import {findInviteById} from '@/app/[tenant]/auth/register/common/orm/register';
+import {findInviteByToken} from '@/app/[tenant]/auth/register/common/orm/register';
 import {registerByInvite} from '@/auth/orm';
 import {tenantURLs} from '@/url/scope';
 import {
@@ -385,7 +385,7 @@ export function buildCredentials(tenantId: string) {
           },
         },
         async ctx => {
-          const {inviteId} = ctx.body;
+          const {inviteToken} = ctx.body;
 
           const tenant = await manager.getTenant(tenantId);
           if (!tenant) {
@@ -399,7 +399,7 @@ export function buildCredentials(tenantId: string) {
           }
           const {client} = tenant;
 
-          const invite = await findInviteById({id: inviteId, client});
+          const invite = await findInviteByToken({token: inviteToken, client});
 
           if (!(invite?.workspace && invite?.partner)) {
             throw new APIError('BAD_REQUEST', {
@@ -494,7 +494,7 @@ export function buildCredentials(tenantId: string) {
           },
         },
         async ctx => {
-          const {email, otp, firstName, name, password, inviteId, locale} =
+          const {email, otp, firstName, name, password, inviteToken, locale} =
             ctx.body;
 
           const tenant = await manager.getTenant(tenantId);
@@ -538,7 +538,7 @@ export function buildCredentials(tenantId: string) {
                 firstName,
                 name,
                 password,
-                inviteId,
+                inviteToken,
                 locale,
                 client: txClient,
                 config,

@@ -13,7 +13,7 @@ import {
   type InviteSubscribe,
 } from '@/auth/validation-utils';
 
-import {findInviteById} from '../../../common/orm/register';
+import {findInviteByToken} from '../../../common/orm/register';
 import {currentTenantScope} from '@/url/current';
 
 function error(message: string): {error: true; message: string} {
@@ -30,7 +30,7 @@ export async function subscribe(data: InviteSubscribe) {
     return {error: true, message: z.prettifyError(validation.error)};
   }
 
-  const {workspaceURL, inviteId} = validation.data;
+  const {workspaceURL, inviteToken} = validation.data;
 
   /* From the address this action was called on, not from its arguments: a
    * caller naming a tenant would subscribe an invite against one it was not
@@ -49,7 +49,7 @@ export async function subscribe(data: InviteSubscribe) {
     return error(await getTranslation({tenant: tenantId}, 'Invalid tenant'));
   const {client} = tenant;
 
-  const invite = await findInviteById({id: inviteId, client});
+  const invite = await findInviteByToken({token: inviteToken, client});
 
   if (
     !(

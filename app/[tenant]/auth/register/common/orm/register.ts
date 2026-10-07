@@ -1,19 +1,21 @@
 import {Client} from '@/goovee/.generated/client';
 
-export async function findInviteById({
-  id,
+/* An empty token returns nothing, so an invitation without a token (sent
+ * before tokens existed) can never be matched. */
+export async function findInviteByToken({
+  token,
   client,
 }: {
-  id: string;
+  token: string;
   client: Client;
 }) {
-  if (!(id && client)) {
+  if (!(token && client)) {
     return null;
   }
 
   const invite = await client.aOSPortalInvitation.findOne({
     where: {
-      id,
+      token,
     },
     select: {
       emailAddress: {

@@ -1,7 +1,7 @@
 import {type OAuthInviteRegister, type OAuthRegister} from './validation-utils';
 
 import {deleteInviteById} from '@/app/[tenant]/[workspace]/account/common/orm/invites';
-import {findInviteById} from '@/app/[tenant]/auth/register/common/orm/register';
+import {findInviteByToken} from '@/app/[tenant]/auth/register/common/orm/register';
 import {
   ALLOW_ALL_REGISTRATION,
   ALLOW_AOS_ONLY_REGISTRATION,
@@ -52,12 +52,12 @@ export async function registerByInvite({
   email,
   password,
   tenantId,
-  inviteId,
+  inviteToken,
   locale,
   client,
   config,
 }: RegisterInviteDTO): Promise<{query: string}> {
-  const invite = await findInviteById({id: inviteId, client});
+  const invite = await findInviteByToken({token: inviteToken, client});
 
   if (!invite) {
     throw new Error(await getTranslation({tenant: tenantId}, 'Invalid invite'));
@@ -156,16 +156,11 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
+    await deleteInviteById({id: invite.id, client});
+
     const scope = tenantURLs(tenantId).workspaceByKey(workspace.url);
 
     revalidateEverything();
-
-    deleteInviteById({
-      id: invite.id,
-      client,
-    }).catch(err => {
-      console.error(err);
-    });
 
     return {
       query: `?callbackurl=${encodeURIComponent(`${scope.forExternal()}/`)}&workspaceURI=${encodeURIComponent(`${scope.forRouter()}/`)}`,
