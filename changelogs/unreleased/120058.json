@@ -1,0 +1,6 @@
+{
+  "title": "Stop accepting an email verification code after 5 wrong entries, so a new code must be requested",
+  "type": "security",
+  "description": "Applies to registration, registration through an invitation, password reset and email address change. The error shown is the same as for a wrong or expired code.",
+  "scope": ["core"]
+}

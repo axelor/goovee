@@ -22,6 +22,10 @@
     {
       "type": "Boolean",
       "name": "used"
+    },
+    {
+      "type": "Int",
+      "name": "failedAttempts"
     }
   ]
 }
