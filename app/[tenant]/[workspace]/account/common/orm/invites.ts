@@ -67,43 +67,31 @@ export async function deleteInviteById({
   id: string;
   client: Client;
 }) {
-  if (!id) {
-    return null;
-  }
-
   const invite = await findInviteById({id, client});
-  const contactConfig = invite?.contactAppPermissionList?.[0];
 
   if (!invite) {
     return null;
   }
 
-  try {
+  const contactConfigIds = (invite.contactAppPermissionList ?? []).map(
+    contactConfig => contactConfig.id,
+  );
+
+  let version = invite.version;
+
+  if (contactConfigIds.length) {
     const updatedInvite = await client.aOSPortalInvitation.update({
       data: {
         id,
-        version: invite?.version,
-        ...(contactConfig
-          ? {
-              contactAppPermissionList: {
-                remove: [contactConfig.id],
-              },
-            }
-          : {}),
+        version,
+        contactAppPermissionList: {remove: contactConfigIds},
       },
       select: {id: true},
     });
-
-    const result = await client.aOSPortalInvitation.delete({
-      id,
-      version: updatedInvite.version,
-    });
-
-    return result;
-  } catch (err) {
-    console.log(err);
-    return null;
+    version = updatedInvite.version;
   }
+
+  return client.aOSPortalInvitation.delete({id, version});
 }
 
 export async function findInvites({

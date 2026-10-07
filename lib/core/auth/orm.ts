@@ -156,16 +156,11 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
+    await deleteInviteById({id: invite.id, client});
+
     const scope = tenantURLs(tenantId).workspaceByKey(workspace.url);
 
     revalidateEverything();
-
-    deleteInviteById({
-      id: invite.id,
-      client,
-    }).catch(err => {
-      console.error(err);
-    });
 
     return {
       query: `?callbackurl=${encodeURIComponent(`${scope.forExternal()}/`)}&workspaceURI=${encodeURIComponent(`${scope.forRouter()}/`)}`,
