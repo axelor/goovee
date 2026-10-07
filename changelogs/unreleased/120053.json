@@ -1,0 +1,6 @@
+{
+  "title": "Stop invitation links from exposing the invited person's email address",
+  "type": "security",
+  "description": "Each invitation is now identified by a random value that cannot be guessed, and the invitation email links to it, so invitations can no longer be listed by trying one link after another. A link that does not match an invitation shows \"not found\". Links in invitations sent before the upgrade no longer work: revoke the pending invitation in Account → Members and send it again.",
+  "scope": ["core", "users"]
+}

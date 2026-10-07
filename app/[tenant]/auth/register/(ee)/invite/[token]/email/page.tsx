@@ -8,11 +8,12 @@ import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';
-import {findInviteById} from '../../../../common/orm/register';
+import {findInviteByToken} from '../../../../common/orm/register';
 import Subscribe from '../subscribe';
 
 import {generateAuthMetadata} from '../../../../../common/workspace';
 import {resolveAuthTenantId} from '@/app/[tenant]/auth/common/tenant';
+import {InviteTokenSchema} from '@/auth/validation-utils';
 
 export async function generateMetadata(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -22,13 +23,18 @@ export async function generateMetadata(props: {
 
 export default async function Page(props: {
   params: Promise<{
-    id: string;
+    token: string;
   }>;
   searchParams: Promise<any>;
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  const {id} = params;
+  const {token} = params;
+
+  if (!InviteTokenSchema.safeParse(token).success) {
+    return notFound();
+  }
+
   const tenantId = await resolveAuthTenantId();
 
   if (!tenantId) {
@@ -39,7 +45,7 @@ export default async function Page(props: {
   if (!tenant) return notFound();
   const {client} = tenant;
 
-  const invite = await findInviteById({id, client});
+  const invite = await findInviteByToken({token, client});
 
   if (!invite?.emailAddress?.address) {
     return notFound();
@@ -73,19 +79,18 @@ export default async function Page(props: {
       );
     } else if (invite.workspace) {
       return (
-        <Subscribe workspaceURL={invite.workspace.url} inviteId={invite.id} />
+        <Subscribe workspaceURL={invite.workspace.url} inviteToken={token} />
       );
     }
   }
 
+  const showGoogleOauth = Boolean(tenant.config.oauth?.google);
+
   return (
     <Form
       email={invite?.emailAddress?.address}
-      inviteId={invite.id}
-      workspaceURL={invite.workspace?.url}
-      googleProviderId={
-        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
-      }
+      inviteToken={token}
+      showGoogleOauth={showGoogleOauth}
     />
   );
 }

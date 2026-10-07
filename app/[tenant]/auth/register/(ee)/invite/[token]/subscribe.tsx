@@ -21,10 +21,10 @@ import {useTenantScope} from '@/url/tenant-context';
 
 export default function Subscribe({
   workspaceURL,
-  inviteId,
+  inviteToken,
 }: {
   workspaceURL: string;
-  inviteId: string;
+  inviteToken: string;
   updateSession?: boolean;
 }) {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function Subscribe({
     try {
       const res: any = await subscribe({
         workspaceURL,
-        inviteId,
+        inviteToken,
       });
 
       if (res.error) {

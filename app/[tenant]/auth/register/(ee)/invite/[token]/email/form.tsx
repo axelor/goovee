@@ -48,11 +48,11 @@ const formSchema = z
 
 export default function SignUp({
   email,
-  inviteId,
+  inviteToken,
   showGoogleOauth,
 }: {
   email: string;
-  inviteId: string;
+  inviteToken: string;
   showGoogleOauth?: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -101,7 +101,7 @@ export default function SignUp({
     try {
       const res = await authClient.credentials.invite.register({
         ...values,
-        inviteId,
+        inviteToken,
         locale: l10n.getLocale(),
       });
 
@@ -141,7 +141,7 @@ export default function SignUp({
   const handleGenerateOTP = async () => {
     try {
       const res = await authClient.credentials.invite.sendOtp({
-        inviteId,
+        inviteToken,
       });
       if (!res.error) {
         reset(1);
@@ -356,7 +356,8 @@ export default function SignUp({
               type="button"
               variant="outline-success"
               className="w-full rounded-full">
-              <Link href={authHref(`/auth/register/invite/${inviteId}/google`)}>
+              <Link
+                href={authHref(`/auth/register/invite/${inviteToken}/google`)}>
                 <Image
                   alt="Google"
                   src={withBasePath('/images/google.svg')}

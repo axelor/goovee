@@ -36,12 +36,12 @@ const formSchema = z.object({
 
 export default function SignUp({
   email,
-  inviteId,
+  inviteToken,
   workspaceURL,
   googleProviderId,
 }: {
   email: string;
-  inviteId: string;
+  inviteToken: string;
   workspaceURL?: string;
   googleProviderId?: string;
 }) {
@@ -85,7 +85,7 @@ export default function SignUp({
       requestSignUp: true,
       additionalData: {
         ...values,
-        inviteId,
+        inviteToken,
         locale: l10n.getLocale(),
       },
     };

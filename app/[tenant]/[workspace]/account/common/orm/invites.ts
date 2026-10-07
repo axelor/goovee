@@ -1,3 +1,5 @@
+import {randomBytes} from 'crypto';
+
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
@@ -202,6 +204,12 @@ export async function findInviteForEmail({
   return invite;
 }
 
+/* The invitation link carries this token, so it must not be guessable: 32
+ * random bytes, base64url so it fits in a URL path segment as is. */
+function generateInviteToken() {
+  return randomBytes(32).toString('base64url');
+}
+
 export async function createInvite({
   workspace,
   client,
@@ -297,8 +305,9 @@ export async function createInvite({
               },
             ],
           },
+          token: generateInviteToken(),
         },
-        select: {id: true},
+        select: {token: true},
       })
       .then(clone);
 
