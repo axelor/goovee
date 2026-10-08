@@ -1,6 +1,5 @@
 import {z} from 'zod';
 import {IdSchema} from '@/utils/validators';
-import {PaymentOption} from '@/types';
 
 export const SearchEventsSchema = z.object({
   search: z.string(),
@@ -29,29 +28,11 @@ export const RegistrationValuesSchema = ParticipantSchema.extend({
 });
 export type RegistrationValues = z.infer<typeof RegistrationValuesSchema>;
 
-const PaymentDataSchema = z.object({
-  id: z.string().optional(),
-  params: z.unknown().optional(),
-});
-
-const PaymentSchema = z.object({
-  data: PaymentDataSchema,
-  mode: z.enum(PaymentOption),
-});
-
-const BaseRegisterSchema = z.object({
-  eventId: z.string(),
-});
-
-const FreeRegisterSchema = BaseRegisterSchema.extend({
+/* Free registrations only; a priced one goes through the payment flow. */
+export const RegisterSchema = z.object({
+  eventId: IdSchema,
   values: RegistrationValuesSchema,
 });
-
-const PaidRegisterSchema = BaseRegisterSchema.extend({
-  payment: PaymentSchema,
-});
-
-export const RegisterSchema = z.union([PaidRegisterSchema, FreeRegisterSchema]);
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 
 export const FetchContactsSchema = z.object({
@@ -69,24 +50,3 @@ export const FetchEventSchema = z.object({
   slug: z.string(),
 });
 export type FetchEventInput = z.infer<typeof FetchEventSchema>;
-
-export const CreateStripeCheckoutSessionSchema = z.object({
-  eventId: IdSchema,
-  values: RegistrationValuesSchema,
-});
-export type CreateStripeCheckoutSessionInput = z.infer<
-  typeof CreateStripeCheckoutSessionSchema
->;
-
-export const PaypalCreateOrderSchema = z.object({
-  values: RegistrationValuesSchema,
-  eventId: IdSchema,
-});
-export type PaypalCreateOrderInput = z.infer<typeof PaypalCreateOrderSchema>;
-
-export const PayboxCreateOrderSchema = z.object({
-  eventId: IdSchema,
-  values: RegistrationValuesSchema,
-  uri: z.string(),
-});
-export type PayboxCreateOrderInput = z.infer<typeof PayboxCreateOrderSchema>;

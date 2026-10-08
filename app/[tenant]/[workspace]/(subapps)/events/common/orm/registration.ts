@@ -100,6 +100,51 @@ export async function registerParticipants({
   return registration;
 }
 
+/* What the registration's push and mail are made of, read the same way
+ * whether the registration was just written or is read back later. */
+const REGISTRATION_NOTICE_SELECT = {
+  event: {
+    slug: true,
+    eventTitle: true,
+    eventPlace: true,
+    eventAllDay: true,
+    eventStartDateTime: true,
+    eventEndDateTime: true,
+    eventDescription: true,
+  },
+  participantList: {
+    select: {
+      name: true,
+      surname: true,
+      emailAddress: true,
+      subscriptionSet: {select: {facility: true}},
+      contact: {
+        isActivatedOnPortal: true,
+        emailAddress: {address: true},
+        localization: {code: true},
+      },
+    },
+  },
+} as const;
+
+/** A registration as its push and mail read it, for sending them after it was written. */
+export async function findRegistrationNotice({
+  id,
+  client,
+}: {
+  id: string;
+  client: Client;
+}) {
+  return client.aOSRegistration.findOne({
+    where: {id},
+    select: REGISTRATION_NOTICE_SELECT,
+  });
+}
+
+export type RegistrationNotice = NonNullable<
+  Awaited<ReturnType<typeof findRegistrationNotice>>
+>;
+
 type EventContact = {
   id: string;
   version: number;

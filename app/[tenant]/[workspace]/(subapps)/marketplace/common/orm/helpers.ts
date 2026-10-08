@@ -27,14 +27,14 @@ export type QueryProps<T extends Entity> = {
   skip?: number;
 };
 
-export function getProductAccessFilter(workspace: Workspace) {
+export function getProductAccessFilter(workspace: Pick<Workspace, 'id'>) {
   return and<AOSMarketplaceProduct>([
     {OR: [{archived: false}, {archived: null}]},
     {portalWorkspace: {id: workspace.id}},
   ]);
 }
 
-export function withProductAccessFilter(workspace: Workspace) {
+export function withProductAccessFilter(workspace: Pick<Workspace, 'id'>) {
   return function (where?: WhereOptions<AOSMarketplaceProduct>) {
     return and<AOSMarketplaceProduct>([
       where,
@@ -58,7 +58,7 @@ export function getPublishedProductFilter(): WhereOptions<AOSMarketplaceProduct>
   };
 }
 
-export function withPublishedProductFilter(workspace: Workspace) {
+export function withPublishedProductFilter(workspace: Pick<Workspace, 'id'>) {
   return function (where?: WhereOptions<AOSMarketplaceProduct>) {
     return and<AOSMarketplaceProduct>([
       where,

@@ -27,7 +27,6 @@ import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {getShopConfig, type ShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/categories';
 import {
-  OrderAlert,
   ShopCatalog,
   type ShopCategory,
   type ShopLabels,
@@ -297,22 +296,19 @@ export default async function Page(props: {
   if (!workspaceConfig) return notFound();
 
   return (
-    <>
-      <Suspense fallback={<CatalogSkeleton />}>
-        <Catalog
-          workspace={access.workspace}
-          client={client}
-          user={user}
-          config={config}
-          workspaceConfig={workspaceConfig}
-          sort={sort}
-          category={category}
-          search={search}
-          inStockOnly={inStockOnly}
-          page={page}
-        />
-      </Suspense>
-      <OrderAlert />
-    </>
+    <Suspense fallback={<CatalogSkeleton />}>
+      <Catalog
+        workspace={access.workspace}
+        client={client}
+        user={user}
+        config={config}
+        workspaceConfig={workspaceConfig}
+        sort={sort}
+        category={category}
+        search={search}
+        inStockOnly={inStockOnly}
+        page={page}
+      />
+    </Suspense>
   );
 }

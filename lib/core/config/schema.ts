@@ -435,6 +435,13 @@ const paymentsSchema = z
           .boolean()
           .describe('true for live payments; defaults to sandbox.')
           .optional(),
+        webhookId: z
+          .string()
+          .min(1)
+          .describe(
+            'Id of the webhook registered for this tenant in the PayPal developer dashboard. PayPal signs each notification, and the signature is checked against this id. Without it, PayPal notifications are refused and a payment is recorded only when the buyer comes back to the site.',
+          )
+          .optional(),
       })
       .describe(
         `PayPal merchant account. The browser needs the client id as well, under ${name([TENANTS_KEY, '<id>', 'public', 'paypal', 'clientId'])}.`,
@@ -443,6 +450,13 @@ const paymentsSchema = z
     stripe: z
       .strictObject({
         clientSecret: z.string().min(1),
+        bankTransferCountry: z
+          .string()
+          .length(2)
+          .describe(
+            'Two-letter country whose bank account Stripe presents for EUR bank transfers; defaults to FR.',
+          )
+          .optional(),
         webhookSecret: z
           .string()
           .describe(
@@ -1154,11 +1168,9 @@ function checkTenantIds(ids: string[]): ConfigIssue[] {
         path: tenantPath(id),
         message:
           `"${id}" is ${id.length} characters, and a tenant id may hold at ` +
-          `most ${TENANT_ID_MAX_LENGTH}. A Hub PISP payment carries its ` +
-          `reference as "<paymentContextId>-<tenantId>" in a field of 35 ` +
-          `characters, and a context id can reach 19 digits, so a longer id ` +
-          `works until this tenant's context ids grow and then fails every Hub ` +
-          `PISP payment it attempts.`,
+          `most ${TENANT_ID_MAX_LENGTH}. A payment's reference ends with the ` +
+          `tenant id, and Hub PISP carries the reference in a field of 35 ` +
+          `characters, which leaves ${TENANT_ID_MAX_LENGTH} for the id.`,
       });
     }
   }

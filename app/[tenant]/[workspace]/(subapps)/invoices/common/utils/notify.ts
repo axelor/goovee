@@ -35,7 +35,7 @@ export async function notifyInvoicePaymentSuccess({
       locale: user.localization?.code || DEFAULT_LOCALE,
       tenant: tenantId,
     });
-    await notifyUser({
+    void notifyUser({
       userId: user.id,
       tenantId,
       /* A payment callback's address names no workspace, so it is named from

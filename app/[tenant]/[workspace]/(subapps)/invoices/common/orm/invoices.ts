@@ -1,7 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
 import {
-  DEFAULT_CURRENCY_CODE,
   DEFAULT_CURRENCY_SCALE,
   DEFAULT_CURRENCY_SYMBOL,
   DEFAULT_PAGE,
@@ -12,9 +11,6 @@ import {getSkip} from '@/utils/pagination';
 import {formatNumber} from '@/locale/server/formatters';
 import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
-import {buildPendingStripeBankTransferIntents} from '@/payment/stripe/service';
-import {findPendingHubPispPayments} from '@/payment/hubpisp/orm';
-import {findPendingStripeBankTransfers} from '@/payment/stripe/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import type {
@@ -129,7 +125,6 @@ export const findInvoice = async ({
   params,
   client,
   workspaceURL,
-  tenantId,
 }: {
   id: Invoice['id'];
   token?: string;
@@ -143,7 +138,6 @@ export const findInvoice = async ({
   };
   client: Client;
   workspaceURL: Workspace['url'];
-  tenantId: string;
 }): Promise<Invoice | null> => {
   if (!workspaceURL) return null;
 
@@ -253,7 +247,6 @@ export const findInvoice = async ({
 
   const currencySymbol = currency?.symbol || DEFAULT_CURRENCY_SYMBOL;
   const scale = currency?.numberOfDecimals || DEFAULT_CURRENCY_SCALE;
-  const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
 
   const $invoicePaymentList: PaymentListItem[] = [];
   for (const list of invoicePaymentList || []) {
@@ -267,33 +260,6 @@ export const findInvoice = async ({
     };
     $invoicePaymentList.push(line);
   }
-
-  const pendingStripeBankTransferPayments =
-    await findPendingStripeBankTransfers({client, id: invoice.id});
-
-  const resolved = await Promise.all(
-    pendingStripeBankTransferPayments?.map(async ctx => ({
-      ...ctx,
-      data: await ctx.data,
-    })) || [],
-  );
-
-  const pendingStripeBankTransferIntents =
-    await buildPendingStripeBankTransferIntents({
-      resolvedContexts: resolved,
-      currencyCode,
-      currencySymbol,
-      scale,
-      tenantId,
-    });
-
-  const pendingHubPispContexts = await findPendingHubPispPayments({
-    client,
-    entityId: invoice.id,
-    currencySymbol,
-    scale,
-    tenantId,
-  });
 
   return {
     ...invoice,
@@ -323,7 +289,5 @@ export const findInvoice = async ({
     }),
     invoicePaymentList: $invoicePaymentList,
     isUnpaid: Number(invoice.amountRemaining) !== 0,
-    pendingStripeBankTransferIntents,
-    pendingHubPispContexts,
   };
 };

@@ -2,6 +2,7 @@ import {headers} from 'next/headers';
 import {getSession} from '@/auth';
 
 import {TENANT_HEADER} from '@/proxy';
+import {backgroundScope} from './background';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findTranslations} from '@/locale/api';
 import {
@@ -19,8 +20,17 @@ export async function getTranslation(
   key: string,
   ...interpolations: string[]
 ) {
+  /* Background work has no request to read the tenant, the session or the
+   * browser's language from; its scope names the tenant and the language. */
+  const background = backgroundScope();
+
   if (!tenant) {
-    tenant = (await headers()).get(TENANT_HEADER) as string;
+    tenant =
+      background?.tenant ?? ((await headers()).get(TENANT_HEADER) as string);
+  }
+
+  if (!locale && background) {
+    locale = background.locale;
   }
 
   if (!user && !locale) {

@@ -29,5 +29,3 @@ export const SORT_BY_OPTIONS = [
    the same as a workspace that configured no ordering at all — the query falls
    back to the same one. Otherwise the first ordering the workspace offers. */
 export const DEFAULT_SORT_OPTION = 'byAToZ';
-
-export const ORDER_SUCCESS_PARAM = 'order_success';

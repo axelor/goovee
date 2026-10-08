@@ -1,7 +1,7 @@
 'use client';
 
 import type {Cloned} from '@/types/util';
-import type {Subapp} from '@/orm/workspace';
+import type {OfferedGateway} from '@/payment/offer';
 
 // ---- LOCAL IMPORTS ---- //
 import type {ShopConfig} from '@/subapps/shop/common/orm/config';
@@ -10,15 +10,21 @@ import type {ShopCheckoutLabels} from '@/subapps/shop/common/ui/components';
 
 export default function Content({
   config,
-  orderSubapp,
+  gateways,
+  checkoutToken,
   labels,
 }: {
   config: ShopConfig | Cloned<ShopConfig>;
-  orderSubapp?: Subapp | null;
-  tenant: string;
+  gateways: OfferedGateway[];
+  checkoutToken: string;
   labels: ShopCheckoutLabels;
 }) {
   return (
-    <ShopCheckout config={config} orderSubapp={orderSubapp} labels={labels} />
+    <ShopCheckout
+      config={config}
+      gateways={gateways}
+      checkoutToken={checkoutToken}
+      labels={labels}
+    />
   );
 }

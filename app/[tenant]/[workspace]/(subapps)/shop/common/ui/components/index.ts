@@ -12,7 +12,6 @@ export {
   AddressSelectionSkeleton,
   CheckoutSkeleton,
 } from './skeleton';
-export {OrderAlert} from './order-alert';
 export {PriceWarning} from './price-warning';
 export {ShopQuantityStepper} from './shop-quantity-stepper';
 export {ShopProductCard} from './shop-product-card';

@@ -14,6 +14,7 @@ import {
   GRADIENT_MAP,
 } from '../../../common/constants/gradients';
 import {findPurchases} from '../../../common/orm';
+import {RemovePurchasedFromCart} from '../../../common/ui/components/checkout/remove-purchased-from-cart';
 import {ProductIcon} from '../../../common/ui/components/shared/product-icon';
 import {ensureAccess} from '@/access/ensure-access';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
@@ -75,6 +76,9 @@ export default async function CheckoutSuccessPage(props: {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
+      <RemovePurchasedFromCart
+        productIds={recent.map(row => row.marketplaceProduct.id)}
+      />
       <div className="rounded-lg border border-ink-100 bg-white p-6 text-center">
         <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-mint-600" />
         <h1 className="text-2xl font-semibold mb-2">

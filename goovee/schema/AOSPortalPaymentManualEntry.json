@@ -1,0 +1,59 @@
+{
+  "name": "AOSPortalPaymentManualEntry",
+  "table": "portal_portal_payment_manual_entry",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "payment",
+      "target": "AOSPortalPayment",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "type",
+      "required": true
+    },
+    {
+      "type": "BigInt",
+      "name": "amount"
+    },
+    {
+      "type": "DateTime",
+      "name": "occurredOn",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "providerRef"
+    },
+    {
+      "type": "String",
+      "name": "reason"
+    },
+    {
+      "type": "String",
+      "name": "eventKey",
+      "required": true,
+      "unique": true
+    },
+    {
+      "type": "String",
+      "name": "gateway",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "status",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "appliedOn"
+    },
+    {
+      "type": "String",
+      "name": "error"
+    }
+  ]
+}

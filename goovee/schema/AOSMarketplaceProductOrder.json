@@ -29,10 +29,6 @@
       "name": "invoicingAddressStr"
     },
     {
-      "type": "String",
-      "name": "paymentContextId"
-    },
-    {
       "type": "ManyToOne",
       "name": "currency",
       "target": "AOSCurrency",

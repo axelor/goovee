@@ -1,5 +1,8 @@
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
+import {PAYMENT_SOURCE} from '@/payment/domain/types';
+import {offeredGateways} from '@/payment/offer';
+import {mintCheckoutToken} from '@/payment/checkout-token';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +11,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-import {clone} from '@/utils';
 import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
 import {CheckoutContent} from '../../common/ui/components/checkout/checkout-content';
@@ -60,7 +62,18 @@ export default async function CheckoutPage(props: {
         {await t('Checkout')}
       </h1>
 
-      <CheckoutContent config={clone(config)} />
+      <CheckoutContent
+        gateways={
+          config.allowOnlinePaymentForEcommerce
+            ? await offeredGateways({
+                source: PAYMENT_SOURCE.marketplace,
+                paymentOptions: config.paymentOptionSet,
+                tenant: access.tenant,
+              })
+            : []
+        }
+        checkoutToken={mintCheckoutToken()}
+      />
     </div>
   );
 }

@@ -59,7 +59,18 @@ export function ical(
   return calendar.toString();
 }
 
-export const generateIcs = (event: IcsEvent, participants: Participant[]) => {
+/** Whom an invite names: a participant as the form sent it or as the registration holds it. */
+type IcsParticipant = Partial<
+  Record<
+    keyof Pick<Participant, 'emailAddress' | 'name' | 'surname'>,
+    string | null
+  >
+>;
+
+export const generateIcs = (
+  event: IcsEvent,
+  participants: IcsParticipant[],
+) => {
   const attendees: ICalAttendeeData[] = participants
     .filter(p => p.emailAddress)
     .map(p => ({

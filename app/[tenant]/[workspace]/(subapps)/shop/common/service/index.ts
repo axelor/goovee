@@ -2,20 +2,17 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
-import {t} from '@/locale/server';
 import {Workspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {ComputedProduct, User} from '@/types';
-import type {SuccessResponse} from '@/types/action';
 import type {CartInput, CartItemInput} from '@/subapps/shop/common/validators';
 import {computeTotal} from '@/utils/cart';
 import {TENANT_HEADER} from '@/proxy';
 import {getSession} from '@/auth';
 import {manager} from '@/tenant';
 import {MAIN_PRICE} from '@/constants';
-import {calculateAdvanceAmount} from '@/utils/payment';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProducts} from '@/subapps/shop/common/orm/product';
@@ -93,105 +90,18 @@ export async function priceCart({
 }
 
 /**
- * Takes a cart already priced by {@link priceCart}. Pricing again here would
- * let a change between checkout and capture put a total on the order that the
- * customer never paid.
+ * Asks the ERP for a quotation on the cart. A paid order takes the payment
+ * route instead: it is recorded as an order request when the capture settles
+ * and built in the ERP by the projection.
  */
-export async function createOrder({
-  cart: $cart,
-  workspace,
-  workspaceConfig,
-  user,
-  config,
-  paymentModeId,
-}: {
-  cart: PricedCart;
-  workspace: Workspace | Cloned<Workspace>;
-  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
-  user: NonNullable<User>;
-  config: Tenant['config'];
-  paymentModeId?: string;
-}): Promise<SuccessResponse<string>> {
-  const {aos} = config;
-
-  const {total} = computeTotal({
-    cart: $cart,
-    config: workspaceConfig,
-    formatNumber,
-  });
-
-  const {id, isContact, mainPartnerId} = user;
-  const partnerId = isContact && mainPartnerId ? mainPartnerId : id;
-  const contactId = isContact && mainPartnerId ? id : undefined;
-
-  const {invoicingAddress, deliveryAddress} = $cart;
-  const payInAdvance = workspaceConfig?.payInAdvance;
-  const advancePaymentPercentage = workspaceConfig?.advancePaymentPercentage;
-
-  const paidAmount =
-    payInAdvance && Number(advancePaymentPercentage) > 0
-      ? calculateAdvanceAmount({
-          amount: Number(total),
-          percentage: Number(advancePaymentPercentage),
-          payInAdvance,
-        }).toString()
-      : Number(total).toString();
-
-  const isAtiPricing = workspaceConfig?.mainPrice === MAIN_PRICE.ATI;
-
-  const payload = {
-    partnerId,
-    contactId,
-    shipping: 0,
-    total,
-    inAti: isAtiPricing,
-    items: $cart.items.map(i => {
-      const {computedProduct, note, quantity} = i;
-      /* Only reachable for a payment context written before this shipped;
-       * those expire five minutes after creation. */
-      if (!computedProduct) return null;
-      const {product, price} = computedProduct;
-      return {
-        productId: product?.id,
-        note: note || '',
-        quantity,
-        price: isAtiPricing ? price?.ati : price?.wt,
-      };
-    }),
-    workspaceId: workspace.id,
-    invocingPartnerAddressId: invoicingAddress,
-    deliveryPartnerAddressId: deliveryAddress,
-    paidAmount,
-    paymentModeId,
-  };
-
-  const res = await aosClient(aos).request<{
-    status?: number;
-    message?: string;
-    data?: string;
-  }>('ws/portal/orders/order', {body: payload});
-
-  if (res?.status === -1) {
-    throw new Error(
-      res?.message
-        ? await t(res.message)
-        : await t('Order creation failed. Please try again.'),
-    );
-  }
-
-  return {success: true, data: res.data ?? ''};
-}
-
-export async function requestOrder({
+export async function requestQuotation({
   cart,
   workspace,
   workspaceConfig,
-  type = 'order',
 }: {
   cart: CartInput;
   workspace: Workspace | Cloned<Workspace>;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
-  type?: 'quotation' | 'order';
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -280,7 +190,7 @@ export async function requestOrder({
 
     const res = await aosClient(aos).request<
       {status?: number} & Record<string, unknown>
-    >(`ws/portal/orders/${type}`, {body: payload});
+    >('ws/portal/orders/quotation', {body: payload});
 
     if (res?.status === -1) {
       return null;

@@ -332,7 +332,7 @@ function InvoicePreview({
         <PreviewField label={i18n.t('Total ATI')} value={invoice.inTaxTotal} />
         {invoice.isUnpaid && (
           <PreviewField
-            label={i18n.t('Remaining')}
+            label={i18n.t('Amount remaining')}
             value={invoice.amountRemaining?.formattedValue}
             emphasis
           />
