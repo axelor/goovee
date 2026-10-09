@@ -13,14 +13,20 @@ import {NotificationDTO} from './types';
 import {useAuthSession} from '@/auth/client';
 import {pushChannelName, MSG_TYPE} from './sw-constants';
 import {useTenantScope} from '@/url/tenant-context';
+import {useAppPush} from '@/mobile/use-app-push';
 
 interface PushContextType {
   permission: NotificationPermission;
   subscription: PushSubscription | null;
   unreadNotifications: NotificationDTO[];
   isSupported: boolean;
+  /* Whether the page runs inside the mobile app, whose notifications are
+   * controlled from the phone's settings rather than the browser's. */
+  inApp: boolean;
   subscribe: () => Promise<void>;
   unsubscribe: () => Promise<void>;
+  /* Stops this device receiving the user's notifications before sign-out. */
+  releaseOnSignOut: () => Promise<void>;
   syncSubscription: (sub: PushSubscription) => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
@@ -316,20 +322,27 @@ export function PushProvider({
     }
   }, [userId, subscription, unsubscribe, isPending]);
 
+  /* Inside the mobile app the device's notifications come from the app rather
+   * than the browser, which has no web push there. */
+  const appPush = useAppPush({tenant, userId, isPending, scope});
+
   const value = useMemo(
     () => ({
-      permission,
+      permission: appPush.available ? appPush.permission : permission,
       subscription,
       unreadNotifications,
-      isSupported,
-      subscribe,
-      unsubscribe,
+      isSupported: appPush.available || isSupported,
+      inApp: appPush.available,
+      subscribe: appPush.available ? appPush.subscribe : subscribe,
+      unsubscribe: appPush.available ? appPush.unsubscribe : unsubscribe,
+      releaseOnSignOut: appPush.available ? appPush.release : unsubscribe,
       syncSubscription,
       markAsRead,
       markAllAsRead,
       refresh: refreshPushNotifications,
     }),
     [
+      appPush,
       permission,
       subscription,
       unreadNotifications,

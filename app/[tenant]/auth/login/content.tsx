@@ -1,7 +1,7 @@
 'use client';
 
 import {useTenantScope} from '@/url/tenant-context';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {useAuthClient} from '@/auth/client';
 import Image from 'next/image';
@@ -17,6 +17,12 @@ import {useEnvironment} from '@/environment';
 import {isSameOrigin} from '@/utils/same-origin';
 import {withBasePath} from '@/path/base-path';
 import {isVectorImage} from '@/image/vector';
+import {
+  handoverChallenge,
+  signInDestination,
+  signInThroughBrowser,
+} from '@/mobile/sign-in';
+import {useMobileBridge} from '@/mobile/use-mobile-bridge';
 import {
   AuthShell,
   AuthField,
@@ -75,6 +81,29 @@ export default function Content({
       ? withBasePath(decoded)
       : tenantScope.forBrowser('/');
 
+  /* Inside the mobile app, identity providers refuse to sign in, so their
+   * buttons run this page in the phone's browser instead. There, the page the
+   * app opened carries its challenge, and every sign-in on it hands the session
+   * back to the app. */
+  const bridge = useMobileBridge();
+  const challenge = handoverChallenge(searchParams, env);
+  const destination = signInDestination(tenantScope, challenge, redirection);
+  const runInBrowser = (provider: 'google' | 'keycloak') => {
+    if (!bridge) return false;
+    const query = new URLSearchParams(searchParams);
+    query.set('provider', provider);
+    signInThroughBrowser(
+      bridge,
+      tenantScope.forBrowser(`/auth/login?${query}`),
+      () =>
+        toast({
+          title: i18n.t('Sign-in could not be completed. Please try again.'),
+          variant: 'destructive',
+        }),
+    );
+    return true;
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -96,7 +125,7 @@ export default function Content({
     });
 
     if (!login.error) {
-      window.location.href = redirection;
+      window.location.href = destination;
     } else {
       console.error(login.error);
       toast({
@@ -113,6 +142,7 @@ export default function Content({
     /* The button renders only where the tenant declares the provider, so this
      * narrows the type rather than guarding a state a visitor can reach. */
     if (!googleProviderId) return;
+    if (runInBrowser('google')) return;
 
     /* OAuth is per-tenant: sign in through the generic provider registered
      * under google-<tenantId>. The tenant is not sent along with the request —
@@ -120,17 +150,18 @@ export default function Content({
      * is acting for. */
     await authClient.signIn.oauth2({
       providerId: googleProviderId,
-      callbackURL: redirection,
+      callbackURL: destination,
       errorCallbackURL: withBasePath(authHref('/auth/error')),
     });
   };
 
   const loginWithKeycloak = async () => {
     if (!keycloakProviderId) return;
+    if (runInBrowser('keycloak')) return;
 
     await authClient.signIn.oauth2({
       providerId: keycloakProviderId,
-      callbackURL: redirection,
+      callbackURL: destination,
       errorCallbackURL: withBasePath(authHref('/auth/error')),
       additionalData: {
         workspaceURI,
@@ -138,6 +169,17 @@ export default function Content({
       },
     });
   };
+
+  /* The app opens this page in the phone's browser naming the provider the user
+   * chose, so the sign-in starts without a second tap. Once only. */
+  const providerToStart = challenge ? searchParams.get('provider') : null;
+  const startedProvider = useRef(false);
+  useEffect(() => {
+    if (startedProvider.current || !providerToStart) return;
+    startedProvider.current = true;
+    if (providerToStart === 'google') loginWithGoogle();
+    if (providerToStart === 'keycloak') loginWithKeycloak();
+  });
 
   /* No gate on the session here. `Locale` above renders nothing until the
    * session has answered once, so this form is only ever mounted with an answer

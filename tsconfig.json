@@ -41,6 +41,7 @@
       "@/mattermost": ["./lib/core/mattermost/index"],
       "@/mattermost/*": ["./lib/core/mattermost/*"],
       "@/notification": ["./lib/core/notification/index"],
+      "@/mobile/*": ["./lib/core/mobile/*"],
       "@/notification/*": ["./lib/core/notification/*"],
       "@/otp": ["./lib/core/otp/index"],
       "@/otp/*": ["./lib/core/otp/*"],

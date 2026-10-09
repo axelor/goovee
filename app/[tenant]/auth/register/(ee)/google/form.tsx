@@ -46,6 +46,7 @@ import {Link} from '@/ui/components/link';
 import {subscribe} from '../../actions';
 import {WorkspaceForRegistration} from '@/orm/workspace';
 import {useTenantScope} from '@/url/tenant-context';
+import {handoverChallenge, signInDestination} from '@/mobile/sign-in';
 
 const formSchema = z
   .object({
@@ -143,6 +144,13 @@ export default function SignUp({
       isSameOrigin(workspaceURI, host) &&
       withBasePath(workspaceURI)) ||
     tenantScope.forBrowser('/');
+  /* On the page the mobile app opened in the phone's browser, the new account's
+   * session goes back to the app. */
+  const destination = signInDestination(
+    tenantScope,
+    handoverChallenge(searchParams, env),
+    redirection,
+  );
 
   const showDirectoryControls = form.watch(
     'showProfileAsContactOnDirectory',
@@ -159,7 +167,7 @@ export default function SignUp({
     if (!(workspace && googleProviderId)) return;
 
     const signUpOptions = {
-      callbackURL: redirection,
+      callbackURL: destination,
       errorCallbackURL: withBasePath(authHref('/auth/error')),
       requestSignUp: true,
       additionalData: {

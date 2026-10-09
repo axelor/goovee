@@ -9,13 +9,13 @@ import {usePushNotifications} from '@/pwa/push-context';
  * so the user stops receiving push notifications after logout.
  */
 export function useSignOut() {
-  const {unsubscribe} = usePushNotifications();
+  const {releaseOnSignOut} = usePushNotifications();
   const authClient = useAuthClient();
 
   return useCallback(
     async (...args: Parameters<typeof authClient.signOut>) => {
       try {
-        await unsubscribe();
+        await releaseOnSignOut();
       } catch (error) {
         console.error('Failed to unsubscribe on logout:', error);
       }
@@ -24,6 +24,6 @@ export function useSignOut() {
        * visitor on a screen of their own has to know it did not happen. */
       return authClient.signOut(...args);
     },
-    [authClient, unsubscribe],
+    [authClient, releaseOnSignOut],
   );
 }

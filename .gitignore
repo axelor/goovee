@@ -39,6 +39,9 @@ yarn-error.log*
 !/portal.config.schema.json
 /portal.env
 
+# the Firebase key push.fcm.serviceAccountFile points at during development
+/fcm-service-account.json
+
 # vercel
 .vercel
 

@@ -25,6 +25,7 @@ import {withBasePath} from '@/path/base-path';
 import {toWorkspaceURI} from '@/url/absolute';
 import {isSameOrigin} from '@/utils/same-origin';
 import {useTenantScope} from '@/url/tenant-context';
+import {handoverChallenge, signInDestination} from '@/mobile/sign-in';
 
 // ---- LOCAL IMPORTS ----//
 
@@ -66,6 +67,13 @@ export default function SignUp({
   const redirection =
     (workspaceURL && isSameOrigin(workspaceURL, host) && workspaceURL) ||
     tenantScope.forBrowser('/');
+  /* On the page the mobile app opened in the phone's browser, the new account's
+   * session goes back to the app. */
+  const destination = signInDestination(
+    tenantScope,
+    handoverChallenge(searchParams, env),
+    redirection,
+  );
 
   /* The path the error screen links back to, without the base path: next/link
    * adds it there, and `new URL(...).pathname` would keep it and get it added
@@ -78,7 +86,7 @@ export default function SignUp({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const signUpOptions = {
-      callbackURL: redirection,
+      callbackURL: destination,
       errorCallbackURL: tenantScope.forBrowser(
         `/auth/error${workspaceURI ? `?workspaceURI=${encodeURIComponent(workspaceURI)}` : ''}`,
       ),

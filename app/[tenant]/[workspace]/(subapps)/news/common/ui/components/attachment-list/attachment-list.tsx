@@ -3,9 +3,9 @@
 import {MdOutlineFileDownload} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
+import {i18n} from '@/locale';
 import {Separator, Skeleton} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {download} from '@/utils/files';
 import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
@@ -23,15 +23,6 @@ export const AttachmentList = ({
   width?: string;
 }) => {
   const {scope} = useWorkspace();
-
-  const handleDownload = async (attachment: Attachment) => {
-    const {metaFile} = attachment;
-    if (!metaFile?.id) return;
-    const href = scope.forBrowser(
-      `/${SUBAPP_CODES.news}/api/news/${slug}/attachment/${metaFile.id}`,
-    );
-    download(metaFile, href);
-  };
 
   return (
     <div
@@ -53,10 +44,17 @@ export const AttachmentList = ({
                 {label}
               </p>
               <div className="text-end">{item?.metaFile?.sizeText}</div>
-              <div
-                className="flex justify-end"
-                onClick={() => handleDownload(item)}>
-                <MdOutlineFileDownload className="text-2xl font-semibold cursor-pointer" />
+              <div className="flex justify-end">
+                {item?.metaFile?.id && (
+                  <a
+                    href={scope.forBrowser(
+                      `/${SUBAPP_CODES.news}/api/news/${slug}/attachment/${item.metaFile.id}`,
+                    )}
+                    download={item.metaFile.fileName ?? ''}
+                    aria-label={`${i18n.t('Download')} ${label ?? ''}`}>
+                    <MdOutlineFileDownload className="text-2xl font-semibold" />
+                  </a>
+                )}
               </div>
             </div>
           );
