@@ -6,6 +6,7 @@ import {
   PushDeviceSchema,
   PushDeviceTokenSchema,
 } from '@/mobile/types';
+import {isMobileAppEnabled} from '@/mobile/enabled';
 import {RequestBodyTooLarge, readTextWithin} from '@/security/request-body';
 import {manager} from '@/tenant';
 
@@ -50,6 +51,11 @@ export async function POST(request: NextRequest, props: Params) {
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) {
     return new NextResponse('Bad request', {status: 400});
+  }
+  /* A tenant that does not use the app takes no devices. Removing one stays
+   * open below, so a device left from before can still be forgotten. */
+  if (!isMobileAppEnabled(tenant.config.public)) {
+    return new NextResponse('Not found', {status: 404});
   }
   const {client} = tenant;
 

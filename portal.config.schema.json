@@ -480,6 +480,17 @@
                 },
                 "additionalProperties": false,
                 "description": "Social addresses the news application offers to share to."
+              },
+              "mobileApp": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Whether this tenant can be used in the portal mobile app. When true, the app can add the portal and its users get notifications on the device. Defaults to false: the app then refuses to add the portal."
+                  }
+                },
+                "required": ["enabled"],
+                "additionalProperties": false
               }
             },
             "required": ["host"],

@@ -29,6 +29,8 @@ import {withBasePath} from '@/path/base-path';
 
 import {Link} from '@/ui/components/link';
 import {useTenantScope} from '@/url/tenant-context';
+import {signInThroughBrowser} from '@/mobile/sign-in';
+import {useMobileBridge} from '@/mobile/use-mobile-bridge';
 
 const formSchema = z
   .object({
@@ -80,11 +82,30 @@ export default function SignUp({
 
     return tenantScope.forRouter(`${path}${query ? `?${query}` : ''}`);
   };
+
+  /* Inside the mobile app, Google refuses to sign in, so accepting the invite
+   * with it runs in the phone's browser, form included. */
+  const bridge = useMobileBridge();
+  const {toast} = useToast();
+  const signUpWithGoogleInBrowser = (event: React.MouseEvent) => {
+    if (!bridge) return;
+    event.preventDefault();
+    signInThroughBrowser(
+      bridge,
+      tenantScope.forBrowser(
+        `/auth/register/invite/${inviteId}/google${searchQuery ? `?${searchQuery}` : ''}`,
+      ),
+      () =>
+        toast({
+          title: i18n.t('Sign-in could not be completed. Please try again.'),
+          variant: 'destructive',
+        }),
+    );
+  };
   const {timeRemaining, isExpired, reset} = useCountDown(0);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const {toast} = useToast();
 
   const toggleShowPassword = () => setShowPassword(show => !show);
   const toggleShowConfirmPassword = () => setShowConfirmPassword(show => !show);
@@ -356,7 +377,9 @@ export default function SignUp({
               type="button"
               variant="outline-success"
               className="w-full rounded-full">
-              <Link href={authHref(`/auth/register/invite/${inviteId}/google`)}>
+              <Link
+                href={authHref(`/auth/register/invite/${inviteId}/google`)}
+                onClick={signUpWithGoogleInBrowser}>
                 <Image
                   alt="Google"
                   src={withBasePath('/images/google.svg')}

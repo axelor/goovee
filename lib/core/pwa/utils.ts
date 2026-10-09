@@ -15,6 +15,7 @@ import {
   isDevicePushEnabled,
   sendToDevices,
 } from '@/mobile/push';
+import {isMobileAppEnabled} from '@/mobile/enabled';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -546,7 +547,8 @@ async function prepare({
   /* Browsers do not wait on the app: a device lookup that fails is reported and
    * leaves the app out of this notification only. */
   const [deviceLookup] = await Promise.allSettled([
-    isDevicePushEnabled()
+    isDevicePushEnabled() &&
+    isMobileAppEnabled(getTenantConfig(tenantId)?.public)
       ? client.pushDevice.find({
           where: {partner: {id: userId}},
           select: {id: true, version: true, token: true},

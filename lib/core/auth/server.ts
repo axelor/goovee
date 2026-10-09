@@ -29,6 +29,8 @@ import {
   findOAuthRegistration,
 } from './(ee)/oauth-providers';
 import {buildCredentials} from './credentials';
+import {signInHandover} from '@/mobile/sign-in-handover';
+import {isMobileAppEnabled} from '@/mobile/enabled';
 import {register, registerByInvite, registerByKeycloak} from './orm';
 import {
   KeycloakRegisterSchema,
@@ -464,6 +466,13 @@ function buildAuth(tenantId: string) {
        * what keeps a callback naming another tenant's provider from resolving
        * here at all. */
       ...(oauthProviders ? [oauthProviders] : []),
+      /* Sign-ins the mobile app runs in the phone's browser, handed over to
+       * the app. Per instance like the rest, so the tenant's secret seals it
+       * and no other tenant can open it; and only for a tenant that uses the
+       * app, so the others answer no handover at all. */
+      ...(isMobileAppEnabled(getTenantConfig(tenantId)?.public)
+        ? [signInHandover()]
+        : []),
       customSession(async ({user, session}, ctx) => {
         /* The tenant this instance was built for, not the one the cookie claims.
          * Every cookie this instance can open should name it, since each tenant

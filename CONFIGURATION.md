@@ -939,8 +939,9 @@ the tenant sends no browser notifications.
 ### 11.2 The mobile app
 
 The portal mobile app is one app for every portal, so its notifications are set
-up once for the whole deployment, not per tenant. They need the Firebase
-service-account key of the app's Firebase project:
+up once for the whole deployment, not per tenant. Only the tenants that turn the
+app on receive them (`public.mobileApp.enabled`, section 14). They need the
+Firebase service-account key of the app's Firebase project:
 
 1. In the Google Cloud console of that project, create a service account with
    only the **Firebase Cloud Messaging API Admin** role.
@@ -1086,6 +1087,19 @@ wording shipped with the portal. Defaults to `false`.
 
 Hours that records of finished uploads are kept before being cleared. Defaults to
 `168`, seven days.
+
+### `public.mobileApp.enabled` / `PORTAL_TENANT_<ID>_PUBLIC_MOBILE_APP_ENABLED`
+
+```json
+"public": {
+  "mobileApp": {"enabled": true}
+}
+```
+
+Whether the tenant can be used in the portal mobile app. Set to `true`, the app
+can add the portal, and its users receive notifications on the device once
+section 11.2 is set up. Left out, the app refuses to add the portal. Defaults to
+`false`.
 
 ---
 

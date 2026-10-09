@@ -13,6 +13,8 @@ import {getTenantConfig} from '@/tenant/config';
 import {isSameOrigin} from '@/utils/same-origin';
 import {absoluteRoot} from '@/url/absolute';
 import {tenantURLs} from '@/url/scope';
+import {withBasePath} from '@/path/base-path';
+import {handoverChallenge, signInDestination} from '@/mobile/sign-in';
 
 import {resolveAuthTenantId} from '../common/tenant';
 import {
@@ -49,6 +51,27 @@ export default async function Page(props: {
 
   /* Non-null: the tenant layout above refuses a segment naming no tenant. */
   const host = getPublicEnvironment(tenantConfig)!.host;
+
+  /* Opened by the mobile app in the phone's browser: a session this browser
+   * already holds is handed to the app, going on there to where the visitor was
+   * headed, in the browser addresses the sign-in form itself uses. `host` is the
+   * origin alone; the base path is already in those addresses. */
+  const challenge = handoverChallenge(
+    new URLSearchParams(searchParams),
+    getPublicEnvironment(tenantConfig),
+  );
+  if (session?.user && challenge) {
+    const scope = tenantURLs(tenantId);
+    const target =
+      (callbackurl &&
+        isSameOrigin(callbackurl, host) &&
+        withBasePath(callbackurl)) ||
+      (workspaceURI &&
+        isSameOrigin(workspaceURI, host) &&
+        withBasePath(workspaceURI)) ||
+      scope.forBrowser('/');
+    redirect(`${host}${signInDestination(scope, challenge, target, host)}`);
+  }
 
   /* A session here is always this tenant's — `getSession` resolves it through the
    * instance the address names — so any session at all means the visitor is

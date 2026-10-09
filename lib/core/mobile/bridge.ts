@@ -1,5 +1,6 @@
 import {
   MOBILE_BRIDGE_GLOBAL,
+  MOBILE_PROTOCOL_VERSION,
   MOBILE_REPLY_EVENT,
   type MobileBridge,
   type MobileReply,
@@ -12,12 +13,14 @@ const REPLY_TIMEOUT_MS = 5 * 60 * 1000;
 /*
  * The mobile app's bridge when this page runs inside the app, otherwise null.
  * The app defines it as the page starts loading, so it is read from effects and
- * event handlers, never while rendering on the server.
+ * event handlers, never while rendering on the server. Null as well for an app
+ * speaking another protocol version, whose page then behaves as on the web.
  */
 export function getMobileBridge(): MobileBridge | null {
   if (typeof window === 'undefined') return null;
   const bridge: unknown = Reflect.get(window, MOBILE_BRIDGE_GLOBAL);
-  return typeof bridge === 'object' && bridge !== null
+  if (typeof bridge !== 'object' || bridge === null) return null;
+  return (bridge as MobileBridge).protocolVersion === MOBILE_PROTOCOL_VERSION
     ? (bridge as MobileBridge)
     : null;
 }

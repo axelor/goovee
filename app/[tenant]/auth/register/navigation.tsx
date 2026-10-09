@@ -5,11 +5,14 @@ import {MdMailOutline} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
+import {useToast} from '@/ui/hooks';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {AuthShell, authButtonClass} from '../common/ui/auth-shell';
 import {useTenantScope} from '@/url/tenant-context';
+import {signInThroughBrowser} from '@/mobile/sign-in';
+import {useMobileBridge} from '@/mobile/use-mobile-bridge';
 
 export default function Navigation({
   showGoogleOauth,
@@ -28,6 +31,26 @@ export default function Navigation({
     const query = [searchQuery, extra].filter(Boolean).join('&');
 
     return tenantScope.forRouter(`${path}${query ? `?${query}` : ''}`);
+  };
+
+  /* Inside the mobile app, Google refuses to sign in, so signing up with it
+   * runs in the phone's browser, form included. */
+  const bridge = useMobileBridge();
+  const {toast} = useToast();
+  const signUpWithGoogleInBrowser = (event: React.MouseEvent) => {
+    if (!bridge) return;
+    event.preventDefault();
+    signInThroughBrowser(
+      bridge,
+      tenantScope.forBrowser(
+        `/auth/register/google${searchQuery ? `?${searchQuery}` : ''}`,
+      ),
+      () =>
+        toast({
+          title: i18n.t('Sign-in could not be completed. Please try again.'),
+          variant: 'destructive',
+        }),
+    );
   };
 
   return (
@@ -59,6 +82,7 @@ export default function Navigation({
             </div>
             <Link
               href={authHref('/auth/register/google')}
+              onClick={signUpWithGoogleInBrowser}
               className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border border-ink-150 bg-white px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-25">
               <span className="font-extrabold text-[#4285F4]">G</span>
               {i18n.t('Sign Up with Google')}

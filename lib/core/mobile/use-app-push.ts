@@ -3,8 +3,9 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import type {TenantScope} from '@/url/tenant-urls';
-import {getMobileBridge, requestApp} from './bridge';
-import type {MobileBridge} from './contract';
+import {requestApp} from './bridge';
+import {MOBILE_DEVICES_PATH} from './contract';
+import {useMobileBridge} from './use-mobile-bridge';
 
 /* Remembers, per tenant, that the user turned the app's notifications off, so
  * they are not turned back on the next time the page loads. */
@@ -41,16 +42,12 @@ export function useAppPush({
   isPending: boolean;
   scope: TenantScope;
 }): AppPush {
-  const [bridge, setBridge] = useState<MobileBridge | null>(null);
+  const bridge = useMobileBridge();
   const [permission, setPermission] =
     useState<NotificationPermission>('default');
   const registeredToken = useRef<string | null>(null);
   /* Per user: the next person to sign in on this device decides for themselves. */
   const optedOutKey = `${OPTED_OUT_KEY}:${tenant}:${userId}`;
-
-  useEffect(() => {
-    setBridge(getMobileBridge());
-  }, []);
 
   const register = useCallback(async () => {
     if (!bridge) return;
@@ -60,7 +57,7 @@ export function useAppPush({
       return;
     }
     if (reply.type !== 'push.token') return;
-    const response = await fetch(scope.forBrowser('/api/mobile/devices'), {
+    const response = await fetch(scope.forBrowser(MOBILE_DEVICES_PATH), {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({token: reply.token, platform: reply.platform}),
@@ -116,7 +113,7 @@ export function useAppPush({
   const forget = useCallback(async () => {
     const token = registeredToken.current;
     if (!token) return;
-    const response = await fetch(scope.forBrowser('/api/mobile/devices'), {
+    const response = await fetch(scope.forBrowser(MOBILE_DEVICES_PATH), {
       method: 'DELETE',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({token}),

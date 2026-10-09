@@ -245,6 +245,15 @@ const publicConfigSchema = z
       })
       .describe('Social addresses the news application offers to share to.')
       .optional(),
+    mobileApp: z
+      .strictObject({
+        enabled: z
+          .boolean()
+          .describe(
+            'Whether this tenant can be used in the portal mobile app. When true, the app can add the portal and its users get notifications on the device. Defaults to false: the app then refuses to add the portal.',
+          ),
+      })
+      .optional(),
   })
   .describe(
     'Browser-facing settings for this tenant. Everything in this group is sent to every visitor; nothing outside it is.',
