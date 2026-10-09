@@ -24,6 +24,7 @@
  * the environment.
  */
 
+import fs from 'fs';
 import path from 'path';
 
 import {z} from 'zod';
@@ -68,6 +69,30 @@ const TENANT_ID_MAX_LENGTH = 15;
  * three and running at ten.
  */
 const positiveInteger = () => z.int().min(1);
+
+/*
+ * Whether a path names a Google service-account key, as the JSON file Google
+ * Cloud downloads: an object naming its project, its account and its private
+ * key. A relative path is read from the working directory. Checked here so a
+ * missing or incomplete key is refused at load, naming the setting, rather than
+ * failing the first notification.
+ */
+function isServiceAccountKeyFile(file: string): boolean {
+  let key: unknown;
+  try {
+    key = JSON.parse(fs.readFileSync(path.resolve(file), 'utf8'));
+  } catch {
+    return false;
+  }
+  if (typeof key !== 'object' || key === null) return false;
+  const {project_id, client_email, private_key} = key as Record<
+    string,
+    unknown
+  >;
+  return [project_id, client_email, private_key].every(
+    field => typeof field === 'string' && field.length > 0,
+  );
+}
 
 /*
  * The hostnames the auth library's own host check accepts: DNS labels of at
@@ -656,8 +681,22 @@ export const deploymentConfigSchema = z.strictObject({
     .strictObject({
       maxConnections: positiveInteger()
         .describe(
-          'Push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Defaults to 10.',
+          'Browser push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Notifications to the mobile app go through Firebase, which manages its own connections, and are not counted. Defaults to 10.',
         )
+        .optional(),
+      fcm: z
+        .strictObject({
+          serviceAccountFile: z
+            .string()
+            .min(1)
+            .refine(isServiceAccountKeyFile, {
+              error:
+                'Expected the path of a readable service-account key file, the JSON downloaded from Google Cloud with project_id, client_email and private_key',
+            })
+            .describe(
+              'Path of the Firebase service-account key file (the JSON downloaded from Google Cloud) that sends notifications to the mobile app through Firebase Cloud Messaging; a relative path is read from the working directory. The mobile app is one app for every portal, so the key is the same for every tenant. Without it, the mobile app receives no notifications; browsers are unaffected.',
+            ),
+        })
         .optional(),
     })
     .optional(),

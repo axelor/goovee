@@ -8,7 +8,7 @@ import {Separator} from '@/ui/components/separator';
 import {AccountToggle} from '../common/ui/components';
 
 export function DevicePushPreference() {
-  const {isSupported, permission, subscribe, unsubscribe} =
+  const {isSupported, inApp, permission, subscribe, unsubscribe} =
     usePushNotifications();
 
   if (!isSupported) return null;
@@ -32,9 +32,13 @@ export function DevicePushPreference() {
             {i18n.t('Push Notifications')}
           </h5>
           <p className="text-xs text-ink-500 mt-0.5 mb-0">
-            {isDenied
-              ? i18n.t('Notifications are blocked by your browser.')
-              : i18n.t('Receive notifications on this device.')}
+            {!isDenied
+              ? i18n.t('Receive notifications on this device.')
+              : inApp
+                ? i18n.t(
+                    'Notifications are turned off for this app in your phone settings.',
+                  )
+                : i18n.t('Notifications are blocked by your browser.')}
           </p>
         </div>
         <AccountToggle

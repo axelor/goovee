@@ -110,6 +110,7 @@ export function UnreadNotificationsList() {
     markAsRead,
     markAllAsRead,
     isSupported,
+    inApp,
     permission,
     subscribe,
   } = usePushNotifications();
@@ -195,9 +196,13 @@ export function UnreadNotificationsList() {
           <Bell className="h-4 w-4" />
           <AlertTitle>{i18n.t('Notifications Blocked')}</AlertTitle>
           <AlertDescription>
-            {i18n.t(
-              'You have blocked notifications for this site. To receive updates, please enable them in your browser settings.',
-            )}
+            {inApp
+              ? i18n.t(
+                  'Notifications are turned off for this app. To receive updates, turn them on in your phone settings.',
+                )
+              : i18n.t(
+                  'You have blocked notifications for this site. To receive updates, please enable them in your browser settings.',
+                )}
           </AlertDescription>
         </Alert>
       )}

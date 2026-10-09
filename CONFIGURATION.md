@@ -176,8 +176,16 @@ several, name the tenant `/` leads to; section 7.2 has the one exception.
 
 ### `push.maxConnections` / `PORTAL_PUSH_MAX_CONNECTIONS` — optional
 
-Push notifications in flight at once, for the whole deployment. Defaults to `10`.
-Leave it out unless push delivery is slow.
+Browser push notifications in flight at once, for the whole deployment. Defaults
+to `10`. Leave it out unless push delivery is slow. Notifications to the mobile
+app go through Firebase and are not counted.
+
+### `push.fcm.serviceAccountFile` / `PORTAL_PUSH_FCM_SERVICE_ACCOUNT_FILE` — optional
+
+Path of the Firebase key file the portal sends mobile app notifications with. A
+relative path is read from the portal's working directory. Leave it out and the
+mobile app receives no notifications; browsers are not affected. Section 11.2
+describes the file.
 
 ### `imageCache.maxBytes` / `PORTAL_IMAGE_CACHE_MAX_BYTES` — optional
 
@@ -871,7 +879,13 @@ PORTAL_TENANT_<ID>_PUBLIC_KEYCLOAK_BUTTON_IMAGE=/images/acme-id.svg
 
 ## 11. Configure push notifications
 
-Push notifications need a VAPID key pair per tenant. Generate it whichever of
+Notifications reach two kinds of device: browsers, through web push, and the
+portal mobile app, through Firebase. Each is configured on its own; set up the
+ones you need.
+
+### 11.1 Browsers
+
+Browser notifications need a VAPID key pair per tenant. Generate it whichever of
 these three ways suits the machine — they are alternatives, not steps.
 
 From the portal checkout:
@@ -920,7 +934,36 @@ PORTAL_TENANT_<ID>_PUBLIC_WEB_PUSH_PUBLIC_KEY=…
 address or an `https:` address.
 
 Generate a separate key pair for each tenant. Leave the `webPush` section out and
-the tenant sends no push notifications.
+the tenant sends no browser notifications.
+
+### 11.2 The mobile app
+
+The portal mobile app is one app for every portal, so its notifications are set
+up once for the whole deployment, not per tenant. They need the Firebase
+service-account key of the app's Firebase project:
+
+1. In the Google Cloud console of that project, create a service account with
+   only the **Firebase Cloud Messaging API Admin** role.
+2. Create a JSON key for it and download the file.
+3. Put the file where the portal can read it, and name its path:
+
+```json
+"push": {
+  "fcm": {"serviceAccountFile": "/etc/portal/secrets/fcm-service-account.json"}
+}
+```
+
+```
+PORTAL_PUSH_FCM_SERVICE_ACCOUNT_FILE=/etc/portal/secrets/fcm-service-account.json
+```
+
+The key is a secret: keep the file out of version control and readable only by
+the portal. A file that is missing or is not a service-account key is refused at
+startup, like any other invalid setting, and the portal then answers no request
+until it is fixed.
+
+To replace the key, create a new one, point every deployment at it, then delete
+the old key in the Google Cloud console.
 
 ---
 
@@ -1295,7 +1338,9 @@ The mount is the AOS upload directory named by `aos.storage.filesystem.dir`; a
 tenant on the `s3` provider needs no mount for its files. Every path in the
 configuration is read inside the container: give container paths, not host paths.
 Mount a Hub PISP tenant's `certsDir` as well, and give `PORTAL_UPLOAD_TEMP_DIR` a
-volume if interrupted uploads should resume after the container restarts.
+volume if interrupted uploads should resume after the container restarts. If the
+mobile app receives notifications, mount the Firebase key file that
+`PORTAL_PUSH_FCM_SERVICE_ACCOUNT_FILE` names.
 
 #### Or mount the JSON file
 

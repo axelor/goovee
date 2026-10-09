@@ -9,6 +9,12 @@ import type {TenantConfig} from '@/tenant';
 import type {WorkspaceSubPath} from '@/url';
 import {tenantURLs} from '@/url/scope';
 import {processWide} from '@/runtime/process-wide';
+import {
+  type DeviceOutcome,
+  type DevicePush,
+  isDevicePushEnabled,
+  sendToDevices,
+} from '@/mobile/push';
 import type {
   NotificationPayload,
   NotificationRecord,
@@ -29,6 +35,11 @@ const MAX_PAYLOAD_BYTES = MAX_ENCRYPTED_BYTES - ENCRYPTION_OVERHEAD_BYTES;
  * to keep a wide audience from encrypting and connecting for every device at
  * once rather than to satisfy anyone's cap. */
 const DEFAULT_MAX_CONNECTIONS = 10;
+
+/* A body for the mobile app, in characters. At up to three bytes each it keeps
+ * the whole FCM message — title, address and tag included — under FCM's 4096
+ * bytes, and is still more than a notification tray shows. */
+const MAX_APP_BODY_CHARACTERS = 600;
 
 /* Bounds inactivity, not the transfer. Absent, a service that accepts the
  * connection and then stops answering holds the send open indefinitely. */
@@ -422,17 +433,25 @@ type PreparedDelivery = {
   client: Client;
   userId: string;
   notificationId?: string;
-  payloadJson: string;
-  topic?: string;
-  vapidDetails: VapidDetails;
-  subscriptions: Array<{
-    id: string;
-    version: number;
-    endpoint: string | null;
-    p256dh: string | null;
-    auth: string | null;
-    expiresAt: Date | null;
-  }>;
+  /* Browsers, through web push. Absent when the tenant has no key pair. */
+  web: {
+    payloadJson: string;
+    topic?: string;
+    vapidDetails: VapidDetails;
+    subscriptions: Array<{
+      id: string;
+      version: number;
+      endpoint: string | null;
+      p256dh: string | null;
+      auth: string | null;
+      expiresAt: Date | null;
+    }>;
+  } | null;
+  /* The mobile app, through FCM. Absent when the deployment has no FCM key. */
+  app: {
+    push: DevicePush;
+    devices: Array<{id: string; version: number; token: string}>;
+  } | null;
 };
 
 function emptyReport(): PushDeliveryReport {
@@ -510,21 +529,44 @@ async function prepare({
    * same tenant's keys as the first attempt. */
   const vapidDetails = getVapidDetails(tenantId, getTenantConfig(tenantId));
 
-  if (!vapidDetails) return null;
+  const subscriptions = vapidDetails
+    ? await client.pushSubscription.find({
+        where: {partner: {id: userId}},
+        select: {
+          id: true,
+          endpoint: true,
+          p256dh: true,
+          auth: true,
+          version: true,
+          expiresAt: true,
+        },
+      })
+    : [];
 
-  const subscriptions = await client.pushSubscription.find({
-    where: {partner: {id: userId}},
-    select: {
-      id: true,
-      endpoint: true,
-      p256dh: true,
-      auth: true,
-      version: true,
-      expiresAt: true,
-    },
-  });
+  /* Browsers do not wait on the app: a device lookup that fails is reported and
+   * leaves the app out of this notification only. */
+  const [deviceLookup] = await Promise.allSettled([
+    isDevicePushEnabled()
+      ? client.pushDevice.find({
+          where: {partner: {id: userId}},
+          select: {id: true, version: true, token: true},
+        })
+      : Promise.resolve([]),
+  ]);
+  if (deviceLookup.status === 'rejected') {
+    console.error(
+      `[PUSH] the app devices of partner ${userId} could not be read`,
+      deviceLookup.reason,
+    );
+  }
+  const devices = (
+    deviceLookup.status === 'fulfilled' ? deviceLookup.value : []
+  ).filter(
+    (device): device is typeof device & {token: string} =>
+      typeof device.token === 'string' && device.token.length > 0,
+  );
 
-  if (!subscriptions?.length) return null;
+  if (!subscriptions.length && !devices.length) return null;
 
   /* `body`, `url` and `tag` are carried at the top level only — the service
    * worker merges them back into the record it hands open tabs. `title` appears
@@ -533,35 +575,110 @@ async function prepare({
   /* The push message is read within its own lifetime, so its address is
    * rendered for the visitor now — the service worker only adds the base path
    * of the origin it runs on. */
-  const payloadJson = serializeWithinLimit({
-    ...pushPayload,
-    url: scope.forRouter(link),
-    title: pushTitle,
-    tenantId,
-    workspaceURL,
-    notification: dbNotification,
-  });
+  const web =
+    vapidDetails && subscriptions.length
+      ? {
+          payloadJson: serializeWithinLimit({
+            ...pushPayload,
+            url: scope.forRouter(link),
+            title: pushTitle,
+            tenantId,
+            workspaceURL,
+            notification: dbNotification,
+          }),
+          topic: payload.tag ? toTopic(payload.tag) : undefined,
+          vapidDetails,
+          subscriptions,
+        }
+      : null;
+
+  /* The app opens the page itself, so it is given the full address. FCM refuses
+   * a message over 4096 bytes, so a long body is cut to what a tray shows. */
+  const app = devices.length
+    ? {
+        push: {
+          title: pushTitle,
+          body:
+            payload.body && payload.body.length > MAX_APP_BODY_CHARACTERS
+              ? shorten(payload.body, MAX_APP_BODY_CHARACTERS)
+              : payload.body,
+          url: scope.forExternal(link),
+          tag: payload.tag,
+        },
+        devices,
+      }
+    : null;
 
   return {
     client,
     userId,
     notificationId: dbNotification?.id,
-    payloadJson,
-    topic: payload.tag ? toTopic(payload.tag) : undefined,
-    vapidDetails,
-    subscriptions,
+    web,
+    app,
   };
 }
 
 async function dispatch({
   client,
-  payloadJson,
-  topic,
-  vapidDetails,
-  subscriptions,
+  web,
+  app,
 }: PreparedDelivery): Promise<PushDeliveryReport> {
   const report = emptyReport();
+  await Promise.all([
+    web && dispatchToBrowsers(client, web, report),
+    app && dispatchToApp(client, app, report),
+  ]);
+  return report;
+}
 
+/* A device FCM reports gone is forgotten, like an expired subscription. Each
+ * is settled on its own, so one failed cleanup does not hide the others. */
+async function dispatchToApp(
+  client: Client,
+  {push, devices}: NonNullable<PreparedDelivery['app']>,
+  report: PushDeliveryReport,
+): Promise<void> {
+  let outcomes: DeviceOutcome[];
+  try {
+    outcomes = await sendToDevices(
+      devices.map(device => device.token),
+      push,
+    );
+  } catch (error) {
+    console.error('[PUSH] the mobile app could not be sent to', error);
+    report.failed += devices.length;
+    return;
+  }
+
+  await Promise.all(
+    devices.map(async (device, index) => {
+      const outcome = outcomes[index];
+      try {
+        if (outcome === 'expired') {
+          await client.pushDevice.delete({
+            id: device.id,
+            version: device.version,
+          });
+        }
+        report[outcome]++;
+      } catch (error) {
+        report.failed++;
+        console.error(`[PUSH] device ${device.id} could not be settled`, error);
+      }
+    }),
+  );
+}
+
+async function dispatchToBrowsers(
+  client: Client,
+  {
+    payloadJson,
+    topic,
+    vapidDetails,
+    subscriptions,
+  }: NonNullable<PreparedDelivery['web']>,
+  report: PushDeliveryReport,
+): Promise<void> {
   /* Each device is settled on its own: one that throws where nothing else does
    * — a subscription deleted underneath us, say — must not discard what the
    * others already reported. Every path counts the device exactly once, and
@@ -609,8 +726,6 @@ async function dispatch({
       }
     }),
   );
-
-  return report;
 }
 
 export async function notifyUser(

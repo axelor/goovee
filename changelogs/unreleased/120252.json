@@ -1,0 +1,6 @@
+{
+  "title": "Send portal notifications to the portal mobile app",
+  "type": "feature",
+  "description": "The portal mobile app opens any portal and, on Android, receives its notifications as native push notifications, next to the existing browser notifications. Inside the app, the notifications toggle in the account settings turns them on and off for the device, and tapping a notification opens its page in the app. Sending them needs a Firebase service-account key file, named once for the whole deployment by `push.fcm.serviceAccountFile` / `PORTAL_PUSH_FCM_SERVICE_ACCOUNT_FILE`; without it the app receives no notifications and browsers are unaffected. Links to other sites in news, forum and other written content now open in a new window, and in the app in the device's browser.",
+  "scope": ["core"]
+}

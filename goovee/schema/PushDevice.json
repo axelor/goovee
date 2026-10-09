@@ -1,0 +1,25 @@
+{
+  "name": "PushDevice",
+  "table": "portal_push_device",
+  "synchronize": true,
+  "fields": [
+    {
+      "type": "String",
+      "name": "token",
+      "unique": true
+    },
+    {
+      "type": "String",
+      "name": "platform"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "partner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "DateTime",
+      "name": "lastUsedAt"
+    }
+  ]
+}

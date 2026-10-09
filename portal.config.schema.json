@@ -23,7 +23,19 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Defaults to 10."
+          "description": "Browser push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Notifications to the mobile app go through Firebase, which manages its own connections, and are not counted. Defaults to 10."
+        },
+        "fcm": {
+          "type": "object",
+          "properties": {
+            "serviceAccountFile": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path of the Firebase service-account key file (the JSON downloaded from Google Cloud) that sends notifications to the mobile app through Firebase Cloud Messaging; a relative path is read from the working directory. The mobile app is one app for every portal, so the key is the same for every tenant. Without it, the mobile app receives no notifications; browsers are unaffected."
+            }
+          },
+          "required": ["serviceAccountFile"],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
