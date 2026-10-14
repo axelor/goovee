@@ -188,18 +188,6 @@ dependencies:
   dompurify:
     specifier: ^3.4.1
     version: 3.4.1
-  draft-js:
-    specifier: ^0.11.7
-    version: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-  draft-js-export-html:
-    specifier: ^1.4.1
-    version: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
-  draft-js-import-html:
-    specifier: ^1.4.1
-    version: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
-  draftjs-to-html:
-    specifier: ^0.9.1
-    version: 0.9.1
   esbuild:
     specifier: ^0.27.3
     version: 0.27.3
@@ -209,9 +197,6 @@ dependencies:
   graphql:
     specifier: ^16.9.0
     version: 16.9.0
-  html-to-draftjs:
-    specifier: ^1.5.0
-    version: 1.5.0(draft-js@0.11.7)(immutable@3.8.3)
   ical-generator:
     specifier: ^8.1.1
     version: 8.1.1(@types/node@25.6.0)(dayjs@1.11.20)
@@ -278,9 +263,6 @@ dependencies:
   react-dom:
     specifier: 19.2.5
     version: 19.2.5(react@19.2.5)
-  react-draft-wysiwyg:
-    specifier: ^1.15.0
-    version: 1.15.0(draft-js@0.11.7)(immutable@3.8.3)(react-dom@19.2.5)(react@19.2.5)
   react-dropzone:
     specifier: ^14.3.5
     version: 14.3.5(react@19.2.5)
@@ -388,15 +370,6 @@ devDependencies:
   '@types/bootstrap':
     specifier: ^5.2.10
     version: 5.2.10
-  '@types/draft-js':
-    specifier: ^0.11.18
-    version: 0.11.18
-  '@types/draftjs-to-html':
-    specifier: ^0.8.4
-    version: 0.8.4
-  '@types/html-to-draftjs':
-    specifier: ^1.5.0
-    version: 1.5.0
   '@types/isotope-layout':
     specifier: ^3.0.15
     version: 3.0.15
@@ -424,9 +397,6 @@ devDependencies:
   '@types/react-dom':
     specifier: 19.2.3
     version: 19.2.3(@types/react@19.2.14)
-  '@types/react-draft-wysiwyg':
-    specifier: ^1.13.9
-    version: 1.13.9
   '@types/react-scroll':
     specifier: ^1.8.10
     version: 1.8.10
@@ -6898,19 +6868,6 @@ packages:
       '@types/d3-zoom': 3.0.8
     dev: false
 
-  /@types/draft-js@0.11.18:
-    resolution: {integrity: sha512-lP6yJ+EKv5tcG1dflWgDKeezdwBa8wJ7KkiNrrHqXuXhl/VGes1SKjEfKHDZqOz19KQbrAhFvNhDPWwnQXYZGQ==}
-    dependencies:
-      '@types/react': 19.2.14
-      immutable: 3.7.6
-    dev: true
-
-  /@types/draftjs-to-html@0.8.4:
-    resolution: {integrity: sha512-5FZcjFoJL57N/IttLCTCNI0krX+181oCl5hf76u3TqPkqBAphHrJAO9ReYesx9138kcObaYmpnWC2Yrqxoqd2Q==}
-    dependencies:
-      '@types/draft-js': 0.11.18
-    dev: true
-
   /@types/estree@1.0.8:
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
@@ -6925,12 +6882,6 @@ packages:
   /@types/google.maps@3.58.1:
     resolution: {integrity: sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ==}
     dev: false
-
-  /@types/html-to-draftjs@1.5.0:
-    resolution: {integrity: sha512-6t0ZAkSR4n822+XD7PCtf7kPcG9GmqJzC3sm38xU0TbozbCCjculgp9wfMgyWR1q8VuEO+3rCf7iLFU7vslkPQ==}
-    dependencies:
-      '@types/draft-js': 0.11.18
-    dev: true
 
   /@types/http-cache-semantics@4.2.0:
     resolution: {integrity: sha512-L3LgimLHXtGkWikKnsPg0/VFx9OGZaC+eN1u4r+OB1XRqH3meBIAVC2zr1WdMH+RHmnRkqliQAOHNJ/E0j/e0Q==}
@@ -7002,13 +6953,6 @@ packages:
       '@types/react': 19.2.14
     dependencies:
       '@types/react': 19.2.14
-
-  /@types/react-draft-wysiwyg@1.13.9:
-    resolution: {integrity: sha512-zJrtPEgcI7LB25RnH43q9m+vNLlqbcBuAdPF5PYckqGHueK4QoFDzDaB52XUxc8InIevA83eXZQybw1XVZTguQ==}
-    dependencies:
-      '@types/draft-js': 0.11.18
-      '@types/react': 19.2.14
-    dev: true
 
   /@types/react-scroll@1.8.10:
     resolution: {integrity: sha512-RD4Z7grbdNGOKwKnUBKar6zNxqaW3n8m9QSrfvljW+gmkj1GArb8AFBomVr6xMOgHPD3v1uV3BrIf01py57daQ==}
@@ -7707,10 +7651,6 @@ packages:
       is-array-buffer: 3.0.5
     dev: true
 
-  /asap@2.0.6:
-    resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
-    dev: false
-
   /asn1.js@5.4.1:
     resolution: {integrity: sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==}
     dependencies:
@@ -8351,10 +8291,6 @@ packages:
       clsx: 2.1.1
     dev: false
 
-  /classnames@2.5.1:
-    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
-    dev: false
-
   /cli-boxes@3.0.0:
     resolution: {integrity: sha512-/lzGpEWL/8PfI0BmBOPRwp0c/wFNX1RdUML3jK/RcSBA9T8mZDdQpqYBKtCFTOfQbwPqWEOpjqW+Fnayc0969g==}
     engines: {node: '>=10'}
@@ -8545,11 +8481,6 @@ packages:
       browserslist: 4.24.2
     dev: false
 
-  /core-js@3.47.0:
-    resolution: {integrity: sha512-c3Q2VVkGAUyupsjRnaNX6u8Dq2vAdzm9iuPj5FW0fRxzlxgq9Q39MDq10IvmQSpLgHQNyQzQmOo6bgGHmH3NNg==}
-    requiresBuild: true
-    dev: false
-
   /core-js@3.49.0:
     resolution: {integrity: sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==}
     requiresBuild: true
@@ -8618,14 +8549,6 @@ packages:
     hasBin: true
     dependencies:
       cross-spawn: 7.0.3
-    dev: false
-
-  /cross-fetch@3.2.0:
-    resolution: {integrity: sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q==}
-    dependencies:
-      node-fetch: 2.7.0
-    transitivePeerDependencies:
-      - encoding
     dev: false
 
   /cross-spawn@7.0.3:
@@ -9267,79 +9190,6 @@ packages:
   /dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
-    dev: false
-
-  /draft-js-export-html@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
-    resolution: {integrity: sha512-G4VGBSalPowktIE4wp3rFbhjs+Ln9IZ2FhXeHjsZDSw0a2+h+BjKu5Enq+mcsyVb51RW740GBK8Xbf7Iic51tw==}
-    peerDependencies:
-      draft-js: '>=0.10.0'
-      immutable: 3.x.x
-    dependencies:
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      draft-js-utils: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
-      immutable: 3.8.3
-    dev: false
-
-  /draft-js-import-element@1.4.0(draft-js@0.11.7)(immutable@3.8.3):
-    resolution: {integrity: sha512-WmYT5PrCm47lGL5FkH6sRO3TTAcn7qNHsD3igiPqLG/RXrqyKrqN4+wBgbcT2lhna/yfWTRtgzAbQsSJoS1Meg==}
-    peerDependencies:
-      draft-js: '>=0.10.0'
-      immutable: 3.x.x
-    dependencies:
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      draft-js-utils: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
-      immutable: 3.8.3
-      synthetic-dom: 1.4.0
-    dev: false
-
-  /draft-js-import-html@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
-    resolution: {integrity: sha512-KOZmtgxZriCDgg5Smr3Y09TjubvXe7rHPy/2fuLSsL+aSzwUDwH/aHDA/k47U+WfpmL4qgyg4oZhqx9TYJV0tg==}
-    peerDependencies:
-      draft-js: '>=0.10.0'
-      immutable: 3.x.x
-    dependencies:
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      draft-js-import-element: 1.4.0(draft-js@0.11.7)(immutable@3.8.3)
-      immutable: 3.8.3
-    dev: false
-
-  /draft-js-utils@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
-    resolution: {integrity: sha512-xE81Y+z/muC5D5z9qWmKfxEW1XyXfsBzSbSBk2JRsoD0yzMGGHQm/0MtuqHl/EUDkaBJJLjJ2EACycoDMY/OOg==}
-    peerDependencies:
-      draft-js: '>=0.10.0'
-      immutable: 3.x.x
-    dependencies:
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      immutable: 3.8.3
-    dev: false
-
-  /draft-js@0.11.7(react-dom@19.2.5)(react@19.2.5):
-    resolution: {integrity: sha512-ne7yFfN4sEL82QPQEn80xnADR8/Q6ALVworbC5UOSzOvjffmYfFsr3xSZtxbIirti14R7Y33EZC5rivpLgIbsg==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
-    dependencies:
-      fbjs: 2.0.0
-      immutable: 3.7.6
-      object-assign: 4.1.1
-      react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
-  /draftjs-to-html@0.9.1:
-    resolution: {integrity: sha512-fFstE6+IayaVFBEvaFt/wN8vdj8FsTRzij7dy7LI9QIwf5LgfHFi9zSpvCg+feJ2tbYVqHxUkjcibwpsTpgFVQ==}
-    dev: false
-
-  /draftjs-utils@0.10.2(draft-js@0.11.7)(immutable@3.8.3):
-    resolution: {integrity: sha512-EstHqr3R3JVcilJrBaO/A+01GvwwKmC7e4TCjC7S94ZeMh4IVmf60OuQXtHHpwItK8C2JCi3iljgN5KHkJboUg==}
-    peerDependencies:
-      draft-js: ^0.11.x
-      immutable: 3.x.x || 4.x.x
-    dependencies:
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      immutable: 3.8.3
     dev: false
 
   /dunder-proto@1.0.1:
@@ -10026,25 +9876,6 @@ packages:
     dependencies:
       reusify: 1.0.4
 
-  /fbjs-css-vars@1.0.2:
-    resolution: {integrity: sha512-b2XGFAFdWZWg0phtAWLHCk836A1Xann+I+Dgd3Gk64MHKZO44FfoD1KxyvbSh0qZsIoXQGGlVztIY+oitJPpRQ==}
-    dev: false
-
-  /fbjs@2.0.0:
-    resolution: {integrity: sha512-8XA8ny9ifxrAWlyhAbexXcs3rRMtxWcs3M0lctLfB49jRDHiaxj+Mo0XxbwE7nKZYzgCFoq64FS+WFd4IycPPQ==}
-    dependencies:
-      core-js: 3.47.0
-      cross-fetch: 3.2.0
-      fbjs-css-vars: 1.0.2
-      loose-envify: 1.4.0
-      object-assign: 4.1.1
-      promise: 7.3.1
-      setimmediate: 1.0.5
-      ua-parser-js: 0.7.41
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
   /fdir@6.5.0(picomatch@4.0.4):
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
@@ -10548,16 +10379,6 @@ packages:
       react-is: 16.13.1
     dev: false
 
-  /html-to-draftjs@1.5.0(draft-js@0.11.7)(immutable@3.8.3):
-    resolution: {integrity: sha512-kggLXBNciKDwKf+KYsuE+V5gw4dZ7nHyGMX9m0wy7urzWjKGWyNFetmArRLvRV0VrxKN70WylFsJvMTJx02OBQ==}
-    peerDependencies:
-      draft-js: ^0.10.x || ^0.11.x
-      immutable: 3.x.x || 4.x.x
-    dependencies:
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      immutable: 3.8.3
-    dev: false
-
   /htmlparser2@10.1.0:
     resolution: {integrity: sha512-VTZkM9GWRAtEpveh7MSF6SjjrpNVNNVJfFup7xTY3UpFtm67foy9HDVXneLtFVt4pMz5kZtgNcvCniNFb1hlEQ==}
     dependencies:
@@ -10710,15 +10531,6 @@ packages:
 
   /immediate@3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
-    dev: false
-
-  /immutable@3.7.6:
-    resolution: {integrity: sha512-AizQPcaofEtO11RZhPPHBOJRdo/20MKQF9mBLnVkBoyHi1/zXK8fzVdnEpSV9gxqtnh6Qomfp3F0xT5qP/vThw==}
-    engines: {node: '>=0.8.0'}
-
-  /immutable@3.8.3:
-    resolution: {integrity: sha512-AUY/VyX0E5XlibOmWt10uabJzam1zlYjwiEgQSDc5+UIkFNaF9WM0JxXKaNMGf+F/ffUF+7kRKXM9A7C0xXqMg==}
-    engines: {node: '>=0.10.0'}
     dev: false
 
   /immutable@4.3.7:
@@ -11376,12 +11188,6 @@ packages:
   /lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  /linkify-it@2.2.0:
-    resolution: {integrity: sha512-GnAl/knGn+i1U/wjBz3akz2stz+HrHLsxMwHQGofCDfPvlf+gDKN58UtfmUquTY4/MXeE2x7k19KQmeoZi94Iw==}
-    dependencies:
-      uc.micro: 1.0.6
-    dev: false
-
   /loadjs@4.3.0:
     resolution: {integrity: sha512-vNX4ZZLJBeDEOBvdr2v/F+0aN5oMuPu7JTqrMwp+DtgK+AryOlpy6Xtm2/HpNr+azEa828oQjOtWsB6iDtSfSQ==}
     dev: false
@@ -11854,18 +11660,6 @@ packages:
       object.entries: 1.1.9
       semver: 6.3.1
     dev: true
-
-  /node-fetch@2.7.0:
-    resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
-    engines: {node: 4.x || >=6.0.0}
-    peerDependencies:
-      encoding: ^0.1.0
-    peerDependenciesMeta:
-      encoding:
-        optional: true
-    dependencies:
-      whatwg-url: 5.0.0
-    dev: false
 
   /node-fetch@3.3.2:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
@@ -12590,12 +12384,6 @@ packages:
     resolution: {integrity: sha512-H5oELycFml5yto/atYqmjyigJoAo3+OXwolYiH7OfQuYlAqhxNvTfiNMbV9hsC6Yp83yE5r2KTVmtrG6R9i6Pg==}
     dev: false
 
-  /promise@7.3.1:
-    resolution: {integrity: sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg==}
-    dependencies:
-      asap: 2.0.6
-    dev: false
-
   /prompts@2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
@@ -12717,25 +12505,6 @@ packages:
     dependencies:
       react: 19.2.5
       scheduler: 0.27.0
-    dev: false
-
-  /react-draft-wysiwyg@1.15.0(draft-js@0.11.7)(immutable@3.8.3)(react-dom@19.2.5)(react@19.2.5):
-    resolution: {integrity: sha512-p1cYZcWc6/ALFBVksbFoCM3b29fGQDlZLIMrXng0TU/UElxIOF2/AWWo4L5auIYVhmqKTZ0NkNjnXOzGGuxyeA==}
-    peerDependencies:
-      draft-js: ^0.10.x || ^0.11.x
-      immutable: 3.x.x || 4.x.x
-      react: '*'
-      react-dom: '*'
-    dependencies:
-      classnames: 2.5.1
-      draft-js: 0.11.7(react-dom@19.2.5)(react@19.2.5)
-      draftjs-utils: 0.10.2(draft-js@0.11.7)(immutable@3.8.3)
-      html-to-draftjs: 1.5.0(draft-js@0.11.7)(immutable@3.8.3)
-      immutable: 3.8.3
-      linkify-it: 2.2.0
-      prop-types: 15.8.1
-      react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
     dev: false
 
   /react-dropzone@14.3.5(react@19.2.5):
@@ -13373,10 +13142,6 @@ packages:
       es-object-atoms: 1.1.1
     dev: true
 
-  /setimmediate@1.0.5:
-    resolution: {integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==}
-    dev: false
-
   /sha.js@2.4.12:
     resolution: {integrity: sha512-8LzC5+bvI45BjpfXU8V5fdU2mfeKiQe1D1gIMn7XUlF3OTUrpdJpPPH4EMAnF0DsHHdSZqCdSss5qCmJKuiO3w==}
     engines: {node: '>= 0.10'}
@@ -13919,10 +13684,6 @@ packages:
     engines: {node: '>= 4.7.0'}
     dev: false
 
-  /synthetic-dom@1.4.0:
-    resolution: {integrity: sha512-mHv51ZsmZ+ShT/4s5kg+MGUIhY7Ltq4v03xpN1c8T1Krb5pScsh/lzEjyhrVD0soVDbThbd2e+4dD9vnDG4rhg==}
-    dev: false
-
   /tagged-tag@1.0.0:
     resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
     engines: {node: '>=20'}
@@ -14062,10 +13823,6 @@ packages:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
     dev: true
-
-  /tr46@0.0.3:
-    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-    dev: false
 
   /tr46@1.0.1:
     resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
@@ -14307,15 +14064,6 @@ packages:
       raf: 3.4.1
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
-    dev: false
-
-  /ua-parser-js@0.7.41:
-    resolution: {integrity: sha512-O3oYyCMPYgNNHuO7Jjk3uacJWZF8loBgwrfd/5LE/HyZ3lUIOdniQ7DNXJcIgZbwioZxk0fLfI4EVnetdiX5jg==}
-    hasBin: true
-    dev: false
-
-  /uc.micro@1.0.6:
-    resolution: {integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==}
     dev: false
 
   /ufo@1.6.3:
@@ -14649,22 +14397,11 @@ packages:
   /web-worker@1.2.0:
     resolution: {integrity: sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA==}
 
-  /webidl-conversions@3.0.1:
-    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
-    dev: false
-
   /webidl-conversions@4.0.2:
     resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}
 
   /webworkify@1.5.0:
     resolution: {integrity: sha512-AMcUeyXAhbACL8S2hqqdqOLqvJ8ylmIbNwUIqQujRSouf4+eUFaXbG6F1Rbu+srlJMmxQWsiU7mOJi0nMBfM1g==}
-    dev: false
-
-  /whatwg-url@5.0.0:
-    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
     dev: false
 
   /whatwg-url@7.1.0:

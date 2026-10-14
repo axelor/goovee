@@ -18,7 +18,6 @@ import {civility} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
-import '@/ui/components/rich-text-editor/rich-text-editor.css';
 import {currentTenantScope} from '@/url/current';
 import type {TenantScope} from '@/url/tenant-urls';
 export default async function Page(props: {

@@ -1,0 +1,6 @@
+{
+  "title": "Render HTML fields the way the back-office renders them",
+  "type": "change",
+  "description": "Descriptions, posts and other HTML fields are now written and displayed with the back-office's own editor, so the same value reads the same on both sides and editing a field no longer drops markup the previous editor could not represent.",
+  "scope": ["core", "ticketing", "forum", "marketplace", "directory"]
+}
