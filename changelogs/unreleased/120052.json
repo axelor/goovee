@@ -1,6 +1,0 @@
-{
-  "title": "Password reset no longer reveals whether an email address has an account",
-  "type": "security",
-  "description": "On the password reset screen, a wrong, expired or missing code now always shows \"Invalid or expired code\", whether or not the email address has an account.",
-  "scope": ["core"]
-}
