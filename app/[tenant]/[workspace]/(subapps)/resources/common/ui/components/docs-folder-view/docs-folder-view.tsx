@@ -24,7 +24,11 @@ import {DocFileIcon} from '../doc-file-icon';
 import ResourceForm from '@/subapps/resources/create/form';
 import CreateFolderForm from '@/subapps/resources/categories/create/form';
 import {COLORS, ICONS} from '@/subapps/resources/common/constants';
-import type {DmsFile, FolderWithParent} from '@/subapps/resources/common/types';
+import type {
+  DmsFile,
+  FolderWithParent,
+  Subfolder,
+} from '@/subapps/resources/common/types';
 
 export interface DocsFolderViewLabels {
   rootCrumb: string;
@@ -46,12 +50,14 @@ export interface DocsFolderViewLabels {
 export function DocsFolderView({
   folder,
   files,
+  subfolders,
   labels,
   uploadParent,
   folderParent,
 }: {
   folder: FolderWithParent;
   files: DmsFile[];
+  subfolders: Subfolder[];
   labels: DocsFolderViewLabels;
   // Each present only when the user may perform that action into this folder;
   // opens a modal instead of navigating to a separate create page.
@@ -181,7 +187,7 @@ export function DocsFolderView({
         </div>
       </header>
 
-      {files.length === 0 ? (
+      {files.length === 0 && subfolders.length === 0 ? (
         <div className="bg-white border border-ink-100 rounded-2xl px-6 py-14 text-center shadow-xs">
           <p className="text-[15px] font-semibold text-ink-700">
             {labels.emptyTitle}
@@ -193,12 +199,20 @@ export function DocsFolderView({
       ) : view === 'list' ? (
         <FileTable
           files={files}
+          subfolders={subfolders}
           labels={labels}
           viewHref={viewHref}
+          folderHref={folderHref}
           downloadHref={downloadHref}
         />
       ) : (
-        <FileGrid files={files} labels={labels} viewHref={viewHref} />
+        <FileGrid
+          files={files}
+          subfolders={subfolders}
+          labels={labels}
+          viewHref={viewHref}
+          folderHref={folderHref}
+        />
       )}
 
       {uploadParent && (
@@ -307,13 +321,17 @@ function isNew(file: DmsFile, newCutoffMs: number): boolean {
 
 function FileTable({
   files,
+  subfolders,
   labels,
   viewHref,
+  folderHref,
   downloadHref,
 }: {
   files: DmsFile[];
+  subfolders: Subfolder[];
   labels: DocsFolderViewLabels;
   viewHref: (id: string) => string;
+  folderHref: (id: string) => string;
   downloadHref: (file: DmsFile) => string | null;
 }) {
   return (
@@ -337,6 +355,39 @@ function FileTable({
           </tr>
         </thead>
         <tbody>
+          {subfolders.map((subfolder, index) => {
+            const dateValue = subfolder.updatedOn ?? subfolder.createdOn;
+            return (
+              <tr
+                key={subfolder.id}
+                className={cn(
+                  'group transition-colors hover:bg-ink-25',
+                  (files.length > 0 || index !== subfolders.length - 1) &&
+                    'border-b border-ink-100',
+                )}>
+                <td className="px-[18px] py-3">
+                  <Link
+                    href={folderHref(subfolder.id)}
+                    className="flex items-center gap-3 min-w-0">
+                    {subfolder.rowIcon}
+                    <span className="font-semibold text-ink-900 truncate">
+                      {subfolder.fileName}
+                    </span>
+                  </Link>
+                </td>
+                <td className="px-[18px] py-3 text-ink-700">—</td>
+                <td className="px-[18px] py-3 text-right text-ink-500 tabular-nums whitespace-nowrap">
+                  {dateValue
+                    ? formatDateTime(dateValue, {dateFormat: 'DD/MM/YYYY'})
+                    : '—'}
+                </td>
+                <td className="px-[18px] py-3 text-right text-ink-700 font-semibold tabular-nums whitespace-nowrap">
+                  —
+                </td>
+                <td className="px-[18px] py-3" />
+              </tr>
+            );
+          })}
           {files.map((file, i) => {
             const fresh = isNew(file, labels.newCutoffMs);
             const dateValue = file.metaFile?.updatedOn ?? file.createdOn;
@@ -424,15 +475,44 @@ function FileTable({
 
 function FileGrid({
   files,
+  subfolders,
   labels,
   viewHref,
+  folderHref,
 }: {
   files: DmsFile[];
+  subfolders: Subfolder[];
   labels: DocsFolderViewLabels;
   viewHref: (id: string) => string;
+  folderHref: (id: string) => string;
 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {subfolders.map(subfolder => {
+        const dateValue = subfolder.updatedOn ?? subfolder.createdOn;
+        return (
+          <Link
+            key={subfolder.id}
+            href={folderHref(subfolder.id)}
+            className={cn(
+              'group bg-white border border-ink-100 rounded-xl p-4',
+              'flex flex-col gap-3 transition-all duration-150',
+              'hover:-translate-y-0.5 hover:shadow-soft-md',
+            )}>
+            <div className="flex items-start gap-2.5">{subfolder.cardIcon}</div>
+            <div className="min-w-0">
+              <div className="text-[13.5px] font-bold text-ink-900 leading-snug line-clamp-2">
+                {subfolder.fileName}
+              </div>
+            </div>
+            {dateValue && (
+              <div className="mt-auto text-[11.5px] text-ink-500 tabular-nums truncate">
+                {formatDateTime(dateValue, {dateFormat: 'DD/MM/YYYY'})}
+              </div>
+            )}
+          </Link>
+        );
+      })}
       {files.map(file => {
         const fresh = isNew(file, labels.newCutoffMs);
         const dateValue = file.metaFile?.updatedOn ?? file.createdOn;

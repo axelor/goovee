@@ -1,0 +1,6 @@
+{
+  "title": "List subfolders in the folder view",
+  "type": "feature",
+  "description": "Opening a folder lists its subfolders above its documents, in both the list and the grid view.",
+  "scope": ["resources"]
+}
