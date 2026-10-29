@@ -117,6 +117,39 @@ export async function fetchFiles({
   return files;
 }
 
+export async function fetchSubfolders({
+  id,
+  user,
+  client,
+  workspaceURL,
+}: {
+  id: string;
+  user?: User;
+  client: Client;
+  workspaceURL: string;
+}) {
+  if (!workspaceURL) return [];
+
+  const subfolders = await client.aOSDMSFile.find({
+    where: {
+      isDirectory: true,
+      parent: {id},
+      workspaceSet: {url: workspaceURL},
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
+    },
+    select: {
+      fileName: true,
+      logoSelect: true,
+      colorSelect: true,
+      createdOn: true,
+      updatedOn: true,
+    },
+    orderBy: {fileName: ORDER_BY.ASC},
+  });
+
+  return subfolders;
+}
+
 export async function searchFiles({
   search,
   workspaceURL,
