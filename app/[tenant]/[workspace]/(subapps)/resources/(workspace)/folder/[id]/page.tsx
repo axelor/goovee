@@ -11,12 +11,14 @@ import {SUBAPP_CODES} from '@/constants';
 import {
   fetchFiles,
   fetchFolderWithParent,
+  fetchSubfolders,
 } from '@/subapps/resources/common/orm/dms';
 import {ACTION, NEW_FILE_CUTOFF_MS} from '@/subapps/resources/common/constants';
 import {
   DocsFolderView,
   type DocsFolderViewLabels,
 } from '@/subapps/resources/common/ui/components';
+import {FolderLogoIcon} from '@/subapps/resources/common/ui/components/folder-logo-icon';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;
@@ -35,13 +37,32 @@ export default async function Page(props: {
 
   const workspaceURL = access.workspace.url;
 
-  const [folder, files, labels] = await Promise.all([
+  const [folder, files, subfolders, labels] = await Promise.all([
     fetchFolderWithParent({id, workspaceURL, client, user}).then(clone),
     fetchFiles({id, client, user, workspaceURL}).then(clone),
+    fetchSubfolders({id, client, user, workspaceURL}).then(clone),
     buildLabels(),
   ]);
 
   if (!folder) return notFound();
+
+  const subfoldersWithIcons = subfolders.map(subfolder => ({
+    ...subfolder,
+    rowIcon: (
+      <FolderLogoIcon
+        logoSelect={subfolder.logoSelect}
+        colorSelect={subfolder.colorSelect}
+        size={32}
+      />
+    ),
+    cardIcon: (
+      <FolderLogoIcon
+        logoSelect={subfolder.logoSelect}
+        colorSelect={subfolder.colorSelect}
+        size={50}
+      />
+    ),
+  }));
 
   /* Entry buttons are server-gated too (the actions enforce permission), and
      mirror the baseline: document upload needs write OR upload, folder creation
@@ -60,6 +81,7 @@ export default async function Page(props: {
     <DocsFolderView
       folder={folder}
       files={files ?? []}
+      subfolders={subfoldersWithIcons}
       labels={labels}
       uploadParent={canUpload ? parentRef : null}
       folderParent={canCreateFolder ? parentRef : null}

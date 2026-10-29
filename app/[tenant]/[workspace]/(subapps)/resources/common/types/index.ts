@@ -1,3 +1,5 @@
+import type {ReactNode} from 'react';
+
 import type {Cloned} from '@/types/util';
 
 // Folder shapes derived from the DMS finders (type-only import, erased at build).
@@ -10,6 +12,15 @@ export type FolderWithParent = Cloned<
     Awaited<ReturnType<typeof import('../orm/dms').fetchFolderWithParent>>
   >
 >;
+
+/* The folder icon map is server-only, so the page renders each subfolder's
+   icon at both sizes the folder view uses and hands them over ready-made. */
+export type Subfolder = Cloned<
+  Awaited<ReturnType<typeof import('../orm/dms').fetchSubfolders>>
+>[number] & {
+  rowIcon: ReactNode;
+  cardIcon: ReactNode;
+};
 
 export interface DmsFile {
   id: string;
