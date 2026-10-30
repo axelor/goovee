@@ -18,6 +18,7 @@ import {
   findDefaultPartnerWorkspaceConfig,
 } from './workspace';
 import type {AOSPartner} from '@/goovee/.generated/models';
+import {aosClient, toAOSPayload, type AOSConfig} from '@/service';
 import {Cloned} from '@/types/util';
 
 const partnerFields = {
@@ -284,6 +285,88 @@ export async function updatePartner({
   return partner;
 }
 
+const PARTNER_MODEL = 'com.axelor.apps.base.db.Partner';
+
+/* Same contract as updatePartner, but the write goes through AOS's REST API
+ * instead of the shared database, so that AOP's audit listener fires and
+ * records the change in the partner's tracking history. Only for payloads made
+ * of scalars and to-one relations: toAOSPayload refuses collections, which a
+ * ws/rest list would replace instead of amend.
+ *
+ * AOS recomputes fields on save (PartnerService) and bumps the version more
+ * than once, so the result is re-read through the ORM rather than derived from
+ * the request. */
+export async function updatePartnerViaAOS({
+  data,
+  client,
+  aos,
+}: {
+  data: UpdateArgs<AOSPartner>;
+  client: Client;
+  aos: AOSConfig;
+}) {
+  if (!data) return null;
+
+  if (!(data?.id && data?.version)) return null;
+
+  const saved = await aosClient(aos).save<{id: number | string}>(
+    PARTNER_MODEL,
+    toAOSPayload(data as Record<string, unknown>),
+  );
+
+  return client.aOSPartner
+    .findOne({
+      where: {id: {eq: String(saved.id)}},
+      select: {id: true},
+    })
+    .then(clone);
+}
+
+/* Flips the portal activation flag through AOS's REST API, so that a
+ * registration leaves a trace in the partner's tracking history. The writes
+ * that precede it deliberately leave the flag unset: AOS records a change it
+ * performs itself, and a flag already true would produce nothing.
+ *
+ * A trace must never cost someone their account, so a call that fails — or a
+ * tenant with no AOS configuration at all — falls back to a plain database
+ * write. The contact ends up activated either way; only the history entry is
+ * lost, and the fallback says so in the logs. */
+export async function activateOnPortal({
+  partnerId,
+  client,
+  aos,
+}: {
+  partnerId: ID;
+  client: Client;
+  aos: AOSConfig | null;
+}) {
+  const partner = await client.aOSPartner.findOne({
+    where: {id: partnerId},
+    select: {id: true, version: true},
+  });
+
+  if (!partner) return null;
+
+  const data = {
+    id: partner.id,
+    version: partner.version,
+    isActivatedOnPortal: true,
+  };
+
+  const untracked = () =>
+    client.aOSPartner.update({data, select: {id: true}}).then(clone);
+
+  if (!aos) {
+    return untracked();
+  }
+
+  try {
+    return await updatePartnerViaAOS({data, client, aos});
+  } catch (err) {
+    return untracked();
+  }
+}
+
 export async function registerContact({
   name,
   firstName,
@@ -294,6 +377,7 @@ export async function registerContact({
   partnerId,
   localizationId,
   existingRecord,
+  aos,
 }: {
   name: string;
   firstName?: string;
@@ -304,6 +388,7 @@ export async function registerContact({
   partnerId: string;
   localizationId?: Localization['id'];
   existingRecord?: {id: string; version: number} | null;
+  aos: AOSConfig | null;
 }) {
   if (!(name && email && partnerId)) {
     return null;
@@ -345,7 +430,6 @@ export async function registerContact({
     fullName: `${name} ${firstName || ''}`,
     simpleFullName: `${name} ${firstName || ''}`,
     createdFromSelect: USER_CREATED_FROM,
-    isActivatedOnPortal: true,
     emailAddress: {
       create: {
         address: email,
@@ -389,6 +473,9 @@ export async function registerContact({
     },
     select: {id: true},
   });
+
+  await activateOnPortal({partnerId: contact.id, client, aos});
+
   return contact;
 }
 
@@ -410,6 +497,7 @@ export async function registerPartner({
   client,
   isContact,
   localizationId,
+  aos,
 }: {
   type: UserType;
   companyName?: string;
@@ -423,6 +511,7 @@ export async function registerPartner({
   client: Client;
   isContact?: boolean;
   localizationId?: Localization['id'];
+  aos: AOSConfig | null;
 }) {
   const hashedPassword = await hash(password);
 
@@ -444,7 +533,6 @@ export async function registerPartner({
     fullName: `${$name} ${firstName || ''}`,
     simpleFullName: `${$name} ${firstName || ''}`,
     createdFromSelect: USER_CREATED_FROM,
-    isActivatedOnPortal: true,
     emailAddress: {
       create: {
         address: email,
@@ -479,11 +567,16 @@ export async function registerPartner({
       select: {id: true},
     });
 
+    await activateOnPortal({partnerId: udpatedPartner.id, client, aos});
+
     return udpatedPartner;
   }
 
   const partner = await client.aOSPartner
     .create({data, select: {id: true}})
     .then(clone);
+
+  await activateOnPortal({partnerId: partner.id, client, aos});
+
   return partner;
 }
